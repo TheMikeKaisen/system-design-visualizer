@@ -31,6 +31,8 @@ message1.md
 /.next/
 /out/
 
+file-structure.md
+zustand_store.md
 # production
 /build
 
