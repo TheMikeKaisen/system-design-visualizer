@@ -1,6 +1,3 @@
-// components/canvas/SimulationOverlay.tsx
-// Owns the Pixi Application lifecycle and composes the bridge.
-
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -21,7 +18,8 @@ export function SimulationOverlay() {
     app
       .init({
         canvas: canvasRef.current,
-        backgroundAlpha: 0,       // Transparent — React Flow SVG is visible beneath
+        // default pixi canvas is black. We set backgroundAlpha to 0 to make it transparent
+        backgroundAlpha: 0,  // Transparent — only React Flow SVG is visible beneath
         antialias: true,
         autoDensity: true,
         resolution: window.devicePixelRatio || 1,
@@ -35,8 +33,8 @@ export function SimulationOverlay() {
         //   └── syncedStage   ← transform synced with RF viewport
         //         └── packetsContainer  ← all packet sprites live here
         //   └── hudStage      ← fixed-position UI (tooltips, counters)
-        const syncedStage = new Container();
-        const packetsContainer = new Container();
+        const syncedStage = new Container(); // when react flow moves, the pixi container should move as well.
+        const packetsContainer = new Container(); // a dedicated layer for all the packets
         syncedStage.addChild(packetsContainer);
         app.stage.addChild(syncedStage);
 
@@ -58,7 +56,8 @@ export function SimulationOverlay() {
         style={{
           position: "absolute",
           inset: 0,
-          pointerEvents: "none",
+          // pointer events none makes the pixi canvas transparent to mouse events
+          pointerEvents: "none", // so that react flow events are not blocked
           zIndex: 10,
         }}
       />
