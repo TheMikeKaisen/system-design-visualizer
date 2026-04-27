@@ -1,4 +1,4 @@
-import { SystemNode } from "@/types";
+import { SystemNode, SystemEdge } from "@/types";
 import { IRoutingStrategy } from "./IRoutingStrategy";
 
 // to select the node(server) using a round robin algorithm
@@ -7,7 +7,8 @@ export class RoundRobinStrategy implements IRoutingStrategy {
 
   selectTarget(
     _source: SystemNode,
-    candidates: SystemNode[]
+    candidates: SystemNode[],
+    _edges: SystemEdge[]
   ): SystemNode {
     const target = candidates[this.counter % candidates.length];
     this.counter++;
