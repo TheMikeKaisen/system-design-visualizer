@@ -13,6 +13,7 @@ import type {
     SystemNode,
     SystemEdge,
     ViewportTransform,
+    SystemEdgeData,
 } from "@/types";
 
 // ─────────────────────────────────────────────
@@ -25,6 +26,7 @@ interface CanvasState {
     /** The live viewport from React Flow — Pixi reads this */
     viewport: ViewportTransform;
     selectedNodeIds: string[];
+    selectedEdgeId: string | null;
 }
 
 interface CanvasActions {
@@ -36,6 +38,10 @@ interface CanvasActions {
     // Imperative mutations (used by Command pattern)
     addNode: (node: SystemNode) => void;
     removeNode: (id: string) => void;
+    removeEdge: (id: string) => void;
+    restoreEdge: (edge: SystemEdge) => void;
+    updateEdgeData: (id: string, data: Partial<SystemEdgeData>) => void;
+    setSelectedEdgeId: (id: string | null) => void;
     updateNodeData: (id: string, data: Partial<SystemNode["data"]>) => void;
     setNodePosition: (id: string, x: number, y: number) => void;
 
@@ -59,6 +65,7 @@ export const useCanvasStore = create<CanvasStore>()(
             edges: [],
             viewport: { x: 0, y: 0, zoom: 1 },
             selectedNodeIds: [],
+            selectedEdgeId: null,
 
             // ── React Flow change handlers ──────────
             onNodesChange: (changes) =>
@@ -111,6 +118,28 @@ export const useCanvasStore = create<CanvasStore>()(
             setSelectedNodeIds: (ids) =>
                 set((state) => {
                     state.selectedNodeIds = ids;
+                }),
+
+            restoreEdge: (edge: SystemEdge) =>
+                set((state) => {
+                    const exists = state.edges.some((e) => e.id === edge.id);
+                    if (!exists) state.edges.push(edge);
+                }),
+
+            removeEdge: (id: string) =>
+                set((state) => {
+                    state.edges = state.edges.filter((e) => e.id !== id);
+                }),
+                
+            updateEdgeData: (id: string, data: Partial<SystemEdgeData>) =>
+                set((state) => {
+                    const edge = state.edges.find((e) => e.id === id);
+                    if (edge?.data) Object.assign(edge.data, data);
+                }),
+
+            setSelectedEdgeId: (id: string | null) =>
+                set((state) => {
+                    state.selectedEdgeId = id;
                 }),
         }))
     )
