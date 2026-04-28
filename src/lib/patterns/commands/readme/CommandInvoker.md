@@ -36,5 +36,48 @@ if (this.undoStack.length > this.maxHistorySize) {
 ```
 This ensures the app stays fast even after hours of editing.
 
+## Record()
+### what happens when you drag a node, step-by-step.
+
+Imagine you have a Database node sitting at coordinates **`X: 0`**. 
+
+Here is what happens if you **did not** have `record()` and tried to use `execute()` instead:
+
+1. **You click the node:** The system remembers it started at `X: 0`.
+2. **You drag the mouse:** As you drag, the `ReactFlow` library takes over. To make the dragging look buttery smooth at 60 frames per second, ReactFlow updates the node's position continuously in the background.
+3. **You let go of the mouse at `X: 100`:** The `onNodeDragStop` event fires. At this exact millisecond, ReactFlow has **already** updated your Zustand store so that the node's position is `X: 100`. The visual canvas and the state are perfectly aligned.
+4. **You create the Command:** You create a `MoveNodeCommand` saying: *"Move the node from X:0 to X:100"*.
+5. **You call `execute()`:** The `MoveNodeCommand` runs its logic, which is essentially: `store.setNodePosition(X: 100)`.
+
+**This is the redundancy.** In Step 5, your command is telling the store to set the node's position to `X: 100`. But because of Step 3, the node is *already* sitting at `X: 100`. 
+
+### Why is that bad?
+While telling the system to set `X` to 100 when it's already 100 sounds harmless, in a complex React application it can cause subtle bugs:
+*   **Wasted Re-renders:** You are forcing React and Zustand to process a state change, which can cause the canvas or your toolbars to re-render needlessly.
+*   **Multiplayer Glitches:** If you broadcast that `execute()` over a network, you might send jittery, overlapping movement data to other users.
+
+### The Solution: `record()`
+You want the ability to say: *"Hey Undo System, the user just moved a node. I don't need you to actually do the moving—React Flow already handled that—but I need you to remember it so the user can undo it later."*
+
+This is exactly what `record()` does. 
+
+### The Actual Use Case in Your App
+Here is the step-by-step lifecycle of how this is used for dragging nodes in your app (`CanvasRoot.tsx`):
+
+1. **`onNodeDragStart`**: The user clicks a node at `{ x: 0, y: 0 }`. You save these starting coordinates in a temporary reference (e.g., `dragStartPositions.current`).
+2. **Dragging**: The user drags the mouse. React Flow updates the node's position continuously. Your code does nothing.
+3. **`onNodeDragStop`**: The user drops the node at `{ x: 100, y: 100 }`. 
+4. You construct the command: 
+   `const cmd = new MoveNodeCommand(nodeId, label, { x: 0, y: 0 }, { x: 100, y: 100 })`
+5. You call **`commandInvoker.record(cmd)`**.
+
+**What happens inside `record()`?**
+* It **skips** calling `cmd.execute()`. 
+* It puts `cmd` directly onto the `undoStack`.
+* It clears the `redoStack`.
+
+Now, if the user hits **Cmd+Z** (Undo), your system pulls that `MoveNodeCommand` off the stack and calls its `undo()` method, which moves the node perfectly back to `{ x: 0, y: 0 }`.
+
+
 ### Summary
 The `CommandInvoker` is what transforms your app from a **static canvas** into a **collaborative workspace with a memory.** It ensures that every action is reversible, syncable, and stable.

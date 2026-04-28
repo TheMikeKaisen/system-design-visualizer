@@ -44,6 +44,22 @@ export class CommandInvoker {
     this.onCommandExecuted?.(serialized);
   }
 
+ /**
+ * Records a command on the undo stack WITHOUT calling execute().
+ * Use when the action was already applied externally (e.g., React Flow drag).
+ * The command's undo() and redo() still work normally.
+ */
+  record(command: ICommand): void {
+    this.undoStack.push(command);
+    if (this.undoStack.length > this.maxHistorySize) {
+      this.undoStack.shift();
+    }
+    this.redoStack.length = 0;
+    this.actionLog.push(command.serialize());
+    // NOTE: onCommandExecuted is NOT called here — no broadcast for recorded commands
+    // because the action originated locally and is already applied.
+  }
+
   undo(): void {
     const command = this.undoStack.pop();
     if (!command) return;
@@ -70,7 +86,7 @@ export class CommandInvoker {
     if (!constructor) {
       console.warn(
         `[CommandInvoker] Unknown remote command type: ${serialized.type}. ` +
-          `Register it via registerCommand().`
+        `Register it via registerCommand().`
       );
       return;
     }
