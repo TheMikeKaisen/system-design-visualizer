@@ -12,9 +12,11 @@ import type { IRoutingStrategy } from "@/lib/patterns/strategies/IRoutingStrateg
 import { RoundRobinStrategy } from "@/lib/patterns/strategies/RoundRobinStrategy";
 import { LeastConnectionsStrategy } from "@/lib/patterns/strategies/LeastConnectionsStrategy";
 import { computePathMetrics, deltaProgress } from "./coordinateBridge";
-import type { PathMetrics } from "./coordinateBridge";
-import type { TrafficConfig } from "@/lib/store/useSimulationStore";
-import { WeightedStrategy } from "../patterns/strategies/WeightedStrategy";
+import type { PathMetrics }         from "./coordinateBridge";
+import type { TrafficConfig }       from "@/lib/store/useSimulationStore";
+import { WeightedStrategy }         from "../patterns/strategies/WeightedStrategy";
+import { useCanvasStore }           from "@/lib/store/useCanvasStore";
+import { extractMultiEdgePath }     from "./edgePathExtractor";
 
 // Public contracts
 
@@ -239,35 +241,66 @@ export class SimulationEngine {
     const { type, payload } = event.data;
     if (type !== "PATH_RESULT") return;
 
-    const { requestId, path } = payload;
+    const { requestId, edgeIds, nodeIds } = payload;
     const pending = this.pendingRequests.get(requestId);
     this.pendingRequests.delete(requestId);
-    if (!pending || path.length < 2) return;
+    if (!pending) return;
+    if (edgeIds.length === 0 && nodeIds.length <= 1) return;
 
-    const packetId = nanoid();
+    // One frame delay ensures React Flow has rendered the edge SVG
+    requestAnimationFrame(() => {
+      this.createPacketFromPath(pending, edgeIds, nodeIds);
+    });
+  }
+
+  private createPacketFromPath(
+    pending:  { sourceId: string; targetId: string; protocol: string },
+    edgeIds:  string[],
+    nodeIds:  string[],
+  ): void {
+    const { nodes, edges, viewport } = useCanvasStore.getState();
+
+    let waypoints: WorldPoint[];
+
+    if (edgeIds.length > 0) {
+      waypoints = extractMultiEdgePath(edgeIds, viewport, nodes, edges);
+    } else {
+      waypoints = [];
+    }
+
+    if (waypoints.length < 2) {
+      const nodeMap   = new Map(nodes.map((n) => [n.id, n]));
+      const nodeCenter = (id: string): WorldPoint => {
+        const node = nodeMap.get(id);
+        if (!node) return { x: 0, y: 0 };
+        return {
+          x: node.position.x + (node.measured?.width  ?? 180) / 2,
+          y: node.position.y + (node.measured?.height ?? 60)  / 2,
+        };
+      };
+      waypoints = nodeIds.map(nodeCenter);
+    }
+
+    if (waypoints.length < 2) return;
+
     const protocol = pending.protocol as Packet["protocol"];
+    const packetId = nanoid();
 
     const packet: Packet = {
-      id: packetId,
-      sourceId: pending.sourceId,
-      targetId: pending.targetId,
-      progress: 0,
-      status: "traveling",
+      id:        packetId,
+      sourceId:  pending.sourceId,
+      targetId:  pending.targetId,
+      progress:  0,
+      status:    "traveling",
       protocol,
       sizeBytes: 512,
       createdAt: performance.now(),
-      color: PROTOCOL_COLORS[protocol] ?? 0x378add,
+      color:     PROTOCOL_COLORS[protocol] ?? 0x378add,
     };
 
-    const metrics = computePathMetrics(path);
+    const metrics = computePathMetrics(waypoints);
     this.packetSpeeds.set(packetId, DEFAULT_SPEED_PX_PER_SECOND);
-
-    // Notify PacketManager so it can store metrics in its own ref
     this.onPathReady(packetId, metrics);
-
-    // The packet itself is returned to PacketManager via the tick result
-    // on the next frame — but we need to add it immediately.
-    // We use a micro-buffer approach: engine holds newPackets until tick collects them.
     this.bufferedNewPackets.push(packet);
   }
 
