@@ -217,3 +217,35 @@ export interface DiagramMeta {
   createdAt: number;
   updatedAt: number;
 }
+
+// ═══════════════════════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════════════════════
+
+/** Bumped when the serialization format changes. Old files must be migrated to this version. */
+export const DIAGRAM_FORMAT_VERSION = 1;
+
+/**
+ * A completely self-contained snapshot of a diagram.
+ * Can be written to disk, sent over the network, or saved in Postgres.
+ */
+export interface SerializedDiagram {
+  version: number;
+  meta: DiagramMeta;
+  nodes: SystemNode[];
+  edges: SystemEdge[];
+  viewport: ViewportTransform;
+}
+
+/**
+ * Lightweight summary for list views (like the "Open Diagram" dialog).
+ * Avoids loading the full node/edge arrays into memory just to show a list.
+ */
+export interface DiagramListItem {
+  id: string;
+  name: string;
+  updatedAt: number;
+  nodeCount: number;
+  edgeCount: number;
+  thumbnail?: string;
+}
