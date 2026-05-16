@@ -57,6 +57,17 @@ export interface SystemNodeData extends Record<string, unknown> {
   securityPolicies: SecurityPolicy[];
 }
 
+
+// What Node<SystemNodeData> becomes:
+// {
+//   id:       string;
+//   type?:    string;
+//   position: { x: number; y: number };
+//   data:     SystemNodeData;     // ← TData replaced with SystemNodeData
+//   measured?: { width: number; height: number };
+//   selected?: boolean;
+//   dragging?: boolean;
+// }
 export type SystemNode = Node<SystemNodeData>;
 
 // ═══════════════════════════════════════════════════════
@@ -158,9 +169,10 @@ export interface WorkerResponse {
   type: "PATH_RESULT";
   payload: {
     requestId: string;
-    /** Empty array = no path found → packet will be dropped */
-    path: WorldPoint[];
+    /** Ordered edge IDs to traverse — empty = no path */
     edgeIds: string[];
+    /** Keep nodeIds for fallback straight-line if SVG extraction fails */
+    nodeIds: string[];
   };
 }
 

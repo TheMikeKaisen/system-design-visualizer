@@ -49,6 +49,7 @@ const nextConfig: NextConfig = {
     // Enable when you add Turbopack via `next dev --turbo`
     // turbo: {},
   },
+  turbopack: {},
 };
 
 export default nextConfig;
