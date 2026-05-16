@@ -2,6 +2,8 @@
 
 import { UndoRedoControls } from "./UndoRedoControls";
 import { SimulationControls } from "./SimulationControls";
+import { DiagramNameInput } from "./DiagramNameInput";
+import { DiagramControls } from "./DiagramControls";
 
 export function Toolbar() {
   return (
@@ -15,6 +17,9 @@ export function Toolbar() {
       </div>
 
       <div className="w-px h-4 bg-border" />
+      <DiagramNameInput />
+
+      <div className="w-px h-4 bg-border" />
 
       <UndoRedoControls />
 
@@ -24,6 +29,10 @@ export function Toolbar() {
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      <DiagramControls />
+
+      <div className="w-px h-4 bg-border mx-1" />
 
       {/* Collab stub — Phase 5 will render peer avatars here */}
       <div
