@@ -1,0 +1,28 @@
+// This is the Prisma schema for Phase 4+ database persistence.
+// To activate:
+//   1. Set DATABASE_URL in .env.local
+//   2. Run: npx prisma migrate dev --name init
+//   3. Set NEXT_PUBLIC_PERSISTENCE_MODE=database in .env.local
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Diagram {
+  id          String   @id @default(cuid())
+  name        String
+  ownerId     String   @default("local")
+  // Full SerializedDiagram stored as JSON
+  data        Json
+  nodeCount   Int      @default(0)
+  edgeCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId, updatedAt(sort: Desc)])
+}
