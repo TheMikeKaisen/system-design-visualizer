@@ -100,7 +100,7 @@ export function DiagramControls() {
           onClose={() => setIsBrowserOpen(false)}
           onLoad={(diagram) => {
             loadDiagram(diagram);
-            router.push(`/${diagram.meta.id}`);
+            router.push(`/canvas/${diagram.meta.id}`);
             setIsBrowserOpen(false);
           }}
         />
