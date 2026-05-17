@@ -217,20 +217,20 @@ export interface DiagramMeta {
   createdAt: number;
   updatedAt: number;
 }
-
 // ═══════════════════════════════════════════════════════
 // PERSISTENCE
 // ═══════════════════════════════════════════════════════
 
-/** Bumped when the serialization format changes. Old files must be migrated to this version. */
-export const DIAGRAM_FORMAT_VERSION = 1;
+/** Bumped when the serialization format changes. Old files must be migrated. */
+export const DIAGRAM_FORMAT_VERSION = 1 as const;
 
 /**
- * A completely self-contained snapshot of a diagram.
- * Can be written to disk, sent over the network, or saved in Postgres.
+ * The complete, self-contained snapshot of a diagram.
+ * This is what gets written to localStorage, exported as a file,
+ * and stored in the database. Nothing else is needed to fully restore a session.
  */
 export interface SerializedDiagram {
-  version: number;
+  version: typeof DIAGRAM_FORMAT_VERSION;
   meta: DiagramMeta;
   nodes: SystemNode[];
   edges: SystemEdge[];
@@ -238,8 +238,8 @@ export interface SerializedDiagram {
 }
 
 /**
- * Lightweight summary for list views (like the "Open Diagram" dialog).
- * Avoids loading the full node/edge arrays into memory just to show a list.
+ * Lightweight summary for the diagram browser list.
+ * Never includes nodes/edges — keeps the list fast to render.
  */
 export interface DiagramListItem {
   id: string;
@@ -247,5 +247,6 @@ export interface DiagramListItem {
   updatedAt: number;
   nodeCount: number;
   edgeCount: number;
+  /** Thumbnail — base64 PNG, generated on save. */
   thumbnail?: string;
 }
