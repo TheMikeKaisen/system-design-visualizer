@@ -26,6 +26,7 @@ import { commandInvoker } from "@/lib/store/useHistoryStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import type { NodeKind, SystemEdge, SystemNode } from "@/types";
 import { nanoid } from "nanoid";
+import { useCanvasCursor } from "@/hooks/useCanvasCursor";
 
 export function CanvasRoot() {
   const {
@@ -33,6 +34,8 @@ export function CanvasRoot() {
     onNodesChange, onEdgesChange,
     setSelectedNodeIds, setSelectedEdgeId,
   } = useCanvasStore();
+
+  const { onMouseMove, onMouseLeave } = useCanvasCursor();
 
   const { screenToFlowPosition } = useReactFlow();
 
@@ -150,6 +153,8 @@ export function CanvasRoot() {
         className="relative w-full h-full"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
       >
         <ReactFlow
           nodes={nodes}

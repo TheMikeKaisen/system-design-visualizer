@@ -5,42 +5,48 @@ import { useReactFlow } from "@xyflow/react";
 import { localStoragePersistence } from "@/lib/persistence/localStoragePersistence";
 import { useDiagramStore } from "@/lib/store/useDiagramStore";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import { resetYjsDoc } from "@/lib/collaboration/yjsDoc";
+import { syncCountersFromNodes } from "@/components/nodes/NodeFactory";
 
 interface DiagramLoaderProps {
   diagramId: string;
+  collabEnabled: boolean;
 }
 
-export function DiagramLoader({ diagramId }: DiagramLoaderProps) {
+export function DiagramLoader({ diagramId, collabEnabled }: DiagramLoaderProps) {
   const { setViewport } = useReactFlow();
   const loadedIdRef = useRef<string | null>(null);
   const { loadDiagram, newDiagram } = useDiagramStore();
 
-  // Wire auto-save — mounted here so it's always active on the canvas
   useAutoSave();
 
   useEffect(() => {
-    // Don't reload if same diagram ID (HMR, StrictMode double-effect, etc.)
     if (loadedIdRef.current === diagramId) return;
     loadedIdRef.current = diagramId;
+
+    // Reset Yjs doc when switching diagrams so stale state doesn't bleed across
+    resetYjsDoc();
 
     const saved = localStoragePersistence.load(diagramId);
 
     if (saved) {
-      loadDiagram(saved);
-      // Restore React Flow viewport AFTER stores are populated
-      requestAnimationFrame(() => {
-        setViewport(saved.viewport, { duration: 0 });
-      });
+      syncCountersFromNodes(saved.nodes);
+      if (!collabEnabled) {
+        // Solo mode — load directly from localStorage
+        loadDiagram(saved);
+        requestAnimationFrame(() => setViewport(saved.viewport, { duration: 0 }));
+      }
+      // Collab mode: CollabProvider's useCollaboration hook handles loading
+      // via pushStoreToYjs / loadStoreFromYjs after sync
     } else {
-      // Brand-new diagram — initialize with the given ID
-      newDiagram();
-      // Override the auto-generated ID to match the URL
-      useDiagramStore.setState((s) => ({
-        meta: { ...s.meta, id: diagramId },
-      }));
+      if (!collabEnabled) {
+        newDiagram();
+        useDiagramStore.setState((s) => ({
+          meta: { ...s.meta, id: diagramId },
+        }));
+      }
     }
-  }, [diagramId, loadDiagram, newDiagram, setViewport]);
+  }, [diagramId, collabEnabled, loadDiagram, newDiagram, setViewport]);
 
-  // This component renders nothing — pure side-effect
   return null;
 }
