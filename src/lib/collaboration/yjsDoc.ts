@@ -1,81 +1,114 @@
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
-// import { WebsocketProvider } from "y-websocket"; // Switch to this for production
+import type { SystemNode, SystemEdge } from "@/types";
 
-/**
- * Singleton Yjs document. All collaborative state lives here.
- *
- * ARCHITECTURE NOTE:
- * Yjs is the source of truth for any data that must sync between peers.
- * Zustand reads FROM Yjs (via observers). Commands mutate Yjs.
- * This ensures conflict-free merging — Yjs CRDT handles concurrent edits.
- *
- * Current state: scaffolded. Zustand ↔ Yjs binding wired in Collaboration Phase.
- */
+// ─────────────────────────────────────────────
+// Shared type map (strongly typed accessors)
+// ─────────────────────────────────────────────
 
-export interface YjsDocShape {
-  /** node ID → serialized SystemNode */
+export interface YjsSharedTypes {
+  /** nodeId → serialized SystemNode */
   nodes: Y.Map<unknown>;
-  /** edge ID → serialized SystemEdge */
+  /** edgeId → serialized SystemEdge */
   edges: Y.Map<unknown>;
   /**
-   * Append-only log of SerializedCommands from all peers.
-   * CommandInvoker will push here; peers observe and applyRemote().
+   * Append-only log of SerializedCommand objects.
+   * Used for audit trail and future collaborative undo.
+   * NOT used for state sync — Y.Map handles that.
    */
   commandLog: Y.Array<unknown>;
-  /** clientId → CollaboratorCursor */
+  /** clientId → CollaboratorCursor (ephemeral, cleared on disconnect) */
   cursors: Y.Map<unknown>;
   /** Diagram metadata */
   meta: Y.Map<unknown>;
 }
 
+// ─────────────────────────────────────────────
+// Singleton
+// ─────────────────────────────────────────────
+
 let _doc: Y.Doc | null = null;
-let _provider: WebrtcProvider | null = null;
 
 export function getYjsDoc(): Y.Doc {
-  if (!_doc) {
-    _doc = new Y.Doc();
-  }
+  if (!_doc) _doc = new Y.Doc();
   return _doc;
 }
 
-export function getYjsSharedTypes(doc: Y.Doc): YjsDocShape {
+export function getYjsSharedTypes(doc: Y.Doc): YjsSharedTypes {
   return {
-    nodes:      doc.getMap("nodes"),
-    edges:      doc.getMap("edges"),
+    nodes: doc.getMap("nodes"),
+    edges: doc.getMap("edges"),
     commandLog: doc.getArray("commandLog"),
-    cursors:    doc.getMap("cursors"),
-    meta:       doc.getMap("meta"),
+    cursors: doc.getMap("cursors"),
+    meta: doc.getMap("meta"),
   };
 }
 
-/**
- * Connects to a collaboration room.
- * Uses y-webrtc for dev/MVP (P2P, no server).
- * Replace with WebsocketProvider for production.
- *
- * @param roomId  Unique diagram ID — peers with the same roomId connect
- */
-export function connectToRoom(roomId: string): WebrtcProvider {
+// ─────────────────────────────────────────────
+// Provider lifecycle
+// ─────────────────────────────────────────────
+
+let _provider: WebrtcProvider | null = null;
+
+interface ConnectOptions {
+  roomId: string;
+  /**
+   * Signaling server URLs for y-webrtc.
+   * Uses the public Yjs signaling server by default (dev/MVP only).
+   * Replace with your own server for production.
+   */
+  signalingUrls?: string[];
+}
+
+export function connectToRoom({
+  roomId,
+  signalingUrls = ["ws://localhost:4444"],
+}: ConnectOptions): WebrtcProvider {
   if (_provider) {
+    if ((_provider as unknown as { roomName: string }).roomName === roomId) {
+      return _provider; // Already connected to this room
+    }
     _provider.disconnect();
     _provider.destroy();
+    _provider = null;
   }
 
   const doc = getYjsDoc();
-  _provider = new WebrtcProvider(roomId, doc, {
-    signaling: ["wss://signaling.yjs.dev"], // Public signaling server — replace in prod
-  });
+
+  /**
+   * TO SWITCH TO PRODUCTION WebSocket:
+   * 1. npm install y-websocket
+   * 2. Replace the import above with: import { WebsocketProvider } from "y-websocket";
+   * 3. Replace `new WebrtcProvider(...)` with:
+   *      new WebsocketProvider(env.YJS_WEBSOCKET_URL, roomId, doc)
+   * 4. The rest of the code is identical — same provider API.
+   */
+  _provider = new WebrtcProvider(roomId, doc, { signaling: signalingUrls });
 
   return _provider;
 }
 
 export function disconnectFromRoom(): void {
-  _provider?.disconnect();
-  _provider?.destroy();
-  _provider = null;
+  if (_provider) {
+    _provider.disconnect();
+    _provider.destroy();
+    _provider = null;
+  }
 }
 
-export function getClientId(): string {
-  return getYjsDoc().clientID.toString();
+export function getProvider(): WebrtcProvider | null {
+  return _provider;
+}
+
+export function getClientId(): number {
+  return getYjsDoc().clientID;
+}
+
+/**
+ * Completely resets the Yjs document and provider.
+ * Call this when switching to a different diagram.
+ */
+export function resetYjsDoc(): void {
+  disconnectFromRoom();
+  _doc = null;
 }
