@@ -1,53 +1,161 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { connectToRoom, disconnectFromRoom, getClientId } from "./yjsDoc";
+import {
+  useEffect, useRef, useState, useCallback,
+} from "react";
 import type { WebrtcProvider } from "y-webrtc";
+import {
+  getYjsDoc, connectToRoom, disconnectFromRoom,
+  getClientId, getYjsSharedTypes,
+} from "./yjsDoc";
+import {
+  pushStoreToYjs, loadStoreFromYjs, setupYjsBinding,
+} from "./yjsBinding";
+import {
+  setLocalAwareness, clearLocalAwareness, subscribeToAwareness,
+} from "./awarenessManager";
+import { getUserIdentity } from "./userIdentity";
+import type { CollaborationStatus, RemotePeers } from "./types";
+import type { WorldPoint } from "@/types";
 
-export interface CollaborationState {
-  isConnected: boolean;
-  peerCount: number;
-  clientId: string;
+interface UseCollaborationOptions {
+  roomId: string | null;
+  enabled?: boolean;
 }
 
-/**
- * Hook to manage room lifecycle.
- * In the Collaboration Phase, this will also:
- * - Sync Zustand ↔ Yjs (bind observers)
- * - Broadcast CommandInvoker commands to peers
- * - Render remote cursors
- */
-export function useCollaboration(roomId: string | null): CollaborationState {
-  const providerRef = useRef<WebrtcProvider | null>(null);
-  const [state, setState] = useState<CollaborationState>({
-    isConnected: false,
-    peerCount: 0,
-    clientId: getClientId(),
-  });
+const INITIAL_STATUS: CollaborationStatus = {
+  isConnected:   false,
+  isSynced:      false,
+  peerCount:     0,
+  peers:         new Map(),
+  localClientId: 0,
+  localUser:     { name: "", color: "", clientId: 0 },
+};
+
+export function useCollaboration({
+  roomId,
+  enabled = true,
+}: UseCollaborationOptions): {
+  status: CollaborationStatus;
+  updateCursor: (worldPos: WorldPoint | null) => void;
+  updateSelection: (nodeIds: string[]) => void;
+} {
+  const [status, setStatus] = useState<CollaborationStatus>(INITIAL_STATUS);
+  const providerRef  = useRef<WebrtcProvider | null>(null);
+  const cleanupRef   = useRef<(() => void) | null>(null);
+  const userIdentity = useRef(getUserIdentity());
+
+  // ── Cursor / selection broadcast ─────────────────────────────────
+
+  const cursorRef    = useRef<WorldPoint | null>(null);
+  const selectionRef = useRef<string[]>([]);
+
+  const broadcastPresence = useCallback(() => {
+    const provider = providerRef.current;
+    if (!provider) return;
+    setLocalAwareness(
+      provider.awareness,
+      { ...userIdentity.current, clientId: getClientId() },
+      cursorRef.current,
+      selectionRef.current
+    );
+  }, []);
+
+  const updateCursor = useCallback(
+    (worldPos: WorldPoint | null) => {
+      cursorRef.current = worldPos;
+      broadcastPresence();
+    },
+    [broadcastPresence]
+  );
+
+  const updateSelection = useCallback(
+    (nodeIds: string[]) => {
+      selectionRef.current = nodeIds;
+      broadcastPresence();
+    },
+    [broadcastPresence]
+  );
+
+  // ── Room lifecycle ────────────────────────────────────────────────
 
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !enabled) return;
 
-    const provider = connectToRoom(roomId);
+    const doc = getYjsDoc();
+    const localClientId = getClientId();
+    const user = userIdentity.current;
+
+    const provider = connectToRoom({ roomId });
     providerRef.current = provider;
 
-    const handleStatus = ({ connected }: { connected: boolean }) => {
-      setState((s) => ({ ...s, isConnected: connected }));
+    setStatus((s) => ({
+      ...s,
+      localClientId,
+      localUser: { ...user, clientId: localClientId },
+    }));
+
+    // ── Initial sync ──────────────────────────────────────────────
+
+    const handleSynced = () => {
+      const { nodes } = getYjsSharedTypes(doc);
+
+      if (nodes.size === 0) {
+        // We are the first peer — push our local Zustand state to Yjs
+        pushStoreToYjs(doc);
+      } else {
+        // Other peers exist — load their state into Zustand
+        loadStoreFromYjs(doc);
+      }
+
+      // Wire the live bidirectional binding
+      cleanupRef.current = setupYjsBinding(doc);
+
+      // Broadcast our presence
+      broadcastPresence();
+
+      setStatus((s) => ({ ...s, isSynced: true }));
     };
 
-    const handlePeers = ({ webrtcPeers }: { webrtcPeers: unknown[] }) => {
-      setState((s) => ({ ...s, peerCount: webrtcPeers.length }));
+    // y-webrtc fires 'synced' after WebRTC exchange completes
+    provider.on("synced", handleSynced);
+
+    // ── Connection status ─────────────────────────────────────────
+
+    const handleStatus = ({ connected }: { connected: boolean }) => {
+      setStatus((s) => ({ ...s, isConnected: connected }));
     };
 
     provider.on("status", handleStatus);
-    provider.on("peers", handlePeers);
+
+    // ── Awareness (remote peers) ──────────────────────────────────
+
+    const unsubAwareness = subscribeToAwareness(
+      provider.awareness,
+      localClientId,
+      (peers: RemotePeers) => {
+        setStatus((s) => ({
+          ...s,
+          peers,
+          peerCount: peers.size,
+        }));
+      }
+    );
+
+    // ── Cleanup ───────────────────────────────────────────────────
 
     return () => {
+      provider.off("synced", handleSynced);
       provider.off("status", handleStatus);
-      provider.off("peers", handlePeers);
+      unsubAwareness();
+      clearLocalAwareness(provider.awareness);
+      cleanupRef.current?.();
+      cleanupRef.current = null;
       disconnectFromRoom();
+      providerRef.current = null;
+      setStatus(INITIAL_STATUS);
     };
-  }, [roomId]);
+  }, [roomId, enabled, broadcastPresence]);
 
-  return state;
+  return { status, updateCursor, updateSelection };
 }
