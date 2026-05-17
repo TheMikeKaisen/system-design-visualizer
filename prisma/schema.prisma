@@ -5,12 +5,12 @@
 //   3. Set NEXT_PUBLIC_PERSISTENCE_MODE=database in .env.local
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Diagram {

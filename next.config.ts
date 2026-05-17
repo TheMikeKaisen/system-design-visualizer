@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["@prisma/client"],
   webpack: (config, { isServer, dev }) => {
     // Web Worker support — must be explicit for consistent behavior
     // across dev and production builds
