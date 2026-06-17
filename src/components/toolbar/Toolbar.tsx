@@ -1,30 +1,32 @@
-"use client";
-
-import { UndoRedoControls }  from "./UndoRedoControls";
+import { auth }     from "@/lib/auth/auth";
+import { UserMenu } from "@/components/auth/UserMenu";
+import { UndoRedoControls }   from "./UndoRedoControls";
 import { SimulationControls } from "./SimulationControls";
-import { DiagramControls }   from "./DiagramControls";
-import { DiagramNameInput }  from "./DiagramNameInput";
+import { DiagramControls }    from "./DiagramControls";
+import { DiagramNameInput }   from "./DiagramNameInput";
 
-export function Toolbar() {
+export async function Toolbar() {
+  const session = await auth();
+
   return (
     <header className="flex items-center gap-2 px-4 h-13 border-b border-border bg-background shrink-0 z-20">
       <LogoIcon />
       <div className="w-px h-4 bg-border" />
-
-      {/* Diagram file operations */}
       <DiagramControls />
       <div className="w-px h-4 bg-border" />
-
-      {/* Editable diagram name + dirty indicator */}
       <DiagramNameInput />
       <div className="w-px h-4 bg-border" />
-
       <UndoRedoControls />
       <div className="w-px h-4 bg-border" />
       <SimulationControls />
-
       <div className="flex-1" />
       <div id="collab-hud-portal" className="flex items-center gap-2" />
+      {session?.user && (
+        <>
+          <div className="w-px h-4 bg-border" />
+          <UserMenu user={session.user} />
+        </>
+      )}
     </header>
   );
 }

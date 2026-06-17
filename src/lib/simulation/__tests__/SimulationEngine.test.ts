@@ -102,4 +102,5 @@ describe("SimulationEngine — pure tick", () => {
     });
     expect(result.newPackets).toHaveLength(0);
   });
+
 });

@@ -43,15 +43,15 @@ describe("CircuitBreakerMachine", () => {
 
   it("allows exactly one probe in HALF_OPEN", () => {
     cb.recordFailure(0); cb.recordFailure(0); cb.recordFailure(0);
-    cb.canPass(6000); // Transition to HALF_OPEN
-    expect(cb.canPass(6001)).toBe(true);  // Probe allowed
-    expect(cb.canPass(6002)).toBe(false); // Second probe rejected
+    // Transition to HALF_OPEN and allow the first probe
+    expect(cb.canPass(6000)).toBe(true);  
+    // Second probe rejected
+    expect(cb.canPass(6001)).toBe(false); 
   });
 
   it("closes after successful probe", () => {
     cb.recordFailure(0); cb.recordFailure(0); cb.recordFailure(0);
-    cb.canPass(6000); // HALF_OPEN
-    cb.canPass(6001); // Probe
+    cb.canPass(6000); // HALF_OPEN and Probe
     cb.recordSuccess();
     expect(cb.getState()).toBe("CLOSED");
     expect(cb.getStatus().failureCount).toBe(0);
@@ -59,8 +59,7 @@ describe("CircuitBreakerMachine", () => {
 
   it("re-opens after failed probe", () => {
     cb.recordFailure(0); cb.recordFailure(0); cb.recordFailure(0);
-    cb.canPass(6000); // HALF_OPEN
-    cb.canPass(6001); // Probe
+    cb.canPass(6000); // HALF_OPEN and Probe
     cb.recordFailure(6002); // Probe fails
     expect(cb.getState()).toBe("OPEN");
   });

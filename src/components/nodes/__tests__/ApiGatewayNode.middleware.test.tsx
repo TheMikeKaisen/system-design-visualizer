@@ -33,14 +33,14 @@ function wrap(data = baseData) {
 
 beforeEach(() => {
   vi.mocked(commandInvoker.execute).mockClear();
-  vi.mocked(useSimulationStore).mockReturnValue({
+  vi.mocked(useSimulationStore).mockImplementation((selector: any) => selector({
     gatewayStates: {},
-  } as any);
+  }));
 });
 
 describe("ApiGatewayNode — middleware integration", () => {
   it("shows circuit breaker badge when gateway state is available", () => {
-    vi.mocked(useSimulationStore).mockReturnValue({
+    vi.mocked(useSimulationStore).mockImplementation((selector: any) => selector({
       gatewayStates: {
         "apigw-1": {
           gatewayId: "apigw-1", cbState: "OPEN",
@@ -48,13 +48,13 @@ describe("ApiGatewayNode — middleware integration", () => {
           rateLimiterFillPct: 0.3, recentAudit: [],
         },
       },
-    } as any);
+    }));
     wrap();
     expect(screen.getByText("OPEN")).toBeInTheDocument();
   });
 
   it("shows runtime stats when gateway state exists", () => {
-    vi.mocked(useSimulationStore).mockReturnValue({
+    vi.mocked(useSimulationStore).mockImplementation((selector: any) => selector({
       gatewayStates: {
         "apigw-1": {
           gatewayId: "apigw-1", cbState: "CLOSED",
@@ -62,7 +62,7 @@ describe("ApiGatewayNode — middleware integration", () => {
           rateLimiterFillPct: 0.8, recentAudit: [],
         },
       },
-    } as any);
+    }));
     wrap();
     expect(screen.getByText("7")).toBeInTheDocument(); // shed count
     expect(screen.getByText("2")).toBeInTheDocument(); // failure count
