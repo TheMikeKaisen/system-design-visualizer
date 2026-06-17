@@ -5,6 +5,7 @@ import { UndoRedoControls }   from "./UndoRedoControls";
 import { SimulationControls } from "./SimulationControls";
 import { DiagramControls }    from "./DiagramControls";
 import { DiagramNameInput }   from "./DiagramNameInput";
+import { ExportControls }     from "./ExportControls";
 
 export function Toolbar({ user }: { user?: { name?: string | null; email?: string | null; image?: string | null } }) {
   return (
@@ -19,6 +20,7 @@ export function Toolbar({ user }: { user?: { name?: string | null; email?: strin
       <div className="w-px h-4 bg-border" />
       <SimulationControls />
       <div className="flex-1" />
+      <ExportControls />
       <div id="collab-hud-portal" className="flex items-center gap-2" />
       {user && (
         <>
