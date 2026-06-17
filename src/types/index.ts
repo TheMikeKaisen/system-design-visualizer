@@ -62,7 +62,7 @@ export interface MiddlewareStep {
   enabled: boolean;
   label:   string;
   /** Type-specific config — kept loosely typed for extensibility */
-  config:  Record<string, string | number | boolean>;
+  config:  Record<string, unknown>;
 }
 
 export interface SystemNodeData extends Record<string, unknown> {
@@ -147,28 +147,24 @@ export interface SecurityPolicy {
 // PathMetrics live ephemerally in PacketManager's ref map — never serialized.
 // ═══════════════════════════════════════════════════════
 
-export type PacketStatus = "traveling" | "arrived" | "dropped" | "queued";
+export type PacketStatus = "traveling" | "arrived" | "dropped";
 
 export interface Packet {
-  readonly id: string;
-  readonly sourceId: string;
-  readonly targetId: string;
-  /** Normalised 0–1 progress along the path */
-  progress: number;
-  status: PacketStatus;
-  readonly protocol: Protocol;
-  readonly sizeBytes: number;
-  readonly createdAt: number;
-  /** Pixi hex color, resolved once at creation from protocol */
-  readonly color: number;
-  /**
-   * Optional auth context — populated in Security phase.
-   * Undefined = unauthenticated (default, backward-compatible).
-   */
-  readonly authToken?: string;
-  /** Future: request headers for API gateway middleware evaluation */
-  readonly headers?: Record<string, string>;
+  readonly id:          string;
+  readonly sourceId:    string;
+  readonly targetId:    string;
+  progress:             number;
+  status:               PacketStatus;
+  readonly protocol:    Protocol;
+  readonly sizeBytes:   number;
+  readonly createdAt:   number;
+  readonly color:       number;
+  readonly authToken?:  string;
+  headers?:             Record<string, string>;
+  readonly gatewayId?:  string;
 }
+
+export type CircuitBreakerState = "CLOSED" | "OPEN" | "HALF_OPEN";
 
 // ═══════════════════════════════════════════════════════
 // WEB WORKER CONTRACT

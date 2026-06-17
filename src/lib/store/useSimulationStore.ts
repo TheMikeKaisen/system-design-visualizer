@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import type { Packet, RoutingStrategyKind } from "@/types";
+import type { Packet, RoutingStrategyKind, CircuitBreakerState } from "@/types";
+import type { AuditEntry } from "../simulation/middleware/types";
 
 // ─────────────────────────────────────────────
 // Sub-types
@@ -13,6 +14,15 @@ export interface TrafficConfig {
   routingStrategy: RoutingStrategyKind;
   /** IDs of nodes that actively generate outbound traffic */
   sourceNodeIds: string[];
+}
+
+export interface GatewayRuntimeState {
+  gatewayId: string;
+  cbState: CircuitBreakerState;
+  cbFailures: number;
+  cbShedCount: number;
+  rateLimiterFillPct: number;
+  recentAudit: AuditEntry[];
 }
 
 export interface SimulationStats {
@@ -34,6 +44,7 @@ interface SimulationState {
   isRunning: boolean;
   config: TrafficConfig;
   stats: SimulationStats;
+  gatewayStates: Record<string, GatewayRuntimeState>;
 }
 
 interface SimulationActions {
@@ -52,6 +63,10 @@ interface SimulationActions {
   // Config
   setConfig: (config: Partial<TrafficConfig>) => void;
   setRoutingStrategy: (strategy: RoutingStrategyKind) => void;
+
+  // Gateways
+  setGatewayState: (state: GatewayRuntimeState) => void;
+  clearGatewayState: (gatewayId: string) => void;
 }
 
 type SimulationStore = SimulationState & SimulationActions;
@@ -87,6 +102,7 @@ export const useSimulationStore = create<SimulationStore>()(
       isRunning: false,
       config: DEFAULT_CONFIG,
       stats: { ...DEFAULT_STATS },
+      gatewayStates: {},
 
       start: () =>
         set((s) => {
@@ -103,6 +119,7 @@ export const useSimulationStore = create<SimulationStore>()(
           s.packets = {};
           s.isRunning = false;
           s.stats = { ...DEFAULT_STATS };
+          s.gatewayStates = {};
         }),
 
       addPacket: (packet) =>
@@ -165,6 +182,16 @@ export const useSimulationStore = create<SimulationStore>()(
         set((s) => {
           s.config.routingStrategy = strategy;
         }),
+
+      setGatewayState: (gs) =>
+        set((s) => {
+          s.gatewayStates[gs.gatewayId] = gs;
+        }),
+
+      clearGatewayState: (id) =>
+        set((s) => {
+          delete s.gatewayStates[id];
+        }),
     }))
   )
 );
@@ -177,3 +204,4 @@ export const selectPackets = (s: SimulationStore) => s.packets;
 export const selectIsRunning = (s: SimulationStore) => s.isRunning;
 export const selectConfig = (s: SimulationStore) => s.config;
 export const selectStats = (s: SimulationStore) => s.stats;
+export const selectGatewayStates = (s: SimulationStore) => s.gatewayStates;
