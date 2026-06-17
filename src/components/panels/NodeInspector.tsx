@@ -1,28 +1,40 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useState, useCallback } from "react";
 import type { SystemNode } from "@/types";
+import { getCloudProvider } from "@/types";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { CloudMetadataPanel } from "./CloudMetadataPanel";
 
 export function NodeInspector({ node }: { node: SystemNode }) {
   const { updateNodeData } = useCanvasStore();
   const [labelDraft, setLabelDraft] = useState(node.data.label);
+  const provider = getCloudProvider(node.data.kind);
 
   const commitLabel = useCallback(() => {
-    if (labelDraft !== node.data.label) {
-      updateNodeData(node.id, { label: labelDraft });
-    }
+    const trimmed = labelDraft.trim();
+    if (!trimmed) { setLabelDraft(node.data.label); return; }
+    if (trimmed !== node.data.label) updateNodeData(node.id, { label: trimmed });
   }, [labelDraft, node.data.label, node.id, updateNodeData]);
 
-  const loadPct = Math.round(node.data.load * 100);
+  const loadPct   = Math.round(node.data.load * 100);
   const loadColor =
-    loadPct < 50 ? "text-green-600" : loadPct < 80 ? "text-amber-600" : "text-red-600";
+    loadPct < 50 ? "text-green-600 dark:text-green-400"
+    : loadPct < 80 ? "text-amber-600 dark:text-amber-400"
+    : "text-red-600 dark:text-red-400";
+
+  // Provider accent color for the label underline
+  const accentColor =
+    provider === "aws"   ? "#FF9900"
+    : provider === "gcp" ? "#4285F4"
+    : provider === "azure"? "#0078D4"
+    : undefined;
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      {/* Header */}
-      <div>
-        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+    <div className="flex flex-col">
+      {/* Identity */}
+      <div className="px-4 pt-4 pb-3">
+        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
           {node.data.kind}
         </p>
         <input
@@ -30,56 +42,15 @@ export function NodeInspector({ node }: { node: SystemNode }) {
           onChange={(e) => setLabelDraft(e.target.value)}
           onBlur={commitLabel}
           onKeyDown={(e) => e.key === "Enter" && commitLabel()}
-          className="w-full text-sm font-medium bg-transparent border-0 border-b border-border
-                     pb-1 text-foreground focus:outline-none focus:border-primary transition-colors"
-          placeholder="Node label"
+          className="w-full text-sm font-medium bg-transparent border-0 border-b pb-1
+                     text-foreground focus:outline-none transition-colors"
+          style={{
+            borderColor:       accentColor ?? "var(--color-border-tertiary)",
+            "--tw-border-opacity": 1,
+          } as React.CSSProperties}
         />
       </div>
-
-      {/* Live stats */}
-      <div className="grid grid-cols-2 gap-2">
-        <StatCard label="Load" value={`${loadPct}%`} valueClass={loadColor} />
-        <StatCard label="Connections" value={String(node.data.activeConnections)} />
-      </div>
-
-      {/* Metadata */}
-      <div>
-        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
-          Configuration
-        </p>
-        <div className="flex flex-col gap-1.5">
-          {Object.entries(node.data.metadata).map(([k, v]) => (
-            <div key={k} className="flex justify-between items-center">
-              <span className="text-[10px] text-muted-foreground capitalize">{k}</span>
-              <span className="text-[10px] font-mono text-foreground">{String(v)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Node ID (debug info) */}
-      <div className="pt-2 border-t border-border">
-        <p className="text-[9px] font-mono text-muted-foreground/50 truncate">
-          id: {node.id}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  valueClass = "text-foreground",
-}: {
-  label: string;
-  value: string;
-  valueClass?: string;
-}) {
-  return (
-    <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
-      <p className={`text-base font-medium tabular-nums ${valueClass}`}>{value}</p>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <CloudMetadataPanel node={node} />
     </div>
   );
 }
