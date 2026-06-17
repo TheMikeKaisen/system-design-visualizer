@@ -26,19 +26,44 @@ export interface ViewportTransform {
 // ═══════════════════════════════════════════════════════
 
 export type NodeKind =
-  | "service"
-  | "loadBalancer"
-  | "database"
-  | "s3Bucket"
-  | "cache"
-  | "messageQueue"
-  | "cdn"
-  // Cloud — Phase N additions (add kinds here, NodeFactory handles the rest)
-  | "ec2Instance"
-  | "rdsCluster"
-  | "elasticacheCluster"
-  | "cloudfrontDistribution"
-  | "apiGateway";     // ← critical for your future API gateway work
+  // General
+  | "service" | "loadBalancer" | "database" | "s3Bucket"
+  | "cache"   | "messageQueue" | "cdn"
+  // API Gateway (already existed, gets full implementation now)
+  | "apiGateway"
+  // AWS
+  | "awsEc2"         | "awsRds"       | "awsElastiCache"
+  | "awsCloudFront"  | "awsLambda"    | "awsSqs"
+  // GCP
+  | "gcpCloudRun"    | "gcpCloudSql"  | "gcpCloudStorage"
+  | "gcpPubSub"      | "gcpCloudCdn"  | "gcpCloudFunction"
+  // Azure
+  | "azureVm"        | "azureSql"     | "azureBlobStorage"
+  | "azureServiceBus"| "azureCdn"     | "azureFunction";
+
+export type CloudProvider = "aws" | "gcp" | "azure" | "general";
+
+/** Determines which cloud badge to show on a node */
+export function getCloudProvider(kind: NodeKind): CloudProvider {
+  if (kind.startsWith("aws"))   return "aws";
+  if (kind.startsWith("gcp"))   return "gcp";
+  if (kind.startsWith("azure")) return "azure";
+  return "general";
+}
+
+/**
+ * An individual step in an API Gateway's middleware chain.
+ * Stored as JSON in SystemNodeData.metadata.middlewareChain
+ * so it survives Zustand serialization.
+ */
+export interface MiddlewareStep {
+  id:      string;
+  type:    "rateLimit" | "auth" | "transform" | "logging" | "circuitBreaker" | "cors";
+  enabled: boolean;
+  label:   string;
+  /** Type-specific config — kept loosely typed for extensibility */
+  config:  Record<string, string | number | boolean>;
+}
 
 export interface SystemNodeData extends Record<string, unknown> {
   label: string;
