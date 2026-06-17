@@ -28,7 +28,7 @@ describe("yjsBinding", () => {
       id: "node-1",
       type: "client",
       position: { x: 10, y: 20 },
-      data: { label: "Client" },
+      data: { label: "Test Node 1", kind: "service", activeConnections: 0, load: 0, metadata: {}, securityPolicies: [] },
     };
 
     const testEdge: SystemEdge = {
@@ -65,7 +65,7 @@ describe("yjsBinding", () => {
       id: "node-2",
       type: "server",
       position: { x: 100, y: 200 },
-      data: { label: "Server" },
+      data: { label: "Server", kind: "service", activeConnections: 0, load: 0, metadata: {}, securityPolicies: [] },
     };
 
     // Update Zustand state (simulates local drag/add node)

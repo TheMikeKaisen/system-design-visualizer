@@ -22,7 +22,8 @@ function wrap(data = defaultData) {
       <ApiGatewayNode
         id="apigw-1" data={data} selected={false}
         type="apiGateway" dragging={false} zIndex={1}
-        isConnectable positionAbsoluteX={0} positionAbsoluteY={0}
+        isConnectable={true} positionAbsoluteX={0} positionAbsoluteY={0}
+        {...({} as any)}
       />
     </ReactFlowProvider>
   );
