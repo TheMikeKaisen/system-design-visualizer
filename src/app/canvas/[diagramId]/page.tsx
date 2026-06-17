@@ -8,6 +8,8 @@ import { DiagramLoader }     from "@/components/canvas/DiagramLoader";
 import { CollabProvider }    from "@/components/collaboration/CollabProvider";
 import { RemoteCursors }     from "@/components/collaboration/RemoteCursors";
 import { PresenceAvatars }   from "@/components/collaboration/PresenceAvatars";
+import { MetricsDashboard }  from "@/components/observability/MetricsDashboard";
+import { MetricsCollectorMount } from "@/components/observability/MetricsCollectorMount";
 import { env }               from "@/lib/env";
 import { auth }              from "@/lib/auth/auth";
 
@@ -24,6 +26,7 @@ export default async function DiagramPage({ params }: Props) {
     <ReactFlowProvider>
       <CollabProvider diagramId={diagramId} enabled={collabEnabled}>
         <DiagramLoader diagramId={diagramId} collabEnabled={collabEnabled} />
+        <MetricsCollectorMount />
         <PresenceAvatars />
 
         <div className="flex flex-col h-screen overflow-hidden bg-background">
@@ -32,10 +35,11 @@ export default async function DiagramPage({ params }: Props) {
           <div className="flex flex-1 overflow-hidden">
             <NodePalette />
 
-            <div className="relative flex-1 overflow-hidden">
+            <div className="relative flex-1 overflow-hidden" data-testid="canvas-root" id="canvas-root">
               <CanvasRoot />
               <RemoteCursors />
               <SimulationStatsHUD />
+              <MetricsDashboard />
             </div>
 
             <InspectorPanel />
