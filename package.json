@@ -10,7 +10,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
+    "docker:dev": "docker-compose up --build",
+    "docker:down": "docker-compose down"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
@@ -23,6 +31,8 @@
     "@xyflow/react": "^12.10.2",
     "clsx": "^2.1.1",
     "dompurify": "^3.4.10",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
     "immer": "^11.1.4",
     "isomorphic-dompurify": "^3.17.0",
     "lucide-react": "^1.8.0",
@@ -34,7 +44,9 @@
     "prisma": "^7.8.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0",
+    "tailwindcss-animate": "^1.0.7",
     "y-webrtc": "^10.3.0",
     "y-websocket": "^3.0.0",
     "yjs": "^13.6.30",
@@ -42,6 +54,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -55,6 +68,7 @@
     "@vitest/coverage-v8": "^4.1.5",
     "@vitest/ui": "^4.1.5",
     "@y/websocket-server": "^0.1.5",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "happy-dom": "^20.9.0",

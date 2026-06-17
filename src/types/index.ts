@@ -167,6 +167,65 @@ export interface Packet {
 export type CircuitBreakerState = "CLOSED" | "OPEN" | "HALF_OPEN";
 
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// OBSERVABILITY
+// ═══════════════════════════════════════════════════════
+
+/**
+ * A single data point recorded once per second during simulation.
+ * Kept in a rolling buffer — never grows unbounded.
+ */
+export interface SimulationDataPoint {
+  /** Unix timestamp (Date.now()) */
+  ts:             number;
+  packetsPerSec:  number;
+  activePackets:  number;
+  avgLatencyMs:   number;
+  dropRatePct:    number;
+  /** Per-gateway circuit breaker state snapshot */
+  gatewayStates:  Record<string, GatewaySnapshot>;
+}
+
+export interface GatewaySnapshot {
+  gatewayId:   string;
+  cbState:     CircuitBreakerState;
+  shedCount:   number;
+  tokenFillPct: number;
+}
+
+export interface SimulationRecording {
+  id:         string;
+  diagramId:  string;
+  startedAt:  number;
+  endedAt:    number | null;
+  dataPoints: SimulationDataPoint[];
+  /** Peak values across the recording */
+  peaks: {
+    maxPacketsPerSec: number;
+    maxLatencyMs:     number;
+    maxDropRatePct:   number;
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════
+
+export interface ExportOptions {
+  format:        "png" | "svg" | "json";
+  includeHud:    boolean;
+  scale:         number;       // 1 = normal, 2 = retina
+  background:    string;       // CSS color or "transparent"
+}
+
+export interface ShareLink {
+  diagramId: string;
+  token:     string;
+  expiresAt: number | null;
+  isPublic:  boolean;
+}
+
+// ═══════════════════════════════════════════════════════
 // WEB WORKER CONTRACT
 // ═══════════════════════════════════════════════════════
 
