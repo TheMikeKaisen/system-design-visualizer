@@ -33,6 +33,7 @@ export function CanvasRoot() {
     nodes, edges,
     onNodesChange, onEdgesChange,
     setSelectedNodeIds, setSelectedEdgeId,
+    setViewport,
   } = useCanvasStore();
 
   const { onMouseMove, onMouseLeave } = useCanvasCursor();
@@ -171,6 +172,7 @@ export function CanvasRoot() {
           onNodeDragStop={handleNodeDragStop as (e: React.MouseEvent, n: Node) => void}
           defaultEdgeOptions={{ type: "simulationEdge" }}
           deleteKeyCode={null}   // We handle Delete ourselves in useKeyboardShortcuts
+          onMove={(_, vp) => setViewport(vp)}
           fitView
           proOptions={{ hideAttribution: true }}
         >

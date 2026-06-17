@@ -1,13 +1,12 @@
-import { auth }     from "@/lib/auth/auth";
+"use client";
+
 import { UserMenu } from "@/components/auth/UserMenu";
 import { UndoRedoControls }   from "./UndoRedoControls";
 import { SimulationControls } from "./SimulationControls";
 import { DiagramControls }    from "./DiagramControls";
 import { DiagramNameInput }   from "./DiagramNameInput";
 
-export async function Toolbar() {
-  const session = await auth();
-
+export function Toolbar({ user }: { user?: { name?: string | null; email?: string | null; image?: string | null } }) {
   return (
     <header className="flex items-center gap-2 px-4 h-13 border-b border-border bg-background shrink-0 z-20">
       <LogoIcon />
@@ -21,10 +20,10 @@ export async function Toolbar() {
       <SimulationControls />
       <div className="flex-1" />
       <div id="collab-hud-portal" className="flex items-center gap-2" />
-      {session?.user && (
+      {user && (
         <>
           <div className="w-px h-4 bg-border" />
-          <UserMenu user={session.user} />
+          <UserMenu user={user} />
         </>
       )}
     </header>
