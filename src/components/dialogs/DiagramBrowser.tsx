@@ -79,10 +79,18 @@ export function DiagramBrowser({ onClose, onLoad }: DiagramBrowserProps) {
             <ul className="divide-y divide-border">
               {savedList.map((item) => (
                 <li key={item.id}>
-                  <button
+                  <div
                     onClick={() => handleLoad(item)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleLoad(item);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     className="w-full flex items-center gap-4 px-5 py-3.5 text-left
-                               hover:bg-accent transition-colors group"
+                               hover:bg-accent transition-colors group cursor-pointer"
                   >
                     {/* Diagram icon */}
                     <div className="shrink-0 w-9 h-9 rounded-lg border border-border
@@ -111,7 +119,7 @@ export function DiagramBrowser({ onClose, onLoad }: DiagramBrowserProps) {
                     >
                       <TrashIcon />
                     </button>
-                  </button>
+                  </div>
                 </li>
               ))}
             </ul>
