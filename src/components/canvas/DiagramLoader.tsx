@@ -31,20 +31,15 @@ export function DiagramLoader({ diagramId, collabEnabled }: DiagramLoaderProps) 
 
     if (saved) {
       syncCountersFromNodes(saved.nodes);
-      if (!collabEnabled) {
-        // Solo mode — load directly from localStorage
-        loadDiagram(saved);
-        requestAnimationFrame(() => setViewport(saved.viewport, { duration: 0 }));
-      }
-      // Collab mode: CollabProvider's useCollaboration hook handles loading
-      // via pushStoreToYjs / loadStoreFromYjs after sync
+      loadDiagram(saved);
+      requestAnimationFrame(() => setViewport(saved.viewport, { duration: 0 }));
+      // Collab mode: CollabProvider's useCollaboration hook will then push or pull
+      // from Yjs once the WebRTC connection syncs.
     } else {
-      if (!collabEnabled) {
-        newDiagram();
-        useDiagramStore.setState((s) => ({
-          meta: { ...s.meta, id: diagramId },
-        }));
-      }
+      newDiagram();
+      useDiagramStore.setState((s) => ({
+        meta: { ...s.meta, id: diagramId },
+      }));
     }
   }, [diagramId, collabEnabled, loadDiagram, newDiagram, setViewport]);
 

@@ -65,14 +65,20 @@ export const MetricsDashboard = memo(function MetricsDashboard() {
 
   // Summary stats
   const latest = dataPoints.at(-1);
-  const peak   = selectedRecording ? selectedRecording.peaks : dataPoints.reduce(
-    (acc, p) => ({
-      packetsPerSec: Math.max(acc.packetsPerSec, p.packetsPerSec),
-      avgLatencyMs:  Math.max(acc.avgLatencyMs,  p.avgLatencyMs),
-      dropRatePct:   Math.max(acc.dropRatePct,   p.dropRatePct),
-    }),
-    { packetsPerSec: 0, avgLatencyMs: 0, dropRatePct: 0 }
-  );
+  const peak = selectedRecording
+    ? {
+        packetsPerSec: selectedRecording.peaks.maxPacketsPerSec,
+        avgLatencyMs: selectedRecording.peaks.maxLatencyMs,
+        dropRatePct: selectedRecording.peaks.maxDropRatePct,
+      }
+    : dataPoints.reduce(
+        (acc, p) => ({
+          packetsPerSec: Math.max(acc.packetsPerSec, p.packetsPerSec),
+          avgLatencyMs: Math.max(acc.avgLatencyMs, p.avgLatencyMs),
+          dropRatePct: Math.max(acc.dropRatePct, p.dropRatePct),
+        }),
+        { packetsPerSec: 0, avgLatencyMs: 0, dropRatePct: 0 }
+      );
 
   if (isMinimized) {
     return (

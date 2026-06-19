@@ -15,6 +15,7 @@ import {
   setLocalAwareness, clearLocalAwareness, subscribeToAwareness,
 } from "./awarenessManager";
 import { getUserIdentity } from "./userIdentity";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import type { CollaborationStatus, RemotePeers } from "./types";
 import type { WorldPoint } from "@/types";
 
@@ -99,17 +100,24 @@ export function useCollaboration({
 
     const handleSynced = () => {
       const { nodes } = getYjsSharedTypes(doc);
+      const store = useCanvasStore.getState();
 
-      if (nodes.size === 0) {
-        // We are the first peer — push our local Zustand state to Yjs
+      if (nodes.size === 0 && store.nodes.length > 0) {
+        // We are the first peer (or offline) AND we have local data.
+        // Push our local Zustand state to Yjs.
         pushStoreToYjs(doc);
-      } else {
-        // Other peers exist — load their state into Zustand
+      } else if (nodes.size > 0) {
+        // We received data from the signaling server or peers.
+        // Load their state into Zustand.
         loadStoreFromYjs(doc);
       }
 
-      // Wire the live bidirectional binding
-      cleanupRef.current = setupYjsBinding(doc);
+      // Wire the live bidirectional binding.
+      // If WebRTC connects to a peer AFTER this, the Yjs observers
+      // will naturally catch the incoming data and render it.
+      if (!cleanupRef.current) {
+        cleanupRef.current = setupYjsBinding(doc);
+      }
 
       // Broadcast our presence
       broadcastPresence();

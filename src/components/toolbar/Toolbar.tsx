@@ -7,7 +7,16 @@ import { DiagramControls }    from "./DiagramControls";
 import { DiagramNameInput }   from "./DiagramNameInput";
 import { ExportControls }     from "./ExportControls";
 
-export function Toolbar({ user }: { user?: { name?: string | null; email?: string | null; image?: string | null } }) {
+interface ToolbarProps {
+  user?: {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+}
+
+export function Toolbar({ user }: ToolbarProps) {
   return (
     <header className="flex items-center gap-2 px-4 h-13 border-b border-border bg-background shrink-0 z-20">
       <LogoIcon />

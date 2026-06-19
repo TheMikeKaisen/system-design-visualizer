@@ -28,7 +28,7 @@ export const env = createEnv({
       .string()
       .transform((v) => v === "true")
       .optional()
-      .default("false"),
+      .default(false),
     NEXT_PUBLIC_PERSISTENCE_MODE:  z
       .enum(["localStorage", "database"])
       .optional()

@@ -62,7 +62,9 @@ interface ConnectOptions {
 
 export function connectToRoom({
   roomId,
-  signalingUrls = ["ws://localhost:4444"],
+  signalingUrls = process.env.NODE_ENV === "production" 
+    ? undefined // Undefined tells y-webrtc to use public internet signaling servers automatically
+    : ["ws://localhost:4444"], // Local server for dev
 }: ConnectOptions): WebrtcProvider {
   if (_provider) {
     if ((_provider as unknown as { roomName: string }).roomName === roomId) {
