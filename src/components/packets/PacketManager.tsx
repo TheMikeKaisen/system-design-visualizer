@@ -87,7 +87,17 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
 
       const simState = useSimulationStore.getState();
       const canvasState = useCanvasStore.getState();
-      if (!simState.isRunning) return;
+      if (!simState.isRunning) {
+        // Sync sprites even when stopped so that if the user hits "Reset",
+        // the deleted packets are cleared from the canvas.
+        syncSprites(
+          simState.packets,
+          pathMetricsRef.current,
+          packetStage,
+          spritesRef.current
+        );
+        return;
+      }
 
       // 1. Drain any packets that arrived since the last tick
       const newPackets = engine.drainNewPackets();
