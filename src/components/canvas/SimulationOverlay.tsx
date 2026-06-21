@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Application, Container } from "pixi.js";
+import "pixi.js/unsafe-eval";
 import { PixiBridge } from "./PixiBridge";
 import { PacketManager } from "@/components/packets/PacketManager";
 
