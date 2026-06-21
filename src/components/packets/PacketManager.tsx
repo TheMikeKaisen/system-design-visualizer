@@ -31,12 +31,17 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
   useEffect(() => {
     const config = useSimulationStore.getState().config;
 
+    const worker = new Worker(
+      new URL("../../lib/workers/pathCalculator.worker.ts", import.meta.url)
+    );
+
     engineRef.current = new SimulationEngine(
       config.routingStrategy,
       // onPathReady: engine calls this when a worker response arrives
       (packetId, metrics) => {
         pathMetricsRef.current.set(packetId, metrics);
-      }
+      },
+      worker
     );
 
     return () => {

@@ -76,14 +76,16 @@ export class SimulationEngine {
   private gatewayPushTimer   = 0;
   private readonly GATEWAY_PUSH_INTERVAL_MS = 1000;
 
-  constructor(strategyKind: RoutingStrategyKind, onPathReady: OnPathReadyCallback) {
+  constructor(
+    strategyKind: RoutingStrategyKind,
+    onPathReady: OnPathReadyCallback,
+    worker: Worker
+  ) {
     this.strategy    = buildStrategy(strategyKind);
     this.onPathReady = onPathReady;
     this.evaluator   = new MiddlewareEvaluator();
 
-    this.worker = new Worker(
-      new URL("../workers/pathCalculator.worker.ts", import.meta.url)
-    );
+    this.worker = worker;
     this.worker.onmessage = this.handleWorkerMessage.bind(this);
     this.worker.onerror   = (err) => console.error("[SimulationEngine] Worker error:", err);
   }

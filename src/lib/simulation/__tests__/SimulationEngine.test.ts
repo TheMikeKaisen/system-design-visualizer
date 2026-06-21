@@ -23,7 +23,7 @@ describe("SimulationEngine — pure tick", () => {
   const onPathReady = vi.fn();
 
   beforeEach(() => {
-    engine = new SimulationEngine("roundRobin", onPathReady);
+    engine = new SimulationEngine("roundRobin", onPathReady, new Worker(new URL("../workers/pathCalculator.worker.ts", import.meta.url)));
   });
 
   afterEach(() => {
