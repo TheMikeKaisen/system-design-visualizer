@@ -2,7 +2,7 @@
 
 import { memo, useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { useObservabilityStore } from "@/lib/store/useObservabilityStore";
@@ -43,7 +43,7 @@ const CHART_CONFIG: Record<MetricTab, {
 
 export const MetricsDashboard = memo(function MetricsDashboard() {
   const [activeTab,    setActiveTab]    = useState<MetricTab>("throughput");
-  const [isMinimized,  setIsMinimized]  = useState(false);
+  const [isMinimized,  setIsMinimized]  = useState(true);
   const [isBrowserOpen, setIsBrowserOpen] = useState(false);
   const [selectedRecording, setSelectedRecording] = useState<SimulationRecording | null>(null);
 
@@ -84,10 +84,10 @@ export const MetricsDashboard = memo(function MetricsDashboard() {
     return (
       <button
         onClick={() => setIsMinimized(false)}
-        className="absolute bottom-16 right-4 z-30 flex items-center gap-2
-                   px-3 py-2 rounded-xl border border-border bg-background/90
-                   backdrop-blur-sm text-xs text-muted-foreground
-                   hover:text-foreground transition-colors shadow-sm"
+        className="absolute bottom-8 right-15 z-30 flex items-center gap-2
+                   px-4 py-2.5 rounded-full border border-border bg-background/95
+                   backdrop-blur-md text-sm font-medium text-foreground
+                   hover:bg-accent transition-all shadow-lg"
       >
         <ChartIcon />
         Metrics
@@ -97,65 +97,70 @@ export const MetricsDashboard = memo(function MetricsDashboard() {
 
   return (
     <div
-      className="absolute bottom-16 right-4 z-30 w-[460px]
+      className="absolute bottom-8 right-15 z-30 w-[500px]
                  rounded-2xl border border-border bg-background/95
-                 backdrop-blur-md shadow-lg overflow-hidden"
+                 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <div className="flex items-center gap-2">
-          <ChartIcon />
-          <span className="text-sm font-medium text-foreground">
-            Simulation metrics
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-muted/20">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+            <ChartIcon />
+          </div>
+          <span className="text-sm font-semibold text-foreground">
+            Simulation Metrics
           </span>
           {isRecording && (
-            <span className="flex items-center gap-1 text-[10px] text-red-500">
+            <span className="flex items-center gap-1.5 text-[10px] font-medium tracking-wide text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
               REC
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {selectedRecording ? (
             <button
               onClick={() => setSelectedRecording(null)}
-              className="text-[10px] px-2 py-1 rounded-md border border-border
-                         text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="text-xs px-2.5 py-1.5 rounded-md border border-border
+                         text-muted-foreground hover:text-foreground hover:bg-accent transition-colors font-medium"
             >
-              Back to Live
+              Exit playback
             </button>
           ) : (
             <>
               <button
                 onClick={() => isRecording ? stopRecording() : startRecording(diagramId)}
-                className={`text-[10px] px-2 py-1 rounded-md border transition-colors
+                className={`text-xs px-3 py-1.5 rounded-md border transition-all font-medium flex items-center gap-1.5
                             ${isRecording
-                              ? "border-red-400/50 text-red-500 hover:bg-red-500/10"
-                              : "border-border text-muted-foreground hover:text-foreground hover:bg-accent"
+                              ? "border-red-400/50 text-red-500 bg-red-500/5 hover:bg-red-500/10"
+                              : "border-border text-foreground bg-background hover:bg-accent"
                             }`}
               >
-                {isRecording ? "Stop rec" : "Record"}
+                {isRecording ? "Stop recording" : "Record"}
               </button>
               <button
                 onClick={() => { clearHistory(); setSelectedRecording(null); }}
-                className="text-[10px] px-2 py-1 rounded-md border border-border
-                           text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                className="text-xs px-2.5 py-1.5 rounded-md border border-border bg-background
+                           text-muted-foreground hover:text-foreground hover:bg-accent transition-colors font-medium"
               >
                 Clear
               </button>
             </>
           )}
           <button
-            onClick={() => setIsBrowserOpen(true)}
-            className="text-[10px] px-2 py-1 rounded-md border border-border
-                       text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ml-1"
+            onClick={() => setIsBrowserOpen(!isBrowserOpen)}
+            className={`text-xs px-3 py-1.5 rounded-md border transition-colors font-medium
+                       ${isBrowserOpen 
+                         ? "border-primary text-primary bg-primary/5" 
+                         : "border-border bg-background text-muted-foreground hover:text-foreground hover:bg-accent"}`}
           >
             Saved
           </button>
+          <div className="w-px h-4 bg-border mx-1" />
           <button
             onClick={() => setIsMinimized(true)}
-            className="ml-1 text-muted-foreground hover:text-foreground transition-colors p-1"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-accent"
             aria-label="Minimize"
           >
             <MinimizeIcon />
@@ -163,98 +168,124 @@ export const MetricsDashboard = memo(function MetricsDashboard() {
         </div>
       </div>
 
-      {isBrowserOpen && (
+      {isBrowserOpen ? (
         <RecordingsBrowser
           onSelect={(r) => { setSelectedRecording(r); setIsBrowserOpen(false); }}
           onClose={() => setIsBrowserOpen(false)}
         />
-      )}
-
-      {/* Summary row */}
-      <div className="grid grid-cols-3 divide-x divide-border border-b border-border">
-        <SummaryCell
-          label="Throughput"
-          current={`${latest?.packetsPerSec ?? 0} pkt/s`}
-          peak={`${peak.packetsPerSec} pkt/s`}
-          color="text-teal-600 dark:text-teal-400"
-        />
-        <SummaryCell
-          label="Avg latency"
-          current={`${latest?.avgLatencyMs ?? 0}ms`}
-          peak={`${peak.avgLatencyMs}ms`}
-          color="text-blue-600 dark:text-blue-400"
-          highlight={(latest?.avgLatencyMs ?? 0) > 500}
-        />
-        <SummaryCell
-          label="Drop rate"
-          current={`${latest?.dropRatePct ?? 0}%`}
-          peak={`${peak.dropRatePct}%`}
-          color="text-orange-600 dark:text-orange-400"
-          highlight={(latest?.dropRatePct ?? 0) > 5}
-        />
-      </div>
-
-      {/* Tab bar */}
-      <div className="flex border-b border-border px-4">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-3 py-2 text-xs transition-colors border-b-2 -mb-px
-                        ${activeTab === tab.id
-                          ? "border-primary text-foreground font-medium"
-                          : "border-transparent text-muted-foreground hover:text-foreground"
-                        }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Chart */}
-      <div className="p-4">
-        {dataPoints.length < 2 ? (
-          <div className="h-32 flex items-center justify-center">
-            <p className="text-xs text-muted-foreground">
-              Start the simulation to see metrics
-            </p>
+      ) : (
+        <div className="flex flex-col">
+          {/* Summary row */}
+          <div className="grid grid-cols-3 divide-x divide-border border-b border-border/50 bg-muted/10">
+            <SummaryCell
+              label="Throughput"
+              current={`${latest?.packetsPerSec ?? 0}`}
+              unit="pkt/s"
+              peak={`${peak.packetsPerSec}`}
+              color="text-emerald-500"
+            />
+            <SummaryCell
+              label="Latency"
+              current={`${latest?.avgLatencyMs ?? 0}`}
+              unit="ms"
+              peak={`${peak.avgLatencyMs}`}
+              color="text-blue-500"
+              highlight={(latest?.avgLatencyMs ?? 0) > 500}
+            />
+            <SummaryCell
+              label="Drop rate"
+              current={`${latest?.dropRatePct ?? 0}`}
+              unit="%"
+              peak={`${peak.dropRatePct}`}
+              color="text-rose-500"
+              highlight={(latest?.dropRatePct ?? 0) > 5}
+            />
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={130}>
-            <LineChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis
-                dataKey="relativeTime"
-                tick={{ fontSize: 9, fill: "var(--color-muted-foreground)" }}
-                interval={Math.floor(chartData.length / 5)}
-                reversed
-              />
-              <YAxis
-                tick={{ fontSize: 9, fill: "var(--color-muted-foreground)" }}
-                unit={cfg.unit}
-                width={50}
-              />
-              <Tooltip
-                contentStyle={{
-                  background:   "var(--color-background)",
-                  border:       "1px solid var(--color-border)",
-                  borderRadius: "8px",
-                  fontSize:     "11px",
-                }}
-                formatter={(val: any) => [`${val}${cfg.unit}`, cfg.label]}
-              />
-              <Line
-                type="monotone"
-                dataKey={cfg.dataKey as string}
-                stroke={cfg.color}
-                strokeWidth={1.5}
-                dot={false}
-                isAnimationActive={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+
+          {/* Tab bar */}
+          <div className="flex px-2 pt-2 bg-muted/10">
+            <div className="flex p-1 bg-muted/30 rounded-lg w-full gap-1">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 px-3 py-1.5 text-xs font-medium transition-all rounded-md
+                              ${activeTab === tab.id
+                                ? "bg-background text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                              }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Chart */}
+          <div className="p-5 pt-4 bg-muted/10">
+            {dataPoints.length < 2 ? (
+              <div className="h-[160px] flex flex-col items-center justify-center border border-dashed border-border rounded-xl bg-background/50">
+                <ChartIcon className="w-6 h-6 text-muted-foreground/50 mb-2" />
+                <p className="text-sm font-medium text-muted-foreground">Waiting for data</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">Start the simulation to see metrics</p>
+              </div>
+            ) : (
+              <div className="h-[180px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id={`gradient-${activeTab}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={cfg.color} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={cfg.color} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--color-border)" strokeOpacity={0.5} />
+                    <XAxis
+                      dataKey="relativeTime"
+                      tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
+                      interval="preserveStartEnd"
+                      tickMargin={10}
+                      axisLine={false}
+                      tickLine={false}
+                      minTickGap={30}
+                      reversed
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(val) => `${val}${cfg.unit.trim() === '%' ? '' : ''}`}
+                      width={55}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background:   "var(--color-background)",
+                        border:       "1px solid var(--color-border)",
+                        borderRadius: "8px",
+                        fontSize:     "12px",
+                        boxShadow:    "0 4px 12px rgba(0,0,0,0.1)",
+                        padding:      "8px 12px"
+                      }}
+                      itemStyle={{ color: "var(--color-foreground)", fontWeight: 500 }}
+                      formatter={(val: any) => [`${val}${cfg.unit}`, cfg.label]}
+                      labelStyle={{ color: "var(--color-muted-foreground)", marginBottom: "4px" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey={cfg.dataKey as string}
+                      stroke={cfg.color}
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill={`url(#gradient-${activeTab})`}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 });
