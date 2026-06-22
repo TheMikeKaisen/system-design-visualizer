@@ -91,13 +91,18 @@ export function PixiBridge({ app, packetStage }: PixiBridgeProps) {
    * (e.g., "fit view" button, programmatic pan). This closes the loop.
    */
   useEffect(() => {
+    // Apply initial viewport immediately on mount
+    const initialVp = useCanvasStore.getState().viewport;
+    applyTransformToStage(packetStage, initialVp);
+    viewportRef.current = initialVp;
+
     const unsubscribe = useCanvasStore.subscribe(
       selectViewport,
       (vp) => {
         applyTransformToStage(packetStage, vp);
         viewportRef.current = vp;
       },
-      { fireImmediately: false }
+      { fireImmediately: true }
     );
     return unsubscribe;
   }, [packetStage]);
