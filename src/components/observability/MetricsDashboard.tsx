@@ -316,10 +316,10 @@ function SummaryCell({
 
 // ─── Icons ────────────────────────────────────────────────────────────
 
-function ChartIcon() {
+function ChartIcon({ className }: { className?: string }) {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-         stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+         stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" className={className}>
       <polyline points="1,10 4,6 7,8 10,3 13,5" />
     </svg>
   );
