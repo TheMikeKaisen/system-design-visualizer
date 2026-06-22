@@ -21,8 +21,8 @@ const SCRIPT_CDNS = ["https://cdnjs.cloudflare.com"];
 
 export function buildCsp(nonce: string, isDev: boolean): string {
   const scriptSrc = isDev
-    ? [SELF, `'unsafe-inline'`, `'unsafe-eval'`, ...SCRIPT_CDNS]
-    : [SELF, `'unsafe-inline'`, ...SCRIPT_CDNS];
+    ? [SELF, `'unsafe-inline'`, `'unsafe-eval'`, `'nonce-${nonce}'`, ...SCRIPT_CDNS]
+    : [SELF, `'unsafe-inline'`, `'nonce-${nonce}'`, ...SCRIPT_CDNS];
 
   const directives: Record<string, string[]> = {
     "default-src":      [SELF],
