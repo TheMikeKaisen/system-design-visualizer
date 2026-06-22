@@ -295,17 +295,20 @@ export const MetricsDashboard = memo(function MetricsDashboard() {
 // ─────────────────────────────────────────────
 
 function SummaryCell({
-  label, current, peak, color, highlight = false,
+  label, current, peak, color, unit, highlight = false,
 }: {
   label: string; current: string; peak: string;
-  color: string; highlight?: boolean;
+  color: string; unit: string; highlight?: boolean;
 }) {
   return (
     <div className="px-4 py-2.5">
       <p className="text-[10px] text-muted-foreground mb-0.5">{label}</p>
-      <p className={`text-sm font-medium tabular-nums ${highlight ? "text-destructive" : color}`}>
-        {current}
-      </p>
+      <div className="flex items-baseline gap-1">
+        <p className={`text-sm font-medium tabular-nums ${highlight ? "text-destructive" : color}`}>
+          {current}
+        </p>
+        <span className="text-[10px] text-muted-foreground font-medium">{unit}</span>
+      </div>
       <p className="text-[9px] text-muted-foreground/60">peak {peak}</p>
     </div>
   );
