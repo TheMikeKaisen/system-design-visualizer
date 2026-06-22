@@ -18,7 +18,7 @@ interface FieldDef {
   max?:     number;
 }
 
-const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
+export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
   awsEc2: [
     { key: "instanceType",  label: "Instance type", type: "select",
       options: ["t3.micro","t3.small","t3.medium","t3.large","m5.large","m5.xlarge","c5.xlarge"] },

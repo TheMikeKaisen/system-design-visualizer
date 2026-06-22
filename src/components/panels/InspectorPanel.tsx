@@ -4,6 +4,7 @@ import { useCanvasStore }       from "@/lib/store/useCanvasStore";
 import { NodeInspector }        from "./NodeInspector";
 import { EdgeInspector }        from "./EdgeInspector";
 import { MiddlewareAuditLog }   from "./MiddlewareAuditLog";
+import { FIELDS }               from "./CloudMetadataPanel";
 
 export function InspectorPanel() {
   const { nodes, edges, selectedNodeIds, selectedEdgeId } = useCanvasStore();
@@ -17,6 +18,18 @@ export function InspectorPanel() {
     ? edges.find((e) => e.id === selectedEdgeId)
     : null;
 
+  if (!selectedNode && !selectedEdge) {
+    return null;
+  }
+
+  // Hide the panel if a node is selected but it has no configuration fields
+  if (selectedNode) {
+    const hasConfig = (FIELDS[selectedNode.data.kind]?.length ?? 0) > 0;
+    if (!hasConfig) {
+      return null;
+    }
+  }
+
   return (
     <aside className="w-[260px] shrink-0 border-l border-border bg-background overflow-y-auto flex flex-col">
       {selectedNode ? (
@@ -26,21 +39,9 @@ export function InspectorPanel() {
             <MiddlewareAuditLog gatewayId={selectedNode.id} />
           )}
         </>
-      ) : selectedEdge ? (
-        <EdgeInspector key={selectedEdge.id} edge={selectedEdge} />
       ) : (
-        <EmptyState />
+        <EdgeInspector key={selectedEdge!.id} edge={selectedEdge!} />
       )}
     </aside>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center h-48 gap-2 px-6 text-center">
-      <p className="text-xs text-muted-foreground">
-        Select a node or edge to inspect properties
-      </p>
-    </div>
   );
 }

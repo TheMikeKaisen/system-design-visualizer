@@ -91,6 +91,7 @@ const PALETTE_SECTIONS: PaletteSection[] = [
 
 export function NodePalette() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const toggleSection = useCallback((id: string) => {
     setCollapsed((prev) => {
@@ -105,47 +106,78 @@ export function NodePalette() {
     e.dataTransfer.effectAllowed = "copy";
   }, []);
 
-  return (
-    <aside className="w-[220px] shrink-0 border-r border-border bg-background overflow-y-auto flex flex-col">
-      {PALETTE_SECTIONS.map((section) => {
-        const isCollapsed = collapsed.has(section.id);
-        return (
-          <div key={section.id}>
-            {/* Section header */}
-            <button
-              onClick={() => toggleSection(section.id)}
-              className="w-full flex items-center justify-between px-3 py-2
-                         hover:bg-accent/50 transition-colors"
-            >
-              <span className={`text-[10px] font-semibold uppercase tracking-wider ${section.color}`}>
-                {section.label}
-              </span>
-              <ChevronIcon collapsed={isCollapsed} />
-            </button>
+  if (sidebarCollapsed) {
+    return (
+      <aside className="w-12 shrink-0 border-r border-border bg-background flex flex-col items-center py-3">
+        <button
+          onClick={() => setSidebarCollapsed(false)}
+          className="p-1.5 hover:bg-accent rounded-md text-muted-foreground transition-colors"
+          title="Expand palette"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      </aside>
+    );
+  }
 
-            {/* Items */}
-            {!isCollapsed && (
-              <div className="flex flex-col gap-0.5 px-2 pb-2">
-                {section.items.map((item) => (
-                  <div
-                    key={item.kind}
-                    draggable
-                    onDragStart={(e) => onDragStart(e, item.kind)}
-                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg
-                               hover:bg-accent cursor-grab active:cursor-grabbing
-                               transition-colors select-none"
-                    role="button"
-                    aria-label={`Drag ${item.label} to canvas`}
-                  >
-                    <span className="shrink-0">{item.icon}</span>
-                    <span className="text-xs text-foreground truncate">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
+  return (
+    <aside className="w-[220px] shrink-0 border-r border-border bg-background flex flex-col relative overflow-hidden">
+      <div className="flex items-center justify-between p-3 border-b border-border/50 shrink-0">
+        <span className="text-sm font-semibold text-foreground">Components</span>
+        <button
+          onClick={() => setSidebarCollapsed(true)}
+          className="p-1 hover:bg-accent rounded-md text-muted-foreground transition-colors"
+          title="Collapse palette"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+      </div>
+      
+      <div className="overflow-y-auto flex-1">
+        {PALETTE_SECTIONS.map((section) => {
+          const isCollapsed = collapsed.has(section.id);
+          return (
+            <div key={section.id}>
+              {/* Section header */}
+              <button
+                onClick={() => toggleSection(section.id)}
+                className="w-full flex items-center justify-between px-3 py-2
+                           hover:bg-accent/50 transition-colors"
+              >
+                <span className={`text-[10px] font-semibold uppercase tracking-wider ${section.color}`}>
+                  {section.label}
+                </span>
+                <ChevronIcon collapsed={isCollapsed} />
+              </button>
+
+              {/* Items */}
+              {!isCollapsed && (
+                <div className="flex flex-col gap-0.5 px-2 pb-2">
+                  {section.items.map((item) => (
+                    <div
+                      key={item.kind}
+                      draggable
+                      onDragStart={(e) => onDragStart(e, item.kind)}
+                      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg
+                                 hover:bg-accent cursor-grab active:cursor-grabbing
+                                 transition-colors select-none"
+                      role="button"
+                      aria-label={`Drag ${item.label} to canvas`}
+                    >
+                      <span className="shrink-0">{item.icon}</span>
+                      <span className="text-xs text-foreground truncate">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </aside>
   );
 }
