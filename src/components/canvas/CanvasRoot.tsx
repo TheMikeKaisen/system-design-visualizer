@@ -15,6 +15,7 @@ import {
 import "@xyflow/react/dist/style.css";
 
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useSimulationStore } from "@/lib/store/useSimulationStore";
 import { SimulationOverlay } from "./SimulationOverlay";
 import { CanvasErrorBoundary } from "./CanvasErrorBoundary";
 import { nodeTypes, edgeTypes } from "@/components/nodes";
@@ -35,6 +36,8 @@ export function CanvasRoot() {
     setSelectedNodeIds, setSelectedEdgeId,
     setViewport,
   } = useCanvasStore();
+
+  const isRunning = useSimulationStore((s) => s.isRunning);
 
   const { onMouseMove, onMouseLeave } = useCanvasCursor();
 
@@ -122,6 +125,8 @@ export function CanvasRoot() {
   const handleDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
+      if (isRunning) return;
+      
       const kind = e.dataTransfer.getData(
         "application/sysvis-node-kind"
       ) as NodeKind | "";
@@ -136,7 +141,7 @@ export function CanvasRoot() {
       const node = createNode({ kind, position });
       commandInvoker.execute(new AddNodeCommand(node));
     },
-    [screenToFlowPosition]
+    [screenToFlowPosition, isRunning]
   );
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -170,6 +175,8 @@ export function CanvasRoot() {
           onPaneClick={handlePaneClick}
           onNodeDragStart={handleNodeDragStart as (e: React.MouseEvent, n: Node) => void}
           onNodeDragStop={handleNodeDragStop as (e: React.MouseEvent, n: Node) => void}
+          nodesDraggable={!isRunning}
+          nodesConnectable={!isRunning}
           defaultEdgeOptions={{ type: "simulationEdge" }}
           deleteKeyCode={null}   // We handle Delete ourselves in useKeyboardShortcuts
           onMove={(_, vp) => setViewport(vp)}

@@ -87,16 +87,20 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
 
       const simState = useSimulationStore.getState();
       const canvasState = useCanvasStore.getState();
+      let config = simState.config;
       if (!simState.isRunning) {
-        // Sync sprites even when stopped so that if the user hits "Reset",
-        // the deleted packets are cleared from the canvas.
-        syncSprites(
-          simState.packets,
-          pathMetricsRef.current,
-          packetStage,
-          spritesRef.current
-        );
-        return;
+        if (Object.keys(simState.packets).length === 0) {
+          // Fully drained. Sync sprites to clear deleted packets, then sleep.
+          syncSprites(
+            simState.packets,
+            pathMetricsRef.current,
+            packetStage,
+            spritesRef.current
+          );
+          return;
+        }
+        // Draining mode: continue ticking existing packets but spawn no new ones
+        config = { ...config, packetsPerSecond: 0 };
       }
 
       // 1. Drain any packets that arrived since the last tick
@@ -112,7 +116,7 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
         pathMetricsRef.current,
         canvasState.nodes,
         canvasState.edges,
-        simState.config
+        config
       );
 
       // 3. Apply the diff to the store in one batch
