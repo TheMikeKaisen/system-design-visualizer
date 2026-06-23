@@ -6,6 +6,7 @@ import { SimulationControls } from "./SimulationControls";
 import { DiagramControls }    from "./DiagramControls";
 import { DiagramNameInput }   from "./DiagramNameInput";
 import { ExportControls }     from "./ExportControls";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface ToolbarProps {
   user?: {
@@ -29,6 +30,8 @@ export function Toolbar({ user }: ToolbarProps) {
       <div className="w-px h-4 bg-border" />
       <SimulationControls />
       <div className="flex-1" />
+      <ThemeToggle />
+      <div className="w-px h-4 bg-border" />
       <ExportControls />
       <div id="collab-hud-portal" className="flex items-center gap-2" />
       {user && (

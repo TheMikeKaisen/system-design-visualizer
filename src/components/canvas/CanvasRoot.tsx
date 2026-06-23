@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useRef, type DragEvent } from "react";
+import { useTheme } from "next-themes";
+
+import { useCallback, useRef, useState, useEffect, type DragEvent } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -153,6 +155,13 @@ export function CanvasRoot() {
   // We still pass RF's own change handlers for internal RF state (selection, etc.)
   // Command pattern wraps only our explicit mutations above.
 
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <CanvasErrorBoundary>
       <div
@@ -182,6 +191,7 @@ export function CanvasRoot() {
           onMove={(_, vp) => setViewport(vp)}
           fitView
           proOptions={{ hideAttribution: true }}
+          colorMode={mounted ? ((resolvedTheme as "light" | "dark") || "light") : "light"}
         >
           <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
           <Controls position="bottom-right" />
