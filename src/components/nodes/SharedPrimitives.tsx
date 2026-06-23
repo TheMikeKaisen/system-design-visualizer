@@ -40,18 +40,24 @@ export function NodeMetricsAlerts({ nodeId }: { nodeId: string }) {
   const queueLimit = nodeData?.data?.capacity?.queueLimit ?? 0;
   const isOverloaded = queueLimit > 0 && metrics.queueLength >= queueLimit;
   const hasDrops = metrics.dropCount > 0;
+  const isCrashed = metrics.isCrashed;
   
   // Only show alerts if there's a problem
-  if (!isOverloaded && !hasDrops) return null;
+  if (!isOverloaded && !hasDrops && !isCrashed) return null;
 
   return (
     <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-50 pointer-events-none">
-      {hasDrops && (
+      {isCrashed && (
+        <div className="bg-red-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap animate-in fade-in slide-in-from-bottom-2">
+          CRASHED (Out of Memory)
+        </div>
+      )}
+      {!isCrashed && hasDrops && (
         <div className="bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap animate-in fade-in slide-in-from-bottom-2">
           {metrics.dropCount} Dropped
         </div>
       )}
-      {isOverloaded && !hasDrops && (
+      {!isCrashed && isOverloaded && !hasDrops && (
         <div className="bg-yellow-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap animate-in fade-in slide-in-from-bottom-2">
           Queue Full
         </div>

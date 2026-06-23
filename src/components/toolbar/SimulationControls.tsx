@@ -81,19 +81,54 @@ export function SimulationControls() {
 
       {/* Packets per second */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
-          {config.packetsPerSecond} pkt/s
+        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+          {config.packetsPerSecond} req/s
         </span>
         <input
           type="range"
           min={0.5}
-          max={20}
+          max={50}
           step={0.5}
           value={config.packetsPerSecond}
           onChange={(e) => setConfig({ packetsPerSecond: parseFloat(e.target.value) })}
-          className="w-20 h-1.5 accent-primary cursor-pointer"
-          title="Packets per second"
+          className="w-16 h-1.5 accent-primary cursor-pointer"
+          title="Requests per second"
         />
+      </div>
+
+      <div className="w-px h-4 bg-border" />
+
+      {/* Max Retries */}
+      <div className="flex items-center gap-1.5">
+        <label className="text-[10px] text-muted-foreground whitespace-nowrap">Retries</label>
+        <select
+          value={config.maxRetries}
+          onChange={(e) => setConfig({ maxRetries: parseInt(e.target.value, 10) })}
+          className="text-xs bg-transparent border border-border rounded px-1.5 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value={0}>0</option>
+          <option value={1}>1</option>
+          <option value={2}>2</option>
+          <option value={3}>3</option>
+        </select>
+      </div>
+
+      <div className="w-px h-4 bg-border" />
+
+      {/* Request Timeout */}
+      <div className="flex items-center gap-1.5">
+        <label className="text-[10px] text-muted-foreground whitespace-nowrap">Timeout</label>
+        <select
+          value={config.requestTimeoutMs}
+          onChange={(e) => setConfig({ requestTimeoutMs: parseInt(e.target.value, 10) })}
+          className="text-xs bg-transparent border border-border rounded px-1.5 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value={500}>0.5s</option>
+          <option value={1000}>1s</option>
+          <option value={3000}>3s</option>
+          <option value={5000}>5s</option>
+          <option value={10000}>10s</option>
+        </select>
       </div>
 
       <div className="w-px h-4 bg-border" />

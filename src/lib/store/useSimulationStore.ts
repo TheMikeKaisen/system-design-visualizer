@@ -14,6 +14,10 @@ export interface TrafficConfig {
   routingStrategy: RoutingStrategyKind;
   /** IDs of nodes that actively generate outbound traffic */
   sourceNodeIds: string[];
+  /** Maximum time (ms) a packet can spend in a queue before timeout */
+  requestTimeoutMs: number;
+  /** Maximum number of retries for dropped/timed-out packets */
+  maxRetries: number;
 }
 
 export interface GatewayRuntimeState {
@@ -85,6 +89,8 @@ const DEFAULT_CONFIG: TrafficConfig = {
   packetsPerSecond: 2,
   routingStrategy: "roundRobin",
   sourceNodeIds: [],
+  requestTimeoutMs: 5000,
+  maxRetries: 0,
 };
 
 const DEFAULT_STATS: SimulationStats = {

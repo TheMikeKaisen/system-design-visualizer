@@ -196,6 +196,8 @@ export interface Packet {
   readonly authToken?:  string;
   headers?:             Record<string, string>;
   readonly gatewayId?:  string;
+  /** Number of times this packet was retried */
+  retryCount?:          number;
 }
 
 export type CircuitBreakerState = "CLOSED" | "OPEN" | "HALF_OPEN";

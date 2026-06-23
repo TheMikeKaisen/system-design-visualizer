@@ -71,7 +71,7 @@ export class SimulationEngine {
 
   private packetSpeeds       = new Map<string, number>();
   private pendingRequests    = new Map<string, {
-    sourceId: string; targetId: string; protocol: string; gatewayId?: string;
+    sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number;
   }>();
   private spawnAccumulators  = new Map<string, number>();
   private bufferedNewPackets: Packet[] = [];
@@ -131,10 +131,10 @@ export class SimulationEngine {
     this.ensureNodeStates(nodes);
 
     // 1. Process completed packets at nodes → forward downstream
-    this.tickNodeProcessing(nowMs, nodes, edges, result);
+    this.tickNodeProcessing(nowMs, config.requestTimeoutMs, config.maxRetries, packets, nodes, edges, result);
 
     // 2. Advance traveling packets along edges
-    this.advancePackets(deltaMs, nowMs, packets, pathMetrics, edges, nodes, result);
+    this.advancePackets(deltaMs, nowMs, config.maxRetries, packets, pathMetrics, edges, nodes, result);
 
     // 3. Spawn new packets from source nodes
     this.spawnPackets(deltaMs, nodes, edges, config);
@@ -168,6 +168,7 @@ export class SimulationEngine {
   private advancePackets(
     deltaMs:     number,
     nowMs:       number,
+    maxRetries:  number,
     packets:     Record<string, Packet>,
     pathMetrics: Map<string, PathMetrics>,
     edges:       SystemEdge[],
@@ -191,7 +192,7 @@ export class SimulationEngine {
 
         // Random edge packet loss
         if (Math.random() < edgeER * (deltaMs / 1000)) {
-          this.handlePacketDropped(id, nowMs, result);
+          this.handlePacketDropped(id, packet, nowMs, maxRetries, nodes, edges, result);
           continue;
         }
 
@@ -207,7 +208,7 @@ export class SimulationEngine {
             switch (evalResult.verdict.action) {
               case "drop":
                 this.evaluator.recordPacketOutcome(targetNode.id, false, nowMs);
-                this.handlePacketDropped(id, nowMs, result);
+                this.handlePacketDropped(id, packet, nowMs, maxRetries, nodes, edges, result);
                 continue;
 
               case "queue":
@@ -220,7 +221,7 @@ export class SimulationEngine {
                 this.packetSpeeds.delete(id);
                 this.packetGateways.delete(id);
                 // Admit through capacity system
-                this.admitPacketAtNode(id, targetNode, nowMs, nodes, edges, result);
+                this.admitPacketAtNode(id, packet, targetNode, nowMs, maxRetries, nodes, edges, result);
                 continue;
               }
             }
@@ -229,7 +230,7 @@ export class SimulationEngine {
           // Non-gateway arrival — admit through capacity system
           this.packetSpeeds.delete(id);
           if (targetNode) {
-            this.admitPacketAtNode(id, targetNode, nowMs, nodes, edges, result);
+            this.admitPacketAtNode(id, packet, targetNode, nowMs, maxRetries, nodes, edges, result);
           } else {
             result.arrivedIds.push(id);
           }
@@ -246,8 +247,10 @@ export class SimulationEngine {
    */
   private admitPacketAtNode(
     packetId:   string,
+    packet:     Packet,
     targetNode: SystemNode,
     nowMs:      number,
+    maxRetries: number,
     nodes:      SystemNode[],
     edges:      SystemEdge[],
     result:     SimulationTickResult,
@@ -270,15 +273,19 @@ export class SimulationEngine {
         result.queuedIds.push(packetId);
         break;
       case "dropped":
-        result.droppedIds.push(packetId);
+        this.handlePacketDropped(packetId, packet, nowMs, maxRetries, nodes, edges, result);
         break;
     }
   }
 
   private handlePacketDropped(
-    id:     string,
-    nowMs:  number,
-    result: SimulationTickResult,
+    id:         string,
+    packet:     Packet | undefined,
+    nowMs:      number,
+    maxRetries: number,
+    nodes:      SystemNode[],
+    edges:      SystemEdge[],
+    result:     SimulationTickResult,
   ): void {
     // Notify CB of failure if this packet was going to a gateway
     const gwId = this.packetGateways.get(id);
@@ -288,6 +295,19 @@ export class SimulationEngine {
     }
     result.droppedIds.push(id);
     this.packetSpeeds.delete(id);
+    
+    // Attempt retry if applicable
+    if (packet && (packet.retryCount ?? 0) < maxRetries) {
+      this.requestPath(
+        packet.sourceId, 
+        packet.targetId, 
+        nodes, 
+        edges, 
+        packet.protocol, 
+        packet.gatewayId,
+        (packet.retryCount ?? 0) + 1
+      );
+    }
   }
 
   // ─────────────────────────────────────────────
@@ -319,12 +339,23 @@ export class SimulationEngine {
    * and forward completed packets downstream.
    */
   private tickNodeProcessing(
-    nowMs:  number,
-    nodes:  SystemNode[],
-    edges:  SystemEdge[],
-    result: SimulationTickResult,
+    nowMs:        number,
+    timeoutMs:    number,
+    maxRetries:   number,
+    allPackets:   Record<string, Packet>,
+    nodes:        SystemNode[],
+    edges:        SystemEdge[],
+    result:       SimulationTickResult,
   ): void {
     for (const [, state] of this.nodeStates) {
+      // 1. Process Timeouts
+      const timedOut = state.getTimedOutPackets(nowMs, timeoutMs);
+      for (const packetId of timedOut) {
+        const packet = allPackets[packetId];
+        this.handlePacketDropped(packetId, packet, nowMs, maxRetries, nodes, edges, result);
+      }
+      
+      // 2. Process Completions
       const completed = state.getCompletedPackets(nowMs);
       for (const packetId of completed) {
         state.completePacket(packetId, nowMs);
@@ -404,9 +435,10 @@ export class SimulationEngine {
     edges:      SystemEdge[],
     protocol:   string,
     gatewayId?: string,
+    retryCount: number = 0,
   ): void {
     const requestId = nanoid();
-    this.pendingRequests.set(requestId, { sourceId, targetId, protocol, gatewayId });
+    this.pendingRequests.set(requestId, { sourceId, targetId, protocol, gatewayId, retryCount });
 
     const req: WorkerRequest = {
       type:    "CALCULATE_PATH",
@@ -436,7 +468,7 @@ export class SimulationEngine {
   }
 
   private createPacketFromPath(
-    pending:  { sourceId: string; targetId: string; protocol: string; gatewayId?: string },
+    pending:  { sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number },
     edgeIds:  string[],
     nodeIds:  string[],
   ): void {
@@ -479,6 +511,7 @@ export class SimulationEngine {
       createdAt:  performance.now(),
       color:      PROTOCOL_COLORS[protocol] ?? 0x378add,
       gatewayId:  pending.gatewayId,
+      retryCount: pending.retryCount,
     };
 
     const metrics = computePathMetrics(waypoints);

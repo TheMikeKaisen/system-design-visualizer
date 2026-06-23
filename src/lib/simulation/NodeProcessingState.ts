@@ -12,8 +12,8 @@ export class NodeProcessingState {
 
   /** Packet IDs currently being actively processed */
   private activeSlots = new Set<string>();
-  /** FIFO queue of packet IDs waiting to be processed */
-  private waitQueue: string[] = [];
+  /** FIFO queue of { id, enqueuedAtMs } waiting to be processed */
+  private waitQueue: { id: string; enqueuedAt: number }[] = [];
   /** Map<packetId, processingStartTimeMs> — tracks when each packet started processing */
   private processingTimers = new Map<string, number>();
   /** Total packets dropped (queue overflow / timeout) since last reset */
@@ -22,6 +22,11 @@ export class NodeProcessingState {
   private _completedInWindow = 0;
   private _windowStartMs = 0;
   private _throughputPerSec = 0;
+  
+  /** Whether the node has crashed due to memory exhaustion */
+  public isCrashed = false;
+  /** Cooldown timer for crash recovery */
+  private crashRecoveryTimeMs = 0;
 
   constructor(nodeId: string, capacity: NodeCapacity) {
     this.nodeId = nodeId;
@@ -37,16 +42,24 @@ export class NodeProcessingState {
     return Math.min(this.capacity.maxConcurrent, memoryLimit);
   }
 
-  /** Effective processing time, scaled by CPU cores */
   get effectiveProcessingTimeMs(): number {
     return this.capacity.processingTimeMs / this.capacity.cpuCores;
+  }
+  
+  /** Check if memory utilization has exceeded 100% */
+  get isMemoryExhausted(): boolean {
+    if (this.capacity.memoryMB === 0) return false;
+    const currentMemory = this.activeSlots.size * this.capacity.memoryPerRequestMB;
+    return currentMemory > this.capacity.memoryMB;
   }
 
   // ─── Admission ───────────────────────────────────────────────
 
   /** Can this node accept a new request into an active processing slot? */
   canAccept(): boolean {
-    return this.activeSlots.size < this.effectiveMaxConcurrent;
+    if (this.isCrashed) return false;
+    // Only constrain by maxConcurrent. Memory exhaustion will cause a crash instead.
+    return this.activeSlots.size < this.capacity.maxConcurrent;
   }
 
   /** Can this node queue a new request? */
@@ -61,16 +74,45 @@ export class NodeProcessingState {
    * - "dropped"    → queue overflow, rejected
    */
   admit(packetId: string, nowMs: number): "processing" | "queued" | "dropped" {
+    // Attempt crash recovery
+    if (this.isCrashed && nowMs > this.crashRecoveryTimeMs) {
+      this.isCrashed = false;
+    }
+
+    if (this.isCrashed) {
+      this._dropCount++;
+      return "dropped";
+    }
+
     if (this.canAccept()) {
       this.startProcessing(packetId, nowMs);
+      
+      // Check for memory crash immediately after admission
+      if (this.isMemoryExhausted) {
+        this.crash(nowMs);
+      }
+      
       return "processing";
     }
     if (this.canQueue()) {
-      this.waitQueue.push(packetId);
+      this.waitQueue.push({ id: packetId, enqueuedAt: nowMs });
       return "queued";
     }
     this._dropCount++;
     return "dropped";
+  }
+  
+  /** Crash the node, dropping all active and queued packets */
+  private crash(nowMs: number): void {
+    this.isCrashed = true;
+    this.crashRecoveryTimeMs = nowMs + 10000; // 10 seconds downtime
+    
+    // Increment drop count for everything we are about to destroy
+    this._dropCount += this.activeSlots.size + this.waitQueue.length;
+    
+    this.activeSlots.clear();
+    this.waitQueue.length = 0;
+    this.processingTimers.clear();
   }
 
   // ─── Processing ──────────────────────────────────────────────
@@ -109,8 +151,12 @@ export class NodeProcessingState {
   /** Promote queued packets into active slots */
   private promoteFromQueue(nowMs: number): void {
     while (this.waitQueue.length > 0 && this.canAccept()) {
-      const nextId = this.waitQueue.shift()!;
-      this.startProcessing(nextId, nowMs);
+      const next = this.waitQueue.shift()!;
+      this.startProcessing(next.id, nowMs);
+      if (this.isMemoryExhausted) {
+        this.crash(nowMs);
+        break; // Stop promoting if we just crashed
+      }
     }
   }
 
@@ -119,14 +165,25 @@ export class NodeProcessingState {
    * Returns IDs of packets that exceeded timeoutMs while queued.
    */
   getTimedOutPackets(nowMs: number, timeoutMs: number): string[] {
-    // For queued packets we don't have individual enqueue times tracked yet.
-    // We'll add that if needed. For now, timeout applies to processing only.
-    return [];
+    const timedOut: string[] = [];
+    const validQueue: { id: string; enqueuedAt: number }[] = [];
+    
+    for (const item of this.waitQueue) {
+      if (nowMs - item.enqueuedAt >= timeoutMs) {
+        timedOut.push(item.id);
+        this._dropCount++; // Timeouts count as drops
+      } else {
+        validQueue.push(item);
+      }
+    }
+    
+    this.waitQueue = validQueue;
+    return timedOut;
   }
 
   /** Remove a packet from the queue (e.g., if it timed out or was cancelled) */
   removeFromQueue(packetId: string): boolean {
-    const idx = this.waitQueue.indexOf(packetId);
+    const idx = this.waitQueue.findIndex(p => p.id === packetId);
     if (idx >= 0) {
       this.waitQueue.splice(idx, 1);
       return true;
@@ -154,7 +211,7 @@ export class NodeProcessingState {
   }
 
   getMetrics(): NodeMetrics {
-    const effectiveMax = this.effectiveMaxConcurrent;
+    const effectiveMax = this.capacity.maxConcurrent;
     return {
       activeCount:        this.activeSlots.size,
       queueLength:        this.waitQueue.length,
@@ -164,6 +221,7 @@ export class NodeProcessingState {
         : 0,
       dropCount:          this._dropCount,
       throughputPerSec:   this._throughputPerSec,
+      isCrashed:          this.isCrashed,
     };
   }
 
@@ -181,6 +239,6 @@ export class NodeProcessingState {
 
   /** Returns all packet IDs currently managed by this node (active + queued) */
   getAllPacketIds(): string[] {
-    return [...this.activeSlots, ...this.waitQueue];
+    return [...this.activeSlots, ...this.waitQueue.map(p => p.id)];
   }
 }
