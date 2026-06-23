@@ -13,13 +13,19 @@ export function useSimulation() {
     useSimulationStore();
 
   const nodes = useCanvasStore((s) => s.nodes);
+  const edges = useCanvasStore((s) => s.edges);
 
   /** Auto-set all nodes as traffic sources and start */
   const startAll = useCallback(() => {
+    if (edges.length === 0) {
+      return { success: false, error: "Connect nodes with edges to simulate traffic." };
+    }
+    
     const allNodeIds = nodes.map((n) => n.id);
     setConfig({ sourceNodeIds: allNodeIds });
     start();
-  }, [nodes, setConfig, start]);
+    return { success: true };
+  }, [nodes, edges, setConfig, start]);
 
   /** Start traffic from specific source nodes */
   const startFrom = useCallback(

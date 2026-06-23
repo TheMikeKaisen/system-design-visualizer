@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { useSimulation } from "@/hooks/useSimulation";
 import { useSimulationStore } from "@/lib/store/useSimulationStore";
 import type { RoutingStrategyKind } from "@/types";
@@ -13,9 +14,36 @@ const STRATEGIES: { value: RoutingStrategyKind; label: string }[] = [
 export function SimulationControls() {
   const { isRunning, config, startAll, stop, reset, setConfig, setRoutingStrategy } =
     useSimulation();
+  
+  const [error, setError] = useState<string | null>(null);
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleStart = () => {
+    const res = startAll();
+    if (res && !res.success) {
+      setError(res.error || "Failed to start simulation.");
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = setTimeout(() => setError(null), 3000);
+    } else {
+      setError(null);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+    };
+  }, []);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 relative">
+      {/* Error Message Tooltip */}
+      {error && (
+        <div className="absolute top-full mt-2 left-0 z-50 px-2.5 py-1.5 rounded-md text-xs font-medium bg-destructive text-destructive-foreground shadow-sm animate-in fade-in slide-in-from-top-1">
+          {error}
+        </div>
+      )}
+
       {/* Start / Stop */}
       {isRunning ? (
         <button
@@ -28,7 +56,7 @@ export function SimulationControls() {
         </button>
       ) : (
         <button
-          onClick={startAll}
+          onClick={handleStart}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
                      bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
         >
