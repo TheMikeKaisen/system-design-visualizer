@@ -90,9 +90,12 @@ export const CloudNodeBase = memo(function CloudNodeBase({
         </span>
       )}
 
-      {/* Connection count */}
-      <span className="text-[10px] text-muted-foreground pl-6">
-        {data.activeConnections} connections
+      {/* Metric (simulated) */}
+      <span className={cn(
+        "text-[10px] text-muted-foreground mt-0.5 transition-opacity duration-300",
+        data.activeConnections > 0 ? "opacity-100" : "opacity-0"
+      )}>
+        {data.activeConnections || 0} connections
       </span>
 
       {/* Slot for custom content (e.g. API Gateway chain) */}

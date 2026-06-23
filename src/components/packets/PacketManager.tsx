@@ -97,6 +97,12 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
             packetStage,
             spritesRef.current
           );
+          // Ensure all nodes have 0 active connections
+          for (const node of canvasState.nodes) {
+            if (node.data.activeConnections !== 0) {
+              canvasState.updateNodeData(node.id, { activeConnections: 0 });
+            }
+          }
           return;
         }
         // Draining mode: continue ticking existing packets but spawn no new ones
@@ -126,7 +132,21 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
       for (const id of diff.arrivedIds) simState.markPacketArrived(id);
       for (const id of diff.droppedIds) simState.markPacketDropped(id);
 
-      // 4. Sync Pixi sprites
+      // 4. Sync node active connections
+      const targetCounts = new Map<string, number>();
+      for (const p of Object.values(simState.packets)) {
+        if (p.status === "traveling") {
+          targetCounts.set(p.targetId, (targetCounts.get(p.targetId) || 0) + 1);
+        }
+      }
+      for (const node of canvasState.nodes) {
+        const count = targetCounts.get(node.id) || 0;
+        if (node.data.activeConnections !== count) {
+          canvasState.updateNodeData(node.id, { activeConnections: count });
+        }
+      }
+
+      // 5. Sync Pixi sprites
       syncSprites(
         simState.packets,
         pathMetricsRef.current,

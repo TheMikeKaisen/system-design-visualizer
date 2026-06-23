@@ -16,7 +16,7 @@ export const LoadBalancerNode = memo(function LoadBalancerNode({
 }: NodeProps<SystemNode>) {
   return (
     <div className={cn(
-      "relative flex flex-col gap-1 rounded-xl border bg-background px-4 py-3 min-w-[170px]",
+      "relative flex flex-col justify-center gap-1 rounded-xl border bg-background px-4 h-[60px] min-w-[170px]",
       selected ? "border-purple-500 ring-1 ring-purple-500/20" : "border-border hover:border-purple-300"
     )}>
       <LoadBar load={data.load} color="bg-purple-500" />
@@ -28,8 +28,12 @@ export const LoadBalancerNode = memo(function LoadBalancerNode({
         <span className="text-[10px] text-muted-foreground">
           {STRATEGY_LABELS[data.metadata.algorithm as string] ?? "Round robin"}
         </span>
-        <span className="text-[10px] text-muted-foreground">
-          {data.activeConnections} conn
+        {/* Metadata */}
+        <span className={cn(
+          "text-xs text-muted-foreground transition-opacity duration-300",
+          data.activeConnections > 0 ? "opacity-100" : "opacity-0"
+        )}>
+          {data.activeConnections || 0} conn
         </span>
       </div>
       <Handle type="target" position={Position.Left}  className="!bg-purple-400" />

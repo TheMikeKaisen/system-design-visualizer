@@ -10,7 +10,7 @@ export const MessageQueueNode = memo(function MessageQueueNode({
 }: NodeProps<SystemNode>) {
   return (
     <div className={cn(
-      "relative flex flex-col gap-1 rounded-xl border bg-background px-4 py-3 min-w-[165px]",
+      "relative flex flex-col justify-center gap-1 rounded-xl border bg-background px-4 h-[60px] min-w-[165px]",
       selected ? "border-pink-400 ring-1 ring-pink-400/20" : "border-border hover:border-pink-300"
     )}>
       <LoadBar load={data.load} color="bg-pink-400" />

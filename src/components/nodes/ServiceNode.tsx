@@ -14,8 +14,8 @@ export const ServiceNode = memo(function ServiceNode({
   return (
     <div
       className={cn(
-        "relative flex flex-col gap-1 rounded-xl border bg-background px-4 py-3",
-        "min-w-[160px] shadow-sm transition-shadow",
+        "relative flex flex-col justify-center rounded-xl border bg-background px-4",
+        "h-[60px] min-w-[160px] shadow-sm transition-shadow",
         selected
           ? "border-blue-500 shadow-blue-200/50 shadow-lg"
           : "border-border hover:border-blue-300"
@@ -30,14 +30,20 @@ export const ServiceNode = memo(function ServiceNode({
       </div>
 
       {/* Icon + label */}
-      <div className="flex items-center gap-2">
+      <div className={cn(
+        "flex items-center gap-2 transition-transform duration-300 ease-out",
+        data.activeConnections > 0 ? "-translate-y-2" : "translate-y-0"
+      )}>
         <ServiceIcon className="size-4 text-blue-500 shrink-0" />
         <span className="text-sm font-medium truncate">{data.label}</span>
       </div>
 
       {/* Metadata */}
-      <span className="text-xs text-muted-foreground">
-        {data.activeConnections} conn
+      <span className={cn(
+        "absolute left-4 text-[11px] text-muted-foreground transition-all duration-300 ease-out",
+        data.activeConnections > 0 ? "opacity-100 bottom-2.5" : "opacity-0 bottom-0"
+      )}>
+        {data.activeConnections || 0} conn
       </span>
 
       {/* React Flow Handles */}
