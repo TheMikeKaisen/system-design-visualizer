@@ -88,19 +88,18 @@ export function SimulationControls() {
 
       {/* Packets per second */}
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-          {config.packetsPerSecond} req/s
-        </span>
-        <input
-          type="range"
-          min={0.5}
-          max={50}
-          step={0.5}
+        <label className="text-[10px] text-muted-foreground whitespace-nowrap">Load</label>
+        <select
           value={config.packetsPerSecond}
-          onChange={(e) => setConfig({ packetsPerSecond: parseFloat(e.target.value) })}
-          className="w-16 h-1.5 accent-primary cursor-pointer"
-          title="Requests per second"
-        />
+          onChange={(e) => setConfig({ packetsPerSecond: parseInt(e.target.value, 10) })}
+          className="text-xs bg-transparent border border-border rounded px-1.5 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value={1}>1 req/s</option>
+          <option value={50}>50 req/s</option>
+          <option value={100}>100 req/s</option>
+          <option value={500}>500 req/s</option>
+          <option value={1000}>1k req/s</option>
+        </select>
       </div>
 
       <div className="w-px h-4 bg-border" />

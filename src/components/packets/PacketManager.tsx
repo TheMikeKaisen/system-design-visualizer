@@ -140,13 +140,21 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
       for (const id of diff.queuedIds) simState.markPacketQueued(id);
       for (const id of diff.processingIds) simState.markPacketProcessing(id);
 
-      // 4. Push node metrics to store
+      // 4. Push node and edge metrics to store
       if (diff.nodeMetrics.size > 0) {
         const metricsObj: Record<string, import("@/types").NodeMetrics> = {};
         for (const [nodeId, m] of diff.nodeMetrics) {
           metricsObj[nodeId] = m;
         }
         simState.setNodeMetrics(metricsObj);
+      }
+
+      if (diff.edgeMetrics.size > 0) {
+        const edgeMetricsObj: Record<string, { throughputPerSec: number }> = {};
+        for (const [edgeId, m] of diff.edgeMetrics) {
+          edgeMetricsObj[edgeId] = m;
+        }
+        simState.setEdgeMetrics(edgeMetricsObj);
       }
 
       // 5. Sync node active connections + load from CPU utilization
@@ -222,6 +230,6 @@ function syncSprites(
     const curr = interpolatePath(m, packet.progress);
     const prev = interpolatePath(m, prevProgress);
 
-    sprite.update(curr.x, curr.y, prev.x, prev.y);
+    sprite.update(curr.x, curr.y, prev.x, prev.y, 1, packet.isHidden);
   }
 }

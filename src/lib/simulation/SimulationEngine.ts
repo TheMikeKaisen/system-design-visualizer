@@ -26,7 +26,7 @@ const PROTOCOL_COLORS: Record<string, number> = {
   UDP:  0xef9f27, WebSocket: 0xd85a30,
 };
 
-const DEFAULT_SPEED_PX_PER_SECOND = 180;
+const DEFAULT_SPEED_PX_PER_SECOND = 720;
 
 // ─────────────────────────────────────────────
 // Public types
@@ -43,6 +43,8 @@ export interface SimulationTickResult {
   processingIds:   string[];
   /** Per-node capacity metrics snapshot */
   nodeMetrics:     Map<string, NodeMetrics>;
+  /** Per-edge throughput metrics snapshot */
+  edgeMetrics:     Map<string, { throughputPerSec: number }>;
 }
 
 export type OnPathReadyCallback = (packetId: string, metrics: PathMetrics) => void;
@@ -71,7 +73,7 @@ export class SimulationEngine {
 
   private packetSpeeds       = new Map<string, number>();
   private pendingRequests    = new Map<string, {
-    sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number;
+    sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number; batchSize: number;
   }>();
   private spawnAccumulators  = new Map<string, number>();
   private bufferedNewPackets: Packet[] = [];
@@ -81,6 +83,9 @@ export class SimulationEngine {
 
   /** Per-node processing state (queues, active slots) */
   private nodeStates         = new Map<string, NodeProcessingState>();
+
+  /** Edge flow tracker for throughput calculation */
+  private edgeFlowWindows    = new Map<string, { requests: number; timestamp: number }[]>();
 
   /** Timer for pushing gateway states to Zustand (once/sec) */
   private gatewayPushTimer   = 0;
@@ -125,6 +130,7 @@ export class SimulationEngine {
       queuedIds:       [],
       processingIds:   [],
       nodeMetrics:     new Map(),
+      edgeMetrics:     new Map(),
     };
 
     // Ensure NodeProcessingState exists for all nodes with capacity
@@ -139,10 +145,19 @@ export class SimulationEngine {
     // 3. Spawn new packets from source nodes
     this.spawnPackets(deltaMs, nowMs, nodes, edges, config);
 
-    // 4. Collect per-node metrics
+    // 4. Collect per-node and per-edge metrics
     for (const [nodeId, state] of this.nodeStates) {
       state.tickMetrics(nowMs);
       result.nodeMetrics.set(nodeId, state.getMetrics());
+    }
+
+    for (const [edgeId, window] of this.edgeFlowWindows) {
+      // Clean up old entries
+      while (window.length > 0 && nowMs - window[0].timestamp > 1000) {
+        window.shift();
+      }
+      const throughputPerSec = window.reduce((sum, entry) => sum + entry.requests, 0);
+      result.edgeMetrics.set(edgeId, { throughputPerSec });
     }
 
     // Push gateway state to Zustand at most once per second
@@ -260,11 +275,11 @@ export class SimulationEngine {
     if (!nodeState) {
       // No capacity config — pass through instantly
       result.arrivedIds.push(packetId);
-      this.forwardPacket(targetNode.id, nodes, edges);
+      this.forwardPacket(targetNode.id, packet.batchSize || 1, nodes, edges);
       return;
     }
 
-    const admission = nodeState.admit(packetId, nowMs);
+    const admission = nodeState.admit(packetId, nowMs, packet.batchSize || 1);
     switch (admission) {
       case "processing":
         result.processingIds.push(packetId);
@@ -305,6 +320,7 @@ export class SimulationEngine {
         edges, 
         packet.protocol, 
         packet.gatewayId,
+        packet.batchSize || 1,
         (packet.retryCount ?? 0) + 1
       );
     }
@@ -361,13 +377,16 @@ export class SimulationEngine {
         state.completePacket(packetId, nowMs);
         result.arrivedIds.push(packetId);
         // Forward to next hop
-        this.forwardPacket(state.nodeId, nodes, edges);
+        const packet = allPackets[packetId];
+        const batchSize = packet?.batchSize || 1;
+        this.forwardPacket(state.nodeId, batchSize, nodes, edges);
       }
     }
   }
 
   private forwardPacket(
     sourceNodeId: string,
+    batchSize:    number,
     nodes:        SystemNode[],
     edges:        SystemEdge[]
   ): void {
@@ -388,7 +407,7 @@ export class SimulationEngine {
 
     const gatewayId = target.data.kind === "apiGateway" ? target.id : undefined;
 
-    this.requestPath(sourceNodeId, target.id, nodes, edges, protocol, gatewayId);
+    this.requestPath(sourceNodeId, target.id, nodes, edges, protocol, gatewayId, batchSize);
   }
 
   private getTrafficMultiplier(profile: TrafficConfig["trafficProfile"], nowMs: number): number {
@@ -432,7 +451,19 @@ export class SimulationEngine {
       const candidates   = nodes.filter((n) => candidateIds.has(n.id));
       if (!candidates.length) continue;
 
-      for (let i = 0; i < toSpawn; i++) {
+      let remainingToSpawn = toSpawn;
+      const batchSizes = [10000, 1000, 100, 50, 1];
+
+      while (remainingToSpawn > 0) {
+        let sizeToSpawn = 1;
+        for (const size of batchSizes) {
+          if (remainingToSpawn >= size) {
+            sizeToSpawn = size;
+            break;
+          }
+        }
+        remainingToSpawn -= sizeToSpawn;
+
         const target  = this.strategy.selectTarget(sourceNode, candidates, edges);
         const outEdge = outEdges.find((e) => e.target === target.id);
         const protocol = outEdge?.data?.protocol ?? "HTTP";
@@ -440,7 +471,7 @@ export class SimulationEngine {
         // Tag packet with gatewayId if heading into a gateway
         const gatewayId = target.data.kind === "apiGateway" ? target.id : undefined;
 
-        this.requestPath(sourceId, target.id, nodes, edges, protocol, gatewayId);
+        this.requestPath(sourceId, target.id, nodes, edges, protocol, gatewayId, sizeToSpawn);
       }
     }
   }
@@ -452,10 +483,11 @@ export class SimulationEngine {
     edges:      SystemEdge[],
     protocol:   string,
     gatewayId?: string,
+    batchSize:  number = 1,
     retryCount: number = 0,
   ): void {
     const requestId = nanoid();
-    this.pendingRequests.set(requestId, { sourceId, targetId, protocol, gatewayId, retryCount });
+    this.pendingRequests.set(requestId, { sourceId, targetId, protocol, gatewayId, retryCount, batchSize });
 
     const req: WorkerRequest = {
       type:    "CALCULATE_PATH",
@@ -485,7 +517,7 @@ export class SimulationEngine {
   }
 
   private createPacketFromPath(
-    pending:  { sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number },
+    pending:  { sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number; batchSize: number },
     edgeIds:  string[],
     nodeIds:  string[],
   ): void {
@@ -517,6 +549,28 @@ export class SimulationEngine {
     const protocol  = pending.protocol as Packet["protocol"];
     const packetId  = nanoid();
 
+    // Calculate throughput for the first edge in the path
+    // For simplicity, we use sourceId-targetId as the edge identifier for throughput tracking
+    // If the path is multi-hop, this tracks the conceptual flow between source and target
+    const edgeId = `${pending.sourceId}-${pending.targetId}`;
+    let window = this.edgeFlowWindows.get(edgeId);
+    if (!window) {
+      window = [];
+      this.edgeFlowWindows.set(edgeId, window);
+    }
+    
+    const nowMs = performance.now();
+    window.push({ requests: pending.batchSize, timestamp: nowMs });
+    
+    // Clean up entries older than 1 second
+    while (window.length > 0 && nowMs - window[0].timestamp > 1000) {
+      window.shift();
+    }
+    
+    // Calculate current throughput
+    const throughputPerSec = window.reduce((sum, entry) => sum + entry.requests, 0);
+    const isHidden = throughputPerSec > 100;
+
     const packet: Packet = {
       id:         packetId,
       sourceId:   pending.sourceId,
@@ -525,14 +579,16 @@ export class SimulationEngine {
       status:     "traveling",
       protocol,
       sizeBytes:  512,
-      createdAt:  performance.now(),
-      color:      PROTOCOL_COLORS[protocol] ?? 0x378add,
+      createdAt:  nowMs,
+      color:      PROTOCOL_COLORS[protocol] ?? 0xffffff,
+      batchSize:  pending.batchSize,
       gatewayId:  pending.gatewayId,
       retryCount: pending.retryCount,
+      isHidden,
     };
 
     const metrics = computePathMetrics(waypoints);
-    this.packetSpeeds.set(packetId, DEFAULT_SPEED_PX_PER_SECOND);
+    this.packetSpeeds.set(packetId, DEFAULT_SPEED_PX_PER_SECOND * 2);
     this.onPathReady(packetId, metrics);
     this.bufferedNewPackets.push(packet);
   }
@@ -595,6 +651,7 @@ export class SimulationEngine {
     this.packetGateways.clear();
     this.bufferedNewPackets.length = 0;
     this.nodeStates.clear();
+    this.edgeFlowWindows.clear();
   }
 
   /** Reset all node processing states (called on simulation reset) */
@@ -602,5 +659,6 @@ export class SimulationEngine {
     for (const state of this.nodeStates.values()) {
       state.reset();
     }
+    this.edgeFlowWindows.clear();
   }
 }

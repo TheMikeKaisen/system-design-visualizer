@@ -11,14 +11,28 @@ const RADIUS = 5;
 const TRAIL_LENGTH = 6;
 const TRAIL_ALPHA_START = 0.15;
 
+function getBatchStyle(packet: Packet): { color: number; scale: number } {
+  const size = packet.batchSize || 1;
+  if (size >= 10000) return { color: 0xa855f7, scale: 1.8 }; // Purple
+  if (size >= 1000)  return { color: 0xf97316, scale: 1.5 }; // Orange
+  if (size >= 100)   return { color: 0xeab308, scale: 1.3 }; // Yellow
+  if (size >= 50)    return { color: 0x22c55e, scale: 1.15 }; // Green
+  return { color: packet.color, scale: 1.0 };                // Original blue/etc
+}
+
 export class PacketSprite {
   readonly container: Container;
   private readonly circle: Graphics;
   private readonly trail: Graphics;
   private readonly label: Text;
+  private readonly baseScale: number;
 
   constructor(packet: Packet) {
     this.container = new Container();
+
+    const { color, scale } = getBatchStyle(packet);
+    this.baseScale = scale;
+    this.container.scale.set(this.baseScale);
 
     // Trail (drawn BEHIND the main circle)
     this.trail = new Graphics();
@@ -26,7 +40,7 @@ export class PacketSprite {
 
     // Main packet circle
     this.circle = new Graphics();
-    this.circle.circle(0, 0, RADIUS).fill({ color: packet.color, alpha: 0.92 });
+    this.circle.circle(0, 0, RADIUS).fill({ color, alpha: 0.92 });
     this.container.addChild(this.circle);
 
     // Protocol label (very small, above the circle)
@@ -54,8 +68,15 @@ export class PacketSprite {
     worldY: number,
     prevX: number,
     prevY: number,
-    alpha = 1
+    alpha = 1,
+    isHidden = false
   ): void {
+    if (isHidden) {
+      this.container.visible = false;
+      return;
+    }
+    
+    this.container.visible = true;
     this.container.x = worldX;
     this.container.y = worldY;
     this.container.alpha = alpha;
@@ -88,7 +109,7 @@ export class PacketSprite {
    * Pixi v8 doesn't ship with a tween lib, so we do it in the ticker caller.
    */
   playArrivalPop(): void {
-    this.container.scale.set(1.8);
+    this.container.scale.set(this.baseScale * 1.8);
   }
 
   destroy(): void {

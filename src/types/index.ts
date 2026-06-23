@@ -195,11 +195,14 @@ export interface Packet {
   readonly sizeBytes:   number;
   readonly createdAt:   number;
   readonly color:       number;
+  readonly batchSize:   number;
   readonly authToken?:  string;
   headers?:             Record<string, string>;
   readonly gatewayId?:  string;
   /** Number of times this packet was retried */
   retryCount?:          number;
+  /** True if visually hidden due to high edge throughput */
+  isHidden?:            boolean;
 }
 
 export type CircuitBreakerState = "CLOSED" | "OPEN" | "HALF_OPEN";

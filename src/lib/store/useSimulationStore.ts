@@ -54,6 +54,7 @@ interface SimulationState {
   stats: SimulationStats;
   gatewayStates: Record<string, GatewayRuntimeState>;
   nodeMetrics: Record<string, NodeMetrics>;
+  edgeMetrics: Record<string, { throughputPerSec: number }>;
 }
 
 interface SimulationActions {
@@ -81,6 +82,7 @@ interface SimulationActions {
 
   // Node metrics
   setNodeMetrics: (metrics: Record<string, NodeMetrics>) => void;
+  setEdgeMetrics: (metrics: Record<string, { throughputPerSec: number }>) => void;
 }
 
 type SimulationStore = SimulationState & SimulationActions;
@@ -90,7 +92,7 @@ type SimulationStore = SimulationState & SimulationActions;
 // ─────────────────────────────────────────────
 
 const DEFAULT_CONFIG: TrafficConfig = {
-  packetsPerSecond: 2,
+  packetsPerSecond: 1,
   routingStrategy: "roundRobin",
   sourceNodeIds: [],
   requestTimeoutMs: 5000,
@@ -121,6 +123,7 @@ export const useSimulationStore = create<SimulationStore>()(
       stats: { ...DEFAULT_STATS },
       gatewayStates: {},
       nodeMetrics: {},
+      edgeMetrics: {},
 
       start: () =>
         set((s) => {
@@ -139,6 +142,7 @@ export const useSimulationStore = create<SimulationStore>()(
           s.stats = { ...DEFAULT_STATS };
           s.gatewayStates = {};
           s.nodeMetrics = {};
+          s.edgeMetrics = {};
         }),
 
       addPacket: (packet) =>
@@ -223,6 +227,11 @@ export const useSimulationStore = create<SimulationStore>()(
       setNodeMetrics: (metrics) =>
         set((s) => {
           s.nodeMetrics = metrics;
+        }),
+
+      setEdgeMetrics: (metrics) =>
+        set((s) => {
+          s.edgeMetrics = metrics;
         }),
     }))
   )
