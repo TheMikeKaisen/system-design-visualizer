@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useTheme } from "next-themes";
+import { useCallback, useState } from "react";
 import { useDiagramStore }    from "@/lib/store/useDiagramStore";
 import { useCanvasStore }     from "@/lib/store/useCanvasStore";
 import { serializeDiagram }   from "@/lib/persistence/diagramSerializer";
@@ -15,6 +16,7 @@ export function ExportControls() {
   const [isCopied,  setIsCopied]  = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
+  const { resolvedTheme } = useTheme();
   const { meta }  = useDiagramStore();
   const { nodes, edges, viewport } = useCanvasStore();
 
@@ -22,19 +24,18 @@ export function ExportControls() {
     setIsExporting(true);
     setIsOpen(false);
     try {
-      const el = document.querySelector('[data-testid="canvas-root"]') as HTMLDivElement | null;
-      await exportCanvasToPng({ current: el }, null, {
+      await exportCanvasToPng(nodes, resolvedTheme, {
         format:       "png",
         includeHud:   false,
         scale:        2,
-        background:   "#ffffff",
+        background:   "auto",
       });
     } catch (err) {
       console.error("[export] PNG export failed:", err);
     } finally {
       setIsExporting(false);
     }
-  }, []);
+  }, [nodes, resolvedTheme]);
 
   const handleExportJson = useCallback(() => {
     setIsOpen(false);

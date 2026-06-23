@@ -15,58 +15,58 @@ import type { ExportOptions } from "@/types";
  * This implementation uses the simpler approach that works in all browsers.
  */
 
+import { getNodesBounds } from "@xyflow/react";
+import type { SystemNode } from "@/types";
+
 export async function exportCanvasToPng(
-  canvasContainerRef: React.RefObject<HTMLDivElement | null>,
-  pixiApp: import("pixi.js").Application | null,
+  nodes: SystemNode[],
+  theme: string | undefined,
   options: ExportOptions
 ): Promise<void> {
-  const container = canvasContainerRef.current;
-  if (!container) throw new Error("Canvas container ref not attached");
+  const viewportEl = document.querySelector(".react-flow__viewport") as HTMLElement | null;
+  if (!viewportEl) throw new Error("React Flow viewport not found");
 
-  // Capture Pixi WebGL frame as a raster image
-  let pixiDataUrl: string | null = null;
-  if (pixiApp) {
-    try {
-      // Extract the current Pixi frame
-      pixiApp.renderer.render(pixiApp.stage);
-      const pixiCanvas = pixiApp.renderer.extract.canvas(pixiApp.stage);
-      pixiDataUrl = (pixiCanvas as HTMLCanvasElement).toDataURL("image/png");
-    } catch {
-      // If extract fails (some mobile browsers), continue without Pixi layer
-      console.warn("[export] Pixi frame extraction failed — exporting DOM only");
-    }
-  }
+  // Determine export dimensions and transform
+  // Calculate bounds exactly covering all nodes
+  const bounds = getNodesBounds(nodes);
+  
+  // Add padding around the nodes (similar to Excalidraw)
+  const PADDING = 50;
+  
+  const imageWidth = bounds.width + PADDING * 2;
+  const imageHeight = bounds.height + PADDING * 2;
+  
+  // Center the diagram in the export viewport at scale 1
+  const transform = `translate(${-bounds.x + PADDING}px, ${-bounds.y + PADDING}px) scale(1)`;
 
-  // Rasterize the React Flow DOM using html-to-image (supports modern CSS like oklch/lab)
-  const { toCanvas } = await import("html-to-image");
-  const canvas = await toCanvas(container, {
-    backgroundColor: options.background === "transparent" ? undefined : options.background,
-    pixelRatio:      options.scale,
-    filter:          (node: HTMLElement) => {
-      // Return true to include, false to exclude
-      // Skip the Pixi canvas (we'll composite it manually)
-      if (node.tagName === "CANVAS" && node.classList?.contains("pixi-canvas")) return false;
-      // Skip HUD elements if includeHud is false
-      if (!options.includeHud && node.id === "simulation-hud") return false;
+  const bgColor = options.background === "transparent" 
+    ? undefined 
+    : theme === "dark" ? "#1a1a1a" : "#ffffff";
+
+  const { toPng } = await import("html-to-image");
+  
+  const dataUrl = await toPng(viewportEl, {
+    backgroundColor: bgColor,
+    width: imageWidth,
+    height: imageHeight,
+    pixelRatio: options.scale,
+    style: {
+      width: `${imageWidth}px`,
+      height: `${imageHeight}px`,
+      transform,
+    },
+    filter: (node: HTMLElement) => {
+      // Exclude minimap or any controls if they happen to sneak in, though they shouldn't in the viewport
+      if (node.classList?.contains("react-flow__minimap")) return false;
+      if (node.classList?.contains("react-flow__controls")) return false;
       return true;
     },
   });
 
-  // Composite Pixi layer on top if we captured it
-  if (pixiDataUrl) {
-    const ctx = canvas.getContext("2d")!;
-    await new Promise<void>((resolve) => {
-      const img    = new Image();
-      img.onload   = () => { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); resolve(); };
-      img.onerror  = () => resolve(); // Fail gracefully
-      img.src      = pixiDataUrl!;
-    });
-  }
-
   // Trigger download
   const link      = document.createElement("a");
   link.download   = `diagram-export-${Date.now()}.png`;
-  link.href       = canvas.toDataURL("image/png");
+  link.href       = dataUrl;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
