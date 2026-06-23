@@ -137,7 +137,7 @@ export class SimulationEngine {
     this.advancePackets(deltaMs, nowMs, config.maxRetries, packets, pathMetrics, edges, nodes, result);
 
     // 3. Spawn new packets from source nodes
-    this.spawnPackets(deltaMs, nodes, edges, config);
+    this.spawnPackets(deltaMs, nowMs, nodes, edges, config);
 
     // 4. Collect per-node metrics
     for (const [nodeId, state] of this.nodeStates) {
@@ -391,20 +391,37 @@ export class SimulationEngine {
     this.requestPath(sourceNodeId, target.id, nodes, edges, protocol, gatewayId);
   }
 
+  private getTrafficMultiplier(profile: TrafficConfig["trafficProfile"], nowMs: number): number {
+    switch (profile) {
+      case "spiky":
+        // Spikes to 5x for 2 seconds every 8 seconds
+        return (nowMs % 8000 < 2000) ? 5 : 1;
+      case "ddos":
+        // Spikes to 20x for 3 seconds every 15 seconds, otherwise very low
+        return (nowMs % 15000 < 3000) ? 20 : 0.2;
+      case "constant":
+      default:
+        return 1;
+    }
+  }
+
   private spawnPackets(
     deltaMs: number,
+    nowMs:   number,
     nodes:   SystemNode[],
     edges:   SystemEdge[],
     config:  TrafficConfig,
   ): void {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+    const multiplier = this.getTrafficMultiplier(config.trafficProfile, nowMs);
+    const effectiveRate = config.packetsPerSecond * multiplier;
 
     for (const sourceId of config.sourceNodeIds) {
       const sourceNode = nodeMap.get(sourceId);
       if (!sourceNode) continue;
 
       const prev        = this.spawnAccumulators.get(sourceId) ?? 0;
-      const accumulated = prev + config.packetsPerSecond * (deltaMs / 1000);
+      const accumulated = prev + effectiveRate * (deltaMs / 1000);
       const toSpawn     = Math.floor(accumulated);
       this.spawnAccumulators.set(sourceId, accumulated - toSpawn);
 

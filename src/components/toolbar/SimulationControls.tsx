@@ -3,12 +3,18 @@
 import { useState, useRef, useEffect } from "react";
 import { useSimulation } from "@/hooks/useSimulation";
 import { useSimulationStore } from "@/lib/store/useSimulationStore";
-import type { RoutingStrategyKind } from "@/types";
+import type { RoutingStrategyKind, TrafficProfile } from "@/types";
 
 const STRATEGIES: { value: RoutingStrategyKind; label: string }[] = [
   { value: "roundRobin",       label: "Round robin" },
   { value: "leastConnections", label: "Least connections" },
   { value: "weighted",         label: "Weighted" },
+];
+
+const PROFILES: { value: TrafficProfile; label: string }[] = [
+  { value: "constant", label: "Constant" },
+  { value: "spiky",    label: "Spiky" },
+  { value: "ddos",     label: "DDoS" },
 ];
 
 export function SimulationControls() {
@@ -146,6 +152,24 @@ export function SimulationControls() {
           </option>
         ))}
       </select>
+
+      <div className="w-px h-4 bg-border" />
+
+      {/* Traffic Profile */}
+      <div className="flex items-center gap-1.5">
+        <label className="text-[10px] text-muted-foreground whitespace-nowrap">Profile</label>
+        <select
+          value={config.trafficProfile}
+          onChange={(e) => setConfig({ trafficProfile: e.target.value as TrafficProfile })}
+          className="text-xs bg-transparent border border-border rounded px-1.5 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          {PROFILES.map((p) => (
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }

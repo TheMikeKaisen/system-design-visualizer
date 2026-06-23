@@ -8,6 +8,8 @@ import type { AuditEntry } from "../simulation/middleware/types";
 // Sub-types
 // ─────────────────────────────────────────────
 
+export type TrafficProfile = "constant" | "spiky" | "ddos";
+
 export interface TrafficConfig {
   /** Packets spawned per second, per active source node */
   packetsPerSecond: number;
@@ -18,6 +20,8 @@ export interface TrafficConfig {
   requestTimeoutMs: number;
   /** Maximum number of retries for dropped/timed-out packets */
   maxRetries: number;
+  /** Scenario profile determining how packets are spawned over time */
+  trafficProfile: TrafficProfile;
 }
 
 export interface GatewayRuntimeState {
@@ -91,6 +95,7 @@ const DEFAULT_CONFIG: TrafficConfig = {
   sourceNodeIds: [],
   requestTimeoutMs: 5000,
   maxRetries: 0,
+  trafficProfile: "constant",
 };
 
 const DEFAULT_STATS: SimulationStats = {
