@@ -3,8 +3,10 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { nanoid } from "nanoid";
 import { useDiagramStore } from "@/lib/store/useDiagramStore";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { localStoragePersistence } from "@/lib/persistence/localStoragePersistence";
 import { importDiagramFromFile } from "@/lib/persistence/fileIO";
 import { serializeDiagram } from "@/lib/persistence/diagramSerializer";
 import { exportCanvasToPng, exportDiagramJson } from "@/lib/export/canvasExport";
@@ -75,9 +77,29 @@ export function DiagramControls() {
       if (result.error !== "Cancelled.") setImportError(result.error);
       return;
     }
+
+    if (nodes.length > 0) {
+      // If we already have components, import in a new canvas
+      const importedDiagram = {
+        ...result.diagram,
+        meta: {
+          ...result.diagram.meta,
+          id: nanoid(),
+        },
+      };
+      
+      // Save it so the new tab can load it from persistence
+      localStoragePersistence.save(importedDiagram);
+      
+      // Open in new tab
+      window.open(`/canvas/${importedDiagram.meta.id}`, "_blank");
+      return;
+    }
+
+    // Otherwise, load in current canvas
     loadDiagram(result.diagram);
     router.push(`/canvas/${result.diagram.meta.id}`);
-  }, [loadDiagram, router]);
+  }, [loadDiagram, router, nodes.length]);
 
   return (
     <>
