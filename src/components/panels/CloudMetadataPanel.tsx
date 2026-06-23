@@ -120,6 +120,9 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
   const getValue = (key: string): string =>
     localValues[key] ?? String(node.data.metadata[key] ?? "");
 
+  const getCapValue = (key: keyof import("@/types").NodeCapacity): string =>
+    localValues[`cap_${key}`] ?? String(node.data.capacity?.[key] ?? "");
+
   const commit = useCallback(
     (key: string, value: string) => {
       setLocalValues((p) => ({ ...p, [key]: value }));
@@ -134,7 +137,26 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
     [node.id, node.data.metadata]
   );
 
-  if (fields.length === 0) return null;
+  const commitCap = useCallback(
+    (key: keyof import("@/types").NodeCapacity, value: string) => {
+      if (!node.data.capacity) return;
+      setLocalValues((p) => ({ ...p, [`cap_${key}`]: value }));
+      
+      const parsed = parseFloat(value);
+      if (isNaN(parsed)) return;
+
+      commandInvoker.execute(
+        new UpdateNodeDataCommand(
+          node.id,
+          { capacity: { ...node.data.capacity } },
+          { capacity: { ...node.data.capacity, [key]: parsed } }
+        )
+      );
+    },
+    [node.id, node.data.capacity]
+  );
+
+  if (fields.length === 0 && !node.data.capacity) return null;
 
   return (
     <div className="flex flex-col gap-3 px-4 py-3 border-t border-border">
@@ -180,6 +202,83 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
           )}
         </div>
       ))}
+
+      {node.data.capacity && (
+        <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-border/50">
+          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+            Capacity & Limits
+          </p>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] text-muted-foreground">CPU Cores</label>
+              <input
+                type="number" min="1" max="64"
+                value={getCapValue("cpuCores")}
+                onChange={(e) => commitCap("cpuCores", e.target.value)}
+                className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] text-muted-foreground">Memory (MB)</label>
+              <select
+                value={getCapValue("memoryMB")}
+                onChange={(e) => commitCap("memoryMB", e.target.value)}
+                className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
+              >
+                <option value="512">512 MB</option>
+                <option value="1024">1 GB</option>
+                <option value="2048">2 GB</option>
+                <option value="4096">4 GB</option>
+                <option value="8192">8 GB</option>
+                <option value="16384">16 GB</option>
+                <option value="32768">32 GB</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] text-muted-foreground">Max Concurrent Requests</label>
+            <input
+              type="number" min="1" max="100000"
+              value={getCapValue("maxConcurrent")}
+              onChange={(e) => commitCap("maxConcurrent", e.target.value)}
+              className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] text-muted-foreground">Queue Limit</label>
+            <input
+              type="number" min="0" max="1000000"
+              value={getCapValue("queueLimit")}
+              onChange={(e) => commitCap("queueLimit", e.target.value)}
+              className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] text-muted-foreground">Process Time (ms)</label>
+              <input
+                type="number" min="1" max="10000"
+                value={getCapValue("processingTimeMs")}
+                onChange={(e) => commitCap("processingTimeMs", e.target.value)}
+                className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] text-muted-foreground">Mem / Req (MB)</label>
+              <input
+                type="number" min="0.1" max="1024" step="0.1"
+                value={getCapValue("memoryPerRequestMB")}
+                onChange={(e) => commitCap("memoryPerRequestMB", e.target.value)}
+                className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

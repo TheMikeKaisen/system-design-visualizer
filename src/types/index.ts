@@ -65,6 +65,38 @@ export interface MiddlewareStep {
   config:  Record<string, unknown>;
 }
 
+// ═══════════════════════════════════════════════════════
+// NODE CAPACITY
+// ═══════════════════════════════════════════════════════
+
+export interface NodeCapacity {
+  /** Max requests being actively processed simultaneously */
+  maxConcurrent: number;
+  /** Max requests waiting in the queue before rejection */
+  queueLimit: number;
+  /** Average time in ms to process one request (before CPU scaling) */
+  processingTimeMs: number;
+  /** CPU cores — affects processing throughput */
+  cpuCores: number;
+  /** Total memory in MB */
+  memoryMB: number;
+  /** Memory consumed per active request in MB */
+  memoryPerRequestMB: number;
+}
+
+export interface NodeMetrics {
+  activeCount: number;
+  queueLength: number;
+  /** 0–1 ratio of active slots used */
+  cpuUtilization: number;
+  /** 0–1 ratio of memory used by active requests */
+  memoryUtilization: number;
+  /** Packets dropped since last reset */
+  dropCount: number;
+  /** Rolling throughput in completed requests/sec */
+  throughputPerSec: number;
+}
+
 export interface SystemNodeData extends Record<string, unknown> {
   label: string;
   kind: NodeKind;
@@ -72,6 +104,8 @@ export interface SystemNodeData extends Record<string, unknown> {
   /** 0–1 load percentage — drives visual health indicator */
   load: number;
   metadata: Record<string, string | number | boolean>;
+  /** Server capacity config. Null for non-processing nodes (e.g. client). */
+  capacity: NodeCapacity | null;
 
   /**
    * Security policies attached to this node.
@@ -147,7 +181,7 @@ export interface SecurityPolicy {
 // PathMetrics live ephemerally in PacketManager's ref map — never serialized.
 // ═══════════════════════════════════════════════════════
 
-export type PacketStatus = "traveling" | "arrived" | "dropped";
+export type PacketStatus = "traveling" | "queued" | "processing" | "arrived" | "dropped";
 
 export interface Packet {
   readonly id:          string;

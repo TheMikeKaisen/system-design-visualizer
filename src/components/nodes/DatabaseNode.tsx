@@ -3,16 +3,20 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
+import { NodeMetricsAlerts } from "./SharedPrimitives";
 import { DbIcon, LoadBar } from "./SharedPrimitives";
 
 export const DatabaseNode = memo(function DatabaseNode({
-  data, selected,
+  id,
+  data,
+  selected,
 }: NodeProps<SystemNode>) {
   return (
     <div className={cn(
       "relative flex flex-col justify-center gap-1 rounded-xl border bg-background px-4 h-[60px] min-w-[160px]",
       selected ? "border-teal-500 ring-1 ring-teal-500/20" : "border-border hover:border-teal-300"
     )}>
+      <NodeMetricsAlerts nodeId={id} />
       <LoadBar load={data.load} color="bg-teal-500" />
       <div className="flex items-center gap-2">
         <DbIcon className="size-4 text-teal-600 shrink-0" />

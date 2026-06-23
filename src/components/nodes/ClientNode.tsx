@@ -4,8 +4,10 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
+import { NodeMetricsAlerts } from "./SharedPrimitives";
 
 export const ClientNode = memo(function ClientNode({
+  id,
   data,
   selected,
 }: NodeProps<SystemNode>) {
@@ -21,6 +23,7 @@ export const ClientNode = memo(function ClientNode({
           : "border-border hover:border-blue-300"
       )}
     >
+      <NodeMetricsAlerts nodeId={id} />
       {/* Load indicator bar */}
       <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl overflow-hidden bg-muted">
         <div

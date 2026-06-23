@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import type { Packet, RoutingStrategyKind, CircuitBreakerState } from "@/types";
+import type { Packet, RoutingStrategyKind, CircuitBreakerState, NodeMetrics } from "@/types";
 import type { AuditEntry } from "../simulation/middleware/types";
 
 // ─────────────────────────────────────────────
@@ -45,6 +45,7 @@ interface SimulationState {
   config: TrafficConfig;
   stats: SimulationStats;
   gatewayStates: Record<string, GatewayRuntimeState>;
+  nodeMetrics: Record<string, NodeMetrics>;
 }
 
 interface SimulationActions {
@@ -58,6 +59,8 @@ interface SimulationActions {
   updatePacketProgress: (id: string, progress: number) => void;
   markPacketArrived: (id: string) => void;
   markPacketDropped: (id: string) => void;
+  markPacketQueued: (id: string) => void;
+  markPacketProcessing: (id: string) => void;
   pruneFinishedPackets: () => void;
 
   // Config
@@ -67,6 +70,9 @@ interface SimulationActions {
   // Gateways
   setGatewayState: (state: GatewayRuntimeState) => void;
   clearGatewayState: (gatewayId: string) => void;
+
+  // Node metrics
+  setNodeMetrics: (metrics: Record<string, NodeMetrics>) => void;
 }
 
 type SimulationStore = SimulationState & SimulationActions;
@@ -103,6 +109,7 @@ export const useSimulationStore = create<SimulationStore>()(
       config: DEFAULT_CONFIG,
       stats: { ...DEFAULT_STATS },
       gatewayStates: {},
+      nodeMetrics: {},
 
       start: () =>
         set((s) => {
@@ -120,6 +127,7 @@ export const useSimulationStore = create<SimulationStore>()(
           s.isRunning = false;
           s.stats = { ...DEFAULT_STATS };
           s.gatewayStates = {};
+          s.nodeMetrics = {};
         }),
 
       addPacket: (packet) =>
@@ -159,10 +167,18 @@ export const useSimulationStore = create<SimulationStore>()(
           s.stats.totalDropped += 1;
         }),
 
-      /**
-       * Batch-remove arrived/dropped packets. Call once per second,
-       * not every frame — we want the visual to linger briefly.
-       */
+      markPacketQueued: (id) =>
+        set((s) => {
+          const p = s.packets[id];
+          if (p) p.status = "queued";
+        }),
+
+      markPacketProcessing: (id) =>
+        set((s) => {
+          const p = s.packets[id];
+          if (p) p.status = "processing";
+        }),
+
       pruneFinishedPackets: () =>
         set((s) => {
           for (const id of Object.keys(s.packets)) {
@@ -191,6 +207,11 @@ export const useSimulationStore = create<SimulationStore>()(
       clearGatewayState: (id) =>
         set((s) => {
           delete s.gatewayStates[id];
+        }),
+
+      setNodeMetrics: (metrics) =>
+        set((s) => {
+          s.nodeMetrics = metrics;
         }),
     }))
   )

@@ -97,11 +97,17 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
             packetStage,
             spritesRef.current
           );
-          // Ensure all nodes have 0 active connections
+          // Ensure all nodes have 0 active connections and load
           for (const node of canvasState.nodes) {
-            if (node.data.activeConnections !== 0) {
-              canvasState.updateNodeData(node.id, { activeConnections: 0 });
+            if (node.data.activeConnections !== 0 || node.data.load !== 0) {
+              canvasState.updateNodeData(node.id, { activeConnections: 0, load: 0 });
             }
+          }
+          // Reset node processing states
+          engine.resetNodeStates();
+          // Clear nodeMetrics
+          if (Object.keys(simState.nodeMetrics).length > 0) {
+            simState.setNodeMetrics({});
           }
           return;
         }
@@ -125,28 +131,41 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
         config
       );
 
-      // 3. Apply the diff to the store in one batch
+      // 3. Apply the diff to the store
       for (const [id, progress] of diff.progressUpdates) {
         simState.updatePacketProgress(id, progress);
       }
       for (const id of diff.arrivedIds) simState.markPacketArrived(id);
       for (const id of diff.droppedIds) simState.markPacketDropped(id);
+      for (const id of diff.queuedIds) simState.markPacketQueued(id);
+      for (const id of diff.processingIds) simState.markPacketProcessing(id);
 
-      // 4. Sync node active connections
+      // 4. Push node metrics to store
+      if (diff.nodeMetrics.size > 0) {
+        const metricsObj: Record<string, import("@/types").NodeMetrics> = {};
+        for (const [nodeId, m] of diff.nodeMetrics) {
+          metricsObj[nodeId] = m;
+        }
+        simState.setNodeMetrics(metricsObj);
+      }
+
+      // 5. Sync node active connections + load from CPU utilization
       const targetCounts = new Map<string, number>();
       for (const p of Object.values(simState.packets)) {
-        if (p.status === "traveling") {
+        if (p.status === "traveling" || p.status === "queued" || p.status === "processing") {
           targetCounts.set(p.targetId, (targetCounts.get(p.targetId) || 0) + 1);
         }
       }
       for (const node of canvasState.nodes) {
         const count = targetCounts.get(node.id) || 0;
-        if (node.data.activeConnections !== count) {
-          canvasState.updateNodeData(node.id, { activeConnections: count });
+        const metrics = diff.nodeMetrics.get(node.id);
+        const newLoad = metrics ? metrics.cpuUtilization : 0;
+        if (node.data.activeConnections !== count || Math.abs(node.data.load - newLoad) > 0.01) {
+          canvasState.updateNodeData(node.id, { activeConnections: count, load: newLoad });
         }
       }
 
-      // 5. Sync Pixi sprites
+      // 6. Sync Pixi sprites
       syncSprites(
         simState.packets,
         pathMetricsRef.current,

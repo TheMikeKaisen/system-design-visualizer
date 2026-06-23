@@ -3,6 +3,7 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
+import { NodeMetricsAlerts } from "./SharedPrimitives";
 import { LBIcon, LoadBar } from "./SharedPrimitives";
 
 const STRATEGY_LABELS: Record<string, string> = {
@@ -12,13 +13,16 @@ const STRATEGY_LABELS: Record<string, string> = {
 };
 
 export const LoadBalancerNode = memo(function LoadBalancerNode({
-  data, selected,
+  id,
+  data,
+  selected,
 }: NodeProps<SystemNode>) {
   return (
     <div className={cn(
       "relative flex flex-col justify-center gap-1 rounded-xl border bg-background px-4 h-[60px] min-w-[170px]",
       selected ? "border-purple-500 ring-1 ring-purple-500/20" : "border-border hover:border-purple-300"
     )}>
+      <NodeMetricsAlerts nodeId={id} />
       <LoadBar load={data.load} color="bg-purple-500" />
       <div className="flex items-center gap-2">
         <LBIcon className="size-4 text-purple-500 shrink-0" />

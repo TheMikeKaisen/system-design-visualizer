@@ -2,7 +2,7 @@ import { nanoid }              from "nanoid";
 import type {
   SystemNode, SystemEdge, Packet,
   WorkerRequest, WorkerResponse,
-  RoutingStrategyKind, WorldPoint,
+  RoutingStrategyKind, WorldPoint, NodeMetrics,
 } from "@/types";
 import type { IRoutingStrategy }    from "@/lib/patterns/strategies/IRoutingStrategy";
 import { RoundRobinStrategy }       from "@/lib/patterns/strategies/RoundRobinStrategy";
@@ -15,6 +15,7 @@ import { MiddlewareEvaluator }      from "./middleware/MiddlewareEvaluator";
 import { useSimulationStore }       from "@/lib/store/useSimulationStore";
 import { useCanvasStore }           from "@/lib/store/useCanvasStore";
 import { extractMultiEdgePath }     from "./edgePathExtractor";
+import { NodeProcessingState }      from "./NodeProcessingState";
 
 // ─────────────────────────────────────────────
 // Constants
@@ -36,6 +37,12 @@ export interface SimulationTickResult {
   progressUpdates: Map<string, number>;
   arrivedIds:      string[];
   droppedIds:      string[];
+  /** Packets that entered "queued" status at a node this tick */
+  queuedIds:       string[];
+  /** Packets that entered "processing" status at a node this tick */
+  processingIds:   string[];
+  /** Per-node capacity metrics snapshot */
+  nodeMetrics:     Map<string, NodeMetrics>;
 }
 
 export type OnPathReadyCallback = (packetId: string, metrics: PathMetrics) => void;
@@ -71,6 +78,9 @@ export class SimulationEngine {
 
   /** Tracks which gateway a packet last traversed (for CB feedback) */
   private packetGateways     = new Map<string, string>();
+
+  /** Per-node processing state (queues, active slots) */
+  private nodeStates         = new Map<string, NodeProcessingState>();
 
   /** Timer for pushing gateway states to Zustand (once/sec) */
   private gatewayPushTimer   = 0;
@@ -112,10 +122,28 @@ export class SimulationEngine {
       progressUpdates: new Map(),
       arrivedIds:      [],
       droppedIds:      [],
+      queuedIds:       [],
+      processingIds:   [],
+      nodeMetrics:     new Map(),
     };
 
+    // Ensure NodeProcessingState exists for all nodes with capacity
+    this.ensureNodeStates(nodes);
+
+    // 1. Process completed packets at nodes → forward downstream
+    this.tickNodeProcessing(nowMs, nodes, edges, result);
+
+    // 2. Advance traveling packets along edges
     this.advancePackets(deltaMs, nowMs, packets, pathMetrics, edges, nodes, result);
+
+    // 3. Spawn new packets from source nodes
     this.spawnPackets(deltaMs, nodes, edges, config);
+
+    // 4. Collect per-node metrics
+    for (const [nodeId, state] of this.nodeStates) {
+      state.tickMetrics(nowMs);
+      result.nodeMetrics.set(nodeId, state.getMetrics());
+    }
 
     // Push gateway state to Zustand at most once per second
     this.gatewayPushTimer += deltaMs;
@@ -157,10 +185,6 @@ export class SimulationEngine {
       const speed  = this.packetSpeeds.get(id) ?? DEFAULT_SPEED_PX_PER_SECOND;
       const edgeER = this.getEdgeErrorRate(packet, edges);
 
-      // ── Middleware evaluation at gateway ─────────────────────────
-      // If the packet is heading INTO a gateway node, evaluate the chain.
-      // We do this at arrival (progress >= 1) so the packet has fully
-      // traversed the edge before being evaluated.
       if (packet.progress < 1) {
         const dp          = deltaProgress(deltaMs, speed, metrics.totalLength);
         const newProgress = packet.progress + dp;
@@ -172,8 +196,10 @@ export class SimulationEngine {
         }
 
         if (newProgress >= 1) {
-          // Packet has arrived at its target — check if target is a gateway
+          // Packet has arrived at its target
           const targetNode = nodeMap.get(packet.targetId);
+
+          // Gateway middleware evaluation
           if (targetNode?.data.kind === "apiGateway") {
             const evalResult = this.evaluator.evaluate(packet, targetNode, nowMs);
             this.packetGateways.set(id, targetNode.id);
@@ -185,32 +211,67 @@ export class SimulationEngine {
                 continue;
 
               case "queue":
-                // Deduct the delay from the packet's remaining progress
-                // by reducing speed temporarily — simplification for simulation
-                result.progressUpdates.set(id, 0.95); // Hold near arrival
+                result.progressUpdates.set(id, 0.95);
                 continue;
 
               case "pass":
               case "transform": {
-                // Let it arrive — CB records success on next tick
                 this.evaluator.recordPacketOutcome(targetNode.id, true, nowMs);
-                result.arrivedIds.push(id);
-                this.forwardPacket(targetNode.id, nodes, edges);
                 this.packetSpeeds.delete(id);
                 this.packetGateways.delete(id);
+                // Admit through capacity system
+                this.admitPacketAtNode(id, targetNode, nowMs, nodes, edges, result);
                 continue;
               }
             }
           }
 
-          // Non-gateway arrival
-          result.arrivedIds.push(id);
-          this.forwardPacket(packet.targetId, nodes, edges);
+          // Non-gateway arrival — admit through capacity system
           this.packetSpeeds.delete(id);
+          if (targetNode) {
+            this.admitPacketAtNode(id, targetNode, nowMs, nodes, edges, result);
+          } else {
+            result.arrivedIds.push(id);
+          }
         } else {
           result.progressUpdates.set(id, newProgress);
         }
       }
+    }
+  }
+
+  /**
+   * Admit a packet at a target node through the capacity system.
+   * If the node has no capacity (e.g. client, CDN), it's instantly "arrived" and forwarded.
+   */
+  private admitPacketAtNode(
+    packetId:   string,
+    targetNode: SystemNode,
+    nowMs:      number,
+    nodes:      SystemNode[],
+    edges:      SystemEdge[],
+    result:     SimulationTickResult,
+  ): void {
+    const nodeState = this.nodeStates.get(targetNode.id);
+
+    if (!nodeState) {
+      // No capacity config — pass through instantly
+      result.arrivedIds.push(packetId);
+      this.forwardPacket(targetNode.id, nodes, edges);
+      return;
+    }
+
+    const admission = nodeState.admit(packetId, nowMs);
+    switch (admission) {
+      case "processing":
+        result.processingIds.push(packetId);
+        break;
+      case "queued":
+        result.queuedIds.push(packetId);
+        break;
+      case "dropped":
+        result.droppedIds.push(packetId);
+        break;
     }
   }
 
@@ -230,8 +291,49 @@ export class SimulationEngine {
   }
 
   // ─────────────────────────────────────────────
-  // Packet spawning & forwarding
+  // Node processing lifecycle
   // ─────────────────────────────────────────────
+
+  /** Ensure a NodeProcessingState exists for every node with capacity */
+  private ensureNodeStates(nodes: SystemNode[]): void {
+    const currentIds = new Set<string>();
+    for (const node of nodes) {
+      if (!node.data.capacity) continue;
+      currentIds.add(node.id);
+      const existing = this.nodeStates.get(node.id);
+      if (existing) {
+        // Update capacity in case user changed it in inspector
+        existing.capacity = node.data.capacity;
+      } else {
+        this.nodeStates.set(node.id, new NodeProcessingState(node.id, node.data.capacity));
+      }
+    }
+    // Remove states for deleted nodes
+    for (const id of this.nodeStates.keys()) {
+      if (!currentIds.has(id)) this.nodeStates.delete(id);
+    }
+  }
+
+  /**
+   * Tick node processing: complete finished packets, promote queued ones,
+   * and forward completed packets downstream.
+   */
+  private tickNodeProcessing(
+    nowMs:  number,
+    nodes:  SystemNode[],
+    edges:  SystemEdge[],
+    result: SimulationTickResult,
+  ): void {
+    for (const [, state] of this.nodeStates) {
+      const completed = state.getCompletedPackets(nowMs);
+      for (const packetId of completed) {
+        state.completePacket(packetId, nowMs);
+        result.arrivedIds.push(packetId);
+        // Forward to next hop
+        this.forwardPacket(state.nodeId, nodes, edges);
+      }
+    }
+  }
 
   private forwardPacket(
     sourceNodeId: string,
@@ -442,5 +544,13 @@ export class SimulationEngine {
     this.spawnAccumulators.clear();
     this.packetGateways.clear();
     this.bufferedNewPackets.length = 0;
+    this.nodeStates.clear();
+  }
+
+  /** Reset all node processing states (called on simulation reset) */
+  resetNodeStates(): void {
+    for (const state of this.nodeStates.values()) {
+      state.reset();
+    }
   }
 }

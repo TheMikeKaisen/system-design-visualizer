@@ -15,15 +15,15 @@ describe("useCanvasStore", () => {
   });
 
   it("can add a node", () => {
-    const node: SystemNode = { id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } };
+    const node: SystemNode = { id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } as any };
     useCanvasStore.getState().addNode(node);
     expect(useCanvasStore.getState().nodes).toHaveLength(1);
     expect(useCanvasStore.getState().nodes[0].id).toBe("n1");
   });
 
   it("can remove a node and its edges", () => {
-    const n1: SystemNode = { id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } };
-    const n2: SystemNode = { id: "n2", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N2" } };
+    const n1: SystemNode = { id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } as any };
+    const n2: SystemNode = { id: "n2", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N2" } as any };
     const edge: SystemEdge = { id: "e1", source: "n1", target: "n2" };
     
     useCanvasStore.getState().addNode(n1);
@@ -36,7 +36,7 @@ describe("useCanvasStore", () => {
   });
 
   it("can update node data", () => {
-    const node: SystemNode = { id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } };
+    const node: SystemNode = { id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } as any };
     useCanvasStore.getState().addNode(node);
     
     useCanvasStore.getState().updateNodeData("n1", { label: "Updated" });
@@ -44,7 +44,7 @@ describe("useCanvasStore", () => {
   });
 
   it("can set node position", () => {
-    const node: SystemNode = { id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } };
+    const node: SystemNode = { id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } as any };
     useCanvasStore.getState().addNode(node);
     
     useCanvasStore.getState().setNodePosition("n1", 100, 200);
@@ -89,7 +89,7 @@ describe("useCanvasStore", () => {
   });
 
   it("handles react flow changes", () => {
-    useCanvasStore.getState().addNode({ id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } });
+    useCanvasStore.getState().addNode({ id: "n1", type: "apiGateway", position: { x: 0, y: 0 }, data: { label: "N1" } as any });
     useCanvasStore.getState().onNodesChange([{ type: "remove", id: "n1" }]);
     expect(useCanvasStore.getState().nodes).toHaveLength(0);
     

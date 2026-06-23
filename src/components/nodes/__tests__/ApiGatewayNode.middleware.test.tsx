@@ -35,6 +35,7 @@ beforeEach(() => {
   vi.mocked(commandInvoker.execute).mockClear();
   vi.mocked(useSimulationStore).mockImplementation((selector: any) => selector({
     gatewayStates: {},
+    nodeMetrics: {},
   }));
 });
 
@@ -48,6 +49,7 @@ describe("ApiGatewayNode — middleware integration", () => {
           rateLimiterFillPct: 0.3, recentAudit: [],
         },
       },
+      nodeMetrics: {},
     }));
     wrap();
     expect(screen.getByText("OPEN")).toBeInTheDocument();
@@ -62,6 +64,7 @@ describe("ApiGatewayNode — middleware integration", () => {
           rateLimiterFillPct: 0.8, recentAudit: [],
         },
       },
+      nodeMetrics: {},
     }));
     wrap();
     expect(screen.getByText("7")).toBeInTheDocument(); // shed count

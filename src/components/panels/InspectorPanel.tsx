@@ -22,10 +22,11 @@ export function InspectorPanel() {
     return null;
   }
 
-  // Hide the panel if a node is selected but it has no configuration fields
+  // Hide the panel if a node is selected but it has no configuration fields and no capacity
   if (selectedNode) {
     const hasConfig = (FIELDS[selectedNode.data.kind]?.length ?? 0) > 0;
-    if (!hasConfig) {
+    const hasCapacity = selectedNode.data.capacity != null;
+    if (!hasConfig && !hasCapacity) {
       return null;
     }
   }

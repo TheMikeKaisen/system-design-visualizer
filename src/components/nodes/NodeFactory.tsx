@@ -1,4 +1,4 @@
-import type { SystemNode, NodeKind } from "@/types";
+import type { SystemNode, NodeKind, NodeCapacity } from "@/types";
 
 const counters = new Map<NodeKind, number>();
 
@@ -63,6 +63,51 @@ const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["dat
   azureFunction:     { label: "Azure Function",      metadata: { runtime: "node18", plan: "Consumption" } },
 };
 
+// ─── Default capacity per node kind ───────────────────────────────────
+
+const CAP_SERVICE:       NodeCapacity = { maxConcurrent: 100,  queueLimit: 500,  processingTimeMs: 200, cpuCores: 4, memoryMB: 8192,  memoryPerRequestMB: 10 };
+const CAP_LB:            NodeCapacity = { maxConcurrent: 1000, queueLimit: 2000, processingTimeMs: 5,   cpuCores: 2, memoryMB: 2048,  memoryPerRequestMB: 1 };
+const CAP_DATABASE:      NodeCapacity = { maxConcurrent: 50,   queueLimit: 200,  processingTimeMs: 100, cpuCores: 8, memoryMB: 16384, memoryPerRequestMB: 20 };
+const CAP_CACHE:         NodeCapacity = { maxConcurrent: 500,  queueLimit: 1000, processingTimeMs: 10,  cpuCores: 2, memoryMB: 4096,  memoryPerRequestMB: 5 };
+const CAP_QUEUE:         NodeCapacity = { maxConcurrent: 200,  queueLimit: 5000, processingTimeMs: 50,  cpuCores: 2, memoryMB: 4096,  memoryPerRequestMB: 2 };
+const CAP_GATEWAY:       NodeCapacity = { maxConcurrent: 500,  queueLimit: 1000, processingTimeMs: 15,  cpuCores: 4, memoryMB: 4096,  memoryPerRequestMB: 2 };
+const CAP_LAMBDA:        NodeCapacity = { maxConcurrent: 1000, queueLimit: 100,  processingTimeMs: 150, cpuCores: 2, memoryMB: 512,   memoryPerRequestMB: 5 };
+const CAP_STORAGE:       NodeCapacity = { maxConcurrent: 5000, queueLimit: 500,  processingTimeMs: 50,  cpuCores: 1, memoryMB: 1024,  memoryPerRequestMB: 1 };
+
+const KIND_CAPACITIES: Record<NodeKind, NodeCapacity | null> = {
+  // General
+  client:          null,
+  service:         CAP_SERVICE,
+  loadBalancer:    CAP_LB,
+  database:        CAP_DATABASE,
+  cache:           CAP_CACHE,
+  messageQueue:    CAP_QUEUE,
+  cdn:             null,
+  s3Bucket:        null,
+  apiGateway:      CAP_GATEWAY,
+  // AWS
+  awsEc2:          CAP_SERVICE,
+  awsRds:          CAP_DATABASE,
+  awsElastiCache:  CAP_CACHE,
+  awsCloudFront:   null,
+  awsLambda:       CAP_LAMBDA,
+  awsSqs:          CAP_QUEUE,
+  // GCP
+  gcpCloudRun:     CAP_SERVICE,
+  gcpCloudSql:     CAP_DATABASE,
+  gcpCloudStorage: CAP_STORAGE,
+  gcpPubSub:       CAP_QUEUE,
+  gcpCloudCdn:     null,
+  gcpCloudFunction:CAP_LAMBDA,
+  // Azure
+  azureVm:         CAP_SERVICE,
+  azureSql:        CAP_DATABASE,
+  azureBlobStorage:CAP_STORAGE,
+  azureServiceBus: CAP_QUEUE,
+  azureCdn:        null,
+  azureFunction:   CAP_LAMBDA,
+};
+
 interface CreateNodeOptions {
   kind:      NodeKind;
   label?:    string;
@@ -76,6 +121,8 @@ export function createNode({ kind, label, position = { x: 100, y: 100 }, forceId
   const count    = (counters.get(kind) ?? 0) + 1;
   counters.set(kind, count);
 
+  const baseCap = KIND_CAPACITIES[kind];
+
   return {
     id:       forceId ?? `${prefix}-${count}`,
     type:     kind,
@@ -86,6 +133,7 @@ export function createNode({ kind, label, position = { x: 100, y: 100 }, forceId
       activeConnections: 0,
       load:              0,
       metadata:          { ...defaults.metadata },
+      capacity:          baseCap ? { ...baseCap } : null,
       securityPolicies:  [],
     },
     measured: undefined,

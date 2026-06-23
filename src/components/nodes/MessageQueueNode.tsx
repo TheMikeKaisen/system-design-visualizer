@@ -3,16 +3,20 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
+import { NodeMetricsAlerts } from "./SharedPrimitives";
 import { LoadBar, MqIcon } from "./SharedPrimitives";
 
 export const MessageQueueNode = memo(function MessageQueueNode({
-  data, selected,
+  id,
+  data,
+  selected,
 }: NodeProps<SystemNode>) {
   return (
     <div className={cn(
       "relative flex flex-col justify-center gap-1 rounded-xl border bg-background px-4 h-[60px] min-w-[165px]",
       selected ? "border-pink-400 ring-1 ring-pink-400/20" : "border-border hover:border-pink-300"
     )}>
+      <NodeMetricsAlerts nodeId={id} />
       <LoadBar load={data.load} color="bg-pink-400" />
       <div className="flex items-center gap-2">
         <MqIcon className="size-4 text-pink-500 shrink-0" />

@@ -1,4 +1,6 @@
 
+import { useSimulationStore } from "@/lib/store/useSimulationStore";
+
 export function LoadBar({ load, color }: { load: number; color: string }) {
   return (
     <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl overflow-hidden bg-muted">
@@ -25,4 +27,35 @@ export function CacheIcon({ className }: { className?: string }) {
 }
 export function MqIcon({ className }: { className?: string }) {
   return <svg viewBox="0 0 16 16" className={className} fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><path d="M2 4h12M2 8h8M2 12h10"/></svg>;
+}
+
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
+
+export function NodeMetricsAlerts({ nodeId }: { nodeId: string }) {
+  const metrics = useSimulationStore((s) => s.nodeMetrics[nodeId]);
+  const nodeData = useCanvasStore((s) => s.nodes.find((n) => n.id === nodeId));
+  
+  if (!metrics) return null;
+
+  const queueLimit = nodeData?.data?.capacity?.queueLimit ?? 0;
+  const isOverloaded = queueLimit > 0 && metrics.queueLength >= queueLimit;
+  const hasDrops = metrics.dropCount > 0;
+  
+  // Only show alerts if there's a problem
+  if (!isOverloaded && !hasDrops) return null;
+
+  return (
+    <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-50 pointer-events-none">
+      {hasDrops && (
+        <div className="bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap animate-in fade-in slide-in-from-bottom-2">
+          {metrics.dropCount} Dropped
+        </div>
+      )}
+      {isOverloaded && !hasDrops && (
+        <div className="bg-yellow-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap animate-in fade-in slide-in-from-bottom-2">
+          Queue Full
+        </div>
+      )}
+    </div>
+  );
 }

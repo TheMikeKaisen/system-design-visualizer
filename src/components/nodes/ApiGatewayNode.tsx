@@ -7,6 +7,7 @@ import { commandInvoker }     from "@/lib/store/useHistoryStore";
 import { UpdateNodeDataCommand } from "@/lib/patterns/commands/UpdateNodeDataCommand";
 import type { SystemNode, SystemNodeData, MiddlewareStep, CircuitBreakerState } from "@/types";
 import { cn } from "@/lib/utils";
+import { NodeMetricsAlerts } from "./SharedPrimitives";
 import { ApiGatewayIcon } from "./icons/CloudIcons";
 
 // ─── Middleware step config ───────────────────────────────────────────
@@ -100,6 +101,7 @@ export const ApiGatewayNode = memo(function ApiGatewayNode({
         ? "border-violet-500 ring-1 ring-violet-500/20"
         : "border-violet-300/50 hover:border-violet-400"
     )}>
+      <NodeMetricsAlerts nodeId={id} />
       {/* Load bar */}
       <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl overflow-hidden bg-muted">
         <div className="h-full transition-all duration-500 bg-violet-500"

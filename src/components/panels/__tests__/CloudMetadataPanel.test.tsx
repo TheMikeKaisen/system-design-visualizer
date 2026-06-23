@@ -40,8 +40,8 @@ describe("CloudMetadataPanel", () => {
     expect(commandInvoker.execute).toHaveBeenCalledOnce();
   });
 
-  it("renders nothing for general nodes with no cloud metadata", () => {
-    const node = createNode({ kind: "service" });
+  it("renders nothing for nodes with no cloud metadata and no capacity", () => {
+    const node = createNode({ kind: "client" });
     const { container } = render(<CloudMetadataPanel node={node} />);
     expect(container.firstChild).toBeNull();
   });
