@@ -195,6 +195,7 @@ export class SimulationEngine {
                 // Let it arrive — CB records success on next tick
                 this.evaluator.recordPacketOutcome(targetNode.id, true, nowMs);
                 result.arrivedIds.push(id);
+                this.forwardPacket(targetNode.id, nodes, edges);
                 this.packetSpeeds.delete(id);
                 this.packetGateways.delete(id);
                 continue;
@@ -204,6 +205,7 @@ export class SimulationEngine {
 
           // Non-gateway arrival
           result.arrivedIds.push(id);
+          this.forwardPacket(packet.targetId, nodes, edges);
           this.packetSpeeds.delete(id);
         } else {
           result.progressUpdates.set(id, newProgress);
@@ -228,8 +230,33 @@ export class SimulationEngine {
   }
 
   // ─────────────────────────────────────────────
-  // Packet spawning
+  // Packet spawning & forwarding
   // ─────────────────────────────────────────────
+
+  private forwardPacket(
+    sourceNodeId: string,
+    nodes:        SystemNode[],
+    edges:        SystemEdge[]
+  ): void {
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+    const sourceNode = nodeMap.get(sourceNodeId);
+    if (!sourceNode) return;
+
+    const outEdges = edges.filter((e) => e.source === sourceNodeId);
+    if (!outEdges.length) return;
+
+    const candidateIds = new Set(outEdges.map((e) => e.target));
+    const candidates   = nodes.filter((n) => candidateIds.has(n.id));
+    if (!candidates.length) return;
+
+    const target  = this.strategy.selectTarget(sourceNode, candidates, edges);
+    const outEdge = outEdges.find((e) => e.target === target.id);
+    const protocol = outEdge?.data?.protocol ?? "HTTP";
+
+    const gatewayId = target.data.kind === "apiGateway" ? target.id : undefined;
+
+    this.requestPath(sourceNodeId, target.id, nodes, edges, protocol, gatewayId);
+  }
 
   private spawnPackets(
     deltaMs: number,

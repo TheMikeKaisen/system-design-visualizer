@@ -21,8 +21,13 @@ export function useSimulation() {
       return { success: false, error: "Connect nodes with edges to simulate traffic." };
     }
     
-    const allNodeIds = nodes.map((n) => n.id);
-    setConfig({ sourceNodeIds: allNodeIds });
+    const clients = nodes.filter((n) => n.data.kind === "client");
+    let sources = clients;
+    if (sources.length === 0) {
+      sources = nodes.filter((n) => !edges.some((e) => e.target === n.id));
+    }
+    const sourceNodeIds = sources.map((n) => n.id);
+    setConfig({ sourceNodeIds });
     start();
     return { success: true };
   }, [nodes, edges, setConfig, start]);
