@@ -10,6 +10,7 @@ import {
   AzureVmIcon, AzureSqlIcon, AzureBlobIcon, AzureServiceBusIcon,
   AzureCdnIcon, AzureFunctionIcon, ApiGatewayIcon,
 } from "@/components/nodes/icons/CloudIcons";
+import { SimulationSettings } from "./SimulationSettings";
 
 // ─── Palette data ─────────────────────────────────────────────────────
 
@@ -94,6 +95,7 @@ const PALETTE_SECTIONS: PaletteSection[] = [
 // ─── Component ─────────────────────────────────────────────────────────
 
 export function NodePalette() {
+  const [activeTab, setActiveTab] = useState<"components" | "controls">("components");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -136,10 +138,10 @@ export function NodePalette() {
 
   return (
     <aside className="w-[260px] shrink-0 border-r border-border bg-background flex flex-col relative overflow-hidden z-10 shadow-[2px_0_12px_rgba(0,0,0,0.02)]">
-      {/* Header & Search */}
-      <div className="flex flex-col gap-3 p-4 border-b border-border/60 shrink-0 bg-muted/20">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold tracking-tight text-foreground">Components</span>
+      {/* Header & Tabs */}
+      <div className="flex flex-col pt-3 px-3 pb-0 border-b border-border/60 shrink-0 bg-muted/20">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <span className="text-sm font-semibold tracking-tight text-foreground">Menu</span>
           <button
             onClick={() => setSidebarCollapsed(true)}
             className="p-1.5 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-colors"
@@ -148,21 +150,54 @@ export function NodePalette() {
             <PanelLeftCloseIcon />
           </button>
         </div>
-        <div className="relative group">
-          <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-          <input
-            type="text"
-            placeholder="Search components..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-background/50 border border-border/80 rounded-md
-                       focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-background
-                       transition-all placeholder:text-muted-foreground/60 shadow-sm"
-          />
+        
+        {/* Tabs */}
+        <div className="flex items-center gap-1 bg-background/50 p-1 rounded-t-lg border border-border/60 border-b-0 relative top-px">
+          <button
+            onClick={() => setActiveTab("components")}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
+              activeTab === "components" 
+                ? "bg-background text-foreground shadow-sm border border-border/40" 
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            Components
+          </button>
+          <button
+            onClick={() => setActiveTab("controls")}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
+              activeTab === "controls" 
+                ? "bg-background text-foreground shadow-sm border border-border/40" 
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            Controls
+          </button>
         </div>
       </div>
       
-      <div className="overflow-y-auto flex-1 pb-4 bg-muted/5 custom-scrollbar">
+      {/* Content Area with simple fade transition */}
+      <div className="flex-1 relative overflow-hidden bg-muted/5">
+        {activeTab === "components" && (
+          <div className="absolute inset-0 flex flex-col animate-in fade-in duration-300">
+            {/* Search */}
+            <div className="p-3 pb-1 shrink-0">
+              <div className="relative group">
+                <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Search components..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-background/50 border border-border/80 rounded-md
+                             focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-background
+                             transition-all placeholder:text-muted-foreground/60 shadow-sm"
+                />
+              </div>
+            </div>
+
+            {/* Components List */}
+            <div className="overflow-y-auto flex-1 pb-4 custom-scrollbar">
         {filteredSections.length === 0 ? (
            <div className="flex flex-col items-center justify-center p-8 gap-2 text-center mt-4">
              <div className="w-10 h-10 rounded-full bg-muted/50 border border-border flex items-center justify-center text-muted-foreground mb-2">
@@ -216,6 +251,15 @@ export function NodePalette() {
               </div>
             );
           })
+        )}
+            </div>
+          </div>
+        )}
+        
+        {activeTab === "controls" && (
+          <div className="absolute inset-0 overflow-y-auto custom-scrollbar animate-in fade-in duration-300">
+            <SimulationSettings />
+          </div>
         )}
       </div>
     </aside>

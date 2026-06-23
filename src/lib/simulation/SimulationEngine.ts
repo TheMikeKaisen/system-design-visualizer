@@ -73,7 +73,7 @@ export class SimulationEngine {
 
   private packetSpeeds       = new Map<string, number>();
   private pendingRequests    = new Map<string, {
-    sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number; batchSize: number;
+    sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number;
   }>();
   private spawnAccumulators  = new Map<string, number>();
   private bufferedNewPackets: Packet[] = [];
@@ -275,11 +275,11 @@ export class SimulationEngine {
     if (!nodeState) {
       // No capacity config — pass through instantly
       result.arrivedIds.push(packetId);
-      this.forwardPacket(targetNode.id, packet.batchSize || 1, nodes, edges);
+      this.forwardPacket(targetNode.id, nodes, edges);
       return;
     }
 
-    const admission = nodeState.admit(packetId, nowMs, packet.batchSize || 1);
+    const admission = nodeState.admit(packetId, nowMs);
     switch (admission) {
       case "processing":
         result.processingIds.push(packetId);
@@ -320,7 +320,6 @@ export class SimulationEngine {
         edges, 
         packet.protocol, 
         packet.gatewayId,
-        packet.batchSize || 1,
         (packet.retryCount ?? 0) + 1
       );
     }
@@ -377,16 +376,13 @@ export class SimulationEngine {
         state.completePacket(packetId, nowMs);
         result.arrivedIds.push(packetId);
         // Forward to next hop
-        const packet = allPackets[packetId];
-        const batchSize = packet?.batchSize || 1;
-        this.forwardPacket(state.nodeId, batchSize, nodes, edges);
+        this.forwardPacket(state.nodeId, nodes, edges);
       }
     }
   }
 
   private forwardPacket(
     sourceNodeId: string,
-    batchSize:    number,
     nodes:        SystemNode[],
     edges:        SystemEdge[]
   ): void {
@@ -407,7 +403,7 @@ export class SimulationEngine {
 
     const gatewayId = target.data.kind === "apiGateway" ? target.id : undefined;
 
-    this.requestPath(sourceNodeId, target.id, nodes, edges, protocol, gatewayId, batchSize);
+    this.requestPath(sourceNodeId, target.id, nodes, edges, protocol, gatewayId);
   }
 
   private getTrafficMultiplier(profile: TrafficConfig["trafficProfile"], nowMs: number): number {
@@ -452,17 +448,9 @@ export class SimulationEngine {
       if (!candidates.length) continue;
 
       let remainingToSpawn = toSpawn;
-      const batchSizes = [10000, 1000, 100, 50, 1];
 
       while (remainingToSpawn > 0) {
-        let sizeToSpawn = 1;
-        for (const size of batchSizes) {
-          if (remainingToSpawn >= size) {
-            sizeToSpawn = size;
-            break;
-          }
-        }
-        remainingToSpawn -= sizeToSpawn;
+        remainingToSpawn -= 1;
 
         const target  = this.strategy.selectTarget(sourceNode, candidates, edges);
         const outEdge = outEdges.find((e) => e.target === target.id);
@@ -471,7 +459,7 @@ export class SimulationEngine {
         // Tag packet with gatewayId if heading into a gateway
         const gatewayId = target.data.kind === "apiGateway" ? target.id : undefined;
 
-        this.requestPath(sourceId, target.id, nodes, edges, protocol, gatewayId, sizeToSpawn);
+        this.requestPath(sourceId, target.id, nodes, edges, protocol, gatewayId);
       }
     }
   }
@@ -483,11 +471,10 @@ export class SimulationEngine {
     edges:      SystemEdge[],
     protocol:   string,
     gatewayId?: string,
-    batchSize:  number = 1,
     retryCount: number = 0,
   ): void {
     const requestId = nanoid();
-    this.pendingRequests.set(requestId, { sourceId, targetId, protocol, gatewayId, retryCount, batchSize });
+    this.pendingRequests.set(requestId, { sourceId, targetId, protocol, gatewayId, retryCount });
 
     const req: WorkerRequest = {
       type:    "CALCULATE_PATH",
@@ -517,7 +504,7 @@ export class SimulationEngine {
   }
 
   private createPacketFromPath(
-    pending:  { sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number; batchSize: number },
+    pending:  { sourceId: string; targetId: string; protocol: string; gatewayId?: string; retryCount: number },
     edgeIds:  string[],
     nodeIds:  string[],
   ): void {
@@ -560,7 +547,7 @@ export class SimulationEngine {
     }
     
     const nowMs = performance.now();
-    window.push({ requests: pending.batchSize, timestamp: nowMs });
+    window.push({ requests: 1, timestamp: nowMs });
     
     // Clean up entries older than 1 second
     while (window.length > 0 && nowMs - window[0].timestamp > 1000) {
@@ -581,7 +568,6 @@ export class SimulationEngine {
       sizeBytes:  512,
       createdAt:  nowMs,
       color:      PROTOCOL_COLORS[protocol] ?? 0xffffff,
-      batchSize:  pending.batchSize,
       gatewayId:  pending.gatewayId,
       retryCount: pending.retryCount,
       isHidden,

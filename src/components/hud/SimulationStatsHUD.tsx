@@ -63,26 +63,6 @@ export function SimulationStatsHUD() {
         highlight={parseFloat(dropRate) > 5}
       />
 
-      <Divider />
-
-      {/* Packet scale legend */}
-      <div className="flex items-center gap-2 border-l border-border pl-2 ml-2">
-        <span className="text-muted-foreground mr-1">scale:</span>
-        <LegendItem color="bg-blue-500" label="1x" />
-        <LegendItem color="bg-green-500" label="50x" />
-        <LegendItem color="bg-yellow-500" label="100x" />
-        <LegendItem color="bg-orange-500" label="1kx" />
-        <LegendItem color="bg-purple-500" label="10kx" />
-      </div>
-    </div>
-  );
-}
-
-function LegendItem({ color, label }: { color: string; label: string }) {
-  return (
-    <div className="flex items-center gap-1">
-      <div className={`w-2 h-2 rounded-full ${color}`} />
-      <span className="text-[10px]">{label}</span>
     </div>
   );
 }

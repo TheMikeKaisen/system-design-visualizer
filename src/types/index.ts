@@ -195,7 +195,6 @@ export interface Packet {
   readonly sizeBytes:   number;
   readonly createdAt:   number;
   readonly color:       number;
-  readonly batchSize:   number;
   readonly authToken?:  string;
   headers?:             Record<string, string>;
   readonly gatewayId?:  string;

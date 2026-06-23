@@ -10,12 +10,12 @@ export class NodeProcessingState {
   readonly nodeId: string;
   capacity: NodeCapacity;
 
-  /** Map<packetId, { batchSize: number, slotsUsed: number }> */
-  private activeSlots = new Map<string, { batchSize: number; slotsUsed: number }>();
+  /** Map<packetId, slotsUsed: number> */
+  private activeSlots = new Map<string, { slotsUsed: number }>();
   private currentActiveSlots = 0;
   
-  /** FIFO queue of { id, enqueuedAtMs, batchSize } waiting to be processed */
-  private waitQueue: { id: string; enqueuedAt: number; batchSize: number }[] = [];
+  /** FIFO queue of { id, enqueuedAtMs } waiting to be processed */
+  private waitQueue: { id: string; enqueuedAt: number }[] = [];
   private currentQueueCount = 0;
 
   /** Map<packetId, { startTime: number, timeNeeded: number }> */
@@ -68,7 +68,7 @@ export class NodeProcessingState {
   }
 
   /** Can this node queue a new request? */
-  canQueue(batchSize: number): boolean {
+  canQueue(): boolean {
     return this.currentQueueCount < this.capacity.queueLimit;
   }
 
@@ -78,19 +78,19 @@ export class NodeProcessingState {
    * - "queued"     → packet added to wait queue
    * - "dropped"    → queue overflow, rejected
    */
-  admit(packetId: string, nowMs: number, batchSize: number = 1): "processing" | "queued" | "dropped" {
+  admit(packetId: string, nowMs: number): "processing" | "queued" | "dropped" {
     // Attempt crash recovery
     if (this.isCrashed && nowMs > this.crashRecoveryTimeMs) {
       this.isCrashed = false;
     }
 
     if (this.isCrashed) {
-      this._dropCount += batchSize;
+      this._dropCount += 1;
       return "dropped";
     }
 
     if (this.canAccept()) {
-      this.startProcessing(packetId, nowMs, batchSize);
+      this.startProcessing(packetId, nowMs);
       
       // Check for memory crash immediately after admission
       if (this.isMemoryExhausted) {
@@ -99,12 +99,12 @@ export class NodeProcessingState {
       
       return "processing";
     }
-    if (this.canQueue(batchSize)) {
-      this.waitQueue.push({ id: packetId, enqueuedAt: nowMs, batchSize });
-      this.currentQueueCount += batchSize;
+    if (this.canQueue()) {
+      this.waitQueue.push({ id: packetId, enqueuedAt: nowMs });
+      this.currentQueueCount += 1;
       return "queued";
     }
-    this._dropCount += batchSize;
+    this._dropCount += 1;
     return "dropped";
   }
   
@@ -116,7 +116,7 @@ export class NodeProcessingState {
     // Increment drop count for everything we are about to destroy
     let droppedInCrash = 0;
     for (const slotData of this.activeSlots.values()) {
-      droppedInCrash += slotData.batchSize;
+      droppedInCrash += 1;
     }
     this._dropCount += droppedInCrash + this.currentQueueCount;
     
@@ -129,13 +129,13 @@ export class NodeProcessingState {
 
   // ─── Processing ──────────────────────────────────────────────
 
-  private startProcessing(packetId: string, nowMs: number, batchSize: number): void {
-    const slotsUsed = Math.max(1, Math.min(batchSize, Math.max(1, this.capacity.maxConcurrent - this.currentActiveSlots)));
+  private startProcessing(packetId: string, nowMs: number): void {
+    const slotsUsed = 1;
     
-    this.activeSlots.set(packetId, { batchSize, slotsUsed });
+    this.activeSlots.set(packetId, { slotsUsed });
     this.currentActiveSlots += slotsUsed;
     
-    const passesNeeded = Math.ceil(batchSize / slotsUsed);
+    const passesNeeded = 1;
     const timeNeeded = passesNeeded * this.effectiveProcessingTimeMs;
     
     this.processingTimers.set(packetId, { startTime: nowMs, timeNeeded });
@@ -161,7 +161,7 @@ export class NodeProcessingState {
     const slotData = this.activeSlots.get(packetId);
     if (slotData) {
       this.currentActiveSlots -= slotData.slotsUsed;
-      this._completedInWindow += slotData.batchSize;
+      this._completedInWindow += 1;
     }
     
     this.activeSlots.delete(packetId);
@@ -175,8 +175,8 @@ export class NodeProcessingState {
   private promoteFromQueue(nowMs: number): void {
     while (this.waitQueue.length > 0 && this.canAccept()) {
       const next = this.waitQueue.shift()!;
-      this.currentQueueCount -= next.batchSize;
-      this.startProcessing(next.id, nowMs, next.batchSize);
+      this.currentQueueCount -= 1;
+      this.startProcessing(next.id, nowMs);
       if (this.isMemoryExhausted) {
         this.crash(nowMs);
         break; // Stop promoting if we just crashed
@@ -190,13 +190,13 @@ export class NodeProcessingState {
    */
   getTimedOutPackets(nowMs: number, timeoutMs: number): string[] {
     const timedOut: string[] = [];
-    const validQueue: { id: string; enqueuedAt: number; batchSize: number }[] = [];
+    const validQueue: { id: string; enqueuedAt: number }[] = [];
     
     for (const item of this.waitQueue) {
       if (nowMs - item.enqueuedAt >= timeoutMs) {
         timedOut.push(item.id);
-        this._dropCount += item.batchSize; // Timeouts count as drops
-        this.currentQueueCount -= item.batchSize;
+        this._dropCount += 1; // Timeouts count as drops
+        this.currentQueueCount -= 1;
       } else {
         validQueue.push(item);
       }
@@ -210,7 +210,7 @@ export class NodeProcessingState {
   removeFromQueue(packetId: string): boolean {
     const idx = this.waitQueue.findIndex(p => p.id === packetId);
     if (idx >= 0) {
-      this.currentQueueCount -= this.waitQueue[idx].batchSize;
+      this.currentQueueCount -= 1;
       this.waitQueue.splice(idx, 1);
       return true;
     }
@@ -242,11 +242,10 @@ export class NodeProcessingState {
 
   getMetrics(): NodeMetrics {
     const effectiveMax = this.capacity.maxConcurrent;
-    // To ensure UI accuracy, activeCount represents total requests processing (sum of batchSizes).
-    // Let's sum up batchSize of active slots:
+    // To ensure UI accuracy, activeCount represents total requests processing.
     let activeTotal = 0;
     for (const slotData of this.activeSlots.values()) {
-      activeTotal += slotData.batchSize;
+      activeTotal += 1;
     }
 
     return {

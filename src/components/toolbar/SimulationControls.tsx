@@ -3,24 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useSimulation } from "@/hooks/useSimulation";
 import { useSimulationStore } from "@/lib/store/useSimulationStore";
-import type { RoutingStrategyKind } from "@/types";
-import type { TrafficProfile } from "@/lib/store/useSimulationStore";
 
-const STRATEGIES: { value: RoutingStrategyKind; label: string }[] = [
-  { value: "roundRobin",       label: "Round robin" },
-  { value: "leastConnections", label: "Least connections" },
-  { value: "weighted",         label: "Weighted" },
-];
-
-const PROFILES: { value: TrafficProfile; label: string }[] = [
-  { value: "constant", label: "Constant" },
-  { value: "spiky",    label: "Spiky" },
-  { value: "ddos",     label: "DDoS" },
-];
 
 export function SimulationControls() {
-  const { isRunning, config, startAll, stop, reset, setConfig, setRoutingStrategy } =
-    useSimulation();
+  const { isRunning, startAll, stop, reset } = useSimulation();
   
   const [error, setError] = useState<string | null>(null);
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -84,92 +70,6 @@ export function SimulationControls() {
         <ResetIcon />
       </button>
 
-      <div className="w-px h-4 bg-border" />
-
-      {/* Packets per second */}
-      <div className="flex items-center gap-1.5">
-        <label className="text-[10px] text-muted-foreground whitespace-nowrap">Load</label>
-        <select
-          value={config.packetsPerSecond}
-          onChange={(e) => setConfig({ packetsPerSecond: parseInt(e.target.value, 10) })}
-          className="text-xs bg-transparent border border-border rounded px-1.5 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          <option value={1}>1 req/s</option>
-          <option value={50}>50 req/s</option>
-          <option value={100}>100 req/s</option>
-          <option value={500}>500 req/s</option>
-          <option value={1000}>1k req/s</option>
-        </select>
-      </div>
-
-      <div className="w-px h-4 bg-border" />
-
-      {/* Max Retries */}
-      <div className="flex items-center gap-1.5">
-        <label className="text-[10px] text-muted-foreground whitespace-nowrap">Retries</label>
-        <select
-          value={config.maxRetries}
-          onChange={(e) => setConfig({ maxRetries: parseInt(e.target.value, 10) })}
-          className="text-xs bg-transparent border border-border rounded px-1.5 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          <option value={0}>0</option>
-          <option value={1}>1</option>
-          <option value={2}>2</option>
-          <option value={3}>3</option>
-        </select>
-      </div>
-
-      <div className="w-px h-4 bg-border" />
-
-      {/* Request Timeout */}
-      <div className="flex items-center gap-1.5">
-        <label className="text-[10px] text-muted-foreground whitespace-nowrap">Timeout</label>
-        <select
-          value={config.requestTimeoutMs}
-          onChange={(e) => setConfig({ requestTimeoutMs: parseInt(e.target.value, 10) })}
-          className="text-xs bg-transparent border border-border rounded px-1.5 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          <option value={500}>0.5s</option>
-          <option value={1000}>1s</option>
-          <option value={3000}>3s</option>
-          <option value={5000}>5s</option>
-          <option value={10000}>10s</option>
-        </select>
-      </div>
-
-      <div className="w-px h-4 bg-border" />
-
-      {/* Routing strategy */}
-      <select
-        value={config.routingStrategy}
-        onChange={(e) => setRoutingStrategy(e.target.value as RoutingStrategyKind)}
-        className="text-xs bg-transparent border border-border rounded px-2 py-1
-                   text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-        {STRATEGIES.map((s) => (
-          <option key={s.value} value={s.value}>
-            {s.label}
-          </option>
-        ))}
-      </select>
-
-      <div className="w-px h-4 bg-border" />
-
-      {/* Traffic Profile */}
-      <div className="flex items-center gap-1.5">
-        <label className="text-[10px] text-muted-foreground whitespace-nowrap">Profile</label>
-        <select
-          value={config.trafficProfile}
-          onChange={(e) => setConfig({ trafficProfile: e.target.value as TrafficProfile })}
-          className="text-xs bg-transparent border border-border rounded px-1.5 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          {PROFILES.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.label}
-            </option>
-          ))}
-        </select>
-      </div>
     </div>
   );
 }
