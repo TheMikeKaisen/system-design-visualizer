@@ -251,10 +251,10 @@ function SaveIcon() {
   return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><path d="M11 12H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h7l2 2v7a1 1 0 0 1-1 1z"/><rect x="4" y="7" width="6" height="5"/><rect x="4" y="2" width="4" height="3"/></svg>;
 }
 function ExportIcon() {
-  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><path d="M7 2v7M4 6l3 3 3-3"/><path d="M2 10v2h10v-2"/></svg>;
+  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><path d="M7 9V2M4 6l3-3 3 3"/><path d="M2 10v2h10v-2"/></svg>;
 }
 function ImportIcon() {
-  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><path d="M7 9V2M4 6l3-3 3 3"/><path d="M2 10v2h10v-2"/></svg>;
+  return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><path d="M7 2v7M4 6l3 3 3-3"/><path d="M2 10v2h10v-2"/></svg>;
 }
 function ImageIcon() {
   return (
