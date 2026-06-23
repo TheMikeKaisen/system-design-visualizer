@@ -16,6 +16,9 @@ import {
 interface PaletteItem { kind: NodeKind; label: string; icon: React.ReactNode }
 interface PaletteSection { id: string; label: string; color: string; items: PaletteItem[] }
 
+function ClientIcon() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><circle cx="8" cy="5" r="3" /><path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5" /></svg>;
+}
 function ServiceIcon() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><rect x="2" y="2" width="12" height="12" rx="2.5"/><path d="M8 5v6M5 8h6"/></svg>;
 }
@@ -42,6 +45,7 @@ const PALETTE_SECTIONS: PaletteSection[] = [
   {
     id: "general", label: "General", color: "text-muted-foreground",
     items: [
+      { kind: "client",       label: "Client",        icon: <ClientIcon /> },
       { kind: "service",      label: "Service",       icon: <ServiceIcon /> },
       { kind: "loadBalancer", label: "Load balancer", icon: <LBIcon /> },
       { kind: "database",     label: "Database",      icon: <DbIcon /> },

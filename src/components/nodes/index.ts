@@ -1,4 +1,5 @@
 // General
+export { ClientNode }       from "./ClientNode";
 export { ServiceNode }      from "./ServiceNode";
 export { LoadBalancerNode } from "./LoadBalancerNode";
 export { DatabaseNode }     from "./DatabaseNode";
@@ -39,6 +40,7 @@ import * as Nodes from "./index";
 import { SimulationEdge } from "@/components/edges/SimulationEdge";
 
 export const nodeTypes = {
+  client:           Nodes.ClientNode,
   service:          Nodes.ServiceNode,
   loadBalancer:     Nodes.LoadBalancerNode,
   database:         Nodes.DatabaseNode,

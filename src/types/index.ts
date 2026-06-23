@@ -28,7 +28,7 @@ export interface ViewportTransform {
 export type NodeKind =
   // General
   | "service" | "loadBalancer" | "database" | "s3Bucket"
-  | "cache"   | "messageQueue" | "cdn"
+  | "cache"   | "messageQueue" | "cdn" | "client"
   // API Gateway (already existed, gets full implementation now)
   | "apiGateway"
   // AWS

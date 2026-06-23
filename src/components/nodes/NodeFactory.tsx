@@ -17,7 +17,7 @@ const KIND_PREFIX: Record<NodeKind, string> = {
   // General
   service:       "svc",   loadBalancer: "lb",   database:  "db",
   s3Bucket:      "s3",    cache:        "cache", messageQueue: "mq",
-  cdn:           "cdn",   apiGateway:   "apigw",
+  cdn:           "cdn",   apiGateway:   "apigw", client:       "client",
   // AWS
   awsEc2:        "ec2",   awsRds:       "rds",  awsElastiCache: "ecache",
   awsCloudFront: "cf",    awsLambda:    "fn",   awsSqs:         "sqs",
@@ -31,6 +31,7 @@ const KIND_PREFIX: Record<NodeKind, string> = {
 
 const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["data"]["metadata"] }> = {
   // General
+  client:            { label: "Client",             metadata: { type: "browser" } },
   service:           { label: "Service",            metadata: { replicas: 1 } },
   loadBalancer:      { label: "Load balancer",       metadata: { algorithm: "round-robin" } },
   database:          { label: "Database",            metadata: { engine: "postgres" } },
