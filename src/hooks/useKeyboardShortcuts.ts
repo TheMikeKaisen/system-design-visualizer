@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useHistoryStore } from "@/lib/store/useHistoryStore";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { DeleteNodeCommand } from "@/lib/patterns/commands/DeleteNodeCommand";
+import { DeleteEdgeCommand } from "@/lib/patterns/commands/DeleteEdgeCommand";
 import { commandInvoker } from "@/lib/store/useHistoryStore";
 
 /**
@@ -48,7 +49,7 @@ export function useKeyboardShortcuts() {
 
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
-        deleteSelectedNodes();
+        deleteSelection();
         return;
       }
 
@@ -62,9 +63,8 @@ export function useKeyboardShortcuts() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [undo, redo]);
 }
-
-function deleteSelectedNodes(): void {
-  const { nodes, edges, selectedNodeIds } = useCanvasStore.getState();
+function deleteSelection(): void {
+  const { nodes, edges, selectedNodeIds, selectedEdgeId } = useCanvasStore.getState();
 
   for (const id of selectedNodeIds) {
     const node = nodes.find((n) => n.id === id);
@@ -73,5 +73,12 @@ function deleteSelectedNodes(): void {
       (e) => e.source === id || e.target === id
     );
     commandInvoker.execute(new DeleteNodeCommand(node, connectedEdges));
+  }
+
+  if (selectedEdgeId) {
+    const edge = edges.find((e) => e.id === selectedEdgeId);
+    if (edge) {
+      commandInvoker.execute(new DeleteEdgeCommand(edge));
+    }
   }
 }
