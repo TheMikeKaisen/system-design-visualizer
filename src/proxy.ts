@@ -8,25 +8,21 @@ import { buildCsp } from "@/lib/security/csp";
  *
  * Responsibilities:
  * 1. Generate a per-request nonce and inject it into the CSP header
- * 2. Protect canvas routes — redirect unauthenticated users to sign-in
- * 3. Protect API routes — return 401 for unauthenticated API calls
+ * 2. (No hard auth gate) — the canvas is publicly accessible.
+ *    Authentication is optional and surfaces as a soft prompt inside the app.
+ *    Collaboration features gate themselves client-side via CollabProvider.
  *
  * WHY NONCE IN MIDDLEWARE:
  * A static CSP header blocks all inline scripts (including React hydration).
  * A per-request nonce allows inline scripts that we explicitly trust while
  * still blocking attacker-injected scripts (XSS defense).
+ *
+ * WHY NO AUTH REDIRECT HERE:
+ * Guest users should be able to open the canvas, drop nodes, and run the
+ * simulation without an account. localStorage handles persistence. Sign-in
+ * is prompted only when a feature requires a server identity (collaboration,
+ * cloud save). Blocking the canvas entirely kills user activation.
  */
-
-const PROTECTED_ROUTES = ["/canvas"];
-const PUBLIC_ROUTES    = ["/auth", "/api/auth"];
-
-function isProtected(pathname: string): boolean {
-  return PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
-}
-
-function isPublic(pathname: string): boolean {
-  return PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
-}
 
 export default auth(async function middleware(request) {
   const { pathname } = request.nextUrl;
@@ -36,17 +32,8 @@ export default auth(async function middleware(request) {
   const nonce      = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader  = buildCsp(nonce, isDev);
 
-  // ── 2. Auth check for protected routes ────────────────────────────
-  const session = request.auth;
-
-  if (isProtected(pathname) && !isPublic(pathname)) {
-    if (!session?.user?.id && process.env.DATABASE_URL) {
-      // Redirect to sign-in, preserving the intended destination
-      const signInUrl = new URL("/auth/sign-in", request.url);
-      signInUrl.searchParams.set("callbackUrl", request.url);
-      return NextResponse.redirect(signInUrl);
-    }
-  }
+  // ── 2. No hard auth gate — canvas is publicly accessible.
+  //    Collaboration and cloud-save features gate themselves client-side.
 
   // ── 3. Build response with security headers ───────────────────────
   const response = NextResponse.next({
