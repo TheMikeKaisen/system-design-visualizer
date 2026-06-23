@@ -3,7 +3,7 @@ import { CacheIcon, LoadBar } from "./SharedPrimitives";
 import { SystemNode } from "@/types";
 import { memo } from "react";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
 
 export const CacheNode = memo(function CacheNode({
   id,
@@ -30,6 +30,7 @@ export const CacheNode = memo(function CacheNode({
         )}>
           {` · ${data.activeConnections || 0} conn`}
         </span>
+        <NodeQueueMetrics nodeId={id} />
       </span>
       <Handle type="target" position={Position.Left}  className="!bg-amber-400" />
       <Handle type="source" position={Position.Right} className="!bg-amber-400" />

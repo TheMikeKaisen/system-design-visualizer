@@ -30,6 +30,7 @@ export function MqIcon({ className }: { className?: string }) {
 }
 
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { cn } from "@/lib/utils";
 
 export function NodeMetricsAlerts({ nodeId }: { nodeId: string }) {
   const metrics = useSimulationStore((s) => s.nodeMetrics[nodeId]);
@@ -62,6 +63,46 @@ export function NodeMetricsAlerts({ nodeId }: { nodeId: string }) {
           Queue Full
         </div>
       )}
+    </div>
+  );
+}
+
+export function NodeQueueMetrics({ nodeId }: { nodeId: string }) {
+  const metrics = useSimulationStore((s) => s.nodeMetrics[nodeId]);
+  const nodeData = useCanvasStore((s) => s.nodes.find((n) => n.id === nodeId));
+  
+  if (!metrics || !nodeData?.data?.capacity?.queueLimit) return null;
+  const queueLimit = nodeData.data.capacity.queueLimit;
+  if (queueLimit <= 0) return null;
+  
+  return (
+    <>
+      <span className={cn(
+        "text-[10px] text-muted-foreground ml-1 transition-opacity duration-300",
+        metrics.queueLength > 0 ? "opacity-100" : "opacity-0"
+      )}>
+        · {metrics.queueLength} queued
+      </span>
+      <QueueBar length={metrics.queueLength} limit={queueLimit} />
+    </>
+  );
+}
+
+function QueueBar({ length, limit }: { length: number; limit: number }) {
+  const pct = Math.min((length / limit) * 100, 100);
+  
+  let color = "bg-green-500";
+  if (pct >= 90) color = "bg-red-500";
+  else if (pct >= 75) color = "bg-orange-500";
+  else if (pct >= 50) color = "bg-yellow-500";
+  else if (pct === 0) color = "bg-transparent";
+  
+  return (
+    <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-xl overflow-hidden bg-muted/30">
+      <div
+        className={`h-full transition-all duration-300 ${color}`}
+        style={{ width: `${pct}%` }}
+      />
     </div>
   );
 }

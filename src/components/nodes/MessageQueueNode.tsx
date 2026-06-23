@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
 import { LoadBar, MqIcon } from "./SharedPrimitives";
 
 export const MessageQueueNode = memo(function MessageQueueNode({
@@ -22,8 +22,9 @@ export const MessageQueueNode = memo(function MessageQueueNode({
         <MqIcon className="size-4 text-pink-500 shrink-0" />
         <span className="text-sm font-medium truncate">{data.label}</span>
       </div>
-      <span className="text-[10px] text-muted-foreground">
+      <span className="text-[10px] text-muted-foreground flex items-center">
         {data.metadata.engine as string}
+        <NodeQueueMetrics nodeId={id} />
       </span>
       <Handle type="target" position={Position.Left}  className="!bg-pink-400" />
       <Handle type="source" position={Position.Right} className="!bg-pink-400" />

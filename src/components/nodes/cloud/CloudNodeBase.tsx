@@ -4,6 +4,8 @@ import { memo, type ReactNode } from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { SystemNodeData, CloudProvider } from "@/types";
 import { cn } from "@/lib/utils";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { NodeQueueMetrics } from "../SharedPrimitives";
 
 // ─── Provider badge colors (hardcoded — brand colors must not invert) ──
 
@@ -44,6 +46,9 @@ export const CloudNodeBase = memo(function CloudNodeBase({
   const cfg   = PROVIDER_CONFIG[provider];
   const label = PROVIDER_LABELS[provider];
   const load  = data.load ?? 0;
+  
+  const node = useCanvasStore((s) => s.nodes.find((n) => n.data === data));
+  const nodeId = node?.id;
 
   const barColor =
     loadColor ??
@@ -92,10 +97,11 @@ export const CloudNodeBase = memo(function CloudNodeBase({
 
       {/* Metric (simulated) */}
       <span className={cn(
-        "text-[10px] text-muted-foreground mt-0.5 transition-opacity duration-300",
+        "text-[10px] text-muted-foreground mt-0.5 transition-opacity duration-300 flex items-center",
         data.activeConnections > 0 ? "opacity-100" : "opacity-0"
       )}>
         {data.activeConnections || 0} connections
+        {nodeId && <NodeQueueMetrics nodeId={nodeId} />}
       </span>
 
       {/* Slot for custom content (e.g. API Gateway chain) */}

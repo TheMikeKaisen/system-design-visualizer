@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
 import { LBIcon, LoadBar } from "./SharedPrimitives";
 
 const STRATEGY_LABELS: Record<string, string> = {
@@ -34,10 +34,11 @@ export const LoadBalancerNode = memo(function LoadBalancerNode({
         </span>
         {/* Metadata */}
         <span className={cn(
-          "text-xs text-muted-foreground transition-opacity duration-300",
+          "text-xs text-muted-foreground transition-opacity duration-300 flex items-center",
           data.activeConnections > 0 ? "opacity-100" : "opacity-0"
         )}>
           {data.activeConnections || 0} conn
+          <NodeQueueMetrics nodeId={id} />
         </span>
       </div>
       <Handle type="target" position={Position.Left}  className="!bg-purple-400" />

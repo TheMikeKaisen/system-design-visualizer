@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
 import { DbIcon, LoadBar } from "./SharedPrimitives";
 
 export const DatabaseNode = memo(function DatabaseNode({
@@ -31,6 +31,7 @@ export const DatabaseNode = memo(function DatabaseNode({
         )}>
           {` · ${data.activeConnections || 0} conn`}
         </span>
+        <NodeQueueMetrics nodeId={id} />
       </span>
       <Handle type="target" position={Position.Left}  className="!bg-teal-400" />
       <Handle type="source" position={Position.Right} className="!bg-teal-400" />

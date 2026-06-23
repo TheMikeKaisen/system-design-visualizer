@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
 
 export const ServiceNode = memo(function ServiceNode({
   id,
@@ -43,10 +43,11 @@ export const ServiceNode = memo(function ServiceNode({
 
       {/* Metadata */}
       <span className={cn(
-        "absolute left-4 text-[11px] text-muted-foreground transition-all duration-300 ease-out",
+        "absolute left-4 text-[11px] text-muted-foreground transition-all duration-300 ease-out flex items-center",
         data.activeConnections > 0 ? "opacity-100 bottom-2.5" : "opacity-0 bottom-0"
       )}>
         {data.activeConnections || 0} conn
+        <NodeQueueMetrics nodeId={id} />
       </span>
 
       {/* React Flow Handles */}
