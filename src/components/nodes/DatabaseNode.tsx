@@ -3,8 +3,8 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
-import { DbIcon, LoadBar } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics, NodeQueuePipe } from "./SharedPrimitives";
+import { DbIcon, LoadGlow } from "./SharedPrimitives";
 
 export const DatabaseNode = memo(function DatabaseNode({
   id,
@@ -17,7 +17,8 @@ export const DatabaseNode = memo(function DatabaseNode({
       selected ? "border-teal-500 ring-1 ring-teal-500/20" : "border-border hover:border-teal-300"
     )}>
       <NodeMetricsAlerts nodeId={id} />
-      <LoadBar load={data.load} color="bg-teal-500" />
+      <NodeQueuePipe nodeId={id} />
+      <LoadGlow load={data.load} colorHex="#14b8a6" />
       <div className="flex items-center gap-2">
         <DbIcon className="size-4 text-teal-600 shrink-0" />
         <span className="text-sm font-medium truncate">{data.label}</span>

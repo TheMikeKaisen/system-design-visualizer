@@ -1,14 +1,16 @@
 
 import { useSimulationStore } from "@/lib/store/useSimulationStore";
 
-export function LoadBar({ load, color }: { load: number; color: string }) {
+export function LoadGlow({ load, colorHex }: { load: number; colorHex: string }) {
   return (
-    <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl overflow-hidden bg-muted">
-      <div
-        className={`h-full transition-all duration-500 ${color}`}
-        style={{ width: `${Math.min(load * 100, 100)}%` }}
-      />
-    </div>
+    <div 
+      className="absolute inset-0 rounded-xl pointer-events-none transition-all duration-500 border-2"
+      style={{
+        borderColor: colorHex,
+        boxShadow: load > 0 ? `0 0 ${load * 15}px ${colorHex}` : 'none',
+        opacity: load > 0 ? 0.2 + (load * 0.8) : 0,
+      }}
+    />
   );
 }
 
@@ -83,22 +85,32 @@ export function NodeQueueMetrics({ nodeId }: { nodeId: string }) {
       )}>
         · {metrics.queueLength} queued
       </span>
-      <QueueBar length={metrics.queueLength} limit={queueLimit} />
     </>
   );
 }
 
-function QueueBar({ length, limit }: { length: number; limit: number }) {
+export function NodeQueuePipe({ nodeId }: { nodeId: string }) {
+  const metrics = useSimulationStore((s) => s.nodeMetrics[nodeId]);
+  const nodeData = useCanvasStore((s) => s.nodes.find((n) => n.id === nodeId));
+  
+  if (!metrics || !nodeData?.data?.capacity?.queueLimit) return null;
+  const queueLimit = nodeData.data.capacity.queueLimit;
+  if (queueLimit <= 0) return null;
+  
+  return <QueuePipe length={metrics.queueLength} limit={queueLimit} />;
+}
+
+function QueuePipe({ length, limit }: { length: number; limit: number }) {
   const pct = Math.min((length / limit) * 100, 100);
   
   let color = "bg-green-500";
-  if (pct >= 90) color = "bg-red-500";
+  if (pct >= 90) color = "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]";
   else if (pct >= 75) color = "bg-orange-500";
   else if (pct >= 50) color = "bg-yellow-500";
   else if (pct === 0) color = "bg-transparent";
   
   return (
-    <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-xl overflow-hidden bg-muted/30">
+    <div className="absolute -bottom-2 left-4 right-4 h-1.5 rounded-full overflow-hidden bg-muted/30 border border-border/50 flex pointer-events-none">
       <div
         className={`h-full transition-all duration-300 ${color}`}
         style={{ width: `${pct}%` }}

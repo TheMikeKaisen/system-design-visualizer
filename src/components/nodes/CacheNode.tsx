@@ -1,9 +1,9 @@
 import { Handle, NodeProps, Position } from "@xyflow/react";
-import { CacheIcon, LoadBar } from "./SharedPrimitives";
+import { CacheIcon, LoadGlow } from "./SharedPrimitives";
 import { SystemNode } from "@/types";
 import { memo } from "react";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics, NodeQueuePipe } from "./SharedPrimitives";
 
 export const CacheNode = memo(function CacheNode({
   id,
@@ -16,7 +16,8 @@ export const CacheNode = memo(function CacheNode({
       selected ? "border-amber-400 ring-1 ring-amber-400/20" : "border-border hover:border-amber-300"
     )}>
       <NodeMetricsAlerts nodeId={id} />
-      <LoadBar load={data.load} color="bg-amber-400" />
+      <NodeQueuePipe nodeId={id} />
+      <LoadGlow load={data.load} colorHex="#fbbf24" />
       <div className="flex items-center gap-2">
         <CacheIcon className="size-4 text-amber-500 shrink-0" />
         <span className="text-sm font-medium truncate">{data.label}</span>

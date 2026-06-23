@@ -3,8 +3,8 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
-import { LBIcon, LoadBar } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics, NodeQueuePipe } from "./SharedPrimitives";
+import { LBIcon, LoadGlow } from "./SharedPrimitives";
 
 const STRATEGY_LABELS: Record<string, string> = {
   "round-robin":       "Round robin",
@@ -23,7 +23,8 @@ export const LoadBalancerNode = memo(function LoadBalancerNode({
       selected ? "border-purple-500 ring-1 ring-purple-500/20" : "border-border hover:border-purple-300"
     )}>
       <NodeMetricsAlerts nodeId={id} />
-      <LoadBar load={data.load} color="bg-purple-500" />
+      <NodeQueuePipe nodeId={id} />
+      <LoadGlow load={data.load} colorHex="#a855f7" />
       <div className="flex items-center gap-2">
         <LBIcon className="size-4 text-purple-500 shrink-0" />
         <span className="text-sm font-medium truncate">{data.label}</span>

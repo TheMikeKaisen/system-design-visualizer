@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts, NodeQueueMetrics } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics, LoadGlow, NodeQueuePipe } from "./SharedPrimitives";
 
 export const ServiceNode = memo(function ServiceNode({
   id,
@@ -24,13 +24,9 @@ export const ServiceNode = memo(function ServiceNode({
       )}
     >
       <NodeMetricsAlerts nodeId={id} />
-      {/* Load indicator bar */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl overflow-hidden bg-muted">
-        <div
-          className="h-full transition-all duration-500"
-          style={{ width: `${data.load * 100}%`, backgroundColor: loadColor }}
-        />
-      </div>
+      <NodeQueuePipe nodeId={id} />
+      {/* Load indicator glow */}
+      <LoadGlow load={data.load} colorHex={loadColor} />
 
       {/* Icon + label */}
       <div className={cn(

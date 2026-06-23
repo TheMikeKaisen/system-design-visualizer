@@ -3,8 +3,8 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts } from "./SharedPrimitives";
-import { LoadBar, S3Icon } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueuePipe } from "./SharedPrimitives";
+import { LoadGlow, S3Icon } from "./SharedPrimitives";
 
 export const S3BucketNode = memo(function S3BucketNode({
   id,
@@ -17,7 +17,8 @@ export const S3BucketNode = memo(function S3BucketNode({
       selected ? "border-orange-400 ring-1 ring-orange-400/20" : "border-border hover:border-orange-300"
     )}>
       <NodeMetricsAlerts nodeId={id} />
-      <LoadBar load={data.load} color="bg-orange-400" />
+      <NodeQueuePipe nodeId={id} />
+      <LoadGlow load={data.load} colorHex="#fb923c" />
       <div className="flex items-center gap-2">
         <S3Icon className="size-4 text-orange-500 shrink-0" />
         <span className="text-sm font-medium truncate">{data.label}</span>

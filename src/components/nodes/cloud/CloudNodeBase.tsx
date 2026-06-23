@@ -5,7 +5,7 @@ import { Handle, Position } from "@xyflow/react";
 import type { SystemNodeData, CloudProvider } from "@/types";
 import { cn } from "@/lib/utils";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
-import { NodeQueueMetrics } from "../SharedPrimitives";
+import { NodeQueueMetrics, LoadGlow, NodeQueuePipe } from "../SharedPrimitives";
 
 // ─── Provider badge colors (hardcoded — brand colors must not invert) ──
 
@@ -67,13 +67,11 @@ export const CloudNodeBase = memo(function CloudNodeBase({
           : `${cfg.border} hover:${cfg.borderSelected}`
       )}
     >
-      {/* Load bar */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl overflow-hidden bg-muted">
-        <div
-          className="h-full transition-all duration-500"
-          style={{ width: `${Math.min(load * 100, 100)}%`, background: barColor }}
-        />
-      </div>
+      {/* Node Queue Pipe */}
+      {nodeId && <NodeQueuePipe nodeId={nodeId} />}
+
+      {/* Load Glow */}
+      <LoadGlow load={load} colorHex={barColor ?? "#9ca3af"} />
 
       {/* Header row */}
       <div className="flex items-center gap-2 pt-0.5">

@@ -4,7 +4,7 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
 import { NodeMetricsAlerts } from "./SharedPrimitives";
-import { LoadBar } from "./SharedPrimitives";
+import { LoadGlow } from "./SharedPrimitives";
 
 export const CdnNode = memo(function CdnNode({
   id,
@@ -17,7 +17,7 @@ export const CdnNode = memo(function CdnNode({
       selected ? "border-teal-400 ring-1 ring-teal-400/20 shadow-lg shadow-teal-200/50" : "border-border hover:border-teal-300"
     )}>
       <NodeMetricsAlerts nodeId={id} />
-      <LoadBar load={data.load} color="bg-teal-400" />
+      <LoadGlow load={data.load} colorHex="#2dd4bf" />
       <div className="flex items-center gap-2">
         <CdnIcon className="size-4 text-teal-500 shrink-0" />
         <span className="text-sm font-medium truncate">{data.label}</span>
