@@ -95,6 +95,8 @@ export interface NodeMetrics {
   dropCount: number;
   /** Rolling throughput in completed requests/sec */
   throughputPerSec: number;
+  /** Whether the node has crashed due to memory exhaustion */
+  isCrashed?: boolean;
 }
 
 export interface SystemNodeData extends Record<string, unknown> {

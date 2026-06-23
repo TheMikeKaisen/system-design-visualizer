@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useSimulation } from "@/hooks/useSimulation";
 import { useSimulationStore } from "@/lib/store/useSimulationStore";
-import type { RoutingStrategyKind, TrafficProfile } from "@/types";
+import type { RoutingStrategyKind } from "@/types";
+import type { TrafficProfile } from "@/lib/store/useSimulationStore";
 
 const STRATEGIES: { value: RoutingStrategyKind; label: string }[] = [
   { value: "roundRobin",       label: "Round robin" },
