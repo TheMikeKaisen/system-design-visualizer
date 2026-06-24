@@ -5,6 +5,7 @@ import { useHistoryStore } from "@/lib/store/useHistoryStore";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { DeleteNodeCommand } from "@/lib/patterns/commands/DeleteNodeCommand";
 import { DeleteEdgeCommand } from "@/lib/patterns/commands/DeleteEdgeCommand";
+import { useSimulationStore } from "@/lib/store/useSimulationStore";
 import { commandInvoker } from "@/lib/store/useHistoryStore";
 
 /**
@@ -64,6 +65,9 @@ export function useKeyboardShortcuts() {
   }, [undo, redo]);
 }
 function deleteSelection(): void {
+  const { isRunning } = useSimulationStore.getState();
+  if (isRunning) return;
+
   const { nodes, edges, selectedNodeIds, selectedEdgeId } = useCanvasStore.getState();
 
   for (const id of selectedNodeIds) {

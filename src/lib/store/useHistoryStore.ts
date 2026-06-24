@@ -39,6 +39,7 @@ interface HistoryState {
    * (e.g., node drag — React Flow moved the node, we just need undo support).
    */
   record: (command: ICommand) => void;
+  clear: () => void;
 
   // Internal — called by the invoker's onCommandExecuted callback
   _syncFromInvoker: () => void;
@@ -67,6 +68,11 @@ export const useHistoryStore = create<HistoryState>((set) => ({
 
   record: (command) => {
     commandInvoker.record(command);
+    useHistoryStore.getState()._syncFromInvoker();
+  },
+
+  clear: () => {
+    commandInvoker.clear();
     useHistoryStore.getState()._syncFromInvoker();
   },
 

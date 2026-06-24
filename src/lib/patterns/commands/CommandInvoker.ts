@@ -74,6 +74,12 @@ export class CommandInvoker {
     this.undoStack.push(command);
   }
 
+  clear(): void {
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+    this.actionLog.length = 0;
+  }
+
   // ── Remote replay (Collaboration phase) ───────────────
 
   /**

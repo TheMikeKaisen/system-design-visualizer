@@ -4,6 +4,7 @@ import type { DiagramMeta, DiagramListItem, SerializedDiagram } from "@/types";
 import { localStoragePersistence } from "@/lib/persistence/localStoragePersistence";
 import { serializeDiagram } from "@/lib/persistence/diagramSerializer";
 import { useCanvasStore } from "./useCanvasStore";
+import { useHistoryStore } from "./useHistoryStore";
 import { syncCountersFromNodes } from "@/components/nodes/NodeFactory";
 
 // ─────────────────────────────────────────────
@@ -73,6 +74,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
     useCanvasStore.getState().onNodesChange(
       useCanvasStore.getState().nodes.map((n) => ({ type: "remove", id: n.id }))
     );
+    useHistoryStore.getState().clear();
     return meta;
   },
 
@@ -99,6 +101,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       isDirty:     false,
       lastSavedAt: Date.now(),
     });
+    
+    useHistoryStore.getState().clear();
   },
 
   save: () => {
