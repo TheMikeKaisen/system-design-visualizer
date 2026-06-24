@@ -15,7 +15,7 @@ const STRATEGIES: { value: RoutingStrategyKind; label: string }[] = [
 const PROFILES: { value: TrafficProfile; label: string }[] = [
   { value: "constant", label: "Constant" },
   { value: "spiky",    label: "Spiky" },
-  { value: "ddos",     label: "DDoS" },
+  // { value: "ddos",     label: "DDoS" },
 ];
 
 export function SimulationSettings() {
