@@ -60,6 +60,19 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
     );
   }, []);
 
+  // ── Cache Invalidations ─────────────────────────────────
+
+  useEffect(() => {
+    return useSimulationStore.subscribe(
+      (s) => s.isRunning,
+      (isRunning) => {
+        if (isRunning) {
+          engineRef.current?.clearCaches();
+        }
+      }
+    );
+  }, []);
+
   // ── Prune metrics in sync with store prune ─────────────
 
   useEffect(() => {
@@ -117,9 +130,6 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
 
       // 1. Drain any packets that arrived since the last tick
       const newPackets = engine.drainNewPackets();
-      for (const p of newPackets) {
-        simState.addPacket(p);
-      }
 
       // 2. Run the pure tick — receive a diff
       const diff = engine.tick(
@@ -131,14 +141,15 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
         config
       );
 
-      // 3. Apply the diff to the store
-      for (const [id, progress] of diff.progressUpdates) {
-        simState.updatePacketProgress(id, progress);
-      }
-      for (const id of diff.arrivedIds) simState.markPacketArrived(id);
-      for (const id of diff.droppedIds) simState.markPacketDropped(id);
-      for (const id of diff.queuedIds) simState.markPacketQueued(id);
-      for (const id of diff.processingIds) simState.markPacketProcessing(id);
+      // 3. Apply the diff to the store in a single batch
+      simState.applySimulationDiff({
+        newPackets,
+        progressUpdates: diff.progressUpdates,
+        arrivedIds: diff.arrivedIds,
+        droppedIds: diff.droppedIds,
+        queuedIds: diff.queuedIds,
+        processingIds: diff.processingIds,
+      });
 
       // 4. Push node and edge metrics to store
       if (diff.nodeMetrics.size > 0) {

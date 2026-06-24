@@ -64,6 +64,14 @@ interface SimulationActions {
   reset: () => void;
 
   // Packet mutations — called by SimulationEngine only
+  applySimulationDiff: (diff: {
+    newPackets: Packet[];
+    progressUpdates: Map<string, number>;
+    arrivedIds: string[];
+    droppedIds: string[];
+    queuedIds: string[];
+    processingIds: string[];
+  }) => void;
   addPacket: (packet: Packet) => void;
   updatePacketProgress: (id: string, progress: number) => void;
   markPacketArrived: (id: string) => void;
@@ -143,6 +151,62 @@ export const useSimulationStore = create<SimulationStore>()(
           s.gatewayStates = {};
           s.nodeMetrics = {};
           s.edgeMetrics = {};
+        }),
+
+      applySimulationDiff: (diff) =>
+        set((s) => {
+          // 1. New packets
+          for (const p of diff.newPackets) {
+            s.packets[p.id] = p;
+            s.stats.totalSent += 1;
+          }
+
+          // 2. Progress updates
+          for (const [id, progress] of diff.progressUpdates) {
+            const p = s.packets[id];
+            if (p && p.status === "traveling") p.progress = progress;
+          }
+
+          // 3. Arrived
+          const now = performance.now();
+          for (const id of diff.arrivedIds) {
+            const p = s.packets[id];
+            if (!p) continue;
+            p.status = "arrived";
+            p.progress = 1;
+            
+            const latency = now - p.createdAt;
+            s.stats.totalArrived += 1;
+            s.stats._latencyBuffer.push(latency);
+          }
+          // Fix latency rolling window if arrived added any
+          if (diff.arrivedIds.length > 0) {
+            while (s.stats._latencyBuffer.length > ROLLING_WINDOW) {
+              s.stats._latencyBuffer.shift();
+            }
+            const sum = s.stats._latencyBuffer.reduce((a, b) => a + b, 0);
+            s.stats.avgLatencyMs = sum / s.stats._latencyBuffer.length || 0;
+          }
+
+          // 4. Dropped
+          for (const id of diff.droppedIds) {
+            const p = s.packets[id];
+            if (!p) continue;
+            p.status = "dropped";
+            s.stats.totalDropped += 1;
+          }
+
+          // 5. Queued
+          for (const id of diff.queuedIds) {
+            const p = s.packets[id];
+            if (p) p.status = "queued";
+          }
+
+          // 6. Processing
+          for (const id of diff.processingIds) {
+            const p = s.packets[id];
+            if (p) p.status = "processing";
+          }
         }),
 
       addPacket: (packet) =>

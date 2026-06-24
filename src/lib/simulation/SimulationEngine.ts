@@ -26,7 +26,7 @@ const PROTOCOL_COLORS: Record<string, number> = {
   UDP:  0xef9f27, WebSocket: 0xd85a30,
 };
 
-const DEFAULT_SPEED_PX_PER_SECOND = 720;
+const DEFAULT_SPEED_PX_PER_SECOND = 360;
 
 // ─────────────────────────────────────────────
 // Public types
@@ -86,6 +86,10 @@ export class SimulationEngine {
 
   /** Edge flow tracker for throughput calculation */
   private edgeFlowWindows    = new Map<string, { requests: number; timestamp: number }[]>();
+
+  /** Caches to prevent heavy math/DOM operations at high volumes */
+  private routeCache         = new Map<string, { edgeIds: string[]; nodeIds: string[] }>();
+  private waypointCache      = new Map<string, WorldPoint[]>();
 
   /** Timer for pushing gateway states to Zustand (once/sec) */
   private gatewayPushTimer   = 0;
@@ -473,6 +477,16 @@ export class SimulationEngine {
     gatewayId?: string,
     retryCount: number = 0,
   ): void {
+    const cacheKey = `${sourceId}->${targetId}`;
+    if (this.routeCache.has(cacheKey)) {
+      const { edgeIds, nodeIds } = this.routeCache.get(cacheKey)!;
+      // High volume fast path: skip worker completely if route is known
+      queueMicrotask(() => {
+        this.createPacketFromPath({ sourceId, targetId, protocol, gatewayId, retryCount }, edgeIds, nodeIds);
+      });
+      return;
+    }
+
     const requestId = nanoid();
     this.pendingRequests.set(requestId, { sourceId, targetId, protocol, gatewayId, retryCount });
 
@@ -499,6 +513,10 @@ export class SimulationEngine {
 
     // One frame delay ensures React Flow has rendered the edge SVG
     requestAnimationFrame(() => {
+      // Cache the result for subsequent packets to skip the worker
+      const cacheKey = `${pending.sourceId}->${pending.targetId}`;
+      this.routeCache.set(cacheKey, { edgeIds, nodeIds });
+
       this.createPacketFromPath(pending, edgeIds, nodeIds);
     });
   }
@@ -511,9 +529,14 @@ export class SimulationEngine {
     const { nodes, edges, viewport } = useCanvasStore.getState();
 
     let waypoints: WorldPoint[];
+    const pathKey = edgeIds.join(",");
 
-    if (edgeIds.length > 0) {
+    if (this.waypointCache.has(pathKey)) {
+      waypoints = this.waypointCache.get(pathKey)!;
+    } else if (edgeIds.length > 0) {
       waypoints = extractMultiEdgePath(edgeIds, viewport, nodes, edges);
+      // Cache the DOM-extracted waypoints to prevent layout thrashing
+      this.waypointCache.set(pathKey, waypoints);
     } else {
       waypoints = [];
     }
@@ -638,6 +661,12 @@ export class SimulationEngine {
     this.bufferedNewPackets.length = 0;
     this.nodeStates.clear();
     this.edgeFlowWindows.clear();
+    this.clearCaches();
+  }
+
+  clearCaches(): void {
+    this.routeCache.clear();
+    this.waypointCache.clear();
   }
 
   /** Reset all node processing states (called on simulation reset) */
@@ -646,5 +675,6 @@ export class SimulationEngine {
       state.reset();
     }
     this.edgeFlowWindows.clear();
+    this.clearCaches();
   }
 }

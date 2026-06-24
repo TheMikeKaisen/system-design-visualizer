@@ -30,6 +30,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import type { NodeKind, SystemEdge, SystemNode } from "@/types";
 import { nanoid } from "nanoid";
 import { useCanvasCursor } from "@/hooks/useCanvasCursor";
+import { EmptyCanvasState } from "./EmptyCanvasState";
 
 export function CanvasRoot() {
   const {
@@ -197,6 +198,7 @@ export function CanvasRoot() {
           <Controls position="bottom-right" />
         </ReactFlow>
 
+        <EmptyCanvasState />
         <SimulationOverlay />
       </div>
     </CanvasErrorBoundary>
