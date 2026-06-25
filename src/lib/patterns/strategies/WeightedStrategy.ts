@@ -25,9 +25,17 @@ export class WeightedStrategy implements IRoutingStrategy {
 
     if (candidates.length === 1) return candidates[0];
 
-    // Read weight from metadata, default to 1 if not set
+    // Read weightingType from the source Load Balancer, default to 'static'
+    const weightingType = _source.data.metadata?.weightingType ?? "static";
+
     const weights = candidates.map((node) => {
-      const w = Number(node.data.metadata.weight ?? 1);
+      if (weightingType === "capacity") {
+        const cap = node.data.capacity?.maxConcurrent ?? 1;
+        return cap > 0 ? cap : 1;
+      }
+      
+      // Default to static weight
+      const w = Number(node.data.metadata?.weight ?? 1);
       return isFinite(w) && w > 0 ? w : 1;
     });
 

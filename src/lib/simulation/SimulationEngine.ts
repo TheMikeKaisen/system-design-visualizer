@@ -70,6 +70,7 @@ export class SimulationEngine {
   private strategy:   IRoutingStrategy;
   private onPathReady: OnPathReadyCallback;
   private evaluator:  MiddlewareEvaluator;
+  private nodeStrategies = new Map<string, { kind: RoutingStrategyKind, strategy: IRoutingStrategy }>();
 
   private packetSpeeds       = new Map<string, number>();
   private pendingRequests    = new Map<string, {
@@ -112,6 +113,20 @@ export class SimulationEngine {
 
   setStrategy(kind: RoutingStrategyKind): void {
     this.strategy = buildStrategy(kind);
+  }
+
+  private getStrategyForNode(node: SystemNode): IRoutingStrategy {
+    if (node.data.kind === "loadBalancer") {
+      const kind = (node.data.metadata?.algorithm as RoutingStrategyKind) || "roundRobin";
+      const cached = this.nodeStrategies.get(node.id);
+      if (cached && cached.kind === kind) {
+        return cached.strategy;
+      }
+      const newStrategy = buildStrategy(kind);
+      this.nodeStrategies.set(node.id, { kind, strategy: newStrategy });
+      return newStrategy;
+    }
+    return this.strategy;
   }
 
   // ─────────────────────────────────────────────
@@ -402,7 +417,8 @@ export class SimulationEngine {
     const candidates   = nodes.filter((n) => candidateIds.has(n.id));
     if (!candidates.length) return;
 
-    const target  = this.strategy.selectTarget(sourceNode, candidates, edges);
+    const strategy = this.getStrategyForNode(sourceNode);
+    const target  = strategy.selectTarget(sourceNode, candidates, edges);
     const outEdge = outEdges.find((e) => e.target === target.id);
     const protocol = outEdge?.data?.protocol ?? "HTTP";
 
@@ -457,7 +473,8 @@ export class SimulationEngine {
       while (remainingToSpawn > 0) {
         remainingToSpawn -= 1;
 
-        const target  = this.strategy.selectTarget(sourceNode, candidates, edges);
+        const strategy = this.getStrategyForNode(sourceNode);
+        const target  = strategy.selectTarget(sourceNode, candidates, edges);
         const outEdge = outEdges.find((e) => e.target === target.id);
         const protocol = outEdge?.data?.protocol ?? "HTTP";
 
@@ -663,6 +680,7 @@ export class SimulationEngine {
     this.packetsToDrop.clear();
     this.nodeStates.clear();
     this.edgeFlowWindows.clear();
+    this.nodeStrategies.clear();
     this.clearCaches();
   }
 

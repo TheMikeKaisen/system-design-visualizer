@@ -26,6 +26,19 @@ export function useAutoSave() {
   }, []);
 
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (useDiagramStore.getState().isDirty) {
+        useDiagramStore.getState().save();
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
     // Subscribe imperatively — avoids triggering React re-renders
     const unsubNodes = useCanvasStore.subscribe(
       (s) => s.nodes,

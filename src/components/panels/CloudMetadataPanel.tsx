@@ -25,6 +25,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "region",  label: "Region", type: "select",
       options: ["us-east-1","us-west-2","eu-west-1","ap-southeast-1","ap-northeast-1"] },
     { key: "ami",     label: "AMI",    type: "text" },
+    { key: "weight",  label: "Routing Weight", type: "number", min: 1, max: 100 },
   ],
   awsRds: [
     { key: "engine", label: "Engine", type: "select",
@@ -50,6 +51,11 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "memoryMb", label: "Memory (MB)", type: "select",
       options: ["128","256","512","1024","2048","3008","10240"] },
     { key: "timeoutS", label: "Timeout (s)", type: "number", min: 1, max: 900 },
+    { key: "weight",   label: "Routing Weight", type: "number", min: 1, max: 100 },
+  ],
+  service: [
+    { key: "replicas", label: "Replicas", type: "number", min: 1, max: 100 },
+    { key: "weight", label: "Routing Weight", type: "number", min: 1, max: 100 },
   ],
   awsSqs: [
     { key: "type",             label: "Queue type",         type: "select", options: ["Standard","FIFO"] },
@@ -62,6 +68,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "minInstances", label: "Min instances", type: "number", min: 0, max: 100 },
     { key: "maxInstances", label: "Max instances", type: "number", min: 1, max: 1000 },
     { key: "memoryMb",     label: "Memory (MB)",   type: "select", options: ["128","256","512","1024","2048","4096","8192"] },
+    { key: "weight",       label: "Routing Weight", type: "number", min: 1, max: 100 },
   ],
   gcpCloudSql: [
     { key: "engine", label: "Engine", type: "select", options: ["postgres14","postgres15","mysql8","sqlserver2019"] },
@@ -87,6 +94,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "region",   label: "Region",    type: "select",
       options: ["eastus","westus2","westeurope","eastasia","australiaeast"] },
     { key: "os",       label: "OS",        type: "select", options: ["Ubuntu 22.04","Windows Server 2022","RHEL 9"] },
+    { key: "weight",   label: "Routing Weight", type: "number", min: 1, max: 100 },
   ],
   azureSql: [
     { key: "tier",     label: "Tier",     type: "select", options: ["Basic","Standard","Premium","GeneralPurpose","BusinessCritical"] },
@@ -109,6 +117,10 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "throttle",   label: "Throttle (req/s)", type: "number", min: 0, max: 100000 },
     { key: "cacheEnabled", label: "Response cache", type: "select", options: ["false","true"] },
   ],
+  loadBalancer: [
+    { key: "algorithm", label: "Routing Strategy", type: "select", options: ["roundRobin", "leastConnections", "weighted"] },
+    { key: "weightingType", label: "Weighting Type", type: "select", options: ["static", "capacity"] }
+  ],
 };
 
 // ─── Component ────────────────────────────────────────────────────────
@@ -124,8 +136,8 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
     localValues[`cap_${key}`] ?? String(node.data.capacity?.[key] ?? "");
 
   const commit = useCallback(
-    (key: string, value: string) => {
-      setLocalValues((p) => ({ ...p, [key]: value }));
+    (key: string, value: string | number) => {
+      setLocalValues((p) => ({ ...p, [key]: String(value) }));
       commandInvoker.execute(
         new UpdateNodeDataCommand(
           node.id,
@@ -185,7 +197,10 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
               min={field.min}
               max={field.max}
               value={getValue(field.key)}
-              onChange={(e) => commit(field.key, e.target.value)}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                commit(field.key, isNaN(val) ? e.target.value : val);
+              }}
               className="text-xs bg-transparent border border-border rounded px-2 py-1.5
                          text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />

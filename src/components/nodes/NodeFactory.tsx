@@ -33,7 +33,7 @@ const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["dat
   // General
   client:            { label: "Client",             metadata: { type: "browser" } },
   service:           { label: "Service",            metadata: { replicas: 1 } },
-  loadBalancer:      { label: "Load balancer",       metadata: { algorithm: "round-robin" } },
+  loadBalancer:      { label: "Load balancer",       metadata: { algorithm: "roundRobin", weightingType: "static" } },
   database:          { label: "Database",            metadata: { engine: "postgres" } },
   s3Bucket:          { label: "S3 Bucket",           metadata: { region: "us-east-1" } },
   cache:             { label: "Cache",               metadata: { engine: "redis" } },
