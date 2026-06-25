@@ -77,6 +77,7 @@ export class SimulationEngine {
   }>();
   private spawnAccumulators  = new Map<string, number>();
   private bufferedNewPackets: Packet[] = [];
+  private packetsToDrop      = new Set<string>();
 
   /** Tracks which gateway a packet last traversed (for CB feedback) */
   private packetGateways     = new Map<string, string>();
@@ -203,17 +204,17 @@ export class SimulationEngine {
       if (!metrics) continue;
 
       const speed  = this.packetSpeeds.get(id) ?? DEFAULT_SPEED_PX_PER_SECOND;
-      const edgeER = this.getEdgeErrorRate(packet, edges);
 
       if (packet.progress < 1) {
-        const dp          = deltaProgress(deltaMs, speed, metrics.totalLength);
-        const newProgress = packet.progress + dp;
-
-        // Random edge packet loss
-        if (Math.random() < edgeER * (deltaMs / 1000)) {
+        // Drop packet if it failed the initial edge traversal roll
+        if (this.packetsToDrop.has(id)) {
+          this.packetsToDrop.delete(id);
           this.handlePacketDropped(id, packet, nowMs, maxRetries, nodes, edges, result);
           continue;
         }
+
+        const dp          = deltaProgress(deltaMs, speed, metrics.totalLength);
+        const newProgress = packet.progress + dp;
 
         if (newProgress >= 1) {
           // Packet has arrived at its target
@@ -559,6 +560,13 @@ export class SimulationEngine {
     const protocol  = pending.protocol as Packet["protocol"];
     const packetId  = nanoid();
 
+    // Evaluate edge error rate once when packet enters edge
+    const edge = edges.find((e) => e.source === pending.sourceId && e.target === pending.targetId);
+    const edgeER = edge?.data?.errorRate ?? 0;
+    if (Math.random() < edgeER) {
+      this.packetsToDrop.add(packetId);
+    }
+
     // Calculate throughput for the first edge in the path
     // For simplicity, we use sourceId-targetId as the edge identifier for throughput tracking
     // If the path is multi-hop, this tracks the conceptual flow between source and target
@@ -640,13 +648,6 @@ export class SimulationEngine {
     return packets;
   }
 
-  private getEdgeErrorRate(packet: Packet, edges: SystemEdge[]): number {
-    const edge = edges.find(
-      (e) => e.source === packet.sourceId && e.target === packet.targetId
-    );
-    return edge?.data?.errorRate ?? 0;
-  }
-
   // ─────────────────────────────────────────────
   // Teardown
   // ─────────────────────────────────────────────
@@ -659,6 +660,7 @@ export class SimulationEngine {
     this.spawnAccumulators.clear();
     this.packetGateways.clear();
     this.bufferedNewPackets.length = 0;
+    this.packetsToDrop.clear();
     this.nodeStates.clear();
     this.edgeFlowWindows.clear();
     this.clearCaches();
@@ -675,6 +677,7 @@ export class SimulationEngine {
       state.reset();
     }
     this.edgeFlowWindows.clear();
+    this.packetsToDrop.clear();
     this.clearCaches();
   }
 }
