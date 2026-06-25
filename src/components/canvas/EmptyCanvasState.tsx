@@ -1,6 +1,7 @@
 "use client";
 
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useDiagramStore } from "@/lib/store/useDiagramStore";
 import { useSimulationStore } from "@/lib/store/useSimulationStore";
 import { commandInvoker } from "@/lib/store/useHistoryStore";
 import { AddNodeCommand } from "@/lib/patterns/commands/AddNodeCommand";
@@ -12,8 +13,9 @@ import type { SystemEdge } from "@/types";
 export function EmptyCanvasState() {
   const nodes = useCanvasStore((s) => s.nodes);
   const startSimulation = useSimulationStore((s) => s.start);
+  const isInitialized = useDiagramStore((s) => s.isInitialized);
 
-  if (nodes.length > 0) return null;
+  if (!isInitialized || nodes.length > 0) return null;
 
   const handleLoadExample = () => {
     // 1. Create nodes

@@ -28,6 +28,8 @@ function newMeta(name = "Untitled diagram"): DiagramMeta {
 
 interface DiagramState {
   meta: DiagramMeta;
+  /** True when the diagram has finished loading from persistence */
+  isInitialized: boolean;
   /** True when canvas has changes not yet written to any storage layer */
   isDirty: boolean;
   /** Timestamp of last successful save (any layer). null = never saved. */
@@ -62,6 +64,7 @@ type DiagramStore = DiagramState & DiagramActions;
 
 export const useDiagramStore = create<DiagramStore>((set, get) => ({
   meta:        newMeta(),
+  isInitialized: false,
   isDirty:     false,
   lastSavedAt: null,
   savedList:   [],
@@ -69,7 +72,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
   newDiagram: (name = "Untitled diagram") => {
     const meta = newMeta(name);
-    set({ meta, isDirty: false, lastSavedAt: null });
+    set({ meta, isInitialized: true, isDirty: false, lastSavedAt: null });
     // Clear canvas
     useCanvasStore.getState().onNodesChange(
       useCanvasStore.getState().nodes.map((n) => ({ type: "remove", id: n.id }))
@@ -97,6 +100,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
     canvas.setViewport(diagram.viewport);
 
     set({
+      isInitialized: true,
       meta:        diagram.meta,
       isDirty:     false,
       lastSavedAt: Date.now(),

@@ -31,6 +31,7 @@ import type { NodeKind, SystemEdge, SystemNode } from "@/types";
 import { nanoid } from "nanoid";
 import { useCanvasCursor } from "@/hooks/useCanvasCursor";
 import { EmptyCanvasState } from "./EmptyCanvasState";
+import { CanvasInitializationOverlay } from "./CanvasInitializationOverlay";
 
 export function CanvasRoot() {
   const {
@@ -199,6 +200,7 @@ export function CanvasRoot() {
         </ReactFlow>
 
         <EmptyCanvasState />
+        <CanvasInitializationOverlay />
         <SimulationOverlay />
       </div>
     </CanvasErrorBoundary>
