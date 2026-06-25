@@ -1,5 +1,40 @@
 
 import { useSimulationStore } from "@/lib/store/useSimulationStore";
+import type { SystemNode } from "@/types";
+
+export function NodeHoverCard({ data, isRunning, selected }: { data: SystemNode["data"]; isRunning: boolean; selected?: boolean }) {
+  if (isRunning || selected) return null;
+
+  const parts: { label: string; value: string | number }[] = [];
+  if (data.capacity) {
+    parts.push({ label: "Max Concurrent", value: data.capacity.maxConcurrent });
+    parts.push({ label: "Queue Limit", value: data.capacity.queueLimit });
+    parts.push({ label: "Process Time", value: `${data.capacity.processingTimeMs}ms` });
+  }
+  if (data.metadata) {
+    for (const [k, v] of Object.entries(data.metadata)) {
+      if (v !== undefined && v !== "" && k !== "replicas") {
+        const key = k.charAt(0).toUpperCase() + k.slice(1).replace(/([A-Z])/g, ' $1');
+        parts.push({ label: key, value: v as string | number });
+      }
+    }
+  }
+
+  if (parts.length === 0) return null;
+
+  return (
+    <div className="absolute top-[110%] left-1/2 -translate-x-1/2 min-w-[180px] opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-75 pointer-events-none z-[100]">
+      <div className="bg-popover border border-border rounded-lg shadow-xl p-3 text-xs flex flex-col gap-1.5">
+        {parts.map((p, i) => (
+          <div key={i} className="flex justify-between items-center gap-3">
+            <span className="text-muted-foreground font-medium whitespace-nowrap">{p.label}</span>
+            <span className="text-foreground font-semibold text-right">{p.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function LoadGlow({ load, colorHex }: { load: number; colorHex: string }) {
   return (

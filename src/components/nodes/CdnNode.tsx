@@ -3,20 +3,23 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts } from "./SharedPrimitives";
+import { NodeMetricsAlerts , NodeHoverCard } from "./SharedPrimitives";
 import { LoadGlow } from "./SharedPrimitives";
+import { useSimulationStore } from "@/lib/store/useSimulationStore";
 
 export const CdnNode = memo(function CdnNode({
   id,
   data,
   selected,
 }: NodeProps<SystemNode>) {
+  const isRunning = useSimulationStore((s) => s.isRunning);
   return (
-    <div className={cn(
-      "relative flex flex-col gap-1 rounded-xl border bg-background px-4 py-3 min-w-[160px]",
+    <div      className={cn(
+        "group relative flex flex-col gap-1 rounded-xl border bg-background px-4 py-3 min-w-[160px]",
       selected ? "border-teal-400 ring-1 ring-teal-400/20 shadow-lg shadow-teal-200/50" : "border-border hover:border-teal-300"
     )}>
       <NodeMetricsAlerts nodeId={id} />
+      <NodeHoverCard data={data} isRunning={isRunning} selected={selected} />
       <LoadGlow load={data.load} colorHex="#2dd4bf" />
       <div className="flex items-center gap-2">
         <CdnIcon className="size-4 text-teal-500 shrink-0" />

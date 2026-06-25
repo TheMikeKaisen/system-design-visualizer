@@ -3,8 +3,9 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts, NodeQueueMetrics, NodeQueuePipe } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics, NodeQueuePipe , NodeHoverCard } from "./SharedPrimitives";
 import { LBIcon, LoadGlow } from "./SharedPrimitives";
+import { useSimulationStore } from "@/lib/store/useSimulationStore";
 
 const STRATEGY_LABELS: Record<string, string> = {
   "round-robin":       "Round robin",
@@ -17,12 +18,14 @@ export const LoadBalancerNode = memo(function LoadBalancerNode({
   data,
   selected,
 }: NodeProps<SystemNode>) {
+  const isRunning = useSimulationStore((s) => s.isRunning);
   return (
-    <div className={cn(
-      "relative flex flex-col justify-center gap-1 rounded-xl border bg-background px-4 h-[60px] min-w-[170px]",
+    <div      className={cn(
+        "group relative flex flex-col justify-center gap-1 rounded-xl border bg-background px-4 h-[60px] min-w-[170px]",
       selected ? "border-purple-500 ring-1 ring-purple-500/20" : "border-border hover:border-purple-300"
     )}>
       <NodeMetricsAlerts nodeId={id} />
+      <NodeHoverCard data={data} isRunning={isRunning} selected={selected} />
       <NodeQueuePipe nodeId={id} />
       <LoadGlow load={data.load} colorHex="#a855f7" />
       <div className="flex items-center gap-2">

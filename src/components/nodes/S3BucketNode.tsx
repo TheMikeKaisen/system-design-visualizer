@@ -3,20 +3,23 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts, NodeQueuePipe } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueuePipe , NodeHoverCard } from "./SharedPrimitives";
 import { LoadGlow, S3Icon } from "./SharedPrimitives";
+import { useSimulationStore } from "@/lib/store/useSimulationStore";
 
 export const S3BucketNode = memo(function S3BucketNode({
   id,
   data,
   selected,
 }: NodeProps<SystemNode>) {
+  const isRunning = useSimulationStore((s) => s.isRunning);
   return (
-    <div className={cn(
-      "relative flex flex-col gap-1 rounded-xl border bg-background px-4 py-3 min-w-[160px]",
+    <div      className={cn(
+        "group relative flex flex-col gap-1 rounded-xl border bg-background px-4 py-3 min-w-[160px]",
       selected ? "border-orange-400 ring-1 ring-orange-400/20" : "border-border hover:border-orange-300"
     )}>
       <NodeMetricsAlerts nodeId={id} />
+      <NodeHoverCard data={data} isRunning={isRunning} selected={selected} />
       <NodeQueuePipe nodeId={id} />
       <LoadGlow load={data.load} colorHex="#fb923c" />
       <div className="flex items-center gap-2">

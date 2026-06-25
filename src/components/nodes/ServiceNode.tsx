@@ -4,19 +4,20 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { SystemNode } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts, NodeQueueMetrics, LoadGlow, NodeQueuePipe } from "./SharedPrimitives";
+import { NodeMetricsAlerts, NodeQueueMetrics, LoadGlow, NodeQueuePipe , NodeHoverCard } from "./SharedPrimitives";
+import { useSimulationStore } from "@/lib/store/useSimulationStore";
 
 export const ServiceNode = memo(function ServiceNode({
   id,
   data,
   selected,
 }: NodeProps<SystemNode>) {
+  const isRunning = useSimulationStore((s) => s.isRunning);
   const loadColor = getLoadColor(data.load);
 
   return (
-    <div
-      className={cn(
-        "relative flex flex-col justify-center rounded-xl border bg-background px-4",
+    <div      className={cn(
+        "group relative flex flex-col justify-center rounded-xl border bg-background px-4",
         "h-[60px] min-w-[160px] shadow-sm transition-shadow",
         selected
           ? "border-blue-500 shadow-blue-200/50 shadow-lg"
@@ -24,6 +25,7 @@ export const ServiceNode = memo(function ServiceNode({
       )}
     >
       <NodeMetricsAlerts nodeId={id} />
+      <NodeHoverCard data={data} isRunning={isRunning} selected={selected} />
       <NodeQueuePipe nodeId={id} />
       {/* Load indicator glow */}
       <LoadGlow load={data.load} colorHex={loadColor} />

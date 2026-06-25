@@ -7,7 +7,7 @@ import { commandInvoker }     from "@/lib/store/useHistoryStore";
 import { UpdateNodeDataCommand } from "@/lib/patterns/commands/UpdateNodeDataCommand";
 import type { SystemNode, SystemNodeData, MiddlewareStep, CircuitBreakerState } from "@/types";
 import { cn } from "@/lib/utils";
-import { NodeMetricsAlerts } from "./SharedPrimitives";
+import { NodeMetricsAlerts , NodeHoverCard } from "./SharedPrimitives";
 import { ApiGatewayIcon } from "./icons/CloudIcons";
 
 // ─── Middleware step config ───────────────────────────────────────────
@@ -50,6 +50,7 @@ function serializeChain(steps: MiddlewareStep[]): string {
 export const ApiGatewayNode = memo(function ApiGatewayNode({
   data, selected, id,
 }: NodeProps<SystemNode>) {
+  const isRunning = useSimulationStore((s) => s.isRunning);
   const chain   = parseChain(data.metadata);
   const gwState = useSimulationStore((s) => s.gatewayStates[id]);
   const cbBadge = gwState ? CB_BADGE[gwState.cbState] : null;
@@ -94,14 +95,15 @@ export const ApiGatewayNode = memo(function ApiGatewayNode({
   }, [id, chain, data.metadata]);
 
   return (
-    <div className={cn(
-      "relative flex flex-col gap-2 rounded-xl border bg-background px-4 py-3",
+    <div      className={cn(
+        "group relative flex flex-col gap-2 rounded-xl border bg-background px-4 py-3",
       "min-w-[280px] max-w-[420px]",
       selected
         ? "border-violet-500 ring-1 ring-violet-500/20"
         : "border-violet-300/50 hover:border-violet-400"
     )}>
       <NodeMetricsAlerts nodeId={id} />
+      <NodeHoverCard data={data} isRunning={isRunning} selected={selected} />
       {/* Load bar */}
       <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl overflow-hidden bg-muted">
         <div className="h-full transition-all duration-500 bg-violet-500"
