@@ -21,7 +21,10 @@ export function DiagramNameInput() {
     }
     if (trimmed !== meta.name) {
       rename(trimmed);
-      save();
+      const success = save();
+      if (!success) {
+        window.alert("Failed to save diagram name. Local storage might be full. Please free some space.");
+      }
     }
   }, [draft, meta.name, rename, save]);
 

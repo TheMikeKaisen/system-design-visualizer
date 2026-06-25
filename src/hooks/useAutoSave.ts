@@ -21,14 +21,20 @@ export function useAutoSave() {
 
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      useDiagramStore.getState().save();
+      const success = useDiagramStore.getState().save();
+      if (!success) {
+        window.alert("Failed to auto-save diagram. Local storage might be full. Please free some space to avoid losing your work.");
+      }
     }, DEBOUNCE_MS);
   }, []);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (useDiagramStore.getState().isDirty) {
-        useDiagramStore.getState().save();
+        const success = useDiagramStore.getState().save();
+        if (!success) {
+          window.alert("Failed to save diagram before leaving. Local storage might be full.");
+        }
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
