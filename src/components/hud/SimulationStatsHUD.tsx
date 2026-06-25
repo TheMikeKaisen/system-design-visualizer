@@ -50,8 +50,8 @@ export function SimulationStatsHUD() {
       {/* Average latency */}
       <Stat
         label="avg latency"
-        value={`${stats.avgLatencyMs.toFixed(0)}ms`}
-        highlight={stats.avgLatencyMs > 500}
+        value={stats.totalArrived > 0 ? `${stats.avgLatencyMs.toFixed(0)}ms` : "—"}
+        highlight={stats.totalArrived > 0 && stats.avgLatencyMs > 500}
       />
 
       <Divider />
