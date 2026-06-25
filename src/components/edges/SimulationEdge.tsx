@@ -109,7 +109,7 @@ export const SimulationEdge = memo(function SimulationEdge({
           opacity,
           strokeDasharray: errorRate > 0.1 ? "6 3" : undefined,
           filter: isHighTraffic ? `drop-shadow(0 0 4px ${edgeColor})` : undefined,
-          transition: "all 1.5s ease-out"
+          transition: "stroke 1.5s ease-out, stroke-width 1.5s ease-out, opacity 1.5s ease-out, filter 1.5s ease-out"
         }}
       />
 
@@ -132,7 +132,7 @@ export const SimulationEdge = memo(function SimulationEdge({
               borderColor: isHighTraffic ? edgeColor : `${edgeColor}44`, 
               color: isHighTraffic ? edgeColor : color,
               boxShadow: isHighTraffic ? `0 0 8px ${edgeColor}40` : "none",
-              transition: "all 1.5s ease-out"
+              transition: "border-color 1.5s ease-out, color 1.5s ease-out, box-shadow 1.5s ease-out"
             }}
           >
             {isHighTraffic ? (
