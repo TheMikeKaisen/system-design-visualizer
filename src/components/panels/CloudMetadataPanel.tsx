@@ -54,7 +54,6 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "weight",   label: "Routing Weight", type: "number", min: 1, max: 100 },
   ],
   service: [
-    { key: "replicas", label: "Replicas", type: "number", min: 1, max: 100 },
     { key: "weight", label: "Routing Weight", type: "number", min: 1, max: 100 },
   ],
   awsSqs: [

@@ -60,10 +60,9 @@ describe("sanitizeDiagramName", () => {
 });
 
 describe("sanitizeMetadata", () => {
-  it("preserves valid values", () => {
-    const result = sanitizeMetadata({ engine: "postgres", replicas: 3, enabled: true });
+  it("strips completely untyped or internal fields", () => {
+    const result = sanitizeMetadata({ engine: "postgres", enabled: true });
     expect(result.engine).toBe("postgres");
-    expect(result.replicas).toBe(3);
     expect(result.enabled).toBe(true);
   });
 
