@@ -62,7 +62,7 @@ export function SimulationControls() {
       <button
         onClick={reset}
         disabled={isRunning}
-        title="Reset simulation"
+        title={isRunning ? "Stop simulation before resetting" : "Reset simulation"}
         className="px-2.5 py-1.5 rounded-md text-xs text-muted-foreground
                    hover:text-foreground hover:bg-accent
                    disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
