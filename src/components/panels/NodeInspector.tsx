@@ -3,19 +3,25 @@
 import { useState, useCallback } from "react";
 import type { SystemNode } from "@/types";
 import { getCloudProvider } from "@/types";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+
 import { CloudMetadataPanel } from "./CloudMetadataPanel";
 
+import { commandInvoker } from "@/lib/store/useHistoryStore";
+import { UpdateNodeDataCommand } from "@/lib/patterns/commands/UpdateNodeDataCommand";
+
 export function NodeInspector({ node }: { node: SystemNode }) {
-  const { updateNodeData } = useCanvasStore();
   const [labelDraft, setLabelDraft] = useState(node.data.label);
   const provider = getCloudProvider(node.data.kind);
 
   const commitLabel = useCallback(() => {
     const trimmed = labelDraft.trim();
     if (!trimmed) { setLabelDraft(node.data.label); return; }
-    if (trimmed !== node.data.label) updateNodeData(node.id, { label: trimmed });
-  }, [labelDraft, node.data.label, node.id, updateNodeData]);
+    if (trimmed !== node.data.label) {
+      commandInvoker.execute(
+        new UpdateNodeDataCommand(node.id, { label: node.data.label }, { label: trimmed })
+      );
+    }
+  }, [labelDraft, node.data.label, node.id]);
 
   const loadPct   = Math.round(node.data.load * 100);
   const loadColor =
