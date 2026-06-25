@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect, useRef } from "react";
 import type { NodeKind } from "@/types";
+import { useSimulation } from "@/hooks/useSimulation";
 import {
   AwsEc2Icon, AwsRdsIcon, AwsElastiCacheIcon, AwsCloudFrontIcon,
   AwsLambdaIcon, AwsSqsIcon,
@@ -99,6 +100,17 @@ export function NodePalette() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { isRunning } = useSimulation();
+  const hasAutoSwitched = useRef(false);
+
+  useEffect(() => {
+    if (isRunning && !hasAutoSwitched.current) {
+      setActiveTab("controls");
+      setSidebarCollapsed(false);
+      hasAutoSwitched.current = true;
+    }
+  }, [isRunning]);
 
   const toggleSection = useCallback((id: string) => {
     setCollapsed((prev) => {
