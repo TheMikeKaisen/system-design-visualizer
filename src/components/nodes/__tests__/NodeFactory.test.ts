@@ -16,6 +16,17 @@ describe("createNode", () => {
     expect(node.data.label).toBe("Auth Service");
   });
 
+  it("assigns default metadata for each kind", () => {
+    const serviceNode = createNode({ kind: "service" });
+    expect(serviceNode.data.metadata).toEqual({});
+
+    const dbNode = createNode({ kind: "database" });
+    expect(dbNode.data.metadata).toEqual({ engine: "postgres" });
+
+    const clientNode = createNode({ kind: "client" });
+    expect(clientNode.data.metadata).toEqual({ type: "browser" });
+  });
+
   it("uses forceId when provided", () => {
     const node = createNode({ kind: "service", forceId: "my-stable-id" });
     expect(node.id).toBe("my-stable-id");
