@@ -70,38 +70,35 @@ export const SimulationEdge = memo(function SimulationEdge({
   return (
     <>
       {/* High traffic glow */}
-      {isHighTraffic && (
-        <>
-          <path
-            d={edgePath}
-            fill="none"
-            stroke={edgeGlowColor}
-            strokeWidth={16}
-            opacity={0.15}
-            className="pointer-events-none animate-pulse"
-          />
-          <path
-            d={edgePath}
-            fill="none"
-            stroke={edgeGlowColor}
-            strokeWidth={8}
-            opacity={0.3}
-            className="pointer-events-none"
-          />
-        </>
-      )}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke={edgeGlowColor}
+        strokeWidth={16}
+        opacity={isHighTraffic ? 0.15 : 0}
+        className={`pointer-events-none ${isHighTraffic ? 'animate-pulse' : ''}`}
+        style={{ transition: "stroke 1.5s ease-out, opacity 1.5s ease-out" }}
+      />
+      <path
+        d={edgePath}
+        fill="none"
+        stroke={edgeGlowColor}
+        strokeWidth={8}
+        opacity={isHighTraffic ? 0.3 : 0}
+        className="pointer-events-none"
+        style={{ transition: "stroke 1.5s ease-out, opacity 1.5s ease-out" }}
+      />
 
       {/* Normal Active traffic glow — rendered behind the edge */}
-      {hasActiveTraffic && !isHighTraffic && (
-        <path
-          d={edgePath}
-          fill="none"
-          stroke={edgeGlowColor}
-          strokeWidth={8}
-          opacity={0.08}
-          className="pointer-events-none"
-        />
-      )}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke={edgeGlowColor}
+        strokeWidth={8}
+        opacity={hasActiveTraffic && !isHighTraffic ? 0.08 : 0}
+        className="pointer-events-none"
+        style={{ transition: "stroke 1.5s ease-out, opacity 1.5s ease-out" }}
+      />
 
       <BaseEdge
         path={edgePath}
@@ -112,6 +109,7 @@ export const SimulationEdge = memo(function SimulationEdge({
           opacity,
           strokeDasharray: errorRate > 0.1 ? "6 3" : undefined,
           filter: isHighTraffic ? `drop-shadow(0 0 4px ${edgeColor})` : undefined,
+          transition: "all 1.5s ease-out"
         }}
       />
 
@@ -128,12 +126,13 @@ export const SimulationEdge = memo(function SimulationEdge({
           <div
             className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px]
                        font-medium border bg-background/90 backdrop-blur-sm
-                       cursor-pointer hover:scale-105 transition-transform
+                       cursor-pointer hover:scale-105
                        ${isHighTraffic ? "shadow-sm" : ""}`}
             style={{ 
               borderColor: isHighTraffic ? edgeColor : `${edgeColor}44`, 
               color: isHighTraffic ? edgeColor : color,
-              boxShadow: isHighTraffic ? `0 0 8px ${edgeColor}40` : "none"
+              boxShadow: isHighTraffic ? `0 0 8px ${edgeColor}40` : "none",
+              transition: "all 1.5s ease-out"
             }}
           >
             {isHighTraffic ? (
