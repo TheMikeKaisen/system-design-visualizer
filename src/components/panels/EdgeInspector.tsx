@@ -5,6 +5,10 @@ import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { commandInvoker } from "@/lib/store/useHistoryStore";
 import { UpdateEdgeDataCommand } from "@/lib/patterns/commands/UpdateEdgeDataCommand";
 import type { SystemEdge, Protocol } from "@/types";
+import { Select } from "@/components/ui/Select";
+import { Input } from "@/components/ui/Input";
+import { RangeSlider } from "@/components/ui/RangeSlider";
+import { Waypoints } from "lucide-react";
 
 const PROTOCOLS: Protocol[] = ["HTTP", "gRPC", "TCP", "UDP", "WebSocket"];
 
@@ -22,55 +26,54 @@ export function EdgeInspector({ edge }: { edge: SystemEdge }) {
   );
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <div>
-        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
-          Edge
-        </p>
-        <p className="text-xs text-muted-foreground font-mono truncate">
+    <div className="flex flex-col gap-4 p-5">
+      <div className="bg-white/5 p-4 rounded-xl border border-white/5 shadow-sm">
+        <div className="flex items-center gap-2 mb-1.5">
+          <Waypoints className="w-3.5 h-3.5 text-muted-foreground" />
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+            Edge Connection
+          </p>
+        </div>
+        <p className="text-xs text-zinc-300 font-mono truncate">
           {edge.source} → {edge.target}
         </p>
       </div>
 
       {/* Protocol */}
       <Field label="Protocol">
-        <select
+        <Select
           value={data.protocol}
           onChange={(e) => update({ protocol: e.target.value as Protocol })}
-          className="w-full text-xs bg-transparent border border-border rounded px-2 py-1.5
-                     text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
         >
           {PROTOCOLS.map((p) => (
-            <option key={p} value={p}>{p}</option>
+            <option key={p} value={p} className="bg-zinc-900 text-zinc-100">{p}</option>
           ))}
-        </select>
+        </Select>
       </Field>
 
       {/* Latency */}
       <Field label={`Latency — ${data.latencyMs}ms`}>
-        <input
-          type="range"
+        <RangeSlider
           min={0} max={2000} step={10}
           value={data.latencyMs}
           onChange={(e) => update({ latencyMs: parseInt(e.target.value) })}
-          className="w-full accent-primary"
+          thumbColor="blue"
         />
       </Field>
 
       {/* Error rate */}
       <Field label={`Error rate — ${Math.round(data.errorRate * 100)}%`}>
-        <input
-          type="range"
+        <RangeSlider
           min={0} max={1} step={0.01}
           value={data.errorRate}
           onChange={(e) => update({ errorRate: parseFloat(e.target.value) })}
-          className="w-full accent-destructive"
+          thumbColor="destructive"
         />
       </Field>
 
       {/* Throughput limit */}
       <Field label="Throughput limit (pkt/s)">
-        <input
+        <Input
           type="number"
           min={0}
           placeholder="Unlimited"
@@ -80,9 +83,6 @@ export function EdgeInspector({ edge }: { edge: SystemEdge }) {
               throughputLimit: e.target.value ? parseInt(e.target.value) : null,
             })
           }
-          className="w-full text-xs bg-transparent border border-border rounded px-2 py-1.5
-                     text-foreground placeholder:text-muted-foreground
-                     focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </Field>
     </div>

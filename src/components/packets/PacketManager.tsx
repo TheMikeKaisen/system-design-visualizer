@@ -25,6 +25,7 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
    * Keyed by packetId. Populated via onPathReady, cleaned up with prune.
    */
   const pathMetricsRef = useRef<Map<string, PathMetrics>>(new Map());
+  const lastSyncTimeRef = useRef<number>(0);
 
   // ── Bootstrap ─────────────────────────────────────────
 
@@ -151,36 +152,42 @@ export function PacketManager({ app, packetStage }: PacketManagerProps) {
         processingIds: diff.processingIds,
       });
 
-      // 4. Push node and edge metrics to store
-      if (diff.nodeMetrics.size > 0) {
-        const metricsObj: Record<string, import("@/types").NodeMetrics> = {};
-        for (const [nodeId, m] of diff.nodeMetrics) {
-          metricsObj[nodeId] = m;
-        }
-        simState.setNodeMetrics(metricsObj);
-      }
+      // 4 & 5. Throttle UI metric pushes to 1 time a second (1000ms)
+      const now = performance.now();
+      if (now - lastSyncTimeRef.current > 1000) {
+        lastSyncTimeRef.current = now;
 
-      if (diff.edgeMetrics.size > 0) {
-        const edgeMetricsObj: Record<string, { throughputPerSec: number }> = {};
-        for (const [edgeId, m] of diff.edgeMetrics) {
-          edgeMetricsObj[edgeId] = m;
+        if (diff.nodeMetrics.size > 0) {
+          const metricsObj: Record<string, import("@/types").NodeMetrics> = {};
+          for (const [nodeId, m] of diff.nodeMetrics) {
+            metricsObj[nodeId] = m;
+          }
+          simState.setNodeMetrics(metricsObj);
         }
-        simState.setEdgeMetrics(edgeMetricsObj);
-      }
 
-      // 5. Sync node active connections + load from CPU utilization
-      const targetCounts = new Map<string, number>();
-      for (const p of Object.values(simState.packets)) {
-        if (p.status === "traveling" || p.status === "queued" || p.status === "processing") {
-          targetCounts.set(p.targetId, (targetCounts.get(p.targetId) || 0) + 1);
+        if (diff.edgeMetrics.size > 0) {
+          const edgeMetricsObj: Record<string, { throughputPerSec: number }> = {};
+          for (const [edgeId, m] of diff.edgeMetrics) {
+            edgeMetricsObj[edgeId] = m;
+          }
+          simState.setEdgeMetrics(edgeMetricsObj);
         }
-      }
-      for (const node of canvasState.nodes) {
-        const count = targetCounts.get(node.id) || 0;
-        const metrics = diff.nodeMetrics.get(node.id);
-        const newLoad = metrics ? metrics.cpuUtilization : 0;
-        if (node.data.activeConnections !== count || Math.abs(node.data.load - newLoad) > 0.01) {
-          canvasState.updateNodeData(node.id, { activeConnections: count, load: newLoad });
+
+        // Sync node active connections + load from CPU utilization
+        const targetCounts = new Map<string, number>();
+        for (const p in simState.packets) {
+          const packet = simState.packets[p];
+          if (packet.status === "traveling" || packet.status === "queued" || packet.status === "processing") {
+            targetCounts.set(packet.targetId, (targetCounts.get(packet.targetId) || 0) + 1);
+          }
+        }
+        for (const node of canvasState.nodes) {
+          const count = targetCounts.get(node.id) || 0;
+          const metrics = diff.nodeMetrics.get(node.id);
+          const newLoad = metrics ? metrics.cpuUtilization : 0;
+          if (node.data.activeConnections !== count || Math.abs(node.data.load - newLoad) > 0.01) {
+            canvasState.updateNodeData(node.id, { activeConnections: count, load: newLoad });
+          }
         }
       }
 

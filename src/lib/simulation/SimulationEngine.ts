@@ -86,8 +86,8 @@ export class SimulationEngine {
   /** Per-node processing state (queues, active slots) */
   private nodeStates         = new Map<string, NodeProcessingState>();
 
-  /** Edge flow tracker for throughput calculation */
-  private edgeFlowWindows    = new Map<string, { requests: number; timestamp: number }[]>();
+  /** Edge flow tracker for throughput calculation (10 x 100ms buckets) */
+  private edgeFlowTrackers   = new Map<string, { buckets: Int32Array; lastTimeDecisecond: number; total: number }>();
 
   /** Caches to prevent heavy math/DOM operations at high volumes */
   private routeCache         = new Map<string, { edgeIds: string[]; nodeIds: string[] }>();
@@ -142,6 +142,7 @@ export class SimulationEngine {
     config:      TrafficConfig,
   ): SimulationTickResult {
     const nowMs  = performance.now();
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const result: SimulationTickResult = {
       newPackets:      this.drainBufferedPackets(packets, nodes),
       progressUpdates: new Map(),
@@ -157,13 +158,13 @@ export class SimulationEngine {
     this.ensureNodeStates(nodes);
 
     // 1. Process completed packets at nodes → forward downstream
-    this.tickNodeProcessing(nowMs, config.requestTimeoutMs, config.maxRetries, packets, nodes, edges, result);
+    this.tickNodeProcessing(nowMs, config.requestTimeoutMs, config.maxRetries, packets, nodes, nodeMap, edges, result);
 
     // 2. Advance traveling packets along edges
-    this.advancePackets(deltaMs, nowMs, config.maxRetries, packets, pathMetrics, edges, nodes, result);
+    this.advancePackets(deltaMs, nowMs, config.maxRetries, packets, pathMetrics, edges, nodes, nodeMap, result);
 
     // 3. Spawn new packets from source nodes
-    this.spawnPackets(deltaMs, nowMs, nodes, edges, config);
+    this.spawnPackets(deltaMs, nowMs, nodes, nodeMap, edges, config);
 
     // 4. Collect per-node and per-edge metrics
     for (const [nodeId, state] of this.nodeStates) {
@@ -171,12 +172,8 @@ export class SimulationEngine {
       result.nodeMetrics.set(nodeId, state.getMetrics());
     }
 
-    for (const [edgeId, window] of this.edgeFlowWindows) {
-      // Clean up old entries
-      while (window.length > 0 && nowMs - window[0].timestamp > 1000) {
-        window.shift();
-      }
-      const throughputPerSec = window.reduce((sum, entry) => sum + entry.requests, 0);
+    for (const edgeId of this.edgeFlowTrackers.keys()) {
+      const throughputPerSec = this.updateAndGetThroughput(edgeId, nowMs, 0);
       result.edgeMetrics.set(edgeId, { throughputPerSec });
     }
 
@@ -208,10 +205,9 @@ export class SimulationEngine {
     pathMetrics: Map<string, PathMetrics>,
     edges:       SystemEdge[],
     nodes:       SystemNode[],
+    nodeMap:     Map<string, SystemNode>,
     result:      SimulationTickResult,
   ): void {
-    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
-
     for (const [id, packet] of Object.entries(packets)) {
       if (packet.status !== "traveling") continue;
 
@@ -256,7 +252,7 @@ export class SimulationEngine {
                 this.packetSpeeds.delete(id);
                 this.packetGateways.delete(id);
                 // Admit through capacity system
-                this.admitPacketAtNode(id, packet, targetNode, nowMs, maxRetries, nodes, edges, result);
+                this.admitPacketAtNode(id, packet, targetNode, nowMs, maxRetries, nodes, nodeMap, edges, result);
                 continue;
               }
             }
@@ -265,7 +261,7 @@ export class SimulationEngine {
           // Non-gateway arrival — admit through capacity system
           this.packetSpeeds.delete(id);
           if (targetNode) {
-            this.admitPacketAtNode(id, packet, targetNode, nowMs, maxRetries, nodes, edges, result);
+            this.admitPacketAtNode(id, packet, targetNode, nowMs, maxRetries, nodes, nodeMap, edges, result);
           } else {
             result.arrivedIds.push(id);
           }
@@ -287,6 +283,7 @@ export class SimulationEngine {
     nowMs:      number,
     maxRetries: number,
     nodes:      SystemNode[],
+    nodeMap:    Map<string, SystemNode>,
     edges:      SystemEdge[],
     result:     SimulationTickResult,
   ): void {
@@ -295,7 +292,7 @@ export class SimulationEngine {
     if (!nodeState) {
       // No capacity config — pass through instantly
       result.arrivedIds.push(packetId);
-      this.forwardPacket(targetNode.id, nodes, edges);
+      this.forwardPacket(targetNode.id, nodes, nodeMap, edges);
       return;
     }
 
@@ -379,6 +376,7 @@ export class SimulationEngine {
     maxRetries:   number,
     allPackets:   Record<string, Packet>,
     nodes:        SystemNode[],
+    nodeMap:      Map<string, SystemNode>,
     edges:        SystemEdge[],
     result:       SimulationTickResult,
   ): void {
@@ -396,7 +394,7 @@ export class SimulationEngine {
         state.completePacket(packetId, nowMs);
         result.arrivedIds.push(packetId);
         // Forward to next hop
-        this.forwardPacket(state.nodeId, nodes, edges);
+        this.forwardPacket(state.nodeId, nodes, nodeMap, edges);
       }
     }
   }
@@ -404,9 +402,9 @@ export class SimulationEngine {
   private forwardPacket(
     sourceNodeId: string,
     nodes:        SystemNode[],
+    nodeMap:      Map<string, SystemNode>,
     edges:        SystemEdge[]
   ): void {
-    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const sourceNode = nodeMap.get(sourceNodeId);
     if (!sourceNode) return;
 
@@ -445,10 +443,10 @@ export class SimulationEngine {
     deltaMs: number,
     nowMs:   number,
     nodes:   SystemNode[],
+    nodeMap: Map<string, SystemNode>,
     edges:   SystemEdge[],
     config:  TrafficConfig,
   ): void {
-    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const multiplier = this.getTrafficMultiplier(config.trafficProfile, nowMs);
     const effectiveRate = config.packetsPerSecond * multiplier;
 
@@ -560,9 +558,8 @@ export class SimulationEngine {
     }
 
     if (waypoints.length < 2) {
-      const nodeMap   = new Map(nodes.map((n) => [n.id, n]));
       const nodeCenter = (id: string): WorldPoint => {
-        const node = nodeMap.get(id);
+        const node = nodes.find(n => n.id === id);
         if (!node) return { x: 0, y: 0 };
         return {
           x: node.position.x + (node.measured?.width  ?? 180) / 2,
@@ -588,22 +585,9 @@ export class SimulationEngine {
     // For simplicity, we use sourceId-targetId as the edge identifier for throughput tracking
     // If the path is multi-hop, this tracks the conceptual flow between source and target
     const edgeId = `${pending.sourceId}-${pending.targetId}`;
-    let window = this.edgeFlowWindows.get(edgeId);
-    if (!window) {
-      window = [];
-      this.edgeFlowWindows.set(edgeId, window);
-    }
-    
     const nowMs = performance.now();
-    window.push({ requests: 1, timestamp: nowMs });
     
-    // Clean up entries older than 1 second
-    while (window.length > 0 && nowMs - window[0].timestamp > 1000) {
-      window.shift();
-    }
-    
-    // Calculate current throughput
-    const throughputPerSec = window.reduce((sum, entry) => sum + entry.requests, 0);
+    const throughputPerSec = this.updateAndGetThroughput(edgeId, nowMs, 1);
     const isHidden = throughputPerSec > 100;
 
     const packet: Packet = {
@@ -665,6 +649,39 @@ export class SimulationEngine {
     return packets;
   }
 
+  private updateAndGetThroughput(edgeId: string, nowMs: number, addCount: number): number {
+    let tracker = this.edgeFlowTrackers.get(edgeId);
+    const currentDeci = Math.floor(nowMs / 100);
+
+    if (!tracker) {
+      tracker = {
+        buckets: new Int32Array(10),
+        lastTimeDecisecond: currentDeci,
+        total: 0
+      };
+      this.edgeFlowTrackers.set(edgeId, tracker);
+    }
+
+    const diff = currentDeci - tracker.lastTimeDecisecond;
+    if (diff > 0) {
+      const bucketsToClear = Math.min(diff, 10);
+      for (let i = 1; i <= bucketsToClear; i++) {
+        const idx = (tracker.lastTimeDecisecond + i) % 10;
+        tracker.total -= tracker.buckets[idx];
+        tracker.buckets[idx] = 0;
+      }
+      tracker.lastTimeDecisecond = currentDeci;
+    }
+
+    if (addCount > 0) {
+      const idx = currentDeci % 10;
+      tracker.buckets[idx] += addCount;
+      tracker.total += addCount;
+    }
+
+    return tracker.total;
+  }
+
   // ─────────────────────────────────────────────
   // Teardown
   // ─────────────────────────────────────────────
@@ -679,7 +696,7 @@ export class SimulationEngine {
     this.bufferedNewPackets.length = 0;
     this.packetsToDrop.clear();
     this.nodeStates.clear();
-    this.edgeFlowWindows.clear();
+    this.edgeFlowTrackers.clear();
     this.nodeStrategies.clear();
     this.clearCaches();
   }
@@ -694,7 +711,7 @@ export class SimulationEngine {
     for (const state of this.nodeStates.values()) {
       state.reset();
     }
-    this.edgeFlowWindows.clear();
+    this.edgeFlowTrackers.clear();
     this.packetsToDrop.clear();
     this.clearCaches();
   }

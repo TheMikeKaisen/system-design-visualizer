@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import type { SystemNode } from "@/types";
 import { getCloudProvider } from "@/types";
+import { Cpu } from "lucide-react";
 
 import { CloudMetadataPanel } from "./CloudMetadataPanel";
 
@@ -39,21 +40,23 @@ export function NodeInspector({ node }: { node: SystemNode }) {
   return (
     <div className="flex flex-col">
       {/* Identity */}
-      <div className="px-4 pt-4 pb-3">
-        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
-          {node.data.kind}
-        </p>
+      <div className="px-4 pt-5 pb-4 bg-white/5 border-b border-white/5">
+        <div className="flex items-center gap-2 mb-2">
+          <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+            {node.data.kind}
+          </p>
+        </div>
         <input
           value={labelDraft}
           onChange={(e) => setLabelDraft(e.target.value)}
           onBlur={commitLabel}
           onKeyDown={(e) => e.key === "Enter" && commitLabel()}
-          className="w-full text-sm font-medium bg-transparent border-0 border-b pb-1
-                     text-foreground focus:outline-none transition-colors"
+          className="w-full text-lg font-semibold bg-transparent border-0 border-b-2 pb-1
+                     text-foreground focus:outline-none transition-colors hover:border-white/20 focus:border-white/40"
           style={{
-            borderColor:       accentColor ?? "var(--color-border-tertiary)",
-            "--tw-border-opacity": 1,
-          } as React.CSSProperties}
+            borderColor: accentColor ?? "rgba(255, 255, 255, 0.1)",
+          }}
         />
       </div>
       <CloudMetadataPanel node={node} />

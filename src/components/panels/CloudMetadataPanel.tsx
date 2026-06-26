@@ -2,8 +2,9 @@
 
 import { useCallback, useState } from "react";
 import type { SystemNode, NodeKind } from "@/types";
-import { commandInvoker } from "@/lib/store/useHistoryStore";
 import { UpdateNodeDataCommand } from "@/lib/patterns/commands/UpdateNodeDataCommand";
+import { Select } from "@/components/ui/Select";
+import { Input } from "@/components/ui/Input";
 
 // ─── Field definitions per NodeKind ───────────────────────────────────
 
@@ -170,124 +171,116 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
   if (fields.length === 0 && !node.data.capacity) return null;
 
   return (
-    <div className="flex flex-col gap-3 px-4 py-3 border-t border-border">
-      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-        Configuration
-      </p>
+    <div className="flex flex-col gap-4 px-4 py-4 border-t border-white/10">
+      <div className="flex flex-col gap-3 bg-white/5 p-3.5 rounded-xl border border-white/5 shadow-sm">
+        <p className="text-[11px] font-semibold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary/80"></span>
+          Configuration
+        </p>
 
-      {fields.map((field) => (
-        <div key={field.key} className="flex flex-col gap-1">
-          <label className="text-[10px] text-muted-foreground">{field.label}</label>
+        {fields.map((field) => (
+          <div key={field.key} className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-medium text-muted-foreground">{field.label}</label>
 
-          {field.type === "select" ? (
-            <select
-              value={getValue(field.key)}
-              onChange={(e) => commit(field.key, e.target.value)}
-              className="text-xs bg-transparent border border-border rounded px-2 py-1.5
-                         text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              {field.options!.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          ) : field.type === "number" ? (
-            <input
-              type="number"
-              min={field.min}
-              max={field.max}
-              value={getValue(field.key)}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                commit(field.key, isNaN(val) ? e.target.value : val);
-              }}
-              className="text-xs bg-transparent border border-border rounded px-2 py-1.5
-                         text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          ) : (
-            <input
-              type="text"
-              value={getValue(field.key)}
-              onChange={(e) => setLocalValues((p) => ({ ...p, [field.key]: e.target.value }))}
-              onBlur={(e) => commit(field.key, e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && commit(field.key, (e.target as HTMLInputElement).value)}
-              className="text-xs bg-transparent border border-border rounded px-2 py-1.5
-                         text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          )}
-        </div>
-      ))}
+            {field.type === "select" ? (
+              <Select
+                value={getValue(field.key)}
+                onChange={(e) => commit(field.key, e.target.value)}
+              >
+                {field.options!.map((opt) => (
+                  <option key={opt} value={opt} className="bg-zinc-900 text-zinc-100">{opt}</option>
+                ))}
+              </Select>
+            ) : field.type === "number" ? (
+              <Input
+                type="number"
+                min={field.min}
+                max={field.max}
+                value={getValue(field.key)}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  commit(field.key, isNaN(val) ? e.target.value : val);
+                }}
+              />
+            ) : (
+              <Input
+                type="text"
+                value={getValue(field.key)}
+                onChange={(e) => setLocalValues((p) => ({ ...p, [field.key]: e.target.value }))}
+                onBlur={(e) => commit(field.key, e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && commit(field.key, (e.target as HTMLInputElement).value)}
+              />
+            )}
+          </div>
+        ))}
+      </div>
 
       {node.data.capacity && (
-        <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-border/50">
-          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+        <div className="flex flex-col gap-3 bg-white/5 p-3.5 rounded-xl border border-white/5 shadow-sm">
+          <p className="text-[11px] font-semibold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80"></span>
             Capacity & Limits
           </p>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-muted-foreground">CPU Cores</label>
-              <input
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-medium text-muted-foreground">CPU Cores</label>
+              <Input
                 type="number" min="1" max="64"
                 value={getCapValue("cpuCores")}
                 onChange={(e) => commitCap("cpuCores", e.target.value)}
-                className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-muted-foreground">Memory (MB)</label>
-              <select
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-medium text-muted-foreground">Memory (MB)</label>
+              <Select
                 value={getCapValue("memoryMB")}
                 onChange={(e) => commitCap("memoryMB", e.target.value)}
-                className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
               >
-                <option value="512">512 MB</option>
-                <option value="1024">1 GB</option>
-                <option value="2048">2 GB</option>
-                <option value="4096">4 GB</option>
-                <option value="8192">8 GB</option>
-                <option value="16384">16 GB</option>
-                <option value="32768">32 GB</option>
-              </select>
+                <option value="512" className="bg-zinc-900 text-zinc-100">512 MB</option>
+                <option value="1024" className="bg-zinc-900 text-zinc-100">1 GB</option>
+                <option value="2048" className="bg-zinc-900 text-zinc-100">2 GB</option>
+                <option value="4096" className="bg-zinc-900 text-zinc-100">4 GB</option>
+                <option value="8192" className="bg-zinc-900 text-zinc-100">8 GB</option>
+                <option value="16384" className="bg-zinc-900 text-zinc-100">16 GB</option>
+                <option value="32768" className="bg-zinc-900 text-zinc-100">32 GB</option>
+              </Select>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-muted-foreground">Max Concurrent Requests</label>
-            <input
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-medium text-muted-foreground">Max Concurrent Requests</label>
+            <Input
               type="number" min="1" max="100000"
               value={getCapValue("maxConcurrent")}
               onChange={(e) => commitCap("maxConcurrent", e.target.value)}
-              className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-muted-foreground">Queue Limit</label>
-            <input
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-medium text-muted-foreground">Queue Limit</label>
+            <Input
               type="number" min="0" max="1000000"
               value={getCapValue("queueLimit")}
               onChange={(e) => commitCap("queueLimit", e.target.value)}
-              className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-muted-foreground">Process Time (ms)</label>
-              <input
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-medium text-muted-foreground">Process Time (ms)</label>
+              <Input
                 type="number" min="1" max="10000"
                 value={getCapValue("processingTimeMs")}
                 onChange={(e) => commitCap("processingTimeMs", e.target.value)}
-                className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-muted-foreground">Mem / Req (MB)</label>
-              <input
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-medium text-muted-foreground">Mem / Req (MB)</label>
+              <Input
                 type="number" min="0.1" max="1024" step="0.1"
                 value={getCapValue("memoryPerRequestMB")}
                 onChange={(e) => commitCap("memoryPerRequestMB", e.target.value)}
-                className="text-xs bg-transparent border border-border rounded px-2 py-1.5 focus:ring-1 focus:ring-primary w-full"
               />
             </div>
           </div>
