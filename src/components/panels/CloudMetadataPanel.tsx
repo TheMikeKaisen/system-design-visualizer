@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import type { SystemNode, NodeKind } from "@/types";
 import { UpdateNodeDataCommand } from "@/lib/patterns/commands/UpdateNodeDataCommand";
+import { commandInvoker } from "@/lib/store/useHistoryStore";
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 
