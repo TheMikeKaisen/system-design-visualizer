@@ -27,14 +27,14 @@ export function EdgeInspector({ edge }: { edge: SystemEdge }) {
 
   return (
     <div className="flex flex-col gap-4 p-5">
-      <div className="bg-white/5 p-4 rounded-xl border border-white/5 shadow-sm">
+      <div className="bg-black/5 dark:bg-white/5 p-4 rounded-xl border border-black/5 dark:border-white/5 shadow-sm">
         <div className="flex items-center gap-2 mb-1.5">
           <Waypoints className="w-3.5 h-3.5 text-muted-foreground" />
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
             Edge Connection
           </p>
         </div>
-        <p className="text-xs text-zinc-300 font-mono truncate">
+        <p className="text-xs text-zinc-600 dark:text-zinc-300 font-mono truncate">
           {edge.source} → {edge.target}
         </p>
       </div>
@@ -46,7 +46,7 @@ export function EdgeInspector({ edge }: { edge: SystemEdge }) {
           onChange={(e) => update({ protocol: e.target.value as Protocol })}
         >
           {PROTOCOLS.map((p) => (
-            <option key={p} value={p} className="bg-zinc-900 text-zinc-100">{p}</option>
+            <option key={p} value={p} className="bg-white dark:bg-zinc-900 text-foreground">{p}</option>
           ))}
         </Select>
       </Field>

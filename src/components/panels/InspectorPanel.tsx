@@ -32,7 +32,7 @@ export function InspectorPanel() {
   }
 
   return (
-    <aside className="w-[260px] shrink-0 border-l border-white/10 bg-background/80 backdrop-blur-xl overflow-y-auto flex flex-col shadow-xl z-10">
+    <aside className="w-[260px] shrink-0 border-l border-black/10 dark:border-white/10 bg-background/80 backdrop-blur-xl overflow-y-auto flex flex-col shadow-xl z-10">
       {selectedNode ? (
         <>
           <NodeInspector key={selectedNode.id} node={selectedNode} />

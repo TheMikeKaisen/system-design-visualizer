@@ -9,7 +9,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       <div className="relative w-full">
         <select
           ref={ref}
-          className={`appearance-none w-full text-xs bg-black/20 backdrop-blur-md border border-white/10 rounded-lg pl-3 pr-8 py-2 text-zinc-100 placeholder:text-zinc-500 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all cursor-pointer ${className || ""}`}
+          className={`appearance-none w-full text-xs bg-black/5 dark:bg-black/20 backdrop-blur-md border border-black/10 dark:border-white/10 rounded-lg pl-3 pr-8 py-2 text-foreground placeholder:text-muted-foreground hover:border-black/20 dark:hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all cursor-pointer ${className || ""}`}
           {...props}
         >
           {children}

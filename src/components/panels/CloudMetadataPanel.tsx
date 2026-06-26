@@ -172,9 +172,9 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
   if (fields.length === 0 && !node.data.capacity) return null;
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-4 border-t border-white/10">
-      <div className="flex flex-col gap-3 bg-white/5 p-3.5 rounded-xl border border-white/5 shadow-sm">
-        <p className="text-[11px] font-semibold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
+    <div className="flex flex-col gap-4 px-4 py-4 border-t border-black/10 dark:border-white/10">
+      <div className="flex flex-col gap-3 bg-black/5 dark:bg-white/5 p-3.5 rounded-xl border border-black/5 dark:border-white/5 shadow-sm">
+        <p className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-widest flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-primary/80"></span>
           Configuration
         </p>
@@ -189,7 +189,7 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
                 onChange={(e) => commit(field.key, e.target.value)}
               >
                 {field.options!.map((opt) => (
-                  <option key={opt} value={opt} className="bg-zinc-900 text-zinc-100">{opt}</option>
+                  <option key={opt} value={opt} className="bg-white dark:bg-zinc-900 text-foreground">{opt}</option>
                 ))}
               </Select>
             ) : field.type === "number" ? (
@@ -217,8 +217,8 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
       </div>
 
       {node.data.capacity && (
-        <div className="flex flex-col gap-3 bg-white/5 p-3.5 rounded-xl border border-white/5 shadow-sm">
-          <p className="text-[11px] font-semibold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
+        <div className="flex flex-col gap-3 bg-black/5 dark:bg-white/5 p-3.5 rounded-xl border border-black/5 dark:border-white/5 shadow-sm">
+          <p className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-widest flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80"></span>
             Capacity & Limits
           </p>
@@ -238,13 +238,13 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
                 value={getCapValue("memoryMB")}
                 onChange={(e) => commitCap("memoryMB", e.target.value)}
               >
-                <option value="512" className="bg-zinc-900 text-zinc-100">512 MB</option>
-                <option value="1024" className="bg-zinc-900 text-zinc-100">1 GB</option>
-                <option value="2048" className="bg-zinc-900 text-zinc-100">2 GB</option>
-                <option value="4096" className="bg-zinc-900 text-zinc-100">4 GB</option>
-                <option value="8192" className="bg-zinc-900 text-zinc-100">8 GB</option>
-                <option value="16384" className="bg-zinc-900 text-zinc-100">16 GB</option>
-                <option value="32768" className="bg-zinc-900 text-zinc-100">32 GB</option>
+                <option value="512" className="bg-white dark:bg-zinc-900 text-foreground">512 MB</option>
+                <option value="1024" className="bg-white dark:bg-zinc-900 text-foreground">1 GB</option>
+                <option value="2048" className="bg-white dark:bg-zinc-900 text-foreground">2 GB</option>
+                <option value="4096" className="bg-white dark:bg-zinc-900 text-foreground">4 GB</option>
+                <option value="8192" className="bg-white dark:bg-zinc-900 text-foreground">8 GB</option>
+                <option value="16384" className="bg-white dark:bg-zinc-900 text-foreground">16 GB</option>
+                <option value="32768" className="bg-white dark:bg-zinc-900 text-foreground">32 GB</option>
               </Select>
             </div>
           </div>

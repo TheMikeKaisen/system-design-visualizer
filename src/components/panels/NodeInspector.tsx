@@ -39,8 +39,7 @@ export function NodeInspector({ node }: { node: SystemNode }) {
 
   return (
     <div className="flex flex-col">
-      {/* Identity */}
-      <div className="px-4 pt-5 pb-4 bg-white/5 border-b border-white/5">
+      <div className="px-4 pt-5 pb-4 bg-black/5 dark:bg-white/5 border-b border-black/10 dark:border-white/5">
         <div className="flex items-center gap-2 mb-2">
           <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -53,10 +52,8 @@ export function NodeInspector({ node }: { node: SystemNode }) {
           onBlur={commitLabel}
           onKeyDown={(e) => e.key === "Enter" && commitLabel()}
           className="w-full text-lg font-semibold bg-transparent border-0 border-b-2 pb-1
-                     text-foreground focus:outline-none transition-colors hover:border-white/20 focus:border-white/40"
-          style={{
-            borderColor: accentColor ?? "rgba(255, 255, 255, 0.1)",
-          }}
+                     text-foreground focus:outline-none transition-colors border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 focus:border-black/40 dark:focus:border-white/40"
+          style={accentColor ? { borderColor: accentColor } : {}}
         />
       </div>
       <CloudMetadataPanel node={node} />
