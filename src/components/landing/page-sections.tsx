@@ -3,36 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Logo } from "@/components/ui/Logo";
 import { HeroVisual } from "./hero-visual";
 import "./landing.css";
-
-/* ═══════════════════════════════════════════════════════════════
-   Logo — Three connected nodes forming a triangular topology
-   ═══════════════════════════════════════════════════════════════ */
-
-function Logo({ size = 28 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {/* Connection lines */}
-      <line x1="8" y1="24" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
-      <line x1="16" y1="6" x2="24" y2="24" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
-      <line x1="8" y1="24" x2="24" y2="24" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
-      {/* Nodes */}
-      <circle cx="16" cy="6" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="var(--color-background)" />
-      <circle cx="8" cy="24" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="var(--color-background)" />
-      <circle cx="24" cy="24" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="var(--color-background)" />
-      {/* Accent dot in center */}
-      <circle cx="16" cy="18" r="1.5" fill="oklch(0.55 0.12 260)" />
-    </svg>
-  );
-}
 
 /* ═══════════════════════════════════════════════════════════════
    Scroll-reveal hook (Intersection Observer)

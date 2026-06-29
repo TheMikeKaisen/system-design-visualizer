@@ -8,6 +8,8 @@ import { DiagramNameInput }   from "./DiagramNameInput";
 import { ExportControls }     from "./ExportControls";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ShortcutsModal } from "@/components/dialogs/ShortcutsModal";
+import { Logo } from "@/components/ui/Logo";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 interface ToolbarProps {
@@ -39,7 +41,9 @@ export function Toolbar({ user }: ToolbarProps) {
 
   return (
     <header className="flex items-center gap-2 px-4 h-13 border-b border-border bg-background shrink-0 z-20">
-      <LogoIcon />
+      <Link href="/" title="Home" className="flex items-center hover:opacity-80 transition-opacity">
+        <Logo size={20} />
+      </Link>
       <div className="w-px h-4 bg-border" />
       <DiagramControls />
       <div className="w-px h-4 bg-border" />
@@ -76,17 +80,6 @@ export function Toolbar({ user }: ToolbarProps) {
         <ShortcutsModal onClose={() => setIsShortcutsOpen(false)} />
       )}
     </header>
-  );
-}
-
-function LogoIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
-      <rect x="1" y="1" width="8" height="8" rx="2" fill="currentColor" opacity={0.8}/>
-      <rect x="11" y="1" width="8" height="8" rx="2" fill="currentColor" opacity={0.4}/>
-      <rect x="1" y="11" width="8" height="8" rx="2" fill="currentColor" opacity={0.4}/>
-      <rect x="11" y="11" width="8" height="8" rx="2" fill="currentColor" opacity={0.8}/>
-    </svg>
   );
 }
 
