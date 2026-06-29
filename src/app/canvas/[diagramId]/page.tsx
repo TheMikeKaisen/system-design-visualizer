@@ -1,4 +1,5 @@
 import { ReactFlowProvider } from "@xyflow/react";
+import { RotateCcw }         from "lucide-react";
 import { Toolbar }           from "@/components/toolbar/Toolbar";
 import { NodePalette }       from "@/components/toolbar/NodePalette";
 import { CanvasRoot }        from "@/components/canvas/CanvasRoot";
@@ -30,6 +31,15 @@ export default async function DiagramPage({ params }: Props) {
         <PresenceAvatars />
 
         <div className="flex flex-col h-screen overflow-hidden bg-background">
+          {/* Mobile Landscape Warning Overlay */}
+          <div className="md:hidden landscape:hidden fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+            <RotateCcw className="w-12 h-12 mb-4 text-muted-foreground animate-pulse" />
+            <h2 className="text-xl font-semibold mb-2 text-foreground">Rotate your device</h2>
+            <p className="text-muted-foreground text-sm max-w-[250px]">
+              Please rotate your device to landscape mode to use the canvas effectively.
+            </p>
+          </div>
+
           <Toolbar user={session?.user} />
 
           <div className="flex flex-1 overflow-hidden">

@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "System Design Visualizer",
-  description: "A fast, local-first tool for mapping out system architectures.",
+  title: "System Simulator — Design, Simulate, Understand",
+  description:
+    "An interactive platform for learning system design. Build distributed systems visually, simulate request flows, and understand how architectures behave.",
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";

@@ -1,0 +1,147 @@
+/* ═══════════════════════════════════════════════════════════
+   Landing Page — Scoped Styles & Animations
+   CSS-only. No JS animation libraries.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Scroll-reveal ──────────────────────────────────────── */
+.landing-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.landing-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children */
+.landing-reveal-stagger > .landing-reveal:nth-child(1) { transition-delay: 0ms; }
+.landing-reveal-stagger > .landing-reveal:nth-child(2) { transition-delay: 100ms; }
+.landing-reveal-stagger > .landing-reveal:nth-child(3) { transition-delay: 200ms; }
+.landing-reveal-stagger > .landing-reveal:nth-child(4) { transition-delay: 300ms; }
+.landing-reveal-stagger > .landing-reveal:nth-child(5) { transition-delay: 400ms; }
+
+/* ── Packet flow along SVG path ─────────────────────────── */
+@keyframes packet-flow {
+  0%   { offset-distance: 0%; opacity: 0; }
+  5%   { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+.packet-dot {
+  offset-rotate: 0deg;
+  animation: packet-flow 3s linear infinite;
+}
+.packet-dot-alt {
+  offset-rotate: 0deg;
+  animation: packet-flow 3.5s linear infinite;
+  animation-delay: 1.2s;
+}
+.packet-dot-slow {
+  offset-rotate: 0deg;
+  animation: packet-flow 4s linear infinite;
+  animation-delay: 0.6s;
+}
+
+/* ── Stroke draw animation ──────────────────────────────── */
+@keyframes stroke-draw {
+  from { stroke-dashoffset: 1000; }
+  to   { stroke-dashoffset: 0; }
+}
+.stroke-animate {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: stroke-draw 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Gentle floating ────────────────────────────────────── */
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+.float-gentle {
+  animation: gentle-float 6s ease-in-out infinite;
+}
+.float-gentle-delayed {
+  animation: gentle-float 6s ease-in-out infinite;
+  animation-delay: -2s;
+}
+.float-gentle-slow {
+  animation: gentle-float 8s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+/* ── Pulse ring on hero visual nodes ────────────────────── */
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+.pulse-ring {
+  animation: pulse-ring 2.5s ease-out infinite;
+}
+.pulse-ring-delayed {
+  animation: pulse-ring 2.5s ease-out infinite;
+  animation-delay: 1.25s;
+}
+
+/* ── Fade-in for hero on page load ──────────────────────── */
+@keyframes hero-fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-fade-in {
+  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.hero-fade-in-delayed {
+  opacity: 0;
+  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+}
+.hero-fade-in-delayed-2 {
+  opacity: 0;
+  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+}
+.hero-fade-in-delayed-3 {
+  opacity: 0;
+  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+}
+
+/* ── Subtle shimmer on CTA ──────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Nav blur backdrop ──────────────────────────────────── */
+.landing-nav {
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+
+/* ── Respect reduced-motion ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .landing-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .packet-dot,
+  .packet-dot-alt,
+  .packet-dot-slow,
+  .float-gentle,
+  .float-gentle-delayed,
+  .float-gentle-slow,
+  .pulse-ring,
+  .pulse-ring-delayed,
+  .hero-fade-in,
+  .hero-fade-in-delayed,
+  .hero-fade-in-delayed-2,
+  .hero-fade-in-delayed-3,
+  .stroke-animate {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    stroke-dashoffset: 0;
+  }
+}

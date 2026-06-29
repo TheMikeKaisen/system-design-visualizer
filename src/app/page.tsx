@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { LandingPage } from "@/components/landing/page-sections";
 
 export default function RootIndex() {
-  redirect("/canvas");
+  return <LandingPage />;
 }
