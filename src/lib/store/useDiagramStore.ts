@@ -95,9 +95,14 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
     canvas.onEdgesChange(
       canvas.edges.map((e) => ({ type: "remove", id: e.id }))
     );
-    diagram.nodes.forEach((n) => canvas.addNode(n));
-    diagram.edges.forEach((e) => canvas.restoreEdge(e));
+    
+    // Ensure nodes and edges are deselected upon loading
+    diagram.nodes.forEach((n) => canvas.addNode({ ...n, selected: false }));
+    diagram.edges.forEach((e) => canvas.restoreEdge({ ...e, selected: false }));
     canvas.setViewport(diagram.viewport);
+
+    canvas.setSelectedNodeIds([]);
+    canvas.setSelectedEdgeId(null);
 
     set({
       isInitialized: true,
