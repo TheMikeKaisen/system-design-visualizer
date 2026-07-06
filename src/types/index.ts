@@ -39,15 +39,19 @@ export type NodeKind =
   | "gcpPubSub"      | "gcpCloudCdn"  | "gcpCloudFunction"
   // Azure
   | "azureVm"        | "azureSql"     | "azureBlobStorage"
-  | "azureServiceBus"| "azureCdn"     | "azureFunction";
+  | "azureServiceBus"| "azureCdn"     | "azureFunction"
+  // Java Educational
+  | "javaSource"     | "javaCompiler" | "javaBytecode"
+  | "jvm"            | "javaMachineCode" | "javaCpu";
 
-export type CloudProvider = "aws" | "gcp" | "azure" | "general";
+export type CloudProvider = "aws" | "gcp" | "azure" | "general" | "educational";
 
 /** Determines which cloud badge to show on a node */
 export function getCloudProvider(kind: NodeKind): CloudProvider {
   if (kind.startsWith("aws"))   return "aws";
   if (kind.startsWith("gcp"))   return "gcp";
   if (kind.startsWith("azure")) return "azure";
+  if (kind.startsWith("java") || kind === "jvm") return "educational";
   return "general";
 }
 
@@ -110,12 +114,26 @@ export interface SystemNodeData extends Record<string, unknown> {
   capacity: NodeCapacity | null;
 
   /**
+   * Data specific to educational scenario nodes.
+   */
+  educational?: EducationalNodeData;
+
+  /**
    * Security policies attached to this node.
    * Packets passing through a secured node are evaluated against these.
    * Empty array = no enforcement (default, backward-compatible).
    * Populated in the Security phase.
    */
   securityPolicies: SecurityPolicy[];
+}
+
+export interface EducationalNodeData {
+  notes: {
+    whatIsIt: string;
+    whyNeeded: string;
+    whatIfMissing: string;
+    interviewTips: string;
+  };
 }
 
 

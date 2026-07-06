@@ -27,6 +27,9 @@ const KIND_PREFIX: Record<NodeKind, string> = {
   // Azure
   azureVm:       "avm",   azureSql:     "asql", azureBlobStorage: "blob",
   azureServiceBus:"asb",  azureCdn:     "acdn", azureFunction:    "afn",
+  // Java
+  javaSource:    "jsrc",  javaCompiler: "jcomp", javaBytecode:    "jbyte",
+  jvm:           "jvm",   javaMachineCode: "jmc", javaCpu:        "jcpu",
 };
 
 const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["data"]["metadata"] }> = {
@@ -61,6 +64,13 @@ const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["dat
   azureServiceBus:   { label: "Service Bus",         metadata: { tier: "Standard", queues: 1, topics: 0 } },
   azureCdn:          { label: "Azure CDN",           metadata: { sku: "Standard_Microsoft" } },
   azureFunction:     { label: "Azure Function",      metadata: { runtime: "node18", plan: "Consumption" } },
+  // Java
+  javaSource:        { label: "Java Source",         metadata: {} },
+  javaCompiler:      { label: "Java Compiler",       metadata: {} },
+  javaBytecode:      { label: "Java Bytecode",       metadata: {} },
+  jvm:               { label: "JVM",                 metadata: {} },
+  javaMachineCode:   { label: "Machine Code",        metadata: {} },
+  javaCpu:           { label: "CPU",                 metadata: {} },
 };
 
 // ─── Default capacity per node kind ───────────────────────────────────
@@ -106,6 +116,13 @@ const KIND_CAPACITIES: Record<NodeKind, NodeCapacity | null> = {
   azureServiceBus: CAP_QUEUE,
   azureCdn:        null,
   azureFunction:   CAP_LAMBDA,
+  // Java
+  javaSource:      null,
+  javaCompiler:    null,
+  javaBytecode:    null,
+  jvm:             null,
+  javaMachineCode: null,
+  javaCpu:         null,
 };
 
 interface CreateNodeOptions {

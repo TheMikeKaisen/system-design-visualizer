@@ -33,6 +33,13 @@ export { AzureServiceBusNode }   from "./cloud/AzureServiceBusNode";
 export { AzureCdnNode }          from "./cloud/AzureCdnNode";
 export { AzureFunctionNode }     from "./cloud/AzureFunctionNode";
 
+// Java
+import { JavaSourceNode }   from "./java/JavaSourceNode";
+import { JavaCompilerNode } from "./java/JavaCompilerNode";
+import { JavaBytecodeNode } from "./java/JavaBytecodeNode";
+import { JvmNode }          from "./java/JvmNode";
+import { JavaCpuNode }      from "./java/JavaCpuNode";
+
 // Edge
 export { SimulationEdge } from "@/components/edges/SimulationEdge";
 
@@ -67,6 +74,11 @@ export const nodeTypes = {
   azureServiceBus:  Nodes.AzureServiceBusNode,
   azureCdn:         Nodes.AzureCdnNode,
   azureFunction:    Nodes.AzureFunctionNode,
+  javaSource:       JavaSourceNode,
+  javaCompiler:     JavaCompilerNode,
+  javaBytecode:     JavaBytecodeNode,
+  jvm:              JvmNode,
+  javaCpu:          JavaCpuNode,
 } as const;
 
 export const edgeTypes = {

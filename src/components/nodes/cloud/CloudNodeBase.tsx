@@ -26,6 +26,14 @@ const PROVIDER_LABELS: Record<CloudProvider, string> = {
   general: "",
 };
 
+const cloudBadges: Record<CloudProvider, string> = {
+  aws: "/badges/aws.svg",
+  gcp: "/badges/gcp.svg",
+  azure: "/badges/azure.svg",
+  general: "",
+  educational: ""
+};
+
 interface CloudNodeBaseProps {
   data:      SystemNodeData;
   selected:  boolean;

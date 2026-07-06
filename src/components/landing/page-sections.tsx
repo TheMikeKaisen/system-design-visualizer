@@ -202,17 +202,13 @@ function Nav() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {/* Guided Learning — disabled */}
-          <button
-            disabled
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground/60 border border-border/50 rounded-lg cursor-not-allowed select-none"
-            aria-label="Guided Learning — coming soon"
+          {/* Guided Learning — enabled */}
+          <Link
+            href="/java"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground border border-border/50 rounded-lg hover:bg-muted/50 transition-colors"
           >
-            Guided Learning
-            <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase bg-muted text-muted-foreground rounded">
-              Soon
-            </span>
-          </button>
+            Learning Paths
+          </Link>
 
           {/* Open Canvas — primary */}
           <Link
@@ -272,18 +268,14 @@ function HeroSection() {
                 </svg>
               </Link>
 
-              {/* Secondary CTA — disabled */}
-              <button
-                disabled
-                className="group inline-flex items-center gap-2 px-6 py-3 text-base font-semibold text-muted-foreground/50 border border-border/60 rounded-xl cursor-not-allowed select-none"
-                aria-label="Guided Learning — coming soon"
+              {/* Secondary CTA — enabled */}
+              <Link
+                href="/java"
+                className="group inline-flex items-center gap-2 px-6 py-3 text-base font-semibold text-muted-foreground border border-border/60 rounded-xl hover:bg-muted/50 transition-colors"
                 id="hero-cta-guided"
               >
-                Guided Learning
-                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase bg-muted text-muted-foreground/60 rounded-md">
-                  Coming Soon
-                </span>
-              </button>
+                Learning Paths
+              </Link>
             </div>
           </div>
 
@@ -422,36 +414,75 @@ function GuidedLearningSection() {
   return (
     <section className="py-24 sm:py-32 border-t border-border/40" aria-labelledby="guided-heading">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="landing-reveal text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-5 text-xs font-semibold uppercase tracking-wider bg-muted text-muted-foreground rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
-            Coming Soon
+        <div className="landing-reveal text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-5 text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+            Now Available
           </div>
           <h2 id="guided-heading" className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            Guided Learning Paths
+            Explore Learning Paths
           </h2>
           <p className="mt-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Structured lessons that walk you through fundamental system design concepts. Each lesson builds on the canvas, guiding you step by step.
+            Structured lessons that walk you through fundamental system design concepts and language internals.
           </p>
         </div>
 
-        {/* Lesson preview cards — muted/locked state */}
-        <div className="landing-reveal-stagger grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
-          <LessonPreviewCard
-            number={1}
-            title="Client-Server Basics"
-            topics={["Request/Response", "HTTP Protocol", "Latency"]}
-          />
-          <LessonPreviewCard
-            number={2}
-            title="Load Balancing"
-            topics={["Round Robin", "Horizontal Scaling", "Health Checks"]}
-          />
-          <LessonPreviewCard
-            number={3}
-            title="Caching Strategies"
-            topics={["Cache Aside", "Write-Through", "TTL & Eviction"]}
-          />
+        <div className="landing-reveal-stagger grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {/* Active Route: Java */}
+          <Link href="/java" className="group">
+            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.2)] transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-orange-500/20 transition-all duration-300">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">Java Internals</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
+                Understand how Java code is compiled, converted to bytecode, and executed by the JVM and CPU.
+              </p>
+              <div className="flex items-center text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform">
+                Explore Java Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </div>
+          </Link>
+
+          {/* Locked Route: Computer Networks */}
+          <div className="relative p-6 sm:p-8 rounded-2xl border border-border/40 bg-card/50 opacity-70 select-none">
+            <div className="absolute top-4 right-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/50">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground mb-5">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 17h2a4 4 0 0 0 4-4V7a4 4 0 0 1 4-4h2"/><circle cx="5" cy="17" r="2"/><circle cx="19" cy="7" r="2"/></svg>
+            </div>
+            <h3 className="text-xl font-bold text-foreground/70 mb-3">Computer Networks</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground/70 mb-6">
+              Learn the foundations of networking: TCP/IP, DNS, Routing, and Load Balancing in real-time.
+            </p>
+            <div className="inline-block px-2 py-1 text-[10px] font-bold tracking-widest uppercase bg-muted text-muted-foreground rounded">
+              Coming Soon
+            </div>
+          </div>
+
+          {/* Locked Route: Database Internals */}
+          <div className="relative p-6 sm:p-8 rounded-2xl border border-border/40 bg-card/50 opacity-70 select-none hidden lg:block">
+            <div className="absolute top-4 right-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/50">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground mb-5">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <h3 className="text-xl font-bold text-foreground/70 mb-3">Database Internals</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground/70 mb-6">
+              Explore how databases store data, B-Trees, transaction logs, ACID properties, and sharding.
+            </p>
+            <div className="inline-block px-2 py-1 text-[10px] font-bold tracking-widest uppercase bg-muted text-muted-foreground rounded">
+              Coming Soon
+            </div>
+          </div>
         </div>
       </div>
     </section>
