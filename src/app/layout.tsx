@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "@xyflow/react/dist/style.css";
 import "./globals.css";
 
@@ -44,6 +45,7 @@ export default async function RootLayout({
           nonce={nonce}
         >
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
