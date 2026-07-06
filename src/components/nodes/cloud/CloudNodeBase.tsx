@@ -17,6 +17,7 @@ const PROVIDER_CONFIG: Record<
   gcp:     { badge: "bg-[#4285F4] text-white",       border: "border-[#4285F4]/30", borderSelected: "border-[#4285F4]", ring: "ring-[#4285F4]/20" },
   azure:   { badge: "bg-[#0078D4] text-white",       border: "border-[#0078D4]/30", borderSelected: "border-[#0078D4]", ring: "ring-[#0078D4]/20" },
   general: { badge: "bg-muted text-muted-foreground", border: "border-border",       borderSelected: "border-primary",  ring: "ring-primary/20" },
+  educational: { badge: "bg-orange-500/10 text-orange-500", border: "border-orange-500/30", borderSelected: "border-orange-500", ring: "ring-orange-500/20" }
 };
 
 const PROVIDER_LABELS: Record<CloudProvider, string> = {
@@ -24,6 +25,7 @@ const PROVIDER_LABELS: Record<CloudProvider, string> = {
   gcp:     "GCP",
   azure:   "Azure",
   general: "",
+  educational: "",
 };
 
 const cloudBadges: Record<CloudProvider, string> = {
