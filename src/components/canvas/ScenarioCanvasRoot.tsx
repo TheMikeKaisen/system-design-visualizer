@@ -16,6 +16,7 @@ import { CanvasErrorBoundary } from "./CanvasErrorBoundary";
 import { ScenarioToolbar } from "../scenario/ScenarioToolbar";
 import { ScenarioTimeline } from "../scenario/ScenarioTimeline";
 import { ScenarioContextPanel } from "../scenario/ScenarioContextPanel";
+import { ScenarioAssetOverlay } from "../scenario/ScenarioAssetOverlay";
 
 interface ScenarioCanvasRootProps {
   nodes: Node[];
@@ -60,6 +61,7 @@ export function ScenarioCanvasRoot({ nodes, edges }: ScenarioCanvasRootProps) {
                 colorMode={mounted ? ((resolvedTheme as "light" | "dark") || "light") : "light"}
               >
                 <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
+                <ScenarioAssetOverlay />
               </ReactFlow>
             </div>
             

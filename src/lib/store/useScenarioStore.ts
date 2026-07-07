@@ -14,14 +14,14 @@ interface ScenarioState {
   selectedNodeId: string | null;
 
   // Active step visuals
-  activeAssetAnimation: {
+  activeAssetAnimations: {
     id: string;
     sourceId: string;
     targetId: string;
-    assetType: "file" | "binary" | "gear";
+    assetType: "file" | "binary" | "gear" | "dot";
     durationMs: number;
     startTime: number;
-  } | null;
+  }[];
   activeCodeSnippet: {
     nodeId: string;
     code: string;
@@ -54,7 +54,7 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
   activeExperiments: [],
   selectedNodeId: null,
 
-  activeAssetAnimation: null,
+  activeAssetAnimations: [],
   activeCodeSnippet: null,
   activeTooltip: null,
   highlightedElementIds: new Set(),
@@ -63,7 +63,7 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
   loadScript: (script) => set({ 
     script, 
     currentStepIndex: 0,
-    activeAssetAnimation: null,
+    activeAssetAnimations: [],
     activeCodeSnippet: null,
     activeTooltip: null,
     highlightedElementIds: new Set(),
@@ -148,7 +148,7 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
   reset: () => {
     set({ 
       currentStepIndex: 0,
-      activeAssetAnimation: null,
+      activeAssetAnimations: [],
       activeCodeSnippet: null,
       activeTooltip: null,
       highlightedElementIds: new Set(),
@@ -159,10 +159,8 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
   },
 
   clearAnimation: (id) => {
-    const { activeAssetAnimation } = get();
-    if (activeAssetAnimation?.id === id) {
-      set({ activeAssetAnimation: null });
-    }
+    const { activeAssetAnimations } = get();
+    set({ activeAssetAnimations: activeAssetAnimations.filter(a => a.id !== id) });
   }
 }));
 
@@ -175,7 +173,7 @@ function applyStepActions(get: () => ScenarioState) {
   // Create new state objects to ensure reactivity
   const highlights = new Set<string>();
   const nodeStatuses: Record<string, NodeStatus> = {};
-  let newAnimation = null;
+  let newAnimations: ScenarioState["activeAssetAnimations"] = [];
   let newCode = null;
   let newTooltip = null;
 
@@ -185,14 +183,14 @@ function applyStepActions(get: () => ScenarioState) {
     } else if (action.action === "highlight") {
       action.elementIds.forEach(id => highlights.add(id));
     } else if (action.action === "animate-asset") {
-      newAnimation = {
+      newAnimations.push({
         id: Math.random().toString(36).substring(2, 11),
         sourceId: action.sourceId,
         targetId: action.targetId,
-        assetType: action.assetType,
+        assetType: action.assetType as any,
         durationMs: action.durationMs,
         startTime: Date.now()
-      };
+      });
     } else if (action.action === "show-code") {
       newCode = { nodeId: action.nodeId, code: action.codeSnippet };
     } else if (action.action === "node-status") {
@@ -204,7 +202,7 @@ function applyStepActions(get: () => ScenarioState) {
 
   useScenarioStore.setState({
     highlightedElementIds: highlights,
-    activeAssetAnimation: newAnimation,
+    activeAssetAnimations: newAnimations,
     activeCodeSnippet: newCode,
     activeTooltip: newTooltip,
     nodeStatuses

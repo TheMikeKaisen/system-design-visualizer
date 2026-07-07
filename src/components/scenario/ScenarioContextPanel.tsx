@@ -98,16 +98,27 @@ export function ScenarioContextPanel() {
           </div>
 
           <div className="mt-8 flex flex-col gap-3">
-            {currentStep.autoAdvance === false && !store.isPlaying && !isLastValidStep && (
-              <button
-                onClick={() => {
-                  store.setPlaying(true);
-                  store.nextStep();
-                }}
-                className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-              >
-                Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+            {!isLastValidStep && (
+              store.isPlaying ? (
+                <button
+                  onClick={() => store.setPlaying(false)}
+                  className="w-full py-2.5 bg-primary/20 text-primary border border-primary/30 rounded-lg font-medium hover:bg-primary/30 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    store.setPlaying(true);
+                    if (currentStep.autoAdvance === false) {
+                      store.nextStep();
+                    }
+                  }}
+                  className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                >
+                  {currentStep.autoAdvance === false ? "Continue" : "Play"} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              )
             )}
             
             {isLastValidStep && (
@@ -116,9 +127,21 @@ export function ScenarioContextPanel() {
                   store.setStepIndex(0);
                   store.setPlaying(true);
                 }}
-                className="w-full py-2.5 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
               >
                 Restart Lesson
+              </button>
+            )}
+
+            {displayIndex > 0 && (
+              <button
+                onClick={() => {
+                  store.setPlaying(false);
+                  store.prevStep();
+                }}
+                className="w-full py-2.5 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Previous Step
               </button>
             )}
           </div>

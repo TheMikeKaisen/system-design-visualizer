@@ -8,9 +8,10 @@ interface EducationalNodeBaseProps {
   icon: React.ReactNode;
   colorClass: string;
   selected?: boolean;
+  children?: React.ReactNode;
 }
 
-export function EducationalNodeBase({ id, data, icon, colorClass, selected }: EducationalNodeBaseProps) {
+export function EducationalNodeBase({ id, data, icon, colorClass, selected, children }: EducationalNodeBaseProps) {
   const store = useScenarioStore();
   
   const isHighlighted = store.highlightedElementIds.has(id);
@@ -41,11 +42,12 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected }: Ed
     <>
       <div 
         onClick={() => store.setSelectedNodeId(id)}
-        className={`relative flex items-center gap-3 p-3 rounded-xl border border-border/60 bg-background/95 backdrop-blur-sm shadow-sm transition-all duration-300 cursor-pointer hover:border-primary/50
+        className={`relative flex flex-col p-3 rounded-xl border border-border/60 bg-background/95 backdrop-blur-sm shadow-sm transition-all duration-300 cursor-pointer hover:border-primary/50
           ${opacity} ${glow} ${statusClasses} ${isSelectedNode || selected ? 'border-primary ring-1 ring-primary' : ''}`}
         style={{ minWidth: 180 }}
       >
-        <div className={`relative p-2.5 rounded-lg text-white ${colorClass} shrink-0`}>
+        <div className="flex items-center gap-3 w-full">
+          <div className={`relative p-2.5 rounded-lg text-white ${colorClass} shrink-0`}>
           {icon}
           
           {/* Status Overlay Indicators */}
@@ -70,9 +72,12 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected }: Ed
           <p className="text-xs font-bold text-foreground truncate">{data.label}</p>
           <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider">{data.kind}</p>
         </div>
+        </div>
 
-        <Handle type="target" position={Position.Left} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" />
-        <Handle type="source" position={Position.Right} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" />
+        {children}
+
+        <Handle type="target" position={Position.Left} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
+        <Handle type="source" position={Position.Right} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
         
         {/* Tooltip Overlay */}
         {store.activeTooltip?.nodeId === id && (

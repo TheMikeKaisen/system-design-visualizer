@@ -8,6 +8,7 @@ export function ScenarioExperimentPanel({ onClose }: ScenarioExperimentPanelProp
   const store = useScenarioStore();
 
   const experiments = [
+    { id: "platform-independence", label: "Platform Independence", description: "Visualize Write Once, Run Anywhere by fanning out to Windows, Linux, and macOS JVMs." },
     { id: "syntax-error", label: "Introduce Syntax Error", description: "See what happens when the compiler catches invalid code." },
     { id: "disable-jit", label: "Disable JIT Compiler", description: "Force the JVM to interpret bytecode line-by-line without optimization." }
   ];
