@@ -6,6 +6,7 @@ function mkNode(id: string, type: string, x: number, y: number, label: string, k
   return {
     id, type,
     position: { x, y },
+    origin: [0.5, 0],
     data: { label, kind: kind as any, activeConnections: 0, load: 0, metadata: {}, capacity: null, securityPolicies: [], ...extra },
   };
 }
@@ -22,7 +23,7 @@ const NODE_COMPILER = mkNode("pi-compiler", "javaCompiler", 400, 160, "javac Com
 const NODE_BYTECODE = mkNode("pi-bytecode", "javaBytecode", 400, 280, "Hello.class",      "javaBytecode", { hero: true, metadata: { layout: "vertical" } });
 
 // ─── Platform Boundary node ───────────────────────────────────────────────
-const NODE_BOUNDARY = mkNode("pi-boundary", "platformBoundary", -100, 370, "Platform Boundary", "platformBoundary" as any);
+const NODE_BOUNDARY = mkNode("pi-boundary", "platformBoundary", 400, 370, "Platform Boundary", "platformBoundary" as any);
 
 // ─── Single-platform nodes per OS ─────────────────────────────────────────
 function makeSinglePlatformNodes(os: "linux" | "windows" | "macos"): SystemNode[] {
@@ -33,7 +34,7 @@ function makeSinglePlatformNodes(os: "linux" | "windows" | "macos"): SystemNode[
   };
   const c = configs[os];
   return [
-    mkNode(`pi-osframe-${os}`, "javaOsFrame", 300, 500, c.osLabel, "javaOsFrame" as any, { metadata: { os, width: 380, height: 320 } }),
+    mkNode(`pi-osframe-${os}`, "javaOsFrame", 400, 500, c.osLabel, "javaOsFrame" as any, { metadata: { os, width: 380, height: 320 } }),
     mkNode(`pi-jvm-${os}`,    "jvm",         400, 550, c.jvmLabel, "jvm", { metadata: { layout: "vertical" } }),
     mkNode(`pi-cpu-${os}`,    "javaCpu",     400, 720, c.cpuLabel, "javaCpu", { metadata: { layout: "vertical" } }),
   ];
@@ -57,9 +58,9 @@ export function getPlatformEdges(os: "linux" | "windows" | "macos"): SystemEdge[
 
 // ─── Compare-all nodes ────────────────────────────────────────────────────
 const COMPARE_OS_CONFIGS = [
-  { os: "windows", x: 60,  jvmY: 550, cpuY: 720, frameX: -40, frameY: 500 },
-  { os: "linux",   x: 400, jvmY: 550, cpuY: 720, frameX: 300, frameY: 500 },
-  { os: "macos",   x: 740, jvmY: 550, cpuY: 720, frameX: 640, frameY: 500 },
+  { os: "windows", x: 60,  jvmY: 550, cpuY: 720, frameX: 60, frameY: 500 },
+  { os: "linux",   x: 400, jvmY: 550, cpuY: 720, frameX: 400, frameY: 500 },
+  { os: "macos",   x: 740, jvmY: 550, cpuY: 720, frameX: 740, frameY: 500 },
 ] as const;
 
 function makeCompareNodes(): SystemNode[] {

@@ -13,19 +13,34 @@ function AssetAnimation({ animation, getNode }: any) {
     if (source && target) {
       const isVertical = source.data?.metadata?.layout === "vertical";
 
+      const srcPos = source.positionAbsolute || source.position;
+      const tgtPos = target.positionAbsolute || target.position;
+
+      const srcOriginX = source.origin?.[0] ?? 0;
+      const srcOriginY = source.origin?.[1] ?? 0;
+      const tgtOriginX = target.origin?.[0] ?? 0;
+      const tgtOriginY = target.origin?.[1] ?? 0;
+
+      const srcW = source.measured?.width || 180;
+      const srcH = source.measured?.height || 56;
+      const tgtW = target.measured?.width || 180;
+      const tgtH = target.measured?.height || 56;
+
       const sourceX = isVertical 
-        ? source.position.x + (source.measured?.width || 180) / 2 
-        : source.position.x + (source.measured?.width || 180);
+        ? srcPos.x + (0.5 - srcOriginX) * srcW
+        : srcPos.x + (1 - srcOriginX) * srcW;
+      
       const sourceY = isVertical 
-        ? source.position.y + (source.measured?.height || 56) 
-        : source.position.y + 28;
+        ? srcPos.y + (1 - srcOriginY) * srcH
+        : srcPos.y + (0.5 - srcOriginY) * srcH;
       
       const targetX = isVertical 
-        ? target.position.x + (target.measured?.width || 180) / 2 
-        : target.position.x;
+        ? tgtPos.x + (0.5 - tgtOriginX) * tgtW
+        : tgtPos.x - tgtOriginX * tgtW;
+        
       const targetY = isVertical 
-        ? target.position.y 
-        : target.position.y + 28;
+        ? tgtPos.y - tgtOriginY * tgtH
+        : tgtPos.y + (0.5 - tgtOriginY) * tgtH;
 
       // Start at source immediately
       setPos({ x: sourceX, y: sourceY });

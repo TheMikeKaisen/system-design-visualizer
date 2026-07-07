@@ -42,10 +42,18 @@ export function ScenarioCameraDirector() {
           const w = n.measured?.width || 200;
           const h = n.measured?.height || 100;
           
-          if (n.position.x < minX) minX = n.position.x;
-          if (n.position.y < minY) minY = n.position.y;
-          if (n.position.x + w > maxX) maxX = n.position.x + w;
-          if (n.position.y + h > maxY) maxY = n.position.y + h;
+          const pos = n.positionAbsolute || n.position;
+          
+          const originX = n.origin?.[0] ?? 0;
+          const originY = n.origin?.[1] ?? 0;
+          
+          const x = pos.x - originX * w;
+          const y = pos.y - originY * h;
+
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x + w > maxX) maxX = x + w;
+          if (y + h > maxY) maxY = y + h;
         });
 
         const bounds = {
