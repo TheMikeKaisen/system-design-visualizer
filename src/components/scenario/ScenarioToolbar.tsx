@@ -36,6 +36,20 @@ export function ScenarioToolbar({
           )}
         </button>
 
+        <button
+          onClick={() => {
+            store.setPlaying(false);
+            store.setSelectedNodeId(null);
+            if (store.script) {
+              store.setStepIndex(store.script.steps.length - 1);
+            }
+          }}
+          className="flex items-center gap-2 bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground px-3 py-1.5 rounded-md font-medium text-sm transition-colors ml-1"
+          title="Reset simulation and clear selection"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+
         <div className="flex items-center bg-muted/50 rounded-md p-0.5 ml-2">
           {[0.5, 1, 2].map((speed) => (
             <button

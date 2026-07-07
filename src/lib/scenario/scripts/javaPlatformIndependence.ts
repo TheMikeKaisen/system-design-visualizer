@@ -18,12 +18,23 @@ function dot(src: string, tgt: string, ms = 1200) {
 }
 
 // ─── Shared top nodes (platform-agnostic layer) ───────────────────────────
-const NODE_SOURCE   = mkNode("pi-source",   "javaSource",   400, 40,  "Hello.java",       "javaSource", { metadata: { layout: "vertical" } });
-const NODE_COMPILER = mkNode("pi-compiler", "javaCompiler", 400, 160, "javac Compiler",   "javaCompiler", { metadata: { layout: "vertical" } });
-const NODE_BYTECODE = mkNode("pi-bytecode", "javaBytecode", 400, 280, "Hello.class",      "javaBytecode", { hero: true, metadata: { layout: "vertical" } });
+const NODE_SOURCE   = mkNode("pi-source",   "javaSource",   400, 40,  "Hello.java",       "javaSource", { 
+  metadata: { layout: "vertical" },
+  educational: { notes: { whatIsIt: "A plain text file containing Java source code written by a human developer.", whyNeeded: "Computers do not understand English. Source code is the human-readable set of instructions that will eventually be translated for the computer.", whatIfMissing: "Without source code, there is no program to compile or run.", interviewTips: "Understand the difference between compilation and interpretation. Java source is compiled first." } }
+});
+const NODE_COMPILER = mkNode("pi-compiler", "javaCompiler", 400, 160, "javac Compiler",   "javaCompiler", { 
+  metadata: { layout: "vertical" },
+  educational: { notes: { whatIsIt: "The Java Compiler (javac) reads source code and translates it into bytecode.", whyNeeded: "It checks for syntax errors and structural problems before the program ever runs. If it passes, it creates platform-independent bytecode.", whatIfMissing: "You couldn't run Java code on the JVM, as the JVM only understands bytecode.", interviewTips: "Be ready to explain that javac does *not* produce machine code. It produces bytecode (WORA: Write Once, Run Anywhere)." } }
+});
+const NODE_BYTECODE = mkNode("pi-bytecode", "javaBytecode", 400, 280, "Hello.class",      "javaBytecode", { 
+  hero: true, metadata: { layout: "vertical" },
+  educational: { notes: { whatIsIt: "A file containing Java Bytecode, a highly optimized set of instructions for the JVM.", whyNeeded: "Bytecode is the secret to Java's cross-platform capabilities. The same .class file can be run on Windows, Mac, or Linux.", whatIfMissing: "Without bytecode, the JVM has nothing to execute.", interviewTips: "Bytecode is an intermediate representation. It is platform-independent, unlike C++ compiled binaries." } }
+});
 
 // ─── Platform Boundary node ───────────────────────────────────────────────
-const NODE_BOUNDARY = mkNode("pi-boundary", "platformBoundary", 400, 370, "Platform Boundary", "platformBoundary" as any);
+const NODE_BOUNDARY = mkNode("pi-boundary", "platformBoundary", 400, 370, "Platform Boundary", "platformBoundary" as any, {
+  educational: { notes: { whatIsIt: "The dividing line between platform-independent Java code and platform-specific machine execution.", whyNeeded: "It conceptually isolates the universal bytecode from the messy reality of different operating systems.", whatIfMissing: "If Java breached this boundary, you'd have to write separate code for Windows, Mac, and Linux.", interviewTips: "This represents Java's 'Write Once, Run Anywhere' (WORA) philosophy in action." } }
+});
 
 // ─── Single-platform nodes per OS ─────────────────────────────────────────
 function makeSinglePlatformNodes(os: "linux" | "windows" | "macos"): SystemNode[] {
@@ -35,8 +46,14 @@ function makeSinglePlatformNodes(os: "linux" | "windows" | "macos"): SystemNode[
   const c = configs[os];
   return [
     mkNode(`pi-osframe-${os}`, "javaOsFrame", 400, 500, c.osLabel, "javaOsFrame" as any, { metadata: { os, width: 380, height: 320 } }),
-    mkNode(`pi-jvm-${os}`,    "jvm",         400, 550, c.jvmLabel, "jvm", { metadata: { layout: "vertical" } }),
-    mkNode(`pi-cpu-${os}`,    "javaCpu",     400, 720, c.cpuLabel, "javaCpu", { metadata: { layout: "vertical" } }),
+    mkNode(`pi-jvm-${os}`,    "jvm",         400, 550, c.jvmLabel, "jvm", { 
+      metadata: { layout: "vertical" },
+      educational: { notes: { whatIsIt: "The Java Virtual Machine (JVM) is an engine that provides a runtime environment to drive the Java Code.", whyNeeded: "It translates bytecode into machine-specific instructions and handles memory management (Garbage Collection).", whatIfMissing: "You would have to compile your code separately for every different OS and CPU architecture.", interviewTips: "Understand JVM internals: Class Loader, Bytecode Verifier, and the Execution Engine (Interpreter + JIT Compiler)." } }
+    }),
+    mkNode(`pi-cpu-${os}`,    "javaCpu",     400, 720, c.cpuLabel, "javaCpu", { 
+      metadata: { layout: "vertical" },
+      educational: { notes: { whatIsIt: "The physical processor inside the computer, like an Intel x64 or Apple Silicon ARM chip.", whyNeeded: "It executes the actual 1s and 0s (machine code) that the JVM generates in real-time.", whatIfMissing: "No computation can happen without the CPU actually doing the math.", interviewTips: "CPUs only understand machine code specific to their architecture (e.g. ARM vs x86). This is why the JVM is necessary to bridge the gap." } }
+    }),
   ];
 }
 
@@ -70,7 +87,7 @@ function makeCompareNodes(): SystemNode[] {
     single.forEach(n => {
       if (n.id.includes("jvm"))     { n.position.x = cfg.x; n.position.y = cfg.jvmY; }
       if (n.id.includes("cpu"))     { n.position.x = cfg.x; n.position.y = cfg.cpuY; }
-      if (n.id.includes("osframe")){ n.position.x = cfg.frameX; n.position.y = cfg.frameY; (n.data.metadata as any).width = 380; (n.data.metadata as any).height = 320; }
+      if (n.id.includes("osframe")){ n.position.x = cfg.frameX; n.position.y = cfg.frameY; (n.data.metadata as any).width = 300; (n.data.metadata as any).height = 320; }
     });
     osNodes.push(...single);
   }
