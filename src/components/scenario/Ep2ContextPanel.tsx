@@ -233,10 +233,10 @@ export function Ep2ContextPanel({ selectedPlatform, isComparing, onCompare }: Ep
                   store.setPlaying(true);
                   if (currentStep?.autoAdvance === false) store.nextStep();
                 }}
-                className={`w-full py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 ${
-                  currentStep?.autoAdvance === false
-                    ? "animate-[pulse_1.5s_ease-in-out_infinite] ring-2 ring-amber-500 ring-offset-2 ring-offset-background"
-                    : ""
+                className={`w-full py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 ${
+                  !store.isPlaying
+                    ? "bg-amber-500 text-amber-950 hover:bg-amber-400 animate-[pulse_1.5s_ease-in-out_infinite] ring-4 ring-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.5)]"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
                 }`}
               >
                 {currentStep?.autoAdvance === false ? "Continue" : "Play"}
