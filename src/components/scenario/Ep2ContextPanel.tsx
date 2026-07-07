@@ -43,7 +43,7 @@ export function Ep2ContextPanel({ selectedPlatform, isComparing, onCompare }: Ep
 
   const validStepsIndices = store.script.steps.map((step, index) => {
     const hasReq = !step.requiredExperiments || step.requiredExperiments.every(e => store.activeExperiments.includes(e));
-    const hasExc = !step.excludedExperiments || step.excludedExperiments.some(e => store.activeExperiments.includes(e));
+    const hasExc = step.excludedExperiments && step.excludedExperiments.some(e => store.activeExperiments.includes(e));
     if (hasReq && !hasExc) return index;
     return -1;
   }).filter(i => i !== -1);
@@ -217,7 +217,7 @@ export function Ep2ContextPanel({ selectedPlatform, isComparing, onCompare }: Ep
                 onClick={() => { store.setStepIndex(0); store.setPlaying(true); }}
                 className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors"
               >
-                Restart Lesson
+                Watch Again
               </button>
             ) : store.isPlaying ? (
               <button

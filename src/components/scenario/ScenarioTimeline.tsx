@@ -23,7 +23,7 @@ export function ScenarioTimeline() {
     : 0;
 
   return (
-    <div className="h-16 border-t border-border/40 bg-background/95 backdrop-blur z-20 relative flex flex-col justify-center px-8">
+    <div className="hidden sm:flex h-16 border-t border-border/40 bg-background/95 backdrop-blur z-20 relative flex-col justify-center px-8">
       <div className="relative flex items-center justify-between w-full max-w-4xl mx-auto">
         {/* Background Line */}
         <div className="absolute left-0 right-0 h-1 bg-muted top-1/2 -translate-y-1/2 rounded-full" />

@@ -21,15 +21,25 @@ export function ScenarioToolbar({
 
   const currentStep = store.script?.steps[store.currentStepIndex];
   const isAtStart = store.currentStepIndex === 0;
-  const isAtEnd = store.script ? store.currentStepIndex >= store.script.steps.length - 1 : false;
-  const needsContinue = !isAtStart && !isAtEnd && currentStep?.autoAdvance === false && !store.isPlaying;
+
+  // Compute valid steps (respecting active experiments) — same as context panels
+  const validStepsIndices = store.script
+    ? store.script.steps.map((step, index) => {
+        const hasReq = !step.requiredExperiments || step.requiredExperiments.every(e => store.activeExperiments.includes(e));
+        const hasExc = step.excludedExperiments && step.excludedExperiments.some(e => store.activeExperiments.includes(e));
+        return hasReq && !hasExc ? index : -1;
+      }).filter(i => i !== -1)
+    : [];
+  const isLastValidStep = validStepsIndices.length > 0 && store.currentStepIndex === validStepsIndices[validStepsIndices.length - 1];
+
+  const needsContinue = !isAtStart && !isLastValidStep && currentStep?.autoAdvance === false && !store.isPlaying;
 
   // Split title if it contains a colon for hierarchy
   const [product, ...restLesson] = title.split(": ");
   const lesson = restLesson.join(": ");
 
   return (
-    <header className="h-14 border-b border-border/40 bg-background/95 backdrop-blur flex items-center justify-between px-4 z-50 relative">
+    <header className="hidden sm:flex h-14 border-b border-border/40 bg-background/95 backdrop-blur items-center justify-between px-4 z-50 relative">
       <div className="flex items-center gap-3">
         <Link href={backHref || "/"} className="text-muted-foreground hover:text-foreground transition-colors mr-1">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -58,9 +68,13 @@ export function ScenarioToolbar({
       <div className="flex items-center gap-2">
         <button
           onClick={() => {
-            store.setPlaying(!store.isPlaying);
-            if (needsContinue) {
-              store.nextStep();
+            if (isLastValidStep && !store.isPlaying) {
+              // Simulation ended — restart from the beginning
+              store.setStepIndex(0);
+              store.setPlaying(true);
+            } else {
+              store.setPlaying(!store.isPlaying);
+              if (needsContinue) store.nextStep();
             }
           }}
           className={`flex items-center gap-2 px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${

@@ -18,6 +18,9 @@ import { ScenarioTimeline } from "../scenario/ScenarioTimeline";
 import { ScenarioContextPanel } from "../scenario/ScenarioContextPanel";
 import { ScenarioAssetOverlay } from "../scenario/ScenarioAssetOverlay";
 import { ScenarioCameraDirector } from "../scenario/ScenarioCameraDirector";
+import { MobileToolbar } from "../scenario/mobile/MobileToolbar";
+import { MobileFAB } from "../scenario/mobile/MobileFAB";
+import { MobileSimulationOverlay } from "../scenario/mobile/MobileSimulationOverlay";
 
 interface ScenarioCanvasRootProps {
   title?: string;
@@ -30,7 +33,7 @@ interface ScenarioCanvasRootProps {
   logoSrc?: string;
 }
 
-export function ScenarioCanvasRoot({ title, experiments, nodes, edges, contextPanel, toolbarExtras, backHref, logoSrc }: ScenarioCanvasRootProps) {
+export function ScenarioCanvasRoot({ title = "System Design Visualizer", experiments, nodes, edges, contextPanel, toolbarExtras, backHref, logoSrc }: ScenarioCanvasRootProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -38,12 +41,25 @@ export function ScenarioCanvasRoot({ title, experiments, nodes, edges, contextPa
     setMounted(true);
   }, []);
 
+  // Derive product / lesson for mobile toolbar
+  const [product, ...restLesson] = (title || "").split(": ");
+  const lesson = restLesson.join(": ");
+
   return (
     <CanvasErrorBoundary>
       <div className="flex flex-col w-full h-full bg-background overflow-hidden">
         
-        {/* Top Toolbar */}
+        {/* Desktop Toolbar (hidden on mobile) */}
         <ScenarioToolbar title={title} experiments={experiments} extras={toolbarExtras} backHref={backHref} logoSrc={logoSrc} />
+
+        {/* Mobile Toolbar (hidden on desktop) */}
+        <MobileToolbar
+          backHref={backHref}
+          logoSrc={logoSrc}
+          product={product}
+          lesson={lesson}
+          experiments={experiments}
+        />
 
         <div className="flex-1 flex overflow-hidden">
           
@@ -73,14 +89,21 @@ export function ScenarioCanvasRoot({ title, experiments, nodes, edges, contextPa
               </ReactFlow>
             </div>
             
-            {/* Bottom Timeline */}
+            {/* Bottom Timeline (hidden on mobile) */}
             <ScenarioTimeline />
           </div>
 
-          {/* Right Context Panel */}
-          {contextPanel ?? <ScenarioContextPanel />}
+          {/* Right Context Panel — mounted on all screens, CSS-hidden on mobile so timer still runs */}
+          <div className="hidden sm:flex">
+            {contextPanel ?? <ScenarioContextPanel />}
+          </div>
         </div>
+
+        {/* Mobile-only floating UI */}
+        <MobileSimulationOverlay />
+        <MobileFAB />
       </div>
     </CanvasErrorBoundary>
   );
 }
+

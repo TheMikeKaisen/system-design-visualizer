@@ -35,7 +35,7 @@ export function ScenarioContextPanel() {
 
   const validStepsIndices = store.script.steps.map((step, index) => {
     const hasReq = !step.requiredExperiments || step.requiredExperiments.every(e => store.activeExperiments.includes(e));
-    const hasExc = !step.excludedExperiments || step.excludedExperiments.some(e => store.activeExperiments.includes(e));
+    const hasExc = step.excludedExperiments && step.excludedExperiments.some(e => store.activeExperiments.includes(e));
     if (hasReq && !hasExc) return index;
     return -1;
   }).filter(i => i !== -1);
