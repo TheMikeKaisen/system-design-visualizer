@@ -33,8 +33,8 @@ export default function JavaPathPage() {
             Back to Home
           </Link>
           <div className="flex items-center gap-5 mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center p-2 bg-white overflow-hidden shadow-sm">
+              <img src="/logo/java.png" alt="Java Logo" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">Java Internals</h1>
           </div>

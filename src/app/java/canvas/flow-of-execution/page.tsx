@@ -39,7 +39,9 @@ export default function JavaExecutionFlowPage() {
           title="Java Internals: How Java Code Executes"
           experiments={EPISODE1_EXPERIMENTS}
           nodes={nodes} 
-          edges={edges} 
+          edges={edges}
+          backHref="/java"
+          logoSrc="/logo/java.png"
         />
       </ReactFlowProvider>
     </main>

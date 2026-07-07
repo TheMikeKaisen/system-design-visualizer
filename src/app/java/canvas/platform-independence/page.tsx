@@ -71,6 +71,8 @@ function PageInner() {
       experiments={EPISODE2_EXPERIMENTS}
       nodes={nodes}
       edges={edges}
+      backHref="/java"
+      logoSrc="/logo/java.png"
       contextPanel={<Ep2ContextPanel selectedPlatform={platform} isComparing={isComparing} onCompare={() => toggleExperiment("compare-all")} />}
       toolbarExtras={selector}
     />

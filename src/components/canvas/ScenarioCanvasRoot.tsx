@@ -26,9 +26,11 @@ interface ScenarioCanvasRootProps {
   edges: Edge[];
   contextPanel?: React.ReactNode;
   toolbarExtras?: React.ReactNode;
+  backHref?: string;
+  logoSrc?: string;
 }
 
-export function ScenarioCanvasRoot({ title, experiments, nodes, edges, contextPanel, toolbarExtras }: ScenarioCanvasRootProps) {
+export function ScenarioCanvasRoot({ title, experiments, nodes, edges, contextPanel, toolbarExtras, backHref, logoSrc }: ScenarioCanvasRootProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -41,7 +43,7 @@ export function ScenarioCanvasRoot({ title, experiments, nodes, edges, contextPa
       <div className="flex flex-col w-full h-full bg-background overflow-hidden">
         
         {/* Top Toolbar */}
-        <ScenarioToolbar title={title} experiments={experiments} extras={toolbarExtras} />
+        <ScenarioToolbar title={title} experiments={experiments} extras={toolbarExtras} backHref={backHref} logoSrc={logoSrc} />
 
         <div className="flex-1 flex overflow-hidden">
           

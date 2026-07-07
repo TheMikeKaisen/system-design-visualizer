@@ -47,8 +47,12 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected, chil
   return (
     <>
       <div 
-        onClick={() => store.setSelectedNodeId(id)}
-        className={`relative flex flex-col p-3 rounded-xl border border-border/60 bg-background/95 backdrop-blur-sm shadow-sm transition-all duration-700 cursor-pointer hover:border-primary/50
+        onClick={() => {
+          if (!store.isPlaying) {
+            store.setSelectedNodeId(id);
+          }
+        }}
+        className={`relative flex flex-col p-3 rounded-xl border border-border/60 bg-background/95 backdrop-blur-sm shadow-sm transition-all duration-700 ${!store.isPlaying ? 'cursor-pointer hover:border-primary/50' : 'cursor-default'}
           ${opacity} ${glow} ${statusClasses} ${isSelectedNode || selected ? 'border-primary ring-1 ring-primary' : ''} ${isHero ? 'scale-110 z-10' : ''}`}
         style={{ minWidth: isHero ? 200 : 180 }}
       >
