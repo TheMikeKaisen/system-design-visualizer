@@ -3,7 +3,7 @@ export type NodeStatus = "idle" | "processing" | "success" | "error";
 export type ScenarioStep = 
   | { action: "tooltip"; nodeId: string; message: string }
   | { action: "highlight"; elementIds: string[] }
-  | { action: "animate-asset"; sourceId: string; targetId: string; assetType: "file" | "binary" | "gear"; durationMs: number }
+  | { action: "animate-asset"; sourceId: string; targetId: string; assetType: "file" | "binary" | "gear" | "dot"; durationMs: number }
   | { action: "show-code"; nodeId: string; codeSnippet: string }
   | { action: "clear" }
   | { action: "node-status"; nodeId: string; status: NodeStatus };
