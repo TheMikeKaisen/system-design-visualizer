@@ -123,67 +123,7 @@ export const JAVA_FLOW_EDGES: SystemEdge[] = [
 
 // --- Platform Independence Expansion ---
 
-export const PLATFORM_INDEPENDENCE_NODES: SystemNode[] = [
-  ...JAVA_FLOW_NODES.filter(n => n.id !== "node-jvm"),
-  {
-    id: "node-jvm-win",
-    type: "jvm",
-    position: { x: 740, y: 150 },
-    data: {
-      label: "Windows JVM",
-      kind: "jvm",
-      activeConnections: 0,
-      load: 0,
-      metadata: {},
-      capacity: null,
-      securityPolicies: [],
-      educational: { notes: JAVA_FLOW_NODES.find(n => n.id === "node-jvm")!.data.educational!.notes }
-    }
-  },
-  {
-    id: "node-jvm-linux",
-    type: "jvm",
-    position: { x: 740, y: 300 },
-    data: {
-      label: "Linux JVM",
-      kind: "jvm",
-      activeConnections: 0,
-      load: 0,
-      metadata: {},
-      capacity: null,
-      securityPolicies: [],
-      educational: { notes: JAVA_FLOW_NODES.find(n => n.id === "node-jvm")!.data.educational!.notes }
-    }
-  },
-  {
-    id: "node-jvm-mac",
-    type: "jvm",
-    position: { x: 740, y: 450 },
-    data: {
-      label: "macOS JVM",
-      kind: "jvm",
-      activeConnections: 0,
-      load: 0,
-      metadata: {},
-      capacity: null,
-      securityPolicies: [],
-      educational: { notes: JAVA_FLOW_NODES.find(n => n.id === "node-jvm")!.data.educational!.notes }
-    }
-  }
-];
 
-export const PLATFORM_INDEPENDENCE_EDGES: SystemEdge[] = [
-  { id: "edge-1", source: "node-source", target: "node-compiler", type: "default", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } },
-  { id: "edge-2", source: "node-compiler", target: "node-bytecode", type: "default", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } },
-  // Fan out
-  { id: "edge-3-win", source: "node-bytecode", target: "node-jvm-win", type: "default", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } },
-  { id: "edge-3-linux", source: "node-bytecode", target: "node-jvm-linux", type: "default", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } },
-  { id: "edge-3-mac", source: "node-bytecode", target: "node-jvm-mac", type: "default", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } },
-  // Fan in (Machine Code)
-  { id: "edge-4-win", source: "node-jvm-win", target: "node-cpu", type: "default", label: "Machine Code", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } },
-  { id: "edge-4-linux", source: "node-jvm-linux", target: "node-cpu", type: "default", label: "Machine Code", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } },
-  { id: "edge-4-mac", source: "node-jvm-mac", target: "node-cpu", type: "default", label: "Machine Code", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } }
-];
 
 export const javaExecutionScript: ScenarioScript = {
   id: "java-execution-101",
@@ -298,7 +238,7 @@ export const javaExecutionScript: ScenarioScript = {
     },
     // NORMAL PATH: Step 5
     {
-      excludedExperiments: ["syntax-error", "platform-independence", "disable-jit"],
+      excludedExperiments: ["syntax-error", "disable-jit"],
       durationMs: 2000,
       narrative: {
         title: "5. Execution",
@@ -313,51 +253,9 @@ export const javaExecutionScript: ScenarioScript = {
       ]
     },
 
-    // BRANCH: Platform Independence (Fan out)
-    {
-      requiredExperiments: ["platform-independence"],
-      excludedExperiments: ["syntax-error"],
-      durationMs: 3500,
-      narrative: {
-        title: "Platform Independence",
-        description: "Notice how the exact same .class file flows into the Windows JVM, Linux JVM, and macOS JVM. The JVM on each platform is different, but they all understand the same Bytecode."
-      },
-      actions: [
-        { action: "clear" },
-        { action: "highlight", elementIds: ["node-bytecode", "node-jvm-win", "node-jvm-linux", "node-jvm-mac", "edge-3-win", "edge-3-linux", "edge-3-mac"] },
-        { action: "node-status", nodeId: "node-bytecode", status: "success" },
-        { action: "node-status", nodeId: "node-jvm-win", status: "processing" },
-        { action: "node-status", nodeId: "node-jvm-linux", status: "processing" },
-        { action: "node-status", nodeId: "node-jvm-mac", status: "processing" },
-        { action: "animate-asset", sourceId: "node-bytecode", targetId: "node-jvm-win", assetType: "dot", durationMs: 1000 },
-        { action: "animate-asset", sourceId: "node-bytecode", targetId: "node-jvm-linux", assetType: "dot", durationMs: 1000 },
-        { action: "animate-asset", sourceId: "node-bytecode", targetId: "node-jvm-mac", assetType: "dot", durationMs: 1000 }
-      ]
-    },
-    // BRANCH: Platform Independence Execution
-    {
-      requiredExperiments: ["platform-independence"],
-      excludedExperiments: ["syntax-error", "disable-jit"],
-      durationMs: 2500,
-      narrative: {
-        title: "Write Once, Run Anywhere",
-        description: "Each OS-specific JVM independently translates that universal Bytecode into its own native Machine Code. The CPU executes it seamlessly."
-      },
-      actions: [
-        { action: "clear" },
-        { action: "highlight", elementIds: ["node-jvm-win", "node-jvm-linux", "node-jvm-mac", "node-cpu", "edge-4-win", "edge-4-linux", "edge-4-mac"] },
-        { action: "node-status", nodeId: "node-jvm-win", status: "success" },
-        { action: "node-status", nodeId: "node-jvm-linux", status: "success" },
-        { action: "node-status", nodeId: "node-jvm-mac", status: "success" },
-        { action: "node-status", nodeId: "node-cpu", status: "success" },
-        { action: "animate-asset", sourceId: "node-jvm-win", targetId: "node-cpu", assetType: "dot", durationMs: 1500 },
-        { action: "animate-asset", sourceId: "node-jvm-linux", targetId: "node-cpu", assetType: "dot", durationMs: 1500 },
-        { action: "animate-asset", sourceId: "node-jvm-mac", targetId: "node-cpu", assetType: "dot", durationMs: 1500 }
-      ]
-    },
     // NORMAL PATH: Step 6
     {
-      excludedExperiments: ["syntax-error", "platform-independence"],
+      excludedExperiments: ["syntax-error"],
       autoAdvance: false,
       narrative: {
         title: "Complete",
@@ -366,21 +264,6 @@ export const javaExecutionScript: ScenarioScript = {
       actions: [
         { action: "clear" },
         { action: "highlight", elementIds: ["node-source", "node-compiler", "node-bytecode", "node-jvm", "node-cpu"] },
-        { action: "node-status", nodeId: "node-cpu", status: "success" }
-      ]
-    },
-    // BRANCH: Step 6 (Platform Independence)
-    {
-      requiredExperiments: ["platform-independence"],
-      excludedExperiments: ["syntax-error"],
-      autoAdvance: false,
-      narrative: {
-        title: "Complete: Write Once, Run Anywhere",
-        description: "You've successfully seen Java's WORA (Write Once, Run Anywhere) principle in action. One bytecode file powers multiple platforms!"
-      },
-      actions: [
-        { action: "clear" },
-        { action: "highlight", elementIds: ["node-source", "node-compiler", "node-bytecode", "node-jvm-win", "node-jvm-linux", "node-jvm-mac", "node-cpu"] },
         { action: "node-status", nodeId: "node-cpu", status: "success" }
       ]
     }
