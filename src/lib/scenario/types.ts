@@ -10,16 +10,26 @@ export type ScenarioStep =
 
 export interface ScenarioNarrative {
   title: string;
-  description: string;
+  description?: string;
+  timelineLabel?: string;
+  question?: string;
+  explanation?: string;
+  keyTakeaway?: string;
+  interviewInsight?: string;
 }
 
 export interface ScenarioScriptStep {
   narrative: ScenarioNarrative;
   actions: ScenarioStep[];
-  autoAdvance?: boolean; // If false, guided mode pauses here
-  durationMs?: number; // How long to wait before auto-advancing
-  requiredExperiments?: string[]; // Only run if ALL these are active
-  excludedExperiments?: string[]; // Only run if NONE of these are active
+  autoAdvance?: boolean;
+  durationMs?: number;
+  requiredExperiments?: string[];
+  excludedExperiments?: string[];
+  quiz?: {
+    question: string;
+    options: { text: string; correct: boolean }[];
+    explanation: string;
+  }[];
 }
 
 export interface ScenarioScript {

@@ -8,6 +8,7 @@ import {
   type EdgeProps,
 } from "@xyflow/react";
 import { useSimulationStore } from "@/lib/store/useSimulationStore";
+import { useScenarioStore } from "@/lib/store/useScenarioStore";
 import type { SystemEdge } from "@/types";
 
 const PROTOCOL_COLORS: Record<string, string> = {
@@ -65,7 +66,17 @@ export const SimulationEdge = memo(function SimulationEdge({
     strokeWidth = selected ? 4 : 3;
   }
 
-  const opacity = errorRate > 0.3 ? 0.6 : 1;
+  const highlightedIds = useScenarioStore((s) => s.highlightedElementIds);
+  const isAnyHighlighted = highlightedIds.size > 0;
+  const isHighlighted = highlightedIds.has(id);
+
+  let opacity = errorRate > 0.3 ? 0.6 : 1;
+  if (isAnyHighlighted && !isHighlighted) {
+    opacity = 0.15; // aggressive fade
+  } else if (isHighlighted) {
+    strokeWidth += 1;
+    edgeGlowColor = "#3b82f6"; // primary color glow for highlighted edge
+  }
 
   return (
     <>

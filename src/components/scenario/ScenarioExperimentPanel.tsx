@@ -1,17 +1,12 @@
 import { useScenarioStore } from "@/lib/store/useScenarioStore";
 
 interface ScenarioExperimentPanelProps {
+  experiments: { id: string; label: string; description: string }[];
   onClose: () => void;
 }
 
-export function ScenarioExperimentPanel({ onClose }: ScenarioExperimentPanelProps) {
+export function ScenarioExperimentPanel({ experiments, onClose }: ScenarioExperimentPanelProps) {
   const store = useScenarioStore();
-
-  const experiments = [
-    { id: "platform-independence", label: "Platform Independence", description: "Visualize Write Once, Run Anywhere by fanning out to Windows, Linux, and macOS JVMs." },
-    { id: "syntax-error", label: "Introduce Syntax Error", description: "See what happens when the compiler catches invalid code." },
-    { id: "disable-jit", label: "Disable JIT Compiler", description: "Force the JVM to interpret bytecode line-by-line without optimization." }
-  ];
 
   return (
     <div className="w-80 bg-background border border-border/60 shadow-2xl rounded-xl overflow-hidden flex flex-col pointer-events-auto">

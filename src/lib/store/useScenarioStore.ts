@@ -32,6 +32,7 @@ interface ScenarioState {
   } | null;
   highlightedElementIds: Set<string>;
   nodeStatuses: Record<string, NodeStatus>;
+  nodeFlags: Record<string, Record<string, unknown>>;
 
   // Actions
   loadScript: (script: ScenarioScript) => void;
@@ -44,6 +45,7 @@ interface ScenarioState {
   setSelectedNodeId: (id: string | null) => void;
   reset: () => void;
   clearAnimation: (id: string) => void;
+  setNodeFlag: (nodeId: string, flag: string, value: unknown) => void;
 }
 
 export const useScenarioStore = create<ScenarioState>((set, get) => ({
@@ -59,6 +61,7 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
   activeTooltip: null,
   highlightedElementIds: new Set(),
   nodeStatuses: {},
+  nodeFlags: {},
 
   loadScript: (script) => set({ 
     script, 
@@ -161,6 +164,18 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
   clearAnimation: (id) => {
     const { activeAssetAnimations } = get();
     set({ activeAssetAnimations: activeAssetAnimations.filter(a => a.id !== id) });
+  },
+
+  setNodeFlag: (nodeId, flag, value) => {
+    set(state => ({
+      nodeFlags: {
+        ...state.nodeFlags,
+        [nodeId]: {
+          ...(state.nodeFlags[nodeId] || {}),
+          [flag]: value
+        }
+      }
+    }));
   }
 }));
 

@@ -17,13 +17,18 @@ import { ScenarioToolbar } from "../scenario/ScenarioToolbar";
 import { ScenarioTimeline } from "../scenario/ScenarioTimeline";
 import { ScenarioContextPanel } from "../scenario/ScenarioContextPanel";
 import { ScenarioAssetOverlay } from "../scenario/ScenarioAssetOverlay";
+import { ScenarioCameraDirector } from "../scenario/ScenarioCameraDirector";
 
 interface ScenarioCanvasRootProps {
+  title?: string;
+  experiments?: { id: string; label: string; description: string }[];
   nodes: Node[];
   edges: Edge[];
+  contextPanel?: React.ReactNode;
+  toolbarExtras?: React.ReactNode;
 }
 
-export function ScenarioCanvasRoot({ nodes, edges }: ScenarioCanvasRootProps) {
+export function ScenarioCanvasRoot({ title, experiments, nodes, edges, contextPanel, toolbarExtras }: ScenarioCanvasRootProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -36,7 +41,7 @@ export function ScenarioCanvasRoot({ nodes, edges }: ScenarioCanvasRootProps) {
       <div className="flex flex-col w-full h-full bg-background overflow-hidden">
         
         {/* Top Toolbar */}
-        <ScenarioToolbar />
+        <ScenarioToolbar title={title} experiments={experiments} extras={toolbarExtras} />
 
         <div className="flex-1 flex overflow-hidden">
           
@@ -62,6 +67,7 @@ export function ScenarioCanvasRoot({ nodes, edges }: ScenarioCanvasRootProps) {
               >
                 <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
                 <ScenarioAssetOverlay />
+                <ScenarioCameraDirector />
               </ReactFlow>
             </div>
             
@@ -70,7 +76,7 @@ export function ScenarioCanvasRoot({ nodes, edges }: ScenarioCanvasRootProps) {
           </div>
 
           {/* Right Context Panel */}
-          <ScenarioContextPanel />
+          {contextPanel ?? <ScenarioContextPanel />}
         </div>
       </div>
     </CanvasErrorBoundary>

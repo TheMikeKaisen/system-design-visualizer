@@ -34,11 +34,13 @@ export { AzureCdnNode }          from "./cloud/AzureCdnNode";
 export { AzureFunctionNode }     from "./cloud/AzureFunctionNode";
 
 // Java
-import { JavaSourceNode }   from "./java/JavaSourceNode";
-import { JavaCompilerNode } from "./java/JavaCompilerNode";
-import { JavaBytecodeNode } from "./java/JavaBytecodeNode";
-import { JvmNode }          from "./java/JvmNode";
-import { JavaCpuNode }      from "./java/JavaCpuNode";
+import { JavaSourceNode }        from "./java/JavaSourceNode";
+import { JavaCompilerNode }      from "./java/JavaCompilerNode";
+import { JavaBytecodeNode }      from "./java/JavaBytecodeNode";
+import { JvmNode }               from "./java/JvmNode";
+import { JavaCpuNode }           from "./java/JavaCpuNode";
+import { PlatformBoundaryNode }  from "./java/PlatformBoundaryNode";
+import { OsFrameNode }           from "./java/OsFrameNode";
 
 // Edge
 export { SimulationEdge } from "@/components/edges/SimulationEdge";
@@ -79,6 +81,8 @@ export const nodeTypes = {
   javaBytecode:     JavaBytecodeNode,
   jvm:              JvmNode,
   javaCpu:          JavaCpuNode,
+  platformBoundary: PlatformBoundaryNode,
+  javaOsFrame:      OsFrameNode,
 } as const;
 
 export const edgeTypes = {

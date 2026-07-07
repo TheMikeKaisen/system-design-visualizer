@@ -18,11 +18,17 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected, chil
   const isAnyHighlighted = store.highlightedElementIds.size > 0;
   const status = store.nodeStatuses[id] || "idle";
 
-  const opacity = isAnyHighlighted && !isHighlighted ? "opacity-30" : "opacity-100";
+  const opacity = isAnyHighlighted && !isHighlighted ? "opacity-15 grayscale-[60%] blur-[1px]" : "opacity-100";
   
   // Base glow from being highlighted
   let glow = isHighlighted ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-[0_0_20px_rgba(var(--primary),0.4)]" : "";
   
+  // Hero styling
+  const isHero = data.hero === true;
+  if (isHero && (isHighlighted || !isAnyHighlighted)) {
+    glow = "ring-2 ring-amber-500 ring-offset-2 ring-offset-background shadow-[0_0_30px_rgba(245,158,11,0.6)] animate-pulse-slow";
+  }
+
   // Status-specific styles
   let statusClasses = "";
   if (status === "processing") {
@@ -42,9 +48,9 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected, chil
     <>
       <div 
         onClick={() => store.setSelectedNodeId(id)}
-        className={`relative flex flex-col p-3 rounded-xl border border-border/60 bg-background/95 backdrop-blur-sm shadow-sm transition-all duration-300 cursor-pointer hover:border-primary/50
-          ${opacity} ${glow} ${statusClasses} ${isSelectedNode || selected ? 'border-primary ring-1 ring-primary' : ''}`}
-        style={{ minWidth: 180 }}
+        className={`relative flex flex-col p-3 rounded-xl border border-border/60 bg-background/95 backdrop-blur-sm shadow-sm transition-all duration-700 cursor-pointer hover:border-primary/50
+          ${opacity} ${glow} ${statusClasses} ${isSelectedNode || selected ? 'border-primary ring-1 ring-primary' : ''} ${isHero ? 'scale-110 z-10' : ''}`}
+        style={{ minWidth: isHero ? 200 : 180 }}
       >
         <div className="flex items-center gap-3 w-full">
           <div className={`relative p-2.5 rounded-lg text-white ${colorClass} shrink-0`}>
@@ -76,8 +82,17 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected, chil
 
         {children}
 
-        <Handle type="target" position={Position.Left} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
-        <Handle type="source" position={Position.Right} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
+        {data.metadata?.layout === "vertical" ? (
+          <>
+            <Handle type="target" position={Position.Top} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" />
+            <Handle type="source" position={Position.Bottom} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" />
+          </>
+        ) : (
+          <>
+            <Handle type="target" position={Position.Left} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
+            <Handle type="source" position={Position.Right} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
+          </>
+        )}
         
         {/* Tooltip Overlay */}
         {store.activeTooltip?.nodeId === id && (

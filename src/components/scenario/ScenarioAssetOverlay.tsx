@@ -11,11 +11,21 @@ function AssetAnimation({ animation, getNode }: any) {
     const target = getNode(animation.targetId);
 
     if (source && target) {
-      const sourceX = source.position.x + (source.measured?.width || 180);
-      const sourceY = source.position.y + 28;
+      const isVertical = source.data?.metadata?.layout === "vertical";
+
+      const sourceX = isVertical 
+        ? source.position.x + (source.measured?.width || 180) / 2 
+        : source.position.x + (source.measured?.width || 180);
+      const sourceY = isVertical 
+        ? source.position.y + (source.measured?.height || 56) 
+        : source.position.y + 28;
       
-      const targetX = target.position.x;
-      const targetY = target.position.y + 28;
+      const targetX = isVertical 
+        ? target.position.x + (target.measured?.width || 180) / 2 
+        : target.position.x;
+      const targetY = isVertical 
+        ? target.position.y 
+        : target.position.y + 28;
 
       // Start at source immediately
       setPos({ x: sourceX, y: sourceY });

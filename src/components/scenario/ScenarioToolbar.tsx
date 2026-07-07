@@ -3,7 +3,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { ScenarioExperimentPanel } from "./ScenarioExperimentPanel";
 
-export function ScenarioToolbar() {
+export function ScenarioToolbar({ 
+  title = "System Design Visualizer", 
+  experiments = [], 
+  extras 
+}: { 
+  title?: string;
+  experiments?: { id: string; label: string; description: string }[];
+  extras?: React.ReactNode;
+}) {
   const store = useScenarioStore();
   const [showExperiments, setShowExperiments] = useState(false);
 
@@ -13,7 +21,7 @@ export function ScenarioToolbar() {
         <div className="bg-primary/20 p-1.5 rounded-lg text-primary">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
         </div>
-        <h1 className="text-lg font-bold">Java Internals: Execution Flow</h1>
+        <h1 className="text-lg font-bold">{title}</h1>
       </div>
 
       <div className="flex items-center gap-2">
@@ -40,22 +48,26 @@ export function ScenarioToolbar() {
           ))}
         </div>
 
-        <button
-          onClick={() => setShowExperiments(!showExperiments)}
-          className={`ml-4 px-3 py-1.5 text-sm font-medium rounded-md border transition-colors flex items-center gap-2 ${showExperiments || store.activeExperiments.length > 0 ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.3 22a2 2 0 0 1-1.3-.4l-4-3a2 2 0 0 1-.7-2.6L8.8 4a2 2 0 0 1 2.6-.7l4 3a2 2 0 0 1 .7 2.6z"/><path d="M12 2v20"/></svg>
-          Experiments {store.activeExperiments.length > 0 && <span className="bg-primary text-primary-foreground text-[10px] w-4 h-4 flex items-center justify-center rounded-full">{store.activeExperiments.length}</span>}
-        </button>
+        {experiments && experiments.length > 0 && (
+          <button
+            onClick={() => setShowExperiments(!showExperiments)}
+            className={`ml-4 px-3 py-1.5 text-sm font-medium rounded-md border transition-colors flex items-center gap-2 ${showExperiments || store.activeExperiments.length > 0 ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.3 22a2 2 0 0 1-1.3-.4l-4-3a2 2 0 0 1-.7-2.6L8.8 4a2 2 0 0 1 2.6-.7l4 3a2 2 0 0 1 .7 2.6z"/><path d="M12 2v20"/></svg>
+            Experiments {store.activeExperiments.length > 0 && <span className="bg-primary text-primary-foreground text-[10px] w-4 h-4 flex items-center justify-center rounded-full">{store.activeExperiments.length}</span>}
+          </button>
+        )}
+
+        {extras}
 
         <Link href="/" className="ml-4 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2">
           Exit
         </Link>
       </div>
 
-      {showExperiments && (
+      {showExperiments && experiments && experiments.length > 0 && (
         <div className="absolute top-14 right-4 z-50">
-          <ScenarioExperimentPanel onClose={() => setShowExperiments(false)} />
+          <ScenarioExperimentPanel experiments={experiments} onClose={() => setShowExperiments(false)} />
         </div>
       )}
     </header>

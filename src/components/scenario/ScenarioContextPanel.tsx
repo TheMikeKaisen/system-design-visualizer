@@ -114,7 +114,11 @@ export function ScenarioContextPanel() {
                       store.nextStep();
                     }
                   }}
-                  className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                  className={`w-full py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 ${
+                    currentStep.autoAdvance === false
+                      ? "animate-[pulse_1.5s_ease-in-out_infinite] ring-2 ring-amber-500 ring-offset-2 ring-offset-background"
+                      : ""
+                  }`}
                 >
                   {currentStep.autoAdvance === false ? "Continue" : "Play"} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>

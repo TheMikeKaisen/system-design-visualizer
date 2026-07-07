@@ -37,6 +37,8 @@ export function ScenarioTimeline() {
         {validStepsIndices.map((originalIndex, displayIndex) => {
           const isPast = validStepsIndices.indexOf(current) > displayIndex;
           const isCurrent = current === originalIndex;
+          const step = steps[originalIndex];
+          const label = step.narrative?.timelineLabel || `Step ${displayIndex + 1}`;
           
           return (
             <button
@@ -53,8 +55,8 @@ export function ScenarioTimeline() {
                 )}
               </div>
               <div className={`absolute top-6 text-[10px] font-medium whitespace-nowrap transition-colors
-                ${isCurrent ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>
-                Step {displayIndex + 1}
+                ${isCurrent ? "text-primary font-bold scale-110" : "text-muted-foreground group-hover:text-foreground"}`}>
+                {label}
               </div>
             </button>
           );

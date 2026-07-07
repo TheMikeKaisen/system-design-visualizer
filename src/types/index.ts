@@ -42,7 +42,8 @@ export type NodeKind =
   | "azureServiceBus"| "azureCdn"     | "azureFunction"
   // Java Educational
   | "javaSource"     | "javaCompiler" | "javaBytecode"
-  | "jvm"            | "javaMachineCode" | "javaCpu";
+  | "jvm"            | "javaMachineCode" | "javaCpu"
+  | "platformBoundary" | "javaOsFrame";
 
 export type CloudProvider = "aws" | "gcp" | "azure" | "general" | "educational";
 
@@ -51,7 +52,7 @@ export function getCloudProvider(kind: NodeKind): CloudProvider {
   if (kind.startsWith("aws"))   return "aws";
   if (kind.startsWith("gcp"))   return "gcp";
   if (kind.startsWith("azure")) return "azure";
-  if (kind.startsWith("java") || kind === "jvm") return "educational";
+  if (kind.startsWith("java") || kind === "jvm" || kind === "platformBoundary" || kind === "javaOsFrame") return "educational";
   return "general";
 }
 

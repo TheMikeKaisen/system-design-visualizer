@@ -45,18 +45,18 @@ export default function JavaPathPage() {
 
         {/* Modules Grid */}
         <div className="grid sm:grid-cols-2 gap-6">
-          {/* Active Lesson: Java Code Execution */}
+          {/* Episode 1: Java Code Execution */}
           <Link href="/java/canvas/flow-of-execution" className="group">
             <div className="relative h-full p-8 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.2)] transition-all duration-300">
+              <div className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 1</div>
               <div className="absolute top-4 right-4 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div>
-              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 mt-4 group-hover:scale-110 transition-transform duration-300">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">Java Code Execution</h3>
               <p className="text-base text-muted-foreground mb-10 leading-relaxed">
-                Follow a piece of Java code from source file to bytecode, through the JVM, and down to the CPU in a fully interactive 3D canvas.
+                Follow a piece of Java code from source file to bytecode, through the JVM, and down to the CPU in a fully interactive canvas.
               </p>
-              
               <div className="flex items-center justify-between mt-auto">
                 <div className="flex -space-x-3">
                   <span className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-500 border-4 border-card flex items-center justify-center text-xs font-bold z-30" title="Source">.java</span>
@@ -64,7 +64,32 @@ export default function JavaPathPage() {
                   <span className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-500 border-4 border-card flex items-center justify-center text-xs font-bold z-10" title="JVM">JVM</span>
                 </div>
                 <div className="flex items-center text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform">
-                  Launch Canvas <svg className="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  Launch <svg className="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Episode 2: Platform Independence */}
+          <Link href="/java/canvas/platform-independence" className="group">
+            <div className="relative h-full p-8 rounded-2xl border border-border bg-card hover:border-amber-500/50 hover:shadow-[0_0_30px_-5px_rgba(245,158,11,0.25)] transition-all duration-300">
+              <div className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 2</div>
+              <div className="absolute top-4 right-4 bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-6 mt-4 group-hover:scale-110 transition-transform duration-300">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-3 group-hover:text-amber-500 transition-colors">How Can The Same Program Run Everywhere?</h3>
+              <p className="text-base text-muted-foreground mb-10 leading-relaxed">
+                Understand why Hello.class runs on Windows, Linux, and macOS without recompiling — and watch it cross the platform boundary live.
+              </p>
+              <div className="flex items-center justify-between mt-auto">
+                <div className="flex -space-x-3">
+                  <span className="w-10 h-10 rounded-full bg-green-500/20 text-green-500 border-4 border-card flex items-center justify-center text-xs font-bold z-30" title="Bytecode">.class</span>
+                  <span className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-500 border-4 border-card flex items-center justify-center text-[9px] font-bold z-20" title="Windows">Win</span>
+                  <span className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 border-4 border-card flex items-center justify-center text-[9px] font-bold z-10" title="Linux">Lnx</span>
+                </div>
+                <div className="flex items-center text-sm font-semibold text-amber-500 group-hover:translate-x-1 transition-transform">
+                  Launch <svg className="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>
