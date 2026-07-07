@@ -42,7 +42,7 @@ export function ScenarioCameraDirector() {
           const w = n.measured?.width || 200;
           const h = n.measured?.height || 100;
           
-          const pos = n.positionAbsolute || n.position;
+          const pos = (n as any).positionAbsolute || n.position;
           
           const originX = n.origin?.[0] ?? 0;
           const originY = n.origin?.[1] ?? 0;
