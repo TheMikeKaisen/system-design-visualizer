@@ -31,6 +31,7 @@ const KIND_PREFIX: Record<NodeKind, string> = {
   javaSource:    "jsrc",  javaCompiler: "jcomp", javaBytecode:    "jbyte",
   jvm:           "jvm",   javaMachineCode: "jmc", javaCpu:        "jcpu",
   platformBoundary: "pbnd", javaOsFrame: "osframe",
+  javaClassLoader: "jcl", javaClass: "jcls",
 };
 
 const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["data"]["metadata"] }> = {
@@ -74,6 +75,8 @@ const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["dat
   javaCpu:           { label: "CPU",                 metadata: {} },
   platformBoundary:  { label: "Platform Boundary",   metadata: {} },
   javaOsFrame:       { label: "OS Frame",            metadata: { os: "linux", width: 260, height: 220 } },
+  javaClassLoader:   { label: "Class Loader",        metadata: {} },
+  javaClass:         { label: "Java Class",          metadata: {} },
 };
 
 // ─── Default capacity per node kind ───────────────────────────────────

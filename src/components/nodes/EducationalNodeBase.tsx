@@ -9,19 +9,21 @@ interface EducationalNodeBaseProps {
   colorClass: string;
   selected?: boolean;
   children?: React.ReactNode;
+  hideDefaultHandles?: boolean;
 }
 
-export function EducationalNodeBase({ id, data, icon, colorClass, selected, children }: EducationalNodeBaseProps) {
+export function EducationalNodeBase({ id, data, icon, colorClass, selected, children, hideDefaultHandles }: EducationalNodeBaseProps) {
   const store = useScenarioStore();
   
+  const isSelectedNode = store.selectedNodeId === id;
   const isHighlighted = store.highlightedElementIds.has(id);
   const isAnyHighlighted = store.highlightedElementIds.size > 0;
   const status = store.nodeStatuses[id] || "idle";
 
-  const opacity = isAnyHighlighted && !isHighlighted ? "opacity-15 grayscale-[60%] blur-[1px]" : "opacity-100";
+  const opacity = isAnyHighlighted && !isHighlighted && !isSelectedNode ? "opacity-15 grayscale-[60%] blur-[1px]" : "opacity-100";
   
-  // Base glow from being highlighted
-  let glow = isHighlighted ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-[0_0_20px_rgba(var(--primary),0.4)]" : "";
+  // Base glow from being highlighted or selected
+  let glow = (isHighlighted || isSelectedNode) ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-[0_0_20px_rgba(var(--primary),0.4)]" : "";
   
   // Hero styling
   const isHero = data.hero === true;
@@ -42,7 +44,6 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected, chil
     glow = "";
   }
 
-  const isSelectedNode = store.selectedNodeId === id;
 
   return (
     <>
@@ -86,24 +87,37 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected, chil
 
         {children}
 
-        {data.metadata?.layout === "vertical" ? (
-          <>
-            <Handle type="target" position={Position.Top} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" />
-            <Handle type="source" position={Position.Bottom} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" />
-          </>
-        ) : (
-          <>
-            <Handle type="target" position={Position.Left} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
-            <Handle type="source" position={Position.Right} className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
-          </>
+        {!hideDefaultHandles && (
+          data.metadata?.layout === "vertical" ? (
+            <>
+              <Handle type="target" position={Position.Top} id="top" className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" />
+              <Handle type="source" position={Position.Bottom} id="bottom" className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" />
+            </>
+          ) : (
+            <>
+              <Handle type="target" position={Position.Left} id="left" className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
+              <Handle type="source" position={Position.Right} id="right" className="w-2 h-2 rounded-full border-2 border-background bg-muted-foreground" style={{ top: 28 }} />
+            </>
+          )
         )}
         
         {/* Tooltip Overlay */}
         {store.activeTooltip?.nodeId === id && (
-          <div className="absolute left-1/2 -translate-x-1/2 -top-14 bg-red-500 text-white text-xs px-3 py-2 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
-            {store.activeTooltip.message}
-            <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 bg-red-500 rotate-45"></div>
-          </div>
+          (() => {
+            const type = store.activeTooltip.type || "error"; // fallback for existing scripts without type
+            const bgColor = 
+              type === "success" ? "bg-green-500" :
+              type === "warning" ? "bg-yellow-500" :
+              type === "info" ? "bg-blue-500" :
+              "bg-red-500";
+
+            return (
+              <div className={`absolute left-1/2 -translate-x-1/2 -top-14 text-white text-xs px-3 py-2 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none ${bgColor}`}>
+                {store.activeTooltip.message}
+                <div className={`absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 rotate-45 ${bgColor}`}></div>
+              </div>
+            );
+          })()
         )}
       </div>
     </>

@@ -41,6 +41,8 @@ import { JvmNode }               from "./java/JvmNode";
 import { JavaCpuNode }           from "./java/JavaCpuNode";
 import { PlatformBoundaryNode }  from "./java/PlatformBoundaryNode";
 import { OsFrameNode }           from "./java/OsFrameNode";
+import { JavaClassLoaderNode }   from "./java/JavaClassLoaderNode";
+import { JavaClassNode }         from "./java/JavaClassNode";
 
 // Edge
 export { SimulationEdge } from "@/components/edges/SimulationEdge";
@@ -83,6 +85,8 @@ export const nodeTypes = {
   javaCpu:          JavaCpuNode,
   platformBoundary: PlatformBoundaryNode,
   javaOsFrame:      OsFrameNode,
+  javaClassLoader:  JavaClassLoaderNode,
+  javaClass:        JavaClassNode,
 } as const;
 
 export const edgeTypes = {
