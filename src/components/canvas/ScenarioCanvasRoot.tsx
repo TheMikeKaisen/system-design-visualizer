@@ -95,7 +95,7 @@ export function ScenarioCanvasRoot({ title = "System Design Visualizer", experim
 
           {/* Right Context Panel — mounted on all screens, CSS-hidden on mobile so timer still runs */}
           <div className="hidden sm:flex">
-            {contextPanel ?? <ScenarioContextPanel />}
+            {contextPanel ?? <ScenarioContextPanel nodes={nodes} />}
           </div>
         </div>
 

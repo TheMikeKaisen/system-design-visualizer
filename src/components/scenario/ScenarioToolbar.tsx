@@ -97,7 +97,7 @@ export function ScenarioToolbar({
             store.setPlaying(false);
             store.setSelectedNodeId(null);
             if (store.script) {
-              store.setStepIndex(store.script.steps.length - 1);
+              store.reset();
             }
           }}
           className="flex items-center gap-2 bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground px-3 py-1.5 rounded-md font-medium text-sm transition-colors ml-1"

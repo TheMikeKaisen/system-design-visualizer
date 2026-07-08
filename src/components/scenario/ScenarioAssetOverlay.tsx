@@ -4,15 +4,13 @@ import { useEffect, useState } from "react";
 
 function AssetAnimation({ animation, getNode }: any) {
   const [pos, setPos] = useState<{ x: number, y: number } | null>(null);
-  const [targetPos, setTargetPos] = useState<{ x: number, y: number } | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     const source = getNode(animation.sourceId);
     const target = getNode(animation.targetId);
 
     if (source && target) {
-      const isVertical = source.data?.metadata?.layout === "vertical";
-
       const srcPos = source.positionAbsolute || source.position;
       const tgtPos = target.positionAbsolute || target.position;
 
@@ -21,41 +19,85 @@ function AssetAnimation({ animation, getNode }: any) {
       const tgtOriginX = target.origin?.[0] ?? 0;
       const tgtOriginY = target.origin?.[1] ?? 0;
 
-      const srcW = source.measured?.width || 180;
-      const srcH = source.measured?.height || 56;
-      const tgtW = target.measured?.width || 180;
-      const tgtH = target.measured?.height || 56;
+      const srcW = source.measured?.width ?? (source as any).width ?? 180;
+      const srcH = source.measured?.height ?? (source as any).height ?? 56;
+      const tgtW = target.measured?.width ?? (target as any).width ?? 180;
+      const tgtH = target.measured?.height ?? (target as any).height ?? 56;
 
-      const sourceX = isVertical 
-        ? srcPos.x + (0.5 - srcOriginX) * srcW
-        : srcPos.x + (1 - srcOriginX) * srcW;
-      
-      const sourceY = isVertical 
-        ? srcPos.y + (1 - srcOriginY) * srcH
-        : srcPos.y + (0.5 - srcOriginY) * srcH;
-      
-      const targetX = isVertical 
-        ? tgtPos.x + (0.5 - tgtOriginX) * tgtW
-        : tgtPos.x - tgtOriginX * tgtW;
-        
-      const targetY = isVertical 
-        ? tgtPos.y - tgtOriginY * tgtH
-        : tgtPos.y + (0.5 - tgtOriginY) * tgtH;
+      const getHandlePos = (node: any, posAbsolute: any, type: 'source'|'target', posType: 'top'|'bottom'|'left'|'right') => {
+        const handles = node.internals?.handleBounds?.[type];
+        if (handles && handles.length > 0) {
+          const h = handles.find((h: any) => h.position === posType || h.id?.includes(posType)) || handles[0];
+          return { x: posAbsolute.x + h.x + h.width / 2, y: posAbsolute.y + h.y + h.height / 2 };
+        }
+        return null;
+      };
+
+      const srcCenterY = srcPos.y + (0.5 - srcOriginY) * srcH;
+      const tgtCenterY = tgtPos.y + (0.5 - tgtOriginY) * tgtH;
+      const srcCenterX = srcPos.x + (0.5 - srcOriginX) * srcW;
+      const tgtCenterX = tgtPos.x + (0.5 - tgtOriginX) * tgtW;
+
+      const dx = tgtCenterX - srcCenterX;
+      const dy = tgtCenterY - srcCenterY;
+
+      let sourceX, sourceY, targetX, targetY;
+
+      if (Math.abs(dy) > Math.abs(dx)) {
+        // Vertical movement
+        if (dy < 0) {
+          // Going UP: source TOP -> target BOTTOM
+          const sPos = getHandlePos(source, srcPos, 'source', 'top');
+          const tPos = getHandlePos(target, tgtPos, 'target', 'bottom');
+          sourceX = sPos ? sPos.x : srcCenterX;
+          sourceY = sPos ? sPos.y : srcPos.y - srcOriginY * srcH;
+          targetX = tPos ? tPos.x : tgtCenterX;
+          targetY = tPos ? tPos.y : tgtPos.y + (1 - tgtOriginY) * tgtH;
+        } else {
+          // Going DOWN: source BOTTOM -> target TOP
+          const sPos = getHandlePos(source, srcPos, 'source', 'bottom');
+          const tPos = getHandlePos(target, tgtPos, 'target', 'top');
+          sourceX = sPos ? sPos.x : srcCenterX;
+          sourceY = sPos ? sPos.y : srcPos.y + (1 - srcOriginY) * srcH;
+          targetX = tPos ? tPos.x : tgtCenterX;
+          targetY = tPos ? tPos.y : tgtPos.y - tgtOriginY * tgtH;
+        }
+      } else {
+        // Horizontal movement
+        if (dx > 0) {
+          // Going RIGHT: source RIGHT -> target LEFT
+          const sPos = getHandlePos(source, srcPos, 'source', 'right');
+          const tPos = getHandlePos(target, tgtPos, 'target', 'left');
+          sourceX = sPos ? sPos.x : srcPos.x + (1 - srcOriginX) * srcW;
+          sourceY = sPos ? sPos.y : srcCenterY;
+          targetX = tPos ? tPos.x : tgtPos.x - tgtOriginX * tgtW;
+          targetY = tPos ? tPos.y : tgtCenterY;
+        } else {
+          // Going LEFT: source LEFT -> target RIGHT
+          const sPos = getHandlePos(source, srcPos, 'source', 'left');
+          const tPos = getHandlePos(target, tgtPos, 'target', 'right');
+          sourceX = sPos ? sPos.x : srcPos.x - srcOriginX * srcW;
+          sourceY = sPos ? sPos.y : srcCenterY;
+          targetX = tPos ? tPos.x : tgtPos.x + (1 - tgtOriginX) * tgtW;
+          targetY = tPos ? tPos.y : tgtCenterY;
+        }
+      }
 
       // Start at source immediately
       setPos({ x: sourceX, y: sourceY });
-      setTargetPos({ x: targetX, y: targetY });
+      setIsAnimating(false);
 
       // In the next frame, begin moving to target
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          setIsAnimating(true);
           setPos({ x: targetX, y: targetY });
         });
       });
     }
   }, [animation, getNode]);
 
-  if (!pos || !targetPos) return null;
+  if (!pos) return null;
 
   return (
     <div 
@@ -68,7 +110,7 @@ function AssetAnimation({ animation, getNode }: any) {
         left: pos.x,
         top: pos.y,
         transform: 'translate(-50%, -50%)',
-        transition: pos.x === targetPos.x ? `left ${animation.durationMs}ms linear, top ${animation.durationMs}ms linear` : 'none',
+        transition: isAnimating ? `left ${animation.durationMs}ms linear, top ${animation.durationMs}ms linear` : 'none',
       }}
     >
       {animation.assetType === "file" && (
