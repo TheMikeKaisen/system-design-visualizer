@@ -26,10 +26,7 @@ interface ScenarioState {
     nodeId: string;
     code: string;
   } | null;
-  activeTooltip: {
-    nodeId: string;
-    message: string;
-  } | null;
+  activeTooltip: { nodeId: string; message: string; type?: "info" | "success" | "warning" | "error" } | null;
   highlightedElementIds: Set<string>;
   nodeStatuses: Record<string, NodeStatus>;
   nodeFlags: Record<string, Record<string, unknown>>;
@@ -211,7 +208,7 @@ function applyStepActions(get: () => ScenarioState) {
     } else if (action.action === "node-status") {
       nodeStatuses[action.nodeId] = action.status;
     } else if (action.action === "tooltip") {
-      newTooltip = { nodeId: action.nodeId, message: action.message };
+      newTooltip = { nodeId: action.nodeId, message: action.message, type: action.type };
     }
   }
 

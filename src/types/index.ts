@@ -43,7 +43,8 @@ export type NodeKind =
   // Java Educational
   | "javaSource"     | "javaCompiler" | "javaBytecode"
   | "jvm"            | "javaMachineCode" | "javaCpu"
-  | "platformBoundary" | "javaOsFrame";
+  | "platformBoundary" | "javaOsFrame"
+  | "javaClassLoader" | "javaClass";
 
 export type CloudProvider = "aws" | "gcp" | "azure" | "general" | "educational";
 
@@ -52,7 +53,7 @@ export function getCloudProvider(kind: NodeKind): CloudProvider {
   if (kind.startsWith("aws"))   return "aws";
   if (kind.startsWith("gcp"))   return "gcp";
   if (kind.startsWith("azure")) return "azure";
-  if (kind.startsWith("java") || kind === "jvm" || kind === "platformBoundary" || kind === "javaOsFrame") return "educational";
+  if (kind.startsWith("java") || kind === "jvm" || kind === "platformBoundary" || kind === "javaOsFrame" || kind === "javaClassLoader" || kind === "javaClass") return "educational";
   return "general";
 }
 
@@ -131,10 +132,19 @@ export interface SystemNodeData extends Record<string, unknown> {
 export interface EducationalNodeData {
   notes: {
     whatIsIt: string;
-    whyNeeded: string;
+    whyNeeded?: string;
+    whatDoesItDo?: string;
+    whenIsItInvolved?: string;
     whatIfMissing: string;
+    interestingFact?: string;
     interviewTips: string;
+
+    codePreview?: string;
+    codeLanguage?: string;
+    codeTitle?: string;
+    compiledOutput?: string;
   };
+  badges?: { label: string; value: string; color?: string }[];
 }
 
 

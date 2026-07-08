@@ -1,7 +1,7 @@
 export type NodeStatus = "idle" | "processing" | "success" | "error";
 
 export type ScenarioStep = 
-  | { action: "tooltip"; nodeId: string; message: string }
+  | { action: "tooltip"; nodeId: string; message: string; type?: "info" | "success" | "warning" | "error" }
   | { action: "highlight"; elementIds: string[] }
   | { action: "animate-asset"; sourceId: string; targetId: string; assetType: "file" | "binary" | "gear" | "dot"; durationMs: number }
   | { action: "show-code"; nodeId: string; codeSnippet: string }
