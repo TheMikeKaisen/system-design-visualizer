@@ -95,6 +95,30 @@ export default function JavaPathPage() {
             </div>
           </Link>
 
+          {/* Episode 3: Class Loading */}
+          <Link href="/java/canvas/how-java-loads-classes" className="group">
+            <div className="relative h-full p-8 rounded-2xl border border-border bg-card hover:border-purple-500/50 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.25)] transition-all duration-300">
+              <div className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 3</div>
+              <div className="absolute top-4 right-4 bg-purple-500/10 text-purple-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
+              <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-6 mt-4 group-hover:scale-110 transition-transform duration-300">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-3 group-hover:text-purple-500 transition-colors">How Does Java Find Classes?</h3>
+              <p className="text-base text-muted-foreground mb-10 leading-relaxed">
+                When you run `java Hello`, where does the JVM look? Understand the class path, external JARs, and why `java.lang.String` doesn't need to be downloaded.
+              </p>
+              <div className="flex items-center justify-between mt-auto">
+                <div className="flex -space-x-3">
+                  <span className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-500 border-4 border-card flex items-center justify-center text-xs font-bold z-30" title="Application Loader">App</span>
+                  <span className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-500 border-4 border-card flex items-center justify-center text-xs font-bold z-20" title="Bootstrap Loader">Boot</span>
+                </div>
+                <div className="flex items-center text-sm font-semibold text-purple-500 group-hover:translate-x-1 transition-transform">
+                  Launch <svg className="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </Link>
+
           {/* Locked Lesson: Garbage Collection */}
           <div className="relative h-full p-8 rounded-2xl border border-border/40 bg-card/40 opacity-80 cursor-not-allowed">
             <div className="absolute top-4 right-4 text-muted-foreground/60">
