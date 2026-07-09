@@ -101,7 +101,7 @@ export function ScenarioCanvasRoot({ title = "System Design Visualizer", experim
         </div>
 
         {/* Mobile-only floating UI */}
-        <MobileSimulationOverlay />
+        <MobileSimulationOverlay nodes={nodes} />
         <MobileFAB />
       </div>
     </CanvasErrorBoundary>
