@@ -17,7 +17,7 @@ const BLOB     = "blob:";
 
 // Hosts we load assets from — CDNs for fonts, icons, etc.
 const FONT_HOSTS  = ["https://fonts.googleapis.com", "https://fonts.gstatic.com"];
-const SCRIPT_CDNS = ["https://cdnjs.cloudflare.com"];
+const SCRIPT_CDNS = ["https://cdnjs.cloudflare.com", "https://va.vercel-scripts.com"];
 
 export function buildCsp(nonce: string, isDev: boolean): string {
   const scriptSrc = isDev
@@ -36,6 +36,7 @@ export function buildCsp(nonce: string, isDev: boolean): string {
       "ws:",            // Dev WebSocket HMR
       "https://signaling.yjs.dev",
       "https://*.upstash.io",   // Upstash Redis (rate limiter)
+      "https://vitals.vercel-insights.com", // Vercel Analytics
     ],
     "worker-src":       [SELF, BLOB],
     "frame-ancestors":  [NONE],

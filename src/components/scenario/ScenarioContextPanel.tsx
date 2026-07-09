@@ -169,9 +169,18 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
               Step
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-4 leading-tight">{currentStep.narrative.title}</h2>
-            <p className="text-[15px] text-foreground/80 leading-relaxed">
-              {currentStep.narrative.description}
-            </p>
+            <div className="text-[15px] text-foreground/80 leading-relaxed">
+              {currentStep.narrative.description?.split("```").map((part, i) => {
+                if (part.startsWith("java\n")) {
+                  return (
+                    <pre key={i} className="mt-3 p-3 rounded-lg bg-black/40 border border-white/10 font-mono text-xs overflow-x-auto text-green-400">
+                      <code>{part.replace("java\n", "")}</code>
+                    </pre>
+                  );
+                }
+                return <span key={i} className="whitespace-pre-wrap">{part}</span>;
+              })}
+            </div>
           </div>
 
           <div className="mt-8 flex flex-col gap-3">
@@ -191,12 +200,20 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
                       store.nextStep();
                     }
                   }}
-                  className={`w-full py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 ${
+                  className={`group relative w-full py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2 ${
                     !store.isPlaying
                       ? "bg-amber-500 text-amber-950 hover:bg-amber-400 animate-[pulse_1.5s_ease-in-out_infinite] ring-4 ring-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.5)]"
                       : "bg-primary text-primary-foreground hover:bg-primary/90"
                   }`}
                 >
+                  {!store.isPlaying && displayIndex === 0 && store.activeExperiments.length > 0 && (
+                    <div 
+                      className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold shadow-md transition-transform"
+                      title={`${store.activeExperiments.length} number of experiments applied`}
+                    >
+                      {store.activeExperiments.length}
+                    </div>
+                  )}
                   {currentStep.autoAdvance === false ? "Continue" : "Play"} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
               )

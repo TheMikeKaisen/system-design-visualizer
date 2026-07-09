@@ -139,7 +139,7 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
     
     set({ activeExperiments: newExperiments });
     // Reset to beginning when an experiment changes so the script branches correctly
-    set({ currentStepIndex: 0, isPlaying: true, selectedNodeId: null });
+    set({ currentStepIndex: 0, isPlaying: false, selectedNodeId: null });
     applyStepActions(get);
   },
 

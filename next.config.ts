@@ -66,8 +66,8 @@ const nextConfig: NextConfig = {
           {
             key:   "Content-Security-Policy",
             value: isDev
-              ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' wss: ws: https:; worker-src 'self' blob:; frame-ancestors 'none';"
-              : "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' wss: https:; worker-src 'self' blob:; frame-ancestors 'none'; upgrade-insecure-requests;",
+              ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' wss: ws: https:; worker-src 'self' blob:; frame-ancestors 'none';"
+              : "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' wss: https:; worker-src 'self' blob:; frame-ancestors 'none'; upgrade-insecure-requests;",
           },
         ],
       },

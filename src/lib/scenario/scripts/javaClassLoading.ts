@@ -245,7 +245,7 @@ export const javaClassLoadingScript: ScenarioScript = {
 
     // --- STEP 4: Dependency Detected ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       autoAdvance: false, // Wait for user
       narrative: {
         title: "4. Dependency Detected",
@@ -261,7 +261,7 @@ export const javaClassLoadingScript: ScenarioScript = {
 
     // --- STEP 5: Requesting String (App Loader) ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       durationMs: 2000,
       narrative: {
         title: "5. Requesting java.lang.String",
@@ -276,7 +276,7 @@ export const javaClassLoadingScript: ScenarioScript = {
 
     // --- STEP 6: Delegation to Platform ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       durationMs: 2500,
       narrative: {
         title: "6. Delegating Upward",
@@ -286,13 +286,14 @@ export const javaClassLoadingScript: ScenarioScript = {
         { action: "clear" },
         { action: "highlight", elementIds: ["node-application", "node-platform", "edge-app-plat"] },
         { action: "node-status", nodeId: "node-platform", status: "processing" },
-        { action: "animate-asset", sourceId: "node-application", targetId: "node-platform", assetType: "dot", durationMs: 1500 }
+        { action: "animate-asset", sourceId: "node-application", targetId: "node-platform", assetType: "dot", durationMs: 1500 },
+        { action: "tooltip", nodeId: "node-application", message: "Delegating to parent...", type: "info" }
       ]
     },
 
     // --- STEP 7: Delegation to Bootstrap ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       durationMs: 2500,
       narrative: {
         title: "7. Delegating to Bootstrap",
@@ -302,13 +303,14 @@ export const javaClassLoadingScript: ScenarioScript = {
         { action: "clear" },
         { action: "highlight", elementIds: ["node-platform", "node-bootstrap", "edge-plat-boot"] },
         { action: "node-status", nodeId: "node-bootstrap", status: "processing" },
-        { action: "animate-asset", sourceId: "node-platform", targetId: "node-bootstrap", assetType: "dot", durationMs: 1500 }
+        { action: "animate-asset", sourceId: "node-platform", targetId: "node-bootstrap", assetType: "dot", durationMs: 1500 },
+        { action: "tooltip", nodeId: "node-platform", message: "Delegating to parent...", type: "info" }
       ]
     },
 
     // --- STEP 8: Bootstrap Finds String ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       durationMs: 2500,
       narrative: {
         title: "8. Bootstrap Finds String",
@@ -324,7 +326,7 @@ export const javaClassLoadingScript: ScenarioScript = {
 
     // --- STEP 9: Returning the Result (Part 1) ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       durationMs: 1500,
       narrative: {
         title: "9. Returning the Result",
@@ -334,13 +336,14 @@ export const javaClassLoadingScript: ScenarioScript = {
         { action: "clear" },
         { action: "highlight", elementIds: ["node-bootstrap", "node-platform", "edge-boot-plat-ret"] },
         { action: "node-status", nodeId: "node-platform", status: "success" },
-        { action: "animate-asset", sourceId: "node-bootstrap", targetId: "node-platform", assetType: "dot", durationMs: 1200 }
+        { action: "animate-asset", sourceId: "node-bootstrap", targetId: "node-platform", assetType: "dot", durationMs: 1200 },
+        { action: "tooltip", nodeId: "node-platform", message: "Passing loaded class down...", type: "info" }
       ]
     },
 
     // --- STEP 10: Returning the Result (Part 2) ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       durationMs: 1500,
       narrative: {
         title: "10. Returning the Result",
@@ -350,13 +353,14 @@ export const javaClassLoadingScript: ScenarioScript = {
         { action: "clear" },
         { action: "highlight", elementIds: ["node-platform", "node-application", "edge-plat-app-ret"] },
         { action: "node-status", nodeId: "node-application", status: "success" },
-        { action: "animate-asset", sourceId: "node-platform", targetId: "node-application", assetType: "dot", durationMs: 1200 }
+        { action: "animate-asset", sourceId: "node-platform", targetId: "node-application", assetType: "dot", durationMs: 1200 },
+        { action: "tooltip", nodeId: "node-application", message: "Passing loaded class down...", type: "info" }
       ]
     },
 
     // --- STEP 11: Delivering to JVM ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       durationMs: 3000,
       narrative: {
         title: "11. String Loaded",
@@ -373,7 +377,7 @@ export const javaClassLoadingScript: ScenarioScript = {
 
     // --- STEP 12: Execution Resumes ---
     {
-      excludedExperiments: ["missing-class", "missing-dependency", "external-jar"],
+      excludedExperiments: ["missing-class", "missing-dependency", "external-jar", "require-platform-library"],
       autoAdvance: false,
       narrative: {
         title: "12. Execution Resumes",
@@ -493,6 +497,118 @@ export const javaClassLoadingScript: ScenarioScript = {
         { action: "node-status", nodeId: "node-application", status: "error" },
         { action: "node-status", nodeId: "node-jvm-execution", status: "error" },
         { action: "tooltip", nodeId: "node-jvm-execution", message: "java.lang.NoClassDefFoundError: UserService" }
+      ]
+    },
+
+    // ════════════════════════════════════════════════════════════
+    // EXPERIMENT 4: REQUIRE PLATFORM LIBRARY
+    // ════════════════════════════════════════════════════════════
+    {
+      requiredExperiments: ["require-platform-library"],
+      autoAdvance: false,
+      durationMs: 3000,
+      narrative: {
+        title: "Platform Module Needed",
+        description: "Execution reaches `DriverManager.getConnection()`. The JVM pauses because it needs the java.sql.Connection class.\n\n```java\nimport java.sql.Connection;\nimport java.sql.DriverManager;\n\npublic class Hello {\n    public static void main(String[] args) {\n        // Requires java.sql module\n        Connection conn = DriverManager.getConnection(\"...\");\n        System.out.println(\"Connected!\");\n    }\n}\n```"
+      },
+      actions: [
+        { action: "clear" },
+        { action: "highlight", elementIds: ["node-jvm-execution"] },
+        { action: "node-status", nodeId: "node-jvm-execution", status: "processing" },
+        { action: "tooltip", nodeId: "node-jvm-execution", message: "Need java.sql.Connection", type: "warning" }
+      ]
+    },
+    {
+      requiredExperiments: ["require-platform-library"],
+      durationMs: 2500,
+      narrative: {
+        title: "Delegating Upward",
+        description: "The Application Loader immediately delegates the request to the Platform Loader without searching."
+      },
+      actions: [
+        { action: "clear" },
+        { action: "highlight", elementIds: ["node-application", "node-platform", "edge-app-plat"] },
+        { action: "node-status", nodeId: "node-application", status: "processing" },
+        { action: "node-status", nodeId: "node-platform", status: "processing" },
+        { action: "animate-asset", sourceId: "node-application", targetId: "node-platform", assetType: "dot", durationMs: 1500 },
+        { action: "tooltip", nodeId: "node-application", message: "Delegating to parent...", type: "info" }
+      ]
+    },
+    {
+      requiredExperiments: ["require-platform-library"],
+      durationMs: 2500,
+      narrative: {
+        title: "Delegating to Bootstrap",
+        description: "The Platform Loader also delegates upward to the Bootstrap Loader."
+      },
+      actions: [
+        { action: "clear" },
+        { action: "highlight", elementIds: ["node-platform", "node-bootstrap", "edge-plat-boot"] },
+        { action: "node-status", nodeId: "node-bootstrap", status: "processing" },
+        { action: "animate-asset", sourceId: "node-platform", targetId: "node-bootstrap", assetType: "dot", durationMs: 1500 },
+        { action: "tooltip", nodeId: "node-platform", message: "Delegating to parent...", type: "info" }
+      ]
+    },
+    {
+      requiredExperiments: ["require-platform-library"],
+      durationMs: 2500,
+      narrative: {
+        title: "Bootstrap Core Check",
+        description: "The Bootstrap Loader checks core modules (like java.base). It does NOT find java.sql.Connection."
+      },
+      actions: [
+        { action: "clear" },
+        { action: "highlight", elementIds: ["node-bootstrap"] },
+        { action: "node-status", nodeId: "node-bootstrap", status: "error" },
+        { action: "tooltip", nodeId: "node-bootstrap", message: "Checked core modules. Not found.", type: "error" }
+      ]
+    },
+    {
+      requiredExperiments: ["require-platform-library"],
+      durationMs: 2500,
+      narrative: {
+        title: "Platform Modules Check",
+        description: "Control returns to the Platform Loader. It searches its modules and finds java.sql.Connection!"
+      },
+      actions: [
+        { action: "clear" },
+        { action: "highlight", elementIds: ["node-bootstrap", "node-platform", "edge-boot-plat-ret"] },
+        { action: "node-status", nodeId: "node-bootstrap", status: "idle" },
+        { action: "node-status", nodeId: "node-platform", status: "success" },
+        { action: "animate-asset", sourceId: "node-bootstrap", targetId: "node-platform", assetType: "dot", durationMs: 1200 },
+        { action: "tooltip", nodeId: "node-platform", message: "java.sql.Connection found!", type: "success" }
+      ]
+    },
+    {
+      requiredExperiments: ["require-platform-library"],
+      durationMs: 2000,
+      narrative: {
+        title: "Returning the Result",
+        description: "The answer travels back down to the Application Loader."
+      },
+      actions: [
+        { action: "clear" },
+        { action: "highlight", elementIds: ["node-platform", "node-application", "edge-plat-app-ret"] },
+        { action: "node-status", nodeId: "node-application", status: "success" },
+        { action: "animate-asset", sourceId: "node-platform", targetId: "node-application", assetType: "dot", durationMs: 1200 },
+        { action: "tooltip", nodeId: "node-application", message: "Passing loaded class down...", type: "info" }
+      ]
+    },
+    {
+      requiredExperiments: ["require-platform-library"],
+      autoAdvance: false,
+      narrative: {
+        title: "Execution Resumes",
+        timelineLabel: "Complete",
+        description: "The Application Loader delivers the loaded Connection class to the JVM, and execution continues.",
+        keyTakeaway: "Always ask your parent first! The JVM delegates upward before searching downward."
+      },
+      actions: [
+        { action: "clear" },
+        { action: "highlight", elementIds: ["node-application", "node-jvm-execution", "edge-app-jvm"] },
+        { action: "node-status", nodeId: "node-jvm-execution", status: "success" },
+        { action: "animate-asset", sourceId: "node-application", targetId: "node-jvm-execution", assetType: "dot", durationMs: 1200 },
+        { action: "tooltip", nodeId: "node-jvm-execution", message: "Class loaded successfully", type: "success" }
       ]
     }
   ]

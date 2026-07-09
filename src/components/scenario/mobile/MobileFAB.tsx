@@ -70,7 +70,7 @@ export function MobileFAB() {
         /* Plain white Play / Pause FAB */
         <button
           onClick={handleTap}
-          className="w-12 h-12 rounded-full bg-black/60 backdrop-blur border border-white/10 text-white flex items-center justify-center shadow-lg transition-transform active:scale-95"
+          className="relative w-12 h-12 rounded-full bg-black/60 backdrop-blur border border-white/10 text-white flex items-center justify-center shadow-lg transition-transform active:scale-95"
           aria-label={store.isPlaying ? "Pause simulation" : "Play simulation"}
         >
           {store.isPlaying ? (
@@ -94,6 +94,14 @@ export function MobileFAB() {
             >
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
+          )}
+          
+          {store.activeExperiments.length > 0 && !store.isPlaying && isAtStart && (
+            <div 
+              className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold shadow-md"
+            >
+              {store.activeExperiments.length}
+            </div>
           )}
         </button>
       )}

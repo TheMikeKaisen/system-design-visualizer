@@ -11,7 +11,8 @@ import { useScenarioStore } from "@/lib/store/useScenarioStore";
 import { ReactFlowProvider } from "@xyflow/react";
 
 const EPISODE3_EXPERIMENTS = [
-  { id: "missing-class", label: "Missing Class", description: "See what happens when you run code that doesn't exist." }
+  { id: "missing-class", label: "Missing Class", description: "See what happens when you run code that doesn't exist." },
+  { id: "require-platform-library", label: "Require Platform Library", description: "See what happens when your code uses a Java platform module like java.sql." }
 ];
 
 export default function JavaClassLoadingPage() {
@@ -25,6 +26,7 @@ export default function JavaClassLoadingPage() {
 
   const nodes = useMemo(() => {
     const isMissingClass = activeExperiments.includes("missing-class");
+    const isRequirePlatformLibrary = activeExperiments.includes("require-platform-library");
 
     // Start with core nodes
     const baseNodes = CLASS_LOADING_NODES.filter(n => {
@@ -32,6 +34,22 @@ export default function JavaClassLoadingPage() {
       if (isMissingClass && n.id === "node-hello-class") return false;
       if (n.id === "node-library-jar") return false;
       return true;
+    }).map(n => {
+      // Clone to safely mutate for this specific state
+      const node = structuredClone(n);
+      
+      if (isRequirePlatformLibrary && node.id === "node-hello-class" && node.data.educational?.notes) {
+        node.data.educational.notes.codePreview = "import java.sql.Connection;\nimport java.sql.DriverManager;\n\npublic class Hello {\n    public static void main(String[] args) {\n        // Requires java.sql module\n        Connection conn = DriverManager.getConnection(\"...\");\n        System.out.println(\"Connected!\");\n    }\n}";
+        if (!node.data.educational.badges) {
+          node.data.educational.badges = [];
+        }
+        node.data.educational.badges.push({
+          label: "Depends On",
+          value: "java.sql.Connection",
+          color: "bg-purple-500/10 border-purple-500/20 text-purple-700 dark:text-purple-400"
+        });
+      }
+      return node;
     });
 
     return baseNodes;

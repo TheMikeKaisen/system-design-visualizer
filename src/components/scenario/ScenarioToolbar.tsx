@@ -1,6 +1,6 @@
 import { useScenarioStore } from "@/lib/store/useScenarioStore";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ScenarioExperimentPanel } from "./ScenarioExperimentPanel";
 
 export function ScenarioToolbar({ 
@@ -21,6 +21,13 @@ export function ScenarioToolbar({
 
   const currentStep = store.script?.steps[store.currentStepIndex];
   const isAtStart = store.currentStepIndex === 0;
+
+  // Hide experiments panel when simulation starts
+  useEffect(() => {
+    if (store.isPlaying) {
+      setShowExperiments(false);
+    }
+  }, [store.isPlaying]);
 
   // Compute valid steps (respecting active experiments) — same as context panels
   const validStepsIndices = store.script
