@@ -44,27 +44,39 @@ export default function JavaPathPage() {
         </div>
 
         {/* Modules Grid */}
-        <div className="grid sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Episode 1: Java Code Execution */}
           <Link href="/java/canvas/flow-of-execution" className="group">
-            <div className="relative h-full p-8 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.2)] transition-all duration-300">
-              <div className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 1</div>
-              <div className="absolute top-4 right-4 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div>
-              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 mt-4 group-hover:scale-110 transition-transform duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.2)] transition-all duration-300 flex flex-col justify-center">
+              <div className="hidden sm:flex items-center justify-between mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 1</div>
+                <div className="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div>
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">Java Code Execution</h3>
-              <p className="text-base text-muted-foreground mb-10 leading-relaxed">
-                Follow a piece of Java code from source file to bytecode, through the JVM, and down to the CPU in a fully interactive canvas.
-              </p>
-              <div className="flex items-center justify-between mt-auto">
-                <div className="flex -space-x-3">
-                  <span className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-500 border-4 border-card flex items-center justify-center text-xs font-bold z-30" title="Source">.java</span>
-                  <span className="w-10 h-10 rounded-full bg-green-500/20 text-green-500 border-4 border-card flex items-center justify-center text-xs font-bold z-20" title="Bytecode">.class</span>
-                  <span className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-500 border-4 border-card flex items-center justify-center text-xs font-bold z-10" title="JVM">JVM</span>
+              
+              <div className="flex items-center sm:block gap-4 sm:gap-0">
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
-                <div className="flex items-center text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform">
-                  Launch <svg className="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <div className="flex-1 min-w-0">
+                  <div className="flex sm:hidden items-center gap-2 mb-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 1</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-primary transition-colors line-clamp-2">Java Code Execution</h3>
+                  <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
+                    Follow a piece of Java code from source file to bytecode, through the JVM, and down to the CPU in a fully interactive canvas.
+                  </p>
+                </div>
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  7 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>
@@ -72,24 +84,36 @@ export default function JavaPathPage() {
 
           {/* Episode 2: Platform Independence */}
           <Link href="/java/canvas/platform-independence" className="group">
-            <div className="relative h-full p-8 rounded-2xl border border-border bg-card hover:border-amber-500/50 hover:shadow-[0_0_30px_-5px_rgba(245,158,11,0.25)] transition-all duration-300">
-              <div className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 2</div>
-              <div className="absolute top-4 right-4 bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-6 mt-4 group-hover:scale-110 transition-transform duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-amber-500/50 hover:shadow-[0_0_30px_-5px_rgba(245,158,11,0.25)] transition-all duration-300 flex flex-col justify-center">
+              <div className="hidden sm:flex items-center justify-between mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 2</div>
+                <div className="bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3 group-hover:text-amber-500 transition-colors">How Can The Same Program Run Everywhere?</h3>
-              <p className="text-base text-muted-foreground mb-10 leading-relaxed">
-                Understand why Hello.class runs on Windows, Linux, and macOS without recompiling — and watch it cross the platform boundary live.
-              </p>
-              <div className="flex items-center justify-between mt-auto">
-                <div className="flex -space-x-3">
-                  <span className="w-10 h-10 rounded-full bg-green-500/20 text-green-500 border-4 border-card flex items-center justify-center text-xs font-bold z-30" title="Bytecode">.class</span>
-                  <span className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-500 border-4 border-card flex items-center justify-center text-[9px] font-bold z-20" title="Windows">Win</span>
-                  <span className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-500 border-4 border-card flex items-center justify-center text-[9px] font-bold z-10" title="Linux">Lnx</span>
+              
+              <div className="flex items-center sm:block gap-4 sm:gap-0">
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 </div>
-                <div className="flex items-center text-sm font-semibold text-amber-500 group-hover:translate-x-1 transition-transform">
-                  Launch <svg className="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <div className="flex-1 min-w-0">
+                  <div className="flex sm:hidden items-center gap-2 mb-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 2</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-amber-500 transition-colors line-clamp-2">How Can The Same Program Run Everywhere?</h3>
+                  <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
+                    Understand why Hello.class runs on Windows, Linux, and macOS without recompiling — and watch it cross the platform boundary live.
+                  </p>
+                </div>
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-amber-500 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  7 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg group-hover:bg-amber-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>
@@ -97,42 +121,69 @@ export default function JavaPathPage() {
 
           {/* Episode 3: Class Loading */}
           <Link href="/java/canvas/how-java-loads-classes" className="group">
-            <div className="relative h-full p-8 rounded-2xl border border-border bg-card hover:border-purple-500/50 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.25)] transition-all duration-300">
-              <div className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 3</div>
-              <div className="absolute top-4 right-4 bg-purple-500/10 text-purple-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
-              <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-6 mt-4 group-hover:scale-110 transition-transform duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-purple-500/50 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.25)] transition-all duration-300 flex flex-col justify-center">
+              <div className="hidden sm:flex items-center justify-between mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 3</div>
+                <div className="bg-purple-500/10 text-purple-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3 group-hover:text-purple-500 transition-colors">How Does Java Find Classes?</h3>
-              <p className="text-base text-muted-foreground mb-10 leading-relaxed">
-                When you run `java Hello`, where does the JVM look? Understand the class path, external JARs, and why `java.lang.String` doesn't need to be downloaded.
-              </p>
-              <div className="flex items-center justify-between mt-auto">
-                <div className="flex -space-x-3">
-                  <span className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-500 border-4 border-card flex items-center justify-center text-xs font-bold z-30" title="Application Loader">App</span>
-                  <span className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-500 border-4 border-card flex items-center justify-center text-xs font-bold z-20" title="Bootstrap Loader">Boot</span>
+              
+              <div className="flex items-center sm:block gap-4 sm:gap-0">
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </div>
-                <div className="flex items-center text-sm font-semibold text-purple-500 group-hover:translate-x-1 transition-transform">
-                  Launch <svg className="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <div className="flex-1 min-w-0">
+                  <div className="flex sm:hidden items-center gap-2 mb-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 3</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-purple-500 transition-colors line-clamp-2">How Does Java Find Classes?</h3>
+                  <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
+                    When you run `java Hello`, where does the JVM look? Understand the class path, external JARs, and why `java.lang.String` doesn't need to be downloaded.
+                  </p>
+                </div>
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-purple-500 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  9 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-purple-500 bg-purple-500/10 px-3 py-1.5 rounded-lg group-hover:bg-purple-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>
           </Link>
 
-          {/* Locked Lesson: Garbage Collection */}
-          <div className="relative h-full p-8 rounded-2xl border border-border/40 bg-card/40 opacity-80 cursor-not-allowed">
-            <div className="absolute top-4 right-4 text-muted-foreground/60">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border/40 bg-card/40 opacity-80 cursor-not-allowed flex flex-col justify-center">
+            <div className="hidden sm:flex items-center justify-between mb-4">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Episode 4</div>
+              <div className="text-muted-foreground/60">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground mb-6">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            
+            <div className="flex items-center sm:block gap-4 sm:gap-0">
+              <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-muted flex items-center justify-center text-muted-foreground sm:mb-4">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex sm:hidden items-center gap-2 mb-1">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">Episode 4</span>
+                </div>
+                <h3 className="text-base sm:text-xl font-bold text-foreground/50 sm:mb-3 line-clamp-2">Garbage Collection</h3>
+                <p className="hidden sm:block text-sm text-muted-foreground/60 mb-6 leading-relaxed line-clamp-3">
+                  Visualize how the JVM manages memory. Watch objects move from Eden space to Tenured generation, and see the Mark-and-Sweep algorithm in action.
+                </p>
+              </div>
+              <div className="sm:hidden flex items-center justify-center text-muted-foreground/40">
+                 <span className="text-[9px] font-bold uppercase tracking-widest">Soon</span>
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-foreground/50 mb-3">Garbage Collection</h3>
-            <p className="text-base text-muted-foreground/60 mb-8 leading-relaxed">
-              Visualize how the JVM manages memory. Watch objects move from Eden space to Tenured generation, and see the Mark-and-Sweep algorithm in action.
-            </p>
-            <div className="mt-auto">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-widest bg-muted text-muted-foreground rounded-md">
+
+            <div className="hidden sm:block mt-auto pt-4 border-t border-border/20">
+              <div className="inline-flex items-center justify-center w-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest bg-muted text-muted-foreground rounded-lg">
                 Coming Soon
               </div>
             </div>
