@@ -131,6 +131,8 @@ const KIND_CAPACITIES: Record<NodeKind, NodeCapacity | null> = {
   javaCpu:         null,
   platformBoundary: null,
   javaOsFrame:     null,
+  javaClassLoader: null,
+  javaClass:       null,
 };
 
 interface CreateNodeOptions {

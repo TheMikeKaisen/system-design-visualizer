@@ -164,7 +164,7 @@ export type SystemNode = Node<SystemNodeData>;
 // EDGE SYSTEM
 // ═══════════════════════════════════════════════════════
 
-export type Protocol = "HTTP" | "gRPC" | "TCP" | "UDP" | "WebSocket";
+export type Protocol = "HTTP" | "gRPC" | "TCP" | "UDP" | "WebSocket" | "Load" | "Execute" | "Delegate" | "Return";
 
 export interface MiddlewareConfig {
   type: "rateLimit" | "auth" | "transform" | "logging" | "circuitBreaker";

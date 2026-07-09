@@ -1,9 +1,11 @@
 import { useScenarioStore } from "@/lib/store/useScenarioStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SystemNode } from "@/types";
+import { LessonQuiz } from "./LessonQuiz";
 
 export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
   const store = useScenarioStore();
+  const [showQuiz, setShowQuiz] = useState(false);
   
   // Timer for auto-playback
   useEffect(() => {
@@ -143,6 +145,21 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
             )}
           </div>
         </div>
+      ) : showQuiz && currentStep?.quiz ? (
+        <div className="flex-1 overflow-y-auto p-5 flex flex-col">
+          <div className="mb-5">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Can You Explain It?</p>
+            <h2 className="text-lg font-bold text-foreground leading-tight">Quick Check</h2>
+          </div>
+          <LessonQuiz
+            questions={currentStep.quiz}
+            onComplete={() => {
+              setShowQuiz(false);
+              store.setStepIndex(0);
+              store.setPlaying(true);
+            }}
+          />
+        </div>
       ) : (
         // Narrative Mode
         <div className="flex-1 overflow-y-auto p-5 flex flex-col justify-between">
@@ -185,7 +202,25 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
               )
             )}
             
-            {isLastValidStep && (
+            {isLastValidStep && currentStep?.quiz && !showQuiz ? (
+              <>
+                <button
+                  onClick={() => setShowQuiz(true)}
+                  className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                >
+                  Can You Explain It? →
+                </button>
+                <button
+                  onClick={() => {
+                    store.setStepIndex(0);
+                    store.setPlaying(true);
+                  }}
+                  className="w-full py-2.5 bg-muted text-foreground rounded-lg font-medium shadow-sm hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
+                >
+                  Restart Lesson
+                </button>
+              </>
+            ) : isLastValidStep ? (
               <button
                 onClick={() => {
                   store.setStepIndex(0);
@@ -195,7 +230,7 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
               >
                 Restart Lesson
               </button>
-            )}
+            ) : null}
 
             {displayIndex > 0 && (
               <button

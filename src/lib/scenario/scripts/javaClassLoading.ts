@@ -1,17 +1,18 @@
 import { SystemNode, SystemEdge } from "@/types";
 import { ScenarioScript } from "../types";
 
-const EPISODE_3_QUIZ = {
-  question: "Why did the JVM use the Bootstrap Class Loader to find java.lang.String, but the Application Class Loader to find Hello.class?",
-  options: [
-    "Because java.lang.String is a core Java class stored in rt.jar (or core modules).",
-    "Because the Application loader is only for third-party JARs.",
-    "Because the Bootstrap loader is faster than the Application loader.",
-    "Because Hello.class was compiled with a newer version of Java."
-  ],
-  correctOptionIndex: 0,
-  explanation: "Java organizes classes by trust and origin. Core classes (like String) are loaded by the highly trusted Bootstrap loader. User-created classes (like Hello) are loaded by the Application loader from your classpath."
-};
+const EPISODE_3_QUIZ = [
+  {
+    question: "Why did the JVM use the Bootstrap Class Loader to find java.lang.String, but the Application Class Loader to find Hello.class?",
+    options: [
+      { text: "Because java.lang.String is a core Java class stored in rt.jar (or core modules).", correct: true },
+      { text: "Because the Application loader is only for third-party JARs.", correct: false },
+      { text: "Because the Bootstrap loader is faster than the Application loader.", correct: false },
+      { text: "Because Hello.class was compiled with a newer version of Java.", correct: false }
+    ],
+    explanation: "Java organizes classes by trust and origin. Core classes (like String) are loaded by the highly trusted Bootstrap loader. User-created classes (like Hello) are loaded by the Application loader from your classpath."
+  }
+];
 
 export const CLASS_LOADING_NODES: SystemNode[] = [
   // Class Loaders

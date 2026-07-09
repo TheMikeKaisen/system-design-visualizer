@@ -21,12 +21,13 @@ import { ScenarioCameraDirector } from "../scenario/ScenarioCameraDirector";
 import { MobileToolbar } from "../scenario/mobile/MobileToolbar";
 import { MobileFAB } from "../scenario/mobile/MobileFAB";
 import { MobileSimulationOverlay } from "../scenario/mobile/MobileSimulationOverlay";
+import { SystemNode, SystemEdge } from "@/types";
 
 interface ScenarioCanvasRootProps {
   title?: string;
   experiments?: { id: string; label: string; description: string }[];
-  nodes: Node[];
-  edges: Edge[];
+  nodes: SystemNode[];
+  edges: SystemEdge[];
   contextPanel?: React.ReactNode;
   toolbarExtras?: React.ReactNode;
   backHref?: string;
