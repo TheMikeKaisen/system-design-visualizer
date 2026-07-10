@@ -11,6 +11,7 @@ function makeGateway(chain: MiddlewareStep[]): SystemNode {
       activeConnections: 0, load: 0,
       securityPolicies: [],
       metadata: { middlewareChain: JSON.stringify(chain) },
+      capacity: null,
     },
   } as SystemNode;
 }

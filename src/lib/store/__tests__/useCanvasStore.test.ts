@@ -52,11 +52,11 @@ describe("useCanvasStore", () => {
   });
 
   it("can update edge data", () => {
-    const edge: SystemEdge = { id: "e1", source: "n1", target: "n2", data: { protocol: "http" } };
+    const edge: SystemEdge = { id: "e1", source: "n1", target: "n2", data: { protocol: "HTTP", throughputLimit: null, latencyMs: 0, errorRate: 0, middleware: [] } };
     useCanvasStore.setState({ edges: [edge] });
     
-    useCanvasStore.getState().updateEdgeData("e1", { protocol: "grpc" });
-    expect(useCanvasStore.getState().edges[0].data?.protocol).toBe("grpc");
+    useCanvasStore.getState().updateEdgeData("e1", { protocol: "gRPC" });
+    expect(useCanvasStore.getState().edges[0].data?.protocol).toBe("gRPC");
   });
 
   it("can restore an edge", () => {

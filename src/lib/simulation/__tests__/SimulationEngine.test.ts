@@ -36,6 +36,9 @@ describe("SimulationEngine — pure tick", () => {
       packetsPerSecond: 0,
       routingStrategy: "roundRobin",
       sourceNodeIds: [],
+      requestTimeoutMs: 5000,
+      maxRetries: 3,
+      trafficProfile: "constant",
     });
     expect(result.newPackets).toHaveLength(0);
     expect(result.progressUpdates.size).toBe(0);
@@ -52,6 +55,9 @@ describe("SimulationEngine — pure tick", () => {
       packetsPerSecond: 0,
       routingStrategy: "roundRobin",
       sourceNodeIds: [],
+      requestTimeoutMs: 5000,
+      maxRetries: 3,
+      trafficProfile: "constant",
     });
 
     expect(result.progressUpdates.has("p1")).toBe(true);
@@ -67,6 +73,9 @@ describe("SimulationEngine — pure tick", () => {
       packetsPerSecond: 0,
       routingStrategy: "roundRobin",
       sourceNodeIds: [],
+      requestTimeoutMs: 5000,
+      maxRetries: 3,
+      trafficProfile: "constant",
     });
 
     expect(result.arrivedIds).toContain("p1");
@@ -79,6 +88,9 @@ describe("SimulationEngine — pure tick", () => {
       packetsPerSecond: 0,
       routingStrategy: "roundRobin",
       sourceNodeIds: [],
+      requestTimeoutMs: 5000,
+      maxRetries: 3,
+      trafficProfile: "constant",
     });
     expect(result.progressUpdates.size).toBe(0);
     expect(result.arrivedIds).toHaveLength(0);
@@ -90,6 +102,9 @@ describe("SimulationEngine — pure tick", () => {
       packetsPerSecond: 0,
       routingStrategy: "roundRobin",
       sourceNodeIds: [],
+      requestTimeoutMs: 5000,
+      maxRetries: 3,
+      trafficProfile: "constant",
     });
     expect(result.progressUpdates.size).toBe(0);
   });
@@ -99,6 +114,9 @@ describe("SimulationEngine — pure tick", () => {
       packetsPerSecond: 10,
       routingStrategy: "roundRobin",
       sourceNodeIds: [], // no sources
+      requestTimeoutMs: 5000,
+      maxRetries: 3,
+      trafficProfile: "constant",
     });
     expect(result.newPackets).toHaveLength(0);
   });

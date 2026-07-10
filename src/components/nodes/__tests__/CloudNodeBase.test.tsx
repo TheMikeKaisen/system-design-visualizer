@@ -6,7 +6,7 @@ import type { SystemNodeData } from "@/types";
 
 const mockData: SystemNodeData = {
   kind: "awsEc2", label: "Web Server", activeConnections: 3,
-  load: 0.6, metadata: { instanceType: "t3.medium" }, securityPolicies: [],
+  load: 0.6, metadata: { instanceType: "t3.medium" }, securityPolicies: [], capacity: null,
 };
 
 function wrap(ui: React.ReactElement) {

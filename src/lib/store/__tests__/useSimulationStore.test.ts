@@ -29,6 +29,9 @@ describe("useSimulationStore", () => {
       progress: 0,
       status: "traveling",
       createdAt: performance.now(),
+      protocol: "HTTP",
+      sizeBytes: 512,
+      color: 0x378add,
     };
     useSimulationStore.getState().addPacket(packet);
     const state = useSimulationStore.getState();
@@ -44,6 +47,9 @@ describe("useSimulationStore", () => {
       progress: 0,
       status: "traveling",
       createdAt: performance.now(),
+      protocol: "HTTP",
+      sizeBytes: 512,
+      color: 0x378add,
     };
     useSimulationStore.getState().addPacket(packet);
     useSimulationStore.getState().updatePacketProgress("p1", 0.5);
@@ -58,6 +64,9 @@ describe("useSimulationStore", () => {
       progress: 0,
       status: "traveling",
       createdAt: performance.now(),
+      protocol: "HTTP",
+      sizeBytes: 512,
+      color: 0x378add,
     };
     useSimulationStore.getState().addPacket(packet);
     useSimulationStore.getState().markPacketArrived("p1");
@@ -76,6 +85,9 @@ describe("useSimulationStore", () => {
       progress: 0,
       status: "traveling",
       createdAt: performance.now(),
+      protocol: "HTTP",
+      sizeBytes: 512,
+      color: 0x378add,
     };
     useSimulationStore.getState().addPacket(packet);
     useSimulationStore.getState().markPacketDropped("p1");
@@ -92,6 +104,9 @@ describe("useSimulationStore", () => {
       progress: 0,
       status: "traveling",
       createdAt: performance.now(),
+      protocol: "HTTP",
+      sizeBytes: 512,
+      color: 0x378add,
     };
     const p2: Packet = {
       id: "p2",
@@ -100,6 +115,9 @@ describe("useSimulationStore", () => {
       progress: 0,
       status: "traveling",
       createdAt: performance.now(),
+      protocol: "HTTP",
+      sizeBytes: 512,
+      color: 0x378add,
     };
     useSimulationStore.getState().addPacket(p1);
     useSimulationStore.getState().addPacket(p2);

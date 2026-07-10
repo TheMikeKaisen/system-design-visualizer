@@ -25,7 +25,7 @@ describe("requireAuth", () => {
   });
 
   it("returns 401 when no session", async () => {
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as any);
     const result = await requireAuth();
     expect(result).toBeInstanceOf(Response);
     const res = result as Response;

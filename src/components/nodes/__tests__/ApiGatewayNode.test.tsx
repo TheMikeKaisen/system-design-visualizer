@@ -14,6 +14,7 @@ const defaultData: SystemNodeData = {
   activeConnections: 0, load: 0,
   metadata: { type: "REST", middlewareChain: "[]" },
   securityPolicies: [],
+  capacity: null,
 };
 
 function wrap(data = defaultData) {

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { buildMemoryLimiter } from "../rateLimit";
 
 // We test the memory limiter directly — Upstash requires a real Redis connection
 // Production tests for the Upstash limiter belong in integration/e2e tests
