@@ -1,7 +1,22 @@
 import { useScenarioStore } from "@/lib/store/useScenarioStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { SystemNode } from "@/types";
 import { LessonQuiz } from "./LessonQuiz";
+
+const renderMarkdown = (text: string | undefined): ReactNode => {
+  if (!text) return null;
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={i} className="font-bold text-foreground">{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      })}
+    </>
+  );
+};
 
 export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
   const store = useScenarioStore();
@@ -92,35 +107,35 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
             {selectedNode.data.educational?.notes?.whatIsIt && (
               <div>
                 <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">What is it?</h3>
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{selectedNode.data.educational.notes.whatIsIt}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{renderMarkdown(selectedNode.data.educational.notes.whatIsIt)}</p>
               </div>
             )}
             
             {selectedNode.data.educational?.notes?.whatDoesItDo && (
               <div>
                 <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">What does it do?</h3>
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{selectedNode.data.educational.notes.whatDoesItDo}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{renderMarkdown(selectedNode.data.educational.notes.whatDoesItDo)}</p>
               </div>
             )}
             
             {selectedNode.data.educational?.notes?.whenIsItInvolved && (
               <div>
                 <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">When is it used?</h3>
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{selectedNode.data.educational.notes.whenIsItInvolved}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{renderMarkdown(selectedNode.data.educational.notes.whenIsItInvolved)}</p>
               </div>
             )}
 
             {selectedNode.data.educational?.notes?.whyNeeded && (
               <div>
                 <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Why is it needed?</h3>
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{selectedNode.data.educational.notes.whyNeeded}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{renderMarkdown(selectedNode.data.educational.notes.whyNeeded)}</p>
               </div>
             )}
             
             {selectedNode.data.educational?.notes?.whatIfMissing && (
               <div>
                 <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">What if it's missing?</h3>
-                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{selectedNode.data.educational.notes.whatIfMissing}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{renderMarkdown(selectedNode.data.educational.notes.whatIfMissing)}</p>
               </div>
             )}
 
@@ -130,7 +145,7 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                   Interesting Fact
                 </h3>
-                <p className="text-sm text-foreground/90 whitespace-pre-wrap">{selectedNode.data.educational.notes.interestingFact}</p>
+                <p className="text-sm text-foreground/90 whitespace-pre-wrap">{renderMarkdown(selectedNode.data.educational.notes.interestingFact)}</p>
               </div>
             )}
             
@@ -140,7 +155,7 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                   Interview Tips
                 </h3>
-                <p className="text-sm text-foreground/90 italic whitespace-pre-wrap">{selectedNode.data.educational.notes.interviewTips}</p>
+                <p className="text-sm text-foreground/90 italic whitespace-pre-wrap">{renderMarkdown(selectedNode.data.educational.notes.interviewTips)}</p>
               </div>
             )}
           </div>
@@ -178,7 +193,17 @@ export function ScenarioContextPanel({ nodes = [] }: { nodes?: SystemNode[] }) {
                     </pre>
                   );
                 }
-                return <span key={i} className="whitespace-pre-wrap">{part}</span>;
+                const boldParts = part.split(/(\*\*.*?\*\*)/g);
+                return (
+                  <span key={i} className="whitespace-pre-wrap">
+                    {boldParts.map((bp, j) => {
+                      if (bp.startsWith('**') && bp.endsWith('**')) {
+                        return <strong key={j}>{bp.slice(2, -2)}</strong>;
+                      }
+                      return bp;
+                    })}
+                  </span>
+                );
               })}
             </div>
           </div>

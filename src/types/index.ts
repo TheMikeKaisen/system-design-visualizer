@@ -44,7 +44,8 @@ export type NodeKind =
   | "javaSource"     | "javaCompiler" | "javaBytecode"
   | "jvm"            | "javaMachineCode" | "javaCpu"
   | "platformBoundary" | "javaOsFrame"
-  | "javaClassLoader" | "javaClass";
+  | "javaClassLoader" | "javaClass"
+  | "group";
 
 export type CloudProvider = "aws" | "gcp" | "azure" | "general" | "educational";
 
@@ -135,7 +136,7 @@ export interface EducationalNodeData {
     whyNeeded?: string;
     whatDoesItDo?: string;
     whenIsItInvolved?: string;
-    whatIfMissing: string;
+    whatIfMissing?: string;
     interestingFact?: string;
     interviewTips: string;
 
@@ -145,6 +146,7 @@ export interface EducationalNodeData {
     compiledOutput?: string;
   };
   badges?: { label: string; value: string; color?: string }[];
+  miniMonitor?: string;
 }
 
 

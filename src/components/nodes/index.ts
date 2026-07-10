@@ -8,6 +8,7 @@ export { CacheNode }        from "./CacheNode";
 export { MessageQueueNode } from "./MessageQueueNode";
 export { ApiGatewayNode }   from "./ApiGatewayNode";
 export { CdnNode }          from "./CdnNode";
+export { LabeledGroupNode } from "./LabeledGroupNode";
 
 // AWS
 export { AwsEc2Node }        from "./cloud/AwsEc2Node";
@@ -60,6 +61,7 @@ export const nodeTypes = {
   messageQueue:     Nodes.MessageQueueNode,
   apiGateway:       Nodes.ApiGatewayNode,
   cdn:              Nodes.CdnNode,
+  labeledGroup:     Nodes.LabeledGroupNode,
   awsEc2:           Nodes.AwsEc2Node,
   awsRds:           Nodes.AwsRdsNode,
   awsElastiCache:   Nodes.AwsElastiCacheNode,

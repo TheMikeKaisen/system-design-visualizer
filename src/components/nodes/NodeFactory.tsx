@@ -27,11 +27,12 @@ const KIND_PREFIX: Record<NodeKind, string> = {
   // Azure
   azureVm:       "avm",   azureSql:     "asql", azureBlobStorage: "blob",
   azureServiceBus:"asb",  azureCdn:     "acdn", azureFunction:    "afn",
-  // Java
-  javaSource:    "jsrc",  javaCompiler: "jcomp", javaBytecode:    "jbyte",
-  jvm:           "jvm",   javaMachineCode: "jmc", javaCpu:        "jcpu",
-  platformBoundary: "pbnd", javaOsFrame: "osframe",
-  javaClassLoader: "jcl", javaClass: "jcls",
+  // Educational / JVM
+  javaSource:    "src",   javaCompiler: "javac", javaBytecode: "class",
+  jvm:           "jvm",   javaMachineCode: "bin", javaCpu:     "cpu",
+  platformBoundary:"os",  javaOsFrame:  "sys",
+  javaClassLoader: "ldr", javaClass:    "cls",
+  group:         "grp",
 };
 
 const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["data"]["metadata"] }> = {
@@ -73,10 +74,11 @@ const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["dat
   jvm:               { label: "JVM",                 metadata: {} },
   javaMachineCode:   { label: "Machine Code",        metadata: {} },
   javaCpu:           { label: "CPU",                 metadata: {} },
-  platformBoundary:  { label: "Platform Boundary",   metadata: {} },
-  javaOsFrame:       { label: "OS Frame",            metadata: { os: "linux", width: 260, height: 220 } },
-  javaClassLoader:   { label: "Class Loader",        metadata: {} },
-  javaClass:         { label: "Java Class",          metadata: {} },
+  platformBoundary:  { label: "OS Platform",        metadata: { os: "linux" } },
+  javaOsFrame:       { label: "OS Execution Frame", metadata: {} },
+  javaClassLoader:   { label: "Class Loader",       metadata: { subsystem: "app" } },
+  javaClass:         { label: "Java Class",         metadata: {} },
+  group:             { label: "Group",              metadata: {} },
 };
 
 // ─── Default capacity per node kind ───────────────────────────────────
@@ -133,6 +135,7 @@ const KIND_CAPACITIES: Record<NodeKind, NodeCapacity | null> = {
   javaOsFrame:     null,
   javaClassLoader: null,
   javaClass:       null,
+  group:           null,
 };
 
 interface CreateNodeOptions {

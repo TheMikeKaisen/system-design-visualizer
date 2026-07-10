@@ -119,14 +119,7 @@ export const useScenarioStore = create<ScenarioState>((set, get) => ({
   },
 
   setPlaying: (isPlaying: boolean) => {
-    // If we play and we are at the end, restart
-    const { script, currentStepIndex } = get();
-    if (isPlaying && script && currentStepIndex >= script.steps.length - 1) {
-      set({ currentStepIndex: 0, isPlaying: true, selectedNodeId: null });
-      applyStepActions(get);
-    } else {
-      set({ isPlaying, ...(isPlaying ? { selectedNodeId: null } : {}) });
-    }
+    set({ isPlaying, ...(isPlaying ? { selectedNodeId: null } : {}) });
   },
 
   setSpeed: (speed: number) => set({ playbackSpeed: speed }),

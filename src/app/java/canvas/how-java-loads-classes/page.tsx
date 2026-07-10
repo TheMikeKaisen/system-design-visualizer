@@ -43,7 +43,7 @@ export default function JavaClassLoadingPage() {
         if (!node.data.educational.badges) {
           node.data.educational.badges = [];
         }
-        node.data.educational.badges.push({
+        node.data.educational.badges!.push({
           label: "Depends On",
           value: "java.sql.Connection",
           color: "bg-purple-500/10 border-purple-500/20 text-purple-700 dark:text-purple-400"

@@ -79,11 +79,17 @@ export function EducationalNodeBase({ id, data, icon, colorClass, selected, chil
           )}
         </div>
         
-        <div className="flex-1 min-w-0 pr-6 pointer-events-none">
+        <div className="flex-1 min-w-0 pr-6 pointer-events-none flex flex-col justify-center">
           <p className="text-xs font-bold text-foreground truncate">{data.label}</p>
           <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider">{data.kind}</p>
         </div>
         </div>
+        
+        {data.educational?.miniMonitor && (
+          <div className="mt-3 bg-black/80 rounded border border-white/10 p-2 font-mono text-[10px] text-green-400 overflow-x-auto shadow-inner">
+            <code>{data.educational.miniMonitor}</code>
+          </div>
+        )}
 
         {children}
 

@@ -11,8 +11,24 @@ function AssetAnimation({ animation, getNode }: any) {
     const target = getNode(animation.targetId);
 
     if (source && target) {
-      const srcPos = source.positionAbsolute || source.position;
-      const tgtPos = target.positionAbsolute || target.position;
+      // Helper to compute absolute position for child nodes
+      const getAbsolutePosition = (node: any): { x: number, y: number } => {
+        let x = node.position?.x || 0;
+        let y = node.position?.y || 0;
+        let current = node;
+        
+        while (current.parentId) {
+          const parent = getNode(current.parentId);
+          if (!parent) break;
+          x += parent.position?.x || 0;
+          y += parent.position?.y || 0;
+          current = parent;
+        }
+        return { x, y };
+      };
+
+      const srcPos = getAbsolutePosition(source);
+      const tgtPos = getAbsolutePosition(target);
 
       const srcOriginX = source.origin?.[0] ?? 0;
       const srcOriginY = source.origin?.[1] ?? 0;
