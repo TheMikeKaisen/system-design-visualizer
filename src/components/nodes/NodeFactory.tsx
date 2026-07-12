@@ -32,6 +32,7 @@ const KIND_PREFIX: Record<NodeKind, string> = {
   jvm:           "jvm",   javaMachineCode: "bin", javaCpu:     "cpu",
   platformBoundary:"os",  javaOsFrame:  "sys",
   javaClassLoader: "ldr", javaClass:    "cls",
+  javaMethodArea: "marea",
   group:         "grp",
 };
 
@@ -78,6 +79,7 @@ const KIND_DEFAULTS: Record<NodeKind, { label: string; metadata: SystemNode["dat
   javaOsFrame:       { label: "OS Execution Frame", metadata: {} },
   javaClassLoader:   { label: "Class Loader",       metadata: { subsystem: "app" } },
   javaClass:         { label: "Java Class",         metadata: {} },
+  javaMethodArea:    { label: "Method Area",        metadata: {} },
   group:             { label: "Group",              metadata: {} },
 };
 
@@ -135,6 +137,7 @@ const KIND_CAPACITIES: Record<NodeKind, NodeCapacity | null> = {
   javaOsFrame:     null,
   javaClassLoader: null,
   javaClass:       null,
+  javaMethodArea:  null,
   group:           null,
 };
 

@@ -44,6 +44,7 @@ import { PlatformBoundaryNode }  from "./java/PlatformBoundaryNode";
 import { OsFrameNode }           from "./java/OsFrameNode";
 import { JavaClassLoaderNode }   from "./java/JavaClassLoaderNode";
 import { JavaClassNode }         from "./java/JavaClassNode";
+import { JavaMethodAreaNode }    from "./java/JavaMethodAreaNode";
 
 // Edge
 export { SimulationEdge } from "@/components/edges/SimulationEdge";
@@ -89,6 +90,7 @@ export const nodeTypes = {
   javaOsFrame:      OsFrameNode,
   javaClassLoader:  JavaClassLoaderNode,
   javaClass:        JavaClassNode,
+  javaMethodArea:   JavaMethodAreaNode,
 } as const;
 
 export const edgeTypes = {

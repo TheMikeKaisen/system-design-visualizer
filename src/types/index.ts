@@ -44,7 +44,7 @@ export type NodeKind =
   | "javaSource"     | "javaCompiler" | "javaBytecode"
   | "jvm"            | "javaMachineCode" | "javaCpu"
   | "platformBoundary" | "javaOsFrame"
-  | "javaClassLoader" | "javaClass"
+  | "javaClassLoader" | "javaClass" | "javaMethodArea"
   | "group";
 
 export type CloudProvider = "aws" | "gcp" | "azure" | "general" | "educational";
