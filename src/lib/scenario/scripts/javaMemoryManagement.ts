@@ -1,5 +1,6 @@
 import { SystemNode, SystemEdge } from "@/types";
 import { createNode } from "@/components/nodes/NodeFactory";
+import { ScenarioScript } from "@/lib/scenario/types";
 
 export const JAVA_MEMORY_NODES: SystemNode[] = [
   createNode({
@@ -66,17 +67,17 @@ export const JAVA_MEMORY_EDGES: SystemEdge[] = [
   },
 ];
 
-export const javaMemoryMethodAreaScript = {
+export const javaMemoryMethodAreaScript: ScenarioScript = {
   id: "java-memory-method-area",
   title: "Java Memory Management - Method Area",
   nodes: JAVA_MEMORY_NODES,
   edges: JAVA_MEMORY_EDGES,
   steps: [
     {
-      id: "stage-1",
-      title: "Class Loading",
-      description: "When the JVM starts or a class is first referenced, the ClassLoader reads the .class file and stores its blueprint in the Method Area.",
-      narrative: "When the JVM starts or a class is first referenced, the ClassLoader reads the .class file and stores its blueprint in the Method Area.",
+      narrative: {
+        title: "Class Loading",
+        description: "When the JVM starts or a class is first referenced, the ClassLoader reads the .class file and stores its blueprint in the Method Area."
+      },
       durationMs: 2500,
       actions: [
         { action: "clear" },
