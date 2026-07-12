@@ -70,8 +70,6 @@ export const JAVA_MEMORY_EDGES: SystemEdge[] = [
 export const javaMemoryMethodAreaScript: ScenarioScript = {
   id: "java-memory-method-area",
   title: "Java Memory Management - Method Area",
-  nodes: JAVA_MEMORY_NODES,
-  edges: JAVA_MEMORY_EDGES,
   steps: [
     {
       narrative: {
