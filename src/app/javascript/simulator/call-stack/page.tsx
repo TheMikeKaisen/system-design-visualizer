@@ -54,7 +54,7 @@ export default function JSCallStackSimulator() {
           <div className="flex items-center gap-4">
             <Link href="/javascript" className="flex items-center gap-2 group">
               <Logo size={24} />
-              <span className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
+              <span className="hidden sm:inline text-sm font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
                 Back to JS
               </span>
             </Link>
@@ -65,7 +65,7 @@ export default function JSCallStackSimulator() {
           </div>
 
           {/* Integrated Playback Controls */}
-          <div className="flex-1 max-w-3xl mx-8 hidden lg:flex items-center gap-6">
+          <div className="flex-1 max-w-3xl mx-4 sm:mx-8 flex justify-end lg:justify-center items-center gap-2 lg:gap-6">
             <div className="flex items-center gap-1">
               <button onClick={reset} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" title="Restart">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
@@ -85,7 +85,7 @@ export default function JSCallStackSimulator() {
               </button>
             </div>
 
-            <div className="flex-1 flex items-center gap-3">
+            <div className="hidden md:flex flex-1 items-center gap-3">
               <span className="text-[10px] font-mono text-muted-foreground font-medium whitespace-nowrap">
                 {currentStepIndex + 1} / {scenario.steps.length}
               </span>
