@@ -48,7 +48,7 @@ export default function JavascriptPathPage() {
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-[#F7DF1E]/50 hover:shadow-[0_0_30px_-5px_rgba(247,223,30,0.2)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 1</div>
-                <div className="bg-[#F7DF1E]/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div>
+                {/* <div className="bg-[#F7DF1E]/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div> */}
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
@@ -71,7 +71,7 @@ export default function JavascriptPathPage() {
 
               <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
                 <div className="flex items-center text-xs font-medium text-muted-foreground">
-                  Today
+                  13 July 2026
                 </div>
                 <div className="flex items-center text-xs font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg group-hover:bg-amber-500/20 transition-colors">
                   Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>

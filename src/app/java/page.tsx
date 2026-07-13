@@ -50,7 +50,7 @@ export default function JavaPathPage() {
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.2)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 1</div>
-                <div className="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div>
+                {/* <div className="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div> */}
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
@@ -87,7 +87,6 @@ export default function JavaPathPage() {
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-amber-500/50 hover:shadow-[0_0_30px_-5px_rgba(245,158,11,0.25)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 2</div>
-                <div className="bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
@@ -124,7 +123,6 @@ export default function JavaPathPage() {
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-purple-500/50 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.25)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 3</div>
-                <div className="bg-purple-500/10 text-purple-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
@@ -161,7 +159,6 @@ export default function JavaPathPage() {
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-emerald-500/50 hover:shadow-[0_0_30px_-5px_rgba(16,185,129,0.25)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 4</div>
-                <div className="bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
@@ -194,11 +191,10 @@ export default function JavaPathPage() {
           </Link>
 
           {/* Episode 5: Memory Management */}
-          <Link href="/java/canvas/memory-management" className="group">
+          {/* <Link href="/java/canvas/memory-management" className="group">
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-pink-500/50 hover:shadow-[0_0_30px_-5px_rgba(236,72,153,0.25)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 5</div>
-                <div className="bg-pink-500/10 text-pink-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">New</div>
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
@@ -228,7 +224,7 @@ export default function JavaPathPage() {
                 </div>
               </div>
             </div>
-          </Link>
+          </Link> */}
         </div>
       </main>
     </div>

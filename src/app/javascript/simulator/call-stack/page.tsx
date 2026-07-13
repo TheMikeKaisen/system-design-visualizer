@@ -55,7 +55,7 @@ export default function JSCallStackSimulator() {
             <Link href="/javascript" className="flex items-center gap-2 group">
               <Logo size={24} />
               <span className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
-                Back to JS Internals
+                Back to JS
               </span>
             </Link>
             <div className="h-4 w-px bg-border/50 hidden sm:block"></div>
