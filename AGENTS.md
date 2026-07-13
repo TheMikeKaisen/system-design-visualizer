@@ -42,3 +42,12 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 2. Use `detect_changes` for code review.
 3. Use `get_affected_flows` to understand impact.
 4. Use `query_graph` pattern="tests_for" to check coverage.
+
+## JavaScript Simulation Guidelines
+When creating new "Episodes" or Scenarios (like the Call Stack simulator), abide by these 5 core rules:
+
+1. **Data-Driven State Isolation**: Never hardcode simulation logic into React components. Define a strict, step-by-step `SimulationScenario` JSON/Object model. Every change in the stack, memory, or UI overlay must be represented as a discrete "Step" in the data layer.
+2. **The "Transparency" Rendering Principle**: When rendering arrays/stacks (like Call Stacks, Memory Heaps, or Queues), render the ENTIRE collection. Highlight and expand the active element, but always render inactive/suspended elements in a collapsed or dimmed state. Do not hide background contexts.
+3. **Strict React Key Strategies**: Never use array indices as React `key` props when mapping simulation data. Construct unique, deterministic keys (e.g., `key={\`\${executionContext.id}-\${variable.name}\`}`) to prevent severe state-leakage and animation bugs during context swaps.
+4. **Explicit Theming for "Terminal" UIs**: When building panels with forced backgrounds (like a dark Code Editor or black Console), hardcode the text colors (e.g., `text-gray-200`). Standard adaptive classes like `text-foreground` will invert to black in Light Mode and become invisible.
+5. **Multi-modal Feedback Architecture**: Every simulation step must contain multiple vectors of feedback. The data model should support: a text explanation (Banner), a brief notification (Toast), and a visual spotlight/overlay action (e.g., "Looking for variable...").
