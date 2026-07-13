@@ -67,7 +67,7 @@ function PageInner() {
 
   return (
     <ScenarioCanvasRoot
-      title="Java Internals: Platform Independence"
+      title="Java: Platform Independence"
       experiments={EPISODE2_EXPERIMENTS}
       nodes={nodes}
       edges={edges}

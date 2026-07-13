@@ -69,7 +69,7 @@ export default function JavaClassLoadingPage() {
     <main className="w-screen h-screen overflow-hidden">
       <ReactFlowProvider>
         <ScenarioCanvasRoot 
-          title="Java Internals: How Java Finds Classes"
+          title="Java: How Java Finds Classes"
           experiments={EPISODE3_EXPERIMENTS}
           nodes={nodes} 
           edges={edges}

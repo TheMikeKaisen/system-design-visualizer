@@ -86,7 +86,7 @@ public class Factory {
     <main className="w-screen h-screen overflow-hidden">
       <ReactFlowProvider>
         <ScenarioCanvasRoot 
-          title="Java Internals: Memory Management (Method Area)"
+          title="Java: Memory Management (Method Area)"
           experiments={EPISODE5_EXPERIMENTS}
           nodes={nodes} 
           edges={JAVA_MEMORY_EDGES}

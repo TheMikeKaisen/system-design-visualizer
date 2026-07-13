@@ -89,7 +89,7 @@ export default function JavaClassLifecyclePage() {
     <main className="w-screen h-screen overflow-hidden">
       <ReactFlowProvider>
         <ScenarioCanvasRoot 
-          title="Java Internals: The Class Lifecycle"
+          title="Java: The Class Lifecycle"
           experiments={EPISODE4_EXPERIMENTS}
           nodes={nodes} 
           edges={JAVA_LIFECYCLE_EDGES}

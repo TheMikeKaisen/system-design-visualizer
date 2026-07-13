@@ -27,7 +27,7 @@ export default function JavaExecutionFlowPage() {
     <main className="w-screen h-screen overflow-hidden">
       <ReactFlowProvider>
         <ScenarioCanvasRoot 
-          title="Java Internals: How Java Code Executes"
+          title="Java: How Java Code Executes"
           experiments={EPISODE1_EXPERIMENTS}
           nodes={JAVA_FLOW_NODES} 
           edges={JAVA_FLOW_EDGES}

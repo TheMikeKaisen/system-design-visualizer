@@ -28,15 +28,15 @@ export default function JavaPathPage() {
       <main className="pt-32 pb-20 mx-auto max-w-5xl px-6">
         {/* Header */}
         <div className="mb-16">
-          <Link href="/" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-8 transition-colors">
+          <Link href="/learning-paths" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-8 transition-colors">
             <svg className="mr-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Back to Home
+            Back to Learning Paths
           </Link>
           <div className="flex items-center gap-5 mb-6">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center p-2 bg-white overflow-hidden shadow-sm">
               <img src="/logo/java.png" alt="Java Logo" className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">Java Internals</h1>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">Java</h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
             Deep dive into the Java ecosystem. Explore how the JVM works, how code is compiled, and visualize the execution flow under the hood.

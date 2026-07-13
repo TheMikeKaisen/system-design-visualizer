@@ -204,7 +204,7 @@ function Nav() {
 
           {/* Guided Learning — enabled */}
           <Link
-            href="/java"
+            href="/learning-paths"
             className="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground border border-border/50 rounded-lg hover:bg-muted/50 transition-colors"
           >
             Learning Paths
@@ -270,7 +270,7 @@ function HeroSection() {
 
               {/* Secondary CTA — enabled */}
               <Link
-                href="/java"
+                href="/learning-paths"
                 className="group inline-flex items-center gap-2 px-6 py-3 text-base font-semibold text-muted-foreground border border-border/60 rounded-xl hover:bg-muted/50 transition-colors"
                 id="hero-cta-guided"
               >
@@ -434,7 +434,7 @@ function GuidedLearningSection() {
               <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-orange-500/20 transition-all duration-300">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">Java Internals</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">Java</h3>
               <p className="text-sm leading-relaxed text-muted-foreground mb-6">
                 Understand how Java code is compiled, converted to bytecode, and executed by the JVM and CPU.
               </p>
