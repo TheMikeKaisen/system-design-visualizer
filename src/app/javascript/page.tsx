@@ -107,7 +107,7 @@ export default function JavascriptPathPage() {
 
               <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
                 <div className="flex items-center text-xs font-medium text-muted-foreground">
-                  New!
+                  14 July 2026
                 </div>
                 <div className="flex items-center text-xs font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg group-hover:bg-amber-500/20 transition-colors">
                   Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
