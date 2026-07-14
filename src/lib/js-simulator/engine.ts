@@ -13,6 +13,14 @@ export interface ExecutionContext {
   outerEnvironment: string | null;
 }
 
+export interface ScopeLookupState {
+  targetVariable: string;
+  status: "searching" | "found" | "not_found" | "reference_error";
+  activeContextId: string;
+  checkedContextIds: string[];
+  traceLog: string[];
+}
+
 export interface SimulationState {
   currentLine: number | null;
   callStack: ExecutionContext[];
@@ -20,6 +28,7 @@ export interface SimulationState {
   consoleOutput?: string[];
   toastMessage?: string;
   visualEffect?: { action: string; target: string; context?: string };
+  scopeLookup?: ScopeLookupState;
 }
 
 export interface SimulationScenario {
