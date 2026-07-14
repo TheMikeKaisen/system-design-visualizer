@@ -73,7 +73,7 @@ export default function JSHoistingSimulator() {
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
       {/* Navigation */}
-      <nav className="h-16 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0">
+      <nav className="relative z-40 h-16 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0">
         <div className="h-full px-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/javascript" className="flex items-center gap-2 group">
