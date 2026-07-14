@@ -43,9 +43,10 @@ function AnimatedVariable({ name, value }: { name: string, value: string }) {
           <span className="text-[10px] text-muted-foreground animate-pulse">allocating...</span>
         </div>
       ) : (
-        <span className={cn(
+          <span className={cn(
           "font-bold",
           displayValue === "undefined" || displayValue === "<uninitialized>" ? "text-red-400" :
+          displayValue.includes("<TDZ>") ? "text-red-500 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/30" :
           displayValue.includes("Function Object") ? "text-purple-400 whitespace-pre text-right" :
           "text-green-400"
         )}>

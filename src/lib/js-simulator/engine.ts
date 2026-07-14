@@ -27,7 +27,7 @@ export interface SimulationState {
   explanation: string;
   consoleOutput?: string[];
   toastMessage?: string;
-  visualEffect?: { action: string; target: string; context?: string };
+  visualEffect?: { action: string; target: string; context?: string; reason?: string };
   scopeLookup?: ScopeLookupState;
 }
 

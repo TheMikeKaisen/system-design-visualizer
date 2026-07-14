@@ -152,11 +152,47 @@ export default function JavascriptPathPage() {
             </div>
           </Link>
 
-          {/* Episode 4: Closures */}
+          {/* Episode 4: let, const & var */}
+          <Link href="/javascript/simulator/let-const" className="group">
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-[#F7DF1E]/50 hover:shadow-[0_0_30px_-5px_rgba(247,223,30,0.2)] transition-all duration-300 flex flex-col justify-center">
+              <div className="hidden sm:flex items-center justify-between mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 4</div>
+              </div>
+              
+              <div className="flex items-center sm:block gap-4 sm:gap-0">
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-[#F7DF1E]/10 text-amber-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex sm:hidden items-center gap-2 mb-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 4</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-amber-500 transition-colors line-clamp-2">let, const & var (TDZ)</h3>
+                  <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
+                    Discover the differences between declarations. See the Temporal Dead Zone block access, and learn about reassignment rules.
+                  </p>
+                </div>
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-amber-500 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  14 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg group-hover:bg-amber-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Episode 5: Closures */}
           <div className="group opacity-50 cursor-not-allowed">
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 4</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 5</div>
                 <div className="bg-muted text-muted-foreground text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Coming Soon</div>
               </div>
               
