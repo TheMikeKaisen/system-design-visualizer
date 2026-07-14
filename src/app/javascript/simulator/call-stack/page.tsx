@@ -4,6 +4,7 @@ import { useJSSimulationStore } from "@/store/useJSSimulationStore";
 import { CodePanel } from "@/components/javascript/CodePanel";
 import { CallStackPanel } from "@/components/javascript/CallStackPanel";
 import { ExecutionContextPanel } from "@/components/javascript/ExecutionContextPanel";
+import { MobileTabbedPanels } from "@/components/javascript/MobileTabbedPanels";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
@@ -56,7 +57,7 @@ export default function JSCallStackSimulator() {
   const progress = ((currentStepIndex + 1) / scenario.steps.length) * 100;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Navigation */}
       <nav className="h-16 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0">
         <div className="h-full px-6 flex items-center justify-between">
@@ -137,8 +138,8 @@ export default function JSCallStackSimulator() {
       {/* Main Simulator Area */}
       <main className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 gap-6 relative">
 
-        {/* 3-Panel Layout */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0 relative">
+        {/* Responsive Layout */}
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6 min-h-0 relative overflow-hidden">
           
           {/* Variable Resolution Overlay */}
           <AnimatePresence>
@@ -166,14 +167,24 @@ export default function JSCallStackSimulator() {
             )}
           </AnimatePresence>
 
-          <div className="h-full">
+          {/* Top/Left: Code Panel */}
+          <div className="flex-[0_0_45%] min-h-0 lg:flex-none lg:h-full lg:col-span-1 shrink-0">
             <CodePanel />
           </div>
-          <div className="h-full">
-            <CallStackPanel />
+
+          {/* Desktop: Grid for Stack & Context */}
+          <div className="hidden lg:contents">
+            <div className="h-full min-h-0">
+              <CallStackPanel />
+            </div>
+            <div className="h-full min-h-0">
+              <ExecutionContextPanel />
+            </div>
           </div>
-          <div className="h-full">
-            <ExecutionContextPanel />
+
+          {/* Mobile: Tabs for Stack & Context */}
+          <div className="flex-1 flex flex-col lg:hidden min-h-0 relative">
+            <MobileTabbedPanels />
           </div>
         </div>
       </main>

@@ -66,7 +66,7 @@ export function CodePanel() {
       
       {/* Console Output */}
       {currentState.consoleOutput && (
-        <div className="h-32 border-t border-border/40 bg-black flex flex-col shrink-0">
+        <div className="hidden lg:flex h-32 border-t border-border/40 bg-black flex-col shrink-0">
           <div className="bg-[#2d2d2d] px-4 py-1 border-b border-border/40 flex items-center">
             <span className="text-[10px] font-bold text-green-400 font-mono tracking-wider">
               {'>_ CONSOLE'}

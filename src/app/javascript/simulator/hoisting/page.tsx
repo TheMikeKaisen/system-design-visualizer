@@ -4,6 +4,7 @@ import { useJSSimulationStore } from "@/store/useJSSimulationStore";
 import { CodePanel } from "@/components/javascript/CodePanel";
 import { CallStackPanel } from "@/components/javascript/CallStackPanel";
 import { ExecutionContextPanel } from "@/components/javascript/ExecutionContextPanel";
+import { MobileTabbedPanels } from "@/components/javascript/MobileTabbedPanels";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
@@ -71,7 +72,7 @@ export default function JSHoistingSimulator() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Navigation */}
       <nav className="relative z-40 h-16 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0">
         <div className="h-full px-6 flex items-center justify-between">
@@ -85,12 +86,12 @@ export default function JSHoistingSimulator() {
             <div className="h-4 w-px bg-border/50 hidden sm:block"></div>
             
             {/* Custom Scenario Dropdown */}
-            <div className="hidden sm:block relative" ref={dropdownRef}>
+            <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 text-sm font-medium text-foreground bg-card border border-border/50 hover:border-primary/50 hover:bg-muted/30 rounded-lg px-3 py-1.5 outline-none transition-all shadow-sm"
+                className="flex items-center gap-2 text-sm font-medium text-foreground bg-card border border-border/50 hover:border-primary/50 hover:bg-muted/30 rounded-lg px-2 sm:px-3 py-1.5 outline-none transition-all shadow-sm"
               >
-                <span>{scenario.title}</span>
+                <span className="truncate max-w-[130px] sm:max-w-none text-xs sm:text-sm">{scenario.title}</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("text-muted-foreground transition-transform duration-200", isDropdownOpen ? "rotate-180" : "")}><polyline points="6 9 12 15 18 9"></polyline></svg>
               </button>
 
@@ -246,16 +247,26 @@ export default function JSHoistingSimulator() {
           )}
         </AnimatePresence>
 
-        {/* 3-Panel Layout */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0 relative">
-          <div className="h-full">
+        {/* Responsive Layout */}
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6 min-h-0 relative overflow-hidden">
+          {/* Top/Left: Code Panel */}
+          <div className="flex-[0_0_45%] min-h-0 lg:flex-none lg:h-full lg:col-span-1 shrink-0">
             <CodePanel />
           </div>
-          <div className="h-full">
-            <CallStackPanel />
+
+          {/* Desktop: Grid for Stack & Context */}
+          <div className="hidden lg:contents">
+            <div className="h-full min-h-0">
+              <CallStackPanel />
+            </div>
+            <div className="h-full min-h-0">
+              <ExecutionContextPanel />
+            </div>
           </div>
-          <div className="h-full">
-            <ExecutionContextPanel />
+
+          {/* Mobile: Tabs for Stack & Context */}
+          <div className="flex-1 flex flex-col lg:hidden min-h-0 relative">
+            <MobileTabbedPanels />
           </div>
         </div>
       </main>
