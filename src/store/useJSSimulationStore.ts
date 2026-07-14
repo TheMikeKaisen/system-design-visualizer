@@ -12,6 +12,7 @@ interface JSSimulationState {
   reset: () => void;
   togglePlay: () => void;
   setStep: (index: number) => void;
+  setScenario: (scenario: SimulationScenario) => void;
 }
 
 export const useJSSimulationStore = create<JSSimulationState>((set, get) => ({
@@ -54,5 +55,9 @@ export const useJSSimulationStore = create<JSSimulationState>((set, get) => ({
     if (index >= 0 && index < scenario.steps.length) {
       set({ currentStepIndex: index, isPlaying: false });
     }
+  },
+
+  setScenario: (scenario: SimulationScenario) => {
+    set({ scenario, currentStepIndex: 0, isPlaying: false });
   }
 }));
