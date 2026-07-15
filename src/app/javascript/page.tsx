@@ -188,27 +188,77 @@ export default function JavascriptPathPage() {
             </div>
           </Link>
 
-          {/* Episode 5: Closures */}
-          <div className="group opacity-50 cursor-not-allowed">
-            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card transition-all duration-300 flex flex-col justify-center">
+          {/* Episode 5: Block Scope */}
+          <Link href="/javascript/simulator/block-scope" className="group">
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-[#F7DF1E]/50 hover:shadow-[0_0_30px_-5px_rgba(247,223,30,0.2)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 5</div>
-                <div className="bg-muted text-muted-foreground text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Coming Soon</div>
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
-                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-muted text-muted-foreground flex items-center justify-center sm:mb-4">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h20"></path><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"></path><path d="M4 12V6a4 4 0 0 1 8 0 4 4 0 0 1 8 0v6"></path></svg>
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-[#F7DF1E]/10 text-amber-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 line-clamp-2">Understanding Closures</h3>
+                  <div className="flex sm:hidden items-center gap-2 mb-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 5</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-amber-500 transition-colors line-clamp-2">Block Scope & Shadowing</h3>
                   <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
-                    See exactly how a function retains access to its lexical scope even after its outer function has finished executing.
+                    Variables live inside rooms, and JavaScript searches through rooms. Understand how blocks create scopes and shadowing.
                   </p>
+                </div>
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-amber-500 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  15 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg group-hover:bg-amber-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
+
+          {/* Episode 6: Closures */}
+          <Link href="/javascript/simulator/closures" className="group">
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-[#F7DF1E]/50 hover:shadow-[0_0_30px_-5px_rgba(247,223,30,0.2)] transition-all duration-300 flex flex-col justify-center">
+              <div className="hidden sm:flex items-center justify-between mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 6</div>
+              </div>
+              
+              <div className="flex items-center sm:block gap-4 sm:gap-0">
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-[#F7DF1E]/10 text-amber-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex sm:hidden items-center gap-2 mb-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 6</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-amber-500 transition-colors line-clamp-2">Closures & Callbacks</h3>
+                  <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
+                    See exactly how a function retains access to its lexical scope even after its outer function has finished executing. Learn data hiding and Web APIs.
+                  </p>
+                </div>
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-amber-500 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  15 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg group-hover:bg-amber-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </Link>
 
         </div>
       </main>

@@ -11,6 +11,8 @@ export interface ExecutionContext {
   phase: ExecutionPhase;
   variables: ExecutionVariable[];
   outerEnvironment: string | null;
+  isBlockScope?: boolean;
+  isClosure?: boolean;
 }
 
 export interface ScopeLookupState {
@@ -21,6 +23,13 @@ export interface ScopeLookupState {
   traceLog: string[];
 }
 
+export interface TaskQueueItem {
+  id: string;
+  name: string;
+  timeout: string;
+  callback: string;
+}
+
 export interface SimulationState {
   currentLine: number | null;
   callStack: ExecutionContext[];
@@ -29,6 +38,7 @@ export interface SimulationState {
   toastMessage?: string;
   visualEffect?: { action: string; target: string; context?: string; reason?: string };
   scopeLookup?: ScopeLookupState;
+  taskQueue?: TaskQueueItem[];
 }
 
 export interface SimulationScenario {
