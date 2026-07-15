@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 export function CallStackPanel() {
   const { scenario, currentStepIndex } = useJSSimulationStore();
   const currentState = scenario.steps[currentStepIndex];
-  const callStack = currentState.callStack;
+  const callStack = currentState.callStack.filter(ec => !ec.isBlockScope);
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">

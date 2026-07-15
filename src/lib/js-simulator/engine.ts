@@ -11,6 +11,7 @@ export interface ExecutionContext {
   phase: ExecutionPhase;
   variables: ExecutionVariable[];
   outerEnvironment: string | null;
+  isBlockScope?: boolean;
 }
 
 export interface ScopeLookupState {
