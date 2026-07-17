@@ -65,7 +65,7 @@ export function CodePanel() {
       </div>
       
       {/* Console Output */}
-      {currentState.consoleOutput && (
+      {currentState.consoleOutput && !scenario.id.startsWith("el-") && (
         <div className="hidden lg:flex h-32 border-t border-border/40 bg-black flex-col shrink-0">
           <div className="bg-[#2d2d2d] px-4 py-1 border-b border-border/40 flex items-center">
             <span className="text-[10px] font-bold text-green-400 font-mono tracking-wider">
@@ -85,11 +85,13 @@ export function CodePanel() {
       )}
 
       {/* Explanation Banner */}
-      <div className="bg-primary/10 border-t border-primary/20 p-4 shrink-0">
-        <p className="text-sm text-foreground dark:text-gray-200 leading-relaxed font-medium">
-          {currentState.explanation}
-        </p>
-      </div>
+      {!scenario.id.startsWith("el-") && (
+        <div className="bg-primary/10 border-t border-primary/20 p-4 shrink-0">
+          <p className="text-sm text-foreground dark:text-gray-200 leading-relaxed font-medium">
+            {currentState.explanation}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

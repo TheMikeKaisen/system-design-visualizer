@@ -30,6 +30,27 @@ export interface TaskQueueItem {
   callback: string;
 }
 
+export interface WebAPIItem {
+  id: string;
+  type: "setTimeout" | "setInterval" | "fetch" | "promise" | "queueMicrotask";
+  label: string;
+  callback: string;
+  delay?: string;
+  status: "running" | "complete";
+}
+
+export interface QueueItem {
+  id: string;
+  label: string;
+  callback: string;
+  source: string;
+}
+
+export interface EventLoopState {
+  phase: "idle" | "checking_microtasks" | "draining_microtask" | "checking_callbacks" | "moving_callback" | "stack_busy";
+  message: string;
+}
+
 export interface SimulationState {
   currentLine: number | null;
   callStack: ExecutionContext[];
@@ -38,7 +59,11 @@ export interface SimulationState {
   toastMessage?: string;
   visualEffect?: { action: string; target: string; context?: string; reason?: string };
   scopeLookup?: ScopeLookupState;
-  taskQueue?: TaskQueueItem[];
+  taskQueue?: TaskQueueItem[]; // Deprecated for Episode 7, kept for Episode 6
+  webAPIs?: WebAPIItem[];
+  microtaskQueue?: QueueItem[];
+  callbackQueue?: QueueItem[];
+  eventLoop?: EventLoopState;
 }
 
 export interface SimulationScenario {
