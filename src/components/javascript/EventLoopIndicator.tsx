@@ -1,7 +1,7 @@
 "use client";
 
 import { useJSSimulationStore } from "@/store/useJSSimulationStore";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export function EventLoopIndicator() {
@@ -77,10 +77,30 @@ export function EventLoopIndicator() {
         </span>
       </div>
       
-      <div className="flex-1 p-4 flex flex-col justify-center items-center text-center gap-2">
+      <div className="flex-1 p-4 pb-6 overflow-y-auto flex flex-col justify-center items-center text-center gap-2">
         <p className="text-sm text-foreground font-medium">
           {eventLoop.message}
         </p>
+        
+        {/* Active Task Minimal Badge */}
+        <AnimatePresence mode="wait">
+          {eventLoop.activeTask && (
+            <motion.div
+              layout
+              layoutId={eventLoop.activeTask.id}
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="mt-2 bg-background border border-border shadow-md shadow-black/10 px-3 py-1.5 rounded-md flex items-center gap-2 relative z-10"
+            >
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span className="text-xs font-mono text-foreground font-bold">{eventLoop.activeTask.label}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Visual path hints based on phase */}
         {eventLoop.phase === "checking_microtasks" && (

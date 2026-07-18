@@ -9,6 +9,11 @@ export function CallStackPanel() {
   const currentState = scenario.steps[currentStepIndex];
   const callStack = currentState.callStack.filter(ec => !ec.isBlockScope && !ec.isClosure);
 
+  // Only use layoutId in Event Loop simulator where tasks fly between panels.
+  // In all other episodes, execution contexts never cross panel boundaries,
+  // and layoutId causes Framer Motion to glitch on parent re-renders (toast/popup timers).
+  const isEventLoopMode = !!currentState.eventLoop;
+
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
       <div className="px-4 py-3 border-b border-border/50 bg-muted/20">
@@ -32,6 +37,7 @@ export function CallStackPanel() {
                 <motion.div
                   key={ec.id}
                   layout
+                  // layoutId={isEventLoopMode && ec.id !== "global" ? ec.id : undefined}
                   initial={{ opacity: 0, y: -50, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -50, scale: 0.8, filter: "blur(4px)" }}

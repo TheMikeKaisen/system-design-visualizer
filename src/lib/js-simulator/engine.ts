@@ -49,6 +49,7 @@ export interface QueueItem {
 export interface EventLoopState {
   phase: "idle" | "checking_microtasks" | "draining_microtask" | "checking_callbacks" | "moving_callback" | "stack_busy";
   message: string;
+  activeTask?: QueueItem;
 }
 
 export interface SimulationState {

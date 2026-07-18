@@ -8,10 +8,19 @@ export function MicrotaskQueuePanel() {
   const { scenario, currentStepIndex } = useJSSimulationStore();
   const currentState = scenario.steps[currentStepIndex];
   const microtaskQueue = currentState.microtaskQueue || [];
+  const eventLoop = currentState.eventLoop || { phase: "idle" };
+
+  const isBeingChecked = eventLoop.phase === "checking_microtasks" || eventLoop.phase === "draining_microtask";
 
   return (
-    <div className="flex flex-col h-full bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-border/50 bg-fuchsia-500/5 flex items-center justify-between">
+    <div className={cn(
+      "flex flex-col h-full bg-card rounded-xl border shadow-sm overflow-hidden transition-all duration-300",
+      isBeingChecked ? "border-fuchsia-500 shadow-[0_0_20px_-5px_rgba(217,70,239,0.5)] ring-1 ring-fuchsia-500/50" : "border-border/50"
+    )}>
+      <div className={cn(
+        "px-4 py-3 border-b flex items-center justify-between transition-colors duration-300",
+        isBeingChecked ? "bg-fuchsia-500/15 border-fuchsia-500/50" : "bg-fuchsia-500/5 border-border/50"
+      )}>
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-fuchsia-500/70"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
           Microtask Queue
@@ -32,6 +41,7 @@ export function MicrotaskQueuePanel() {
               <motion.div
                 key={item.id}
                 layout
+                layoutId={item.id}
                 initial={{ opacity: 0, x: -30, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -30, scale: 0.9, filter: "blur(4px)" }}

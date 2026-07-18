@@ -29,6 +29,7 @@ export function WebAPIsPanel() {
               <motion.div
                 key={api.id}
                 layout
+                layoutId={api.id}
                 initial={{ opacity: 0, scale: 0.9, y: 10 }}
                 animate={{ 
                   opacity: 1, 

@@ -9,6 +9,7 @@ import { MicrotaskQueuePanel } from "@/components/javascript/MicrotaskQueuePanel
 import { CallbackQueuePanel } from "@/components/javascript/CallbackQueuePanel";
 import { EventLoopIndicator } from "@/components/javascript/EventLoopIndicator";
 import { EventLoopMobilePanels } from "@/components/javascript/EventLoopMobilePanels";
+import { StepExplanationPopup } from "@/components/javascript/StepExplanationPopup";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
@@ -48,36 +49,10 @@ export default function JSEventLoopSimulator() {
     return () => clearTimeout(timer);
   }, [isPlaying, currentStepIndex, nextStep]);
 
-  // Toast effect
-  const [activeToast, setActiveToast] = useState<string | null>(null);
-  useEffect(() => {
-    if (scenario.steps[currentStepIndex]?.toastMessage) {
-      setActiveToast(scenario.steps[currentStepIndex].toastMessage!);
-      const t = setTimeout(() => setActiveToast(null), 2500);
-      return () => clearTimeout(t);
-    } else {
-      setActiveToast(null);
-    }
-  }, [currentStepIndex, scenario.steps]);
+  // Toast was removed from JSX in favor of StepExplanationPopup.
 
-  // Explanation popup effect (disappears after 2s, pauses on hover)
-  const [activeExplanation, setActiveExplanation] = useState<string | null>(null);
-  const [isHoveringExplanation, setIsHoveringExplanation] = useState(false);
-
-  useEffect(() => {
-    let t: NodeJS.Timeout;
-    if (scenario.steps[currentStepIndex]?.explanation) {
-      setActiveExplanation(scenario.steps[currentStepIndex].explanation!);
-      if (!isHoveringExplanation) {
-        t = setTimeout(() => setActiveExplanation(null), 2000);
-      }
-    } else {
-      setActiveExplanation(null);
-    }
-    return () => {
-      if (t) clearTimeout(t);
-    };
-  }, [currentStepIndex, scenario.steps, isHoveringExplanation]);
+  // Explanation popup is now an isolated component (StepExplanationPopup)
+  // to prevent its timer from triggering parent re-renders.
 
   const progress = ((currentStepIndex + 1) / scenario.steps.length) * 100;
 
@@ -197,49 +172,13 @@ export default function JSEventLoopSimulator() {
         </div>
       </nav>
 
-      {/* Toast Narration */}
-      <AnimatePresence>
-        {activeToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 bg-card border border-border text-foreground px-6 py-3 rounded-full shadow-xl shadow-black/20 font-medium text-sm flex items-center gap-3"
-          >
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-            </span>
-            {activeToast}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Toast Narration - Removed because we use the Step Explanation Banner now */}
 
       {/* Main Simulator Area */}
       <main className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 gap-4 relative">
         
-        {/* Step Explanation Banner (Floating Popup) */}
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-3xl pointer-events-none px-4">
-          <AnimatePresence mode="wait">
-            {activeExplanation && (
-              <motion.div
-                key={currentStepIndex}
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="bg-primary/95 backdrop-blur-md border border-primary/50 rounded-xl p-4 text-primary-foreground text-sm font-medium shadow-2xl flex items-start gap-3 mx-auto pointer-events-auto"
-                onMouseEnter={() => setIsHoveringExplanation(true)}
-                onMouseLeave={() => setIsHoveringExplanation(false)}
-              >
-                <div className="mt-0.5 shrink-0">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                </div>
-                <p className="leading-relaxed">{activeExplanation}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {/* Step Explanation Banner - isolated component to avoid re-render interference */}
+        <StepExplanationPopup />
 
         {/* Desktop Layout - "Runtime Landscape" */}
         <div className="hidden lg:flex flex-col h-full gap-4 min-h-0 pt-10">
@@ -262,10 +201,8 @@ export default function JSEventLoopSimulator() {
             <div className="flex-[2] min-w-0">
               <MicrotaskQueuePanel />
             </div>
-            <div className="flex-1 min-w-[160px] flex flex-col justify-center">
-              <div className="h-32">
-                <EventLoopIndicator />
-              </div>
+            <div className="flex-1 min-w-[160px]">
+              <EventLoopIndicator />
             </div>
             <div className="flex-[2] min-w-0">
               <CallbackQueuePanel />
