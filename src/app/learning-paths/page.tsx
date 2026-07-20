@@ -62,25 +62,26 @@ export default function LearningPathsPage() {
             </div>
           </Link>
 
-          {/* Locked Route: Computer Networks */}
-          <div className="relative p-6 sm:p-8 rounded-2xl border border-border/40 bg-card/50 opacity-70 select-none">
-            <div className="absolute top-4 right-4">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/50">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
+          {/* Active Route: Operating Systems */}
+          <Link href="/operating-systems" className="group">
+            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-teal-500/50 hover:shadow-[0_0_30px_-5px_rgba(6,182,212,0.2)] transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-teal-500/20 transition-all duration-300">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="4" width="16" height="16" rx="2" />
+                  <rect x="9" y="9" width="6" height="6" />
+                  <path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" />
+                  <path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-teal-500 transition-colors">Operating Systems</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
+                Visualize process states, CPU scheduling, memory management, and hardware interaction in real-time.
+              </p>
+              <div className="flex items-center text-sm font-semibold text-teal-500 group-hover:translate-x-1 transition-transform">
+                Explore OS Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground mb-5">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 17h2a4 4 0 0 0 4-4V7a4 4 0 0 1 4-4h2"/><circle cx="5" cy="17" r="2"/><circle cx="19" cy="7" r="2"/></svg>
-            </div>
-            <h3 className="text-xl font-bold text-foreground/70 mb-3">Computer Networks</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground/70 mb-6">
-              Learn the foundations of networking: TCP/IP, DNS, Routing, and Load Balancing in real-time.
-            </p>
-            <div className="inline-block px-2 py-1 text-[10px] font-bold tracking-widest uppercase bg-muted text-muted-foreground rounded">
-              Coming Soon
-            </div>
-          </div>
+          </Link>
         </div>
       </main>
     </div>
