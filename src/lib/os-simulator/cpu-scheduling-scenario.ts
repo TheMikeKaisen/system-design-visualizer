@@ -325,10 +325,10 @@ const RR_STEPS: OSStepState[] = [
   // ── Step 0: Setup ──
   {
     processes: {
-      chrome: p(CHROME, "ready"),
-      spotify: p(SPOTIFY, "ready"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
+      chrome: p(CHROME, "ready", { cpuBurstMs: 10 }),
+      spotify: p(SPOTIFY, "ready", { cpuBurstMs: 6 }),
+      vscode: p(VSCODE, "ready", { cpuBurstMs: 8 }),
+      discord: p(DISCORD, "ready", { cpuBurstMs: 4 }),
     },
     newQueue: [],
     readyQueue: ["chrome", "spotify", "vscode", "discord"],
@@ -338,19 +338,19 @@ const RR_STEPS: OSStepState[] = [
     cpu: { currentProcess: null, mode: "idle", utilizationPct: 0 },
     memory: mem(p(CHROME, "ready"), p(SPOTIFY, "ready"), p(VSCODE, "ready"), p(DISCORD, "ready")),
     explanation:
-      "Preemptive Scheduling (Round Robin): Same four processes, same Ready Queue. But now there's a timer! Each process gets a fixed time quantum (4ms). When the timer expires, the OS forcefully takes the CPU away — even if the process isn't finished.",
+      "Preemptive Scheduling (Round Robin): Same four processes, same Ready Queue. But now there is a timer! Each process gets a fixed time quantum (4ms). Watch the remaining burst time on each process.",
     toastMessage: "Mode: Preemptive (Round Robin, q=4ms)",
     chapter: "Round Robin (RR)",
     logEntries: [...FCFS_LOG_BASE],
   },
 
-  // ── Step 1: Chrome dispatched, timer starts ──
+  // ── Step 1: Chrome dispatched (Round 1) ──
   {
     processes: {
-      chrome: p(CHROME, "running"),
-      spotify: p(SPOTIFY, "ready"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
+      chrome: p(CHROME, "running", { cpuBurstMs: 10 }),
+      spotify: p(SPOTIFY, "ready", { cpuBurstMs: 6 }),
+      vscode: p(VSCODE, "ready", { cpuBurstMs: 8 }),
+      discord: p(DISCORD, "ready", { cpuBurstMs: 4 }),
     },
     newQueue: [],
     readyQueue: ["spotify", "vscode", "discord"],
@@ -365,7 +365,7 @@ const RR_STEPS: OSStepState[] = [
       action: "Dispatching Chrome (RR)",
     },
     explanation:
-      "Chrome is dispatched to the CPU. But notice something new: a timer starts counting down from 4ms. This is the time quantum. When it hits zero, Chrome will be forcefully removed — whether it's done or not.",
+      "Chrome needs 10ms of CPU time. It gets dispatched with a 4ms quantum. The timer starts.",
     toastMessage: "Chrome dispatched — timer: 4ms",
     chapter: "Round Robin (RR)",
     logEntries: [
@@ -374,70 +374,13 @@ const RR_STEPS: OSStepState[] = [
     ],
   },
 
-  // ── Step 2: Timer counting down ──
+  // ── Step 2: Chrome timer expires (Burst 10 -> 6) ──
   {
     processes: {
-      chrome: p(CHROME, "running"),
-      spotify: p(SPOTIFY, "ready"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
-    },
-    newQueue: [],
-    readyQueue: ["spotify", "vscode", "discord"],
-    waitQueue: [],
-    suspendedQueue: [],
-    terminatedList: [],
-    cpu: { currentProcess: "chrome", mode: "user", utilizationPct: 100, timerMs: 2 },
-    memory: mem(p(CHROME, "running"), p(SPOTIFY, "ready"), p(VSCODE, "ready"), p(DISCORD, "ready")),
-    explanation:
-      "Chrome is running. The timer ticks down: 4ms → 2ms. Chrome is using its allocated time slice. Spotify, VS Code, and Discord wait — but they know their turn is coming soon.",
-    chapter: "Round Robin (RR)",
-    logEntries: [
-      ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 2200, message: "Chrome (P1) running... quantum remaining: 2ms" },
-    ],
-  },
-
-  // ── Step 3: Timer expires! Interrupt! ──
-  {
-    processes: {
-      chrome: p(CHROME, "running"),
-      spotify: p(SPOTIFY, "ready"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
-    },
-    newQueue: [],
-    readyQueue: ["spotify", "vscode", "discord"],
-    waitQueue: [],
-    suspendedQueue: [],
-    terminatedList: [],
-    cpu: { currentProcess: "chrome", mode: "kernel", utilizationPct: 100, timerMs: 0 },
-    memory: mem(p(CHROME, "running"), p(SPOTIFY, "ready"), p(VSCODE, "ready"), p(DISCORD, "ready")),
-    activeInterrupt: {
-      type: "timer",
-      source: "cpu_timer",
-      message: "Timer Interrupt! Quantum Expired!",
-    },
-    explanation:
-      "TIME'S UP! The hardware timer fires an interrupt. The CPU switches to Kernel Mode. The OS saves Chrome's entire state (registers, program counter, stack pointer) so it can resume later. This is a context switch.",
-    toastMessage: "⏰ Timer interrupt!",
-    chapter: "Round Robin (RR)",
-    logEntries: [
-      ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 2200, message: "Chrome (P1) running... quantum remaining: 2ms" },
-      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome (P1)" },
-    ],
-  },
-
-  // ── Step 4: Chrome → READY (back of queue), Spotify dispatched ──
-  {
-    processes: {
-      chrome: p(CHROME, "ready"),
-      spotify: p(SPOTIFY, "running"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
+      chrome: p(CHROME, "ready", { cpuBurstMs: 6 }),
+      spotify: p(SPOTIFY, "running", { cpuBurstMs: 6 }),
+      vscode: p(VSCODE, "ready", { cpuBurstMs: 8 }),
+      discord: p(DISCORD, "ready", { cpuBurstMs: 4 }),
     },
     newQueue: [],
     readyQueue: ["vscode", "discord", "chrome"],
@@ -446,61 +389,28 @@ const RR_STEPS: OSStepState[] = [
     terminatedList: [],
     cpu: { currentProcess: "spotify", mode: "user", utilizationPct: 100, timerMs: 4 },
     memory: mem(p(CHROME, "ready"), p(SPOTIFY, "running"), p(VSCODE, "ready"), p(DISCORD, "ready")),
-    activeScheduler: {
-      type: "short_term",
-      isActive: true,
-      action: "Context switch: Chrome → Spotify",
+    activeInterrupt: {
+      type: "timer",
+      source: "cpu_timer",
+      message: "Timer Interrupt! Quantum Expired!",
     },
     explanation:
-      "Chrome is preempted and sent to the BACK of the Ready Queue. Spotify gets dispatched with a fresh 4ms quantum. Notice Chrome isn't terminated — it's just waiting for its next turn. This is the key difference from non-preemptive scheduling!",
-    toastMessage: "Context switch: Spotify dispatched",
+      "TIME'S UP! Chrome runs for 4ms. Its remaining burst is now 6ms. It is sent to the BACK of the Ready Queue. Spotify (needs 6ms) is dispatched with a fresh 4ms quantum.",
+    toastMessage: "⏰ Chrome preempted! Spotify dispatched",
     chapter: "Round Robin (RR)",
     logEntries: [
       ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 2200, message: "Chrome (P1) running... quantum remaining: 2ms" },
-      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome (P1)" },
-      { timeMs: 4201, message: "Context switch: Chrome (P1) → READY (back of queue)" },
-      { timeMs: 4202, message: "STS: Spotify (P2) dispatched → RUNNING (quantum=4ms)" },
+      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome" },
     ],
   },
 
-  // ── Step 5: Spotify timer counting ──
+  // ── Step 3: Spotify requests I/O early (Burst 6 -> 4) ──
   {
     processes: {
-      chrome: p(CHROME, "ready"),
-      spotify: p(SPOTIFY, "running"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
-    },
-    newQueue: [],
-    readyQueue: ["vscode", "discord", "chrome"],
-    waitQueue: [],
-    suspendedQueue: [],
-    terminatedList: [],
-    cpu: { currentProcess: "spotify", mode: "user", utilizationPct: 100, timerMs: 2 },
-    memory: mem(p(CHROME, "ready"), p(SPOTIFY, "running"), p(VSCODE, "ready"), p(DISCORD, "ready")),
-    explanation:
-      "Spotify is running with its own quantum. The pattern repeats — every process gets exactly 4ms of CPU time before being rotated. This ensures fairness: no process can hog the CPU.",
-    chapter: "Round Robin (RR)",
-    logEntries: [
-      ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 2200, message: "Chrome (P1) running... quantum remaining: 2ms" },
-      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome (P1)" },
-      { timeMs: 4201, message: "Context switch: Chrome (P1) → READY (back of queue)" },
-      { timeMs: 4202, message: "STS: Spotify (P2) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 6202, message: "Spotify (P2) running... quantum remaining: 2ms" },
-    ],
-  },
-
-  // ── Step 6: Spotify requests I/O before timer expires ──
-  {
-    processes: {
-      chrome: p(CHROME, "ready"),
-      spotify: p(SPOTIFY, "waiting", { ioDevice: "disk" }),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
+      chrome: p(CHROME, "ready", { cpuBurstMs: 6 }),
+      spotify: p(SPOTIFY, "waiting", { ioDevice: "disk", cpuBurstMs: 4 }),
+      vscode: p(VSCODE, "running", { cpuBurstMs: 8 }),
+      discord: p(DISCORD, "ready", { cpuBurstMs: 4 }),
     },
     newQueue: [],
     readyQueue: ["discord", "chrome"],
@@ -509,78 +419,23 @@ const RR_STEPS: OSStepState[] = [
     terminatedList: [],
     cpu: { currentProcess: "vscode", mode: "user", utilizationPct: 100, timerMs: 4 },
     memory: mem(p(CHROME, "ready"), p(SPOTIFY, "waiting"), p(VSCODE, "running"), p(DISCORD, "ready")),
-    activeScheduler: {
-      type: "short_term",
-      isActive: true,
-      action: "Dispatching VS Code",
-    },
     explanation:
-      "Interesting! Spotify requests disk I/O before its quantum expires. It voluntarily gives up the CPU and moves to WAITING. The remaining quantum time is wasted. VS Code is immediately dispatched with a fresh 4ms quantum.",
+      "Spotify runs for 2ms and then requests disk I/O! It gives up the CPU early. Its remaining burst is 4ms. VS Code (needs 8ms) is immediately dispatched.",
     toastMessage: "Spotify → Waiting (Disk), VS Code dispatched",
     chapter: "Round Robin (RR)",
     logEntries: [
       ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 2200, message: "Chrome (P1) running... quantum remaining: 2ms" },
-      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome (P1)" },
-      { timeMs: 4201, message: "Context switch: Chrome (P1) → READY (back of queue)" },
-      { timeMs: 4202, message: "STS: Spotify (P2) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 6202, message: "Spotify (P2) running... quantum remaining: 2ms" },
       { timeMs: 7000, message: "Spotify (P2) syscall: read(disk) → WAITING" },
-      { timeMs: 7001, message: "STS: VS Code (P3) dispatched → RUNNING (quantum=4ms)" },
     ],
   },
 
-  // ── Step 7: Disk completes → Spotify back to READY ──
+  // ── Step 4: VS Code timer expires (Burst 8 -> 4), Spotify IO finishes ──
   {
     processes: {
-      chrome: p(CHROME, "ready"),
-      spotify: p(SPOTIFY, "ready"),
-      vscode: p(VSCODE, "running"),
-      discord: p(DISCORD, "ready"),
-    },
-    newQueue: [],
-    readyQueue: ["discord", "chrome", "spotify"],
-    waitQueue: [],
-    suspendedQueue: [],
-    terminatedList: [],
-    cpu: { currentProcess: "vscode", mode: "user", utilizationPct: 100, timerMs: 2 },
-    memory: mem(
-      p(CHROME, "ready"),
-      p(SPOTIFY, "ready"),
-      p(VSCODE, "running"),
-      p(DISCORD, "ready")
-    ),
-    activeInterrupt: {
-      type: "io_complete",
-      source: "disk",
-      message: "Disk I/O Complete",
-    },
-    explanation:
-      "While VS Code is running, the disk finishes Spotify's request. A hardware interrupt signals the OS, and Spotify moves from WAITING back to READY — at the end of the queue. The Round Robin continues.",
-    toastMessage: "💾 Disk done — Spotify → Ready",
-    chapter: "Round Robin (RR)",
-    logEntries: [
-      ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 2200, message: "Chrome (P1) running... quantum remaining: 2ms" },
-      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome (P1)" },
-      { timeMs: 4201, message: "Context switch: Chrome (P1) → READY (back of queue)" },
-      { timeMs: 4202, message: "STS: Spotify (P2) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 6202, message: "Spotify (P2) running... quantum remaining: 2ms" },
-      { timeMs: 7000, message: "Spotify (P2) syscall: read(disk) → WAITING" },
-      { timeMs: 7001, message: "STS: VS Code (P3) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 9000, message: "IRQ: Disk I/O complete → Spotify (P2) WAITING → READY" },
-    ],
-  },
-
-  // ── Step 8: VSCode timer expires → Discord dispatched ──
-  {
-    processes: {
-      chrome: p(CHROME, "ready"),
-      spotify: p(SPOTIFY, "ready"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "running"),
+      chrome: p(CHROME, "ready", { cpuBurstMs: 6 }),
+      spotify: p(SPOTIFY, "ready", { cpuBurstMs: 4 }),
+      vscode: p(VSCODE, "ready", { cpuBurstMs: 4 }),
+      discord: p(DISCORD, "running", { cpuBurstMs: 4 }),
     },
     newQueue: [],
     readyQueue: ["chrome", "spotify", "vscode"],
@@ -588,118 +443,139 @@ const RR_STEPS: OSStepState[] = [
     suspendedQueue: [],
     terminatedList: [],
     cpu: { currentProcess: "discord", mode: "user", utilizationPct: 100, timerMs: 4 },
-    memory: mem(
-      p(CHROME, "ready"),
-      p(SPOTIFY, "ready"),
-      p(VSCODE, "ready"),
-      p(DISCORD, "running")
-    ),
-    activeScheduler: {
-      type: "short_term",
-      isActive: true,
-      action: "Context switch: VS Code → Discord",
-    },
+    memory: mem(p(CHROME, "ready"), p(SPOTIFY, "ready"), p(VSCODE, "ready"), p(DISCORD, "running")),
     explanation:
-      "VS Code's quantum expires. It goes to the back of the Ready Queue. Discord — which has been patiently waiting — finally gets its turn! In Round Robin, every process is guaranteed CPU time within a bounded period.",
-    toastMessage: "VS Code preempted — Discord dispatched",
+      "VS Code runs for 4ms (burst 8→4) and is preempted. Meanwhile, Spotify's disk I/O finishes and it joins the back of the queue! Discord (needs 4ms) gets the CPU.",
+    toastMessage: "VS Code preempted, Spotify IO done",
     chapter: "Round Robin (RR)",
     logEntries: [
       ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 2200, message: "Chrome (P1) running... quantum remaining: 2ms" },
-      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome (P1)" },
-      { timeMs: 4201, message: "Context switch: Chrome (P1) → READY (back of queue)" },
-      { timeMs: 4202, message: "STS: Spotify (P2) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 6202, message: "Spotify (P2) running... quantum remaining: 2ms" },
-      { timeMs: 7000, message: "Spotify (P2) syscall: read(disk) → WAITING" },
-      { timeMs: 7001, message: "STS: VS Code (P3) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 9000, message: "IRQ: Disk I/O complete → Spotify (P2) WAITING → READY" },
-      { timeMs: 11001, message: "IRQ: Timer interrupt — quantum expired for VS Code (P3)" },
-      { timeMs: 11002, message: "Context switch: VS Code (P3) → READY" },
-      { timeMs: 11003, message: "STS: Discord (P4) dispatched → RUNNING (quantum=4ms)" },
+      { timeMs: 11000, message: "IRQ: Timer interrupt — VS Code" },
     ],
   },
 
-  // ── Step 9: Second round begins — Chrome dispatched again ──
+  // ── Step 5: Discord FINISHES! (Burst 4 -> 0) (Round 2 begins) ──
   {
     processes: {
-      chrome: p(CHROME, "running"),
-      spotify: p(SPOTIFY, "ready"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
+      chrome: p(CHROME, "running", { cpuBurstMs: 6 }),
+      spotify: p(SPOTIFY, "ready", { cpuBurstMs: 4 }),
+      vscode: p(VSCODE, "ready", { cpuBurstMs: 4 }),
+      discord: p(DISCORD, "terminated", { cpuBurstMs: 0 }),
     },
     newQueue: [],
-    readyQueue: ["spotify", "vscode", "discord"],
+    readyQueue: ["spotify", "vscode"],
     waitQueue: [],
     suspendedQueue: [],
-    terminatedList: [],
+    terminatedList: ["discord"],
     cpu: { currentProcess: "chrome", mode: "user", utilizationPct: 100, timerMs: 4 },
-    memory: mem(
-      p(CHROME, "running"),
-      p(SPOTIFY, "ready"),
-      p(VSCODE, "ready"),
-      p(DISCORD, "ready")
-    ),
-    activeScheduler: {
-      type: "short_term",
-      isActive: true,
-      action: "Round 2: Dispatching Chrome",
-    },
+    memory: mem(p(CHROME, "running"), p(SPOTIFY, "ready"), p(VSCODE, "ready"), p(DISCORD, "terminated")),
     explanation:
-      "Discord's quantum expires. And look — Chrome gets the CPU again! This is Round 2. Every process has now had exactly one 4ms time slice. The cycle repeats until all processes complete. This is why it's called Round Robin.",
-    toastMessage: "Round 2: Chrome dispatched again",
+      "Discord only needed 4ms, so it finishes perfectly within its quantum! Discord TERMINATES. Round 1 is complete! Chrome (burst 6) is dispatched for Round 2.",
+    toastMessage: "Discord Terminated! Chrome gets CPU",
     chapter: "Round Robin (RR)",
     logEntries: [
       ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 2200, message: "Chrome (P1) running... quantum remaining: 2ms" },
-      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome (P1)" },
-      { timeMs: 4201, message: "Context switch: Chrome (P1) → READY (back of queue)" },
-      { timeMs: 4202, message: "STS: Spotify (P2) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 6202, message: "Spotify (P2) running... quantum remaining: 2ms" },
-      { timeMs: 7000, message: "Spotify (P2) syscall: read(disk) → WAITING" },
-      { timeMs: 7001, message: "STS: VS Code (P3) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 9000, message: "IRQ: Disk I/O complete → Spotify (P2) WAITING → READY" },
-      { timeMs: 11001, message: "IRQ: Timer interrupt — quantum expired for VS Code (P3)" },
-      { timeMs: 11002, message: "Context switch: VS Code (P3) → READY" },
-      { timeMs: 11003, message: "STS: Discord (P4) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 15003, message: "IRQ: Timer interrupt — quantum expired for Discord (P4)" },
-      { timeMs: 15004, message: "--- ROUND 2 ---" },
-      { timeMs: 15005, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
+      { timeMs: 15000, message: "Discord (P4) → TERMINATED" },
     ],
   },
 
-  // ── Step 10: Summary ──
+  // ── Step 6: Chrome timer expires (Burst 6 -> 2) ──
   {
     processes: {
-      chrome: p(CHROME, "ready"),
-      spotify: p(SPOTIFY, "ready"),
-      vscode: p(VSCODE, "ready"),
-      discord: p(DISCORD, "ready"),
+      chrome: p(CHROME, "ready", { cpuBurstMs: 2 }),
+      spotify: p(SPOTIFY, "running", { cpuBurstMs: 4 }),
+      vscode: p(VSCODE, "ready", { cpuBurstMs: 4 }),
+      discord: p(DISCORD, "terminated", { cpuBurstMs: 0 }),
     },
     newQueue: [],
-    readyQueue: ["chrome", "spotify", "vscode", "discord"],
+    readyQueue: ["vscode", "chrome"],
     waitQueue: [],
     suspendedQueue: [],
-    terminatedList: [],
-    cpu: { currentProcess: null, mode: "idle", utilizationPct: 0 },
-    memory: mem(p(CHROME, "ready"), p(SPOTIFY, "ready"), p(VSCODE, "ready"), p(DISCORD, "ready")),
+    terminatedList: ["discord"],
+    cpu: { currentProcess: "spotify", mode: "user", utilizationPct: 100, timerMs: 4 },
+    memory: mem(p(CHROME, "ready"), p(SPOTIFY, "running"), p(VSCODE, "ready"), p(DISCORD, "terminated")),
     explanation:
-      "Round Robin ensures fairness: every process gets equal CPU time. The trade-off? More context switches (overhead). The quantum size matters: too large → behaves like FCFS. Too small → constant switching, no real work gets done. The sweet spot is usually 10-100ms in real operating systems.",
-    toastMessage: "Preemptive Demo Complete",
+      "Chrome runs for 4ms. Its remaining burst goes from 6ms → 2ms. It is preempted. Spotify (burst 4) is dispatched.",
+    toastMessage: "Chrome preempted, Spotify gets CPU",
     chapter: "Round Robin (RR)",
     logEntries: [
       ...FCFS_LOG_BASE,
-      { timeMs: 200, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 4200, message: "IRQ: Timer interrupt — quantum expired for Chrome (P1)" },
-      { timeMs: 4202, message: "STS: Spotify (P2) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 7000, message: "Spotify (P2) → WAITING (disk I/O)" },
-      { timeMs: 7001, message: "STS: VS Code (P3) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 9000, message: "Spotify (P2) WAITING → READY (disk done)" },
-      { timeMs: 11001, message: "STS: Discord (P4) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 15004, message: "--- ROUND 2 ---" },
-      { timeMs: 15005, message: "STS: Chrome (P1) dispatched → RUNNING (quantum=4ms)" },
-      { timeMs: 30000, message: "Round Robin complete. Context switches: 8+" },
+      { timeMs: 19000, message: "IRQ: Timer interrupt — Chrome" },
+    ],
+  },
+
+  // ── Step 7: Spotify FINISHES! (Burst 4 -> 0) ──
+  {
+    processes: {
+      chrome: p(CHROME, "ready", { cpuBurstMs: 2 }),
+      spotify: p(SPOTIFY, "terminated", { cpuBurstMs: 0 }),
+      vscode: p(VSCODE, "running", { cpuBurstMs: 4 }),
+      discord: p(DISCORD, "terminated", { cpuBurstMs: 0 }),
+    },
+    newQueue: [],
+    readyQueue: ["chrome"],
+    waitQueue: [],
+    suspendedQueue: [],
+    terminatedList: ["discord", "spotify"],
+    cpu: { currentProcess: "vscode", mode: "user", utilizationPct: 100, timerMs: 4 },
+    memory: mem(p(CHROME, "ready"), p(SPOTIFY, "terminated"), p(VSCODE, "running"), p(DISCORD, "terminated")),
+    explanation:
+      "Spotify uses its 4ms and its burst drops from 4 → 0. Spotify TERMINATES! VS Code (burst 4) is dispatched.",
+    toastMessage: "Spotify Terminated! VS Code gets CPU",
+    chapter: "Round Robin (RR)",
+    logEntries: [
+      ...FCFS_LOG_BASE,
+      { timeMs: 23000, message: "Spotify (P2) → TERMINATED" },
+    ],
+  },
+
+  // ── Step 8: VS Code FINISHES! (Burst 4 -> 0) (Round 3 begins) ──
+  {
+    processes: {
+      chrome: p(CHROME, "running", { cpuBurstMs: 2 }),
+      spotify: p(SPOTIFY, "terminated", { cpuBurstMs: 0 }),
+      vscode: p(VSCODE, "terminated", { cpuBurstMs: 0 }),
+      discord: p(DISCORD, "terminated", { cpuBurstMs: 0 }),
+    },
+    newQueue: [],
+    readyQueue: [],
+    waitQueue: [],
+    suspendedQueue: [],
+    terminatedList: ["discord", "spotify", "vscode"],
+    cpu: { currentProcess: "chrome", mode: "user", utilizationPct: 100, timerMs: 4 },
+    memory: mem(p(CHROME, "running"), p(SPOTIFY, "terminated"), p(VSCODE, "terminated"), p(DISCORD, "terminated")),
+    explanation:
+      "VS Code uses its 4ms and drops from 4 → 0. VS Code TERMINATES! Chrome is the only process left. It gets the CPU for Round 3. It only needs 2ms.",
+    toastMessage: "VS Code Terminated! Chrome gets CPU",
+    chapter: "Round Robin (RR)",
+    logEntries: [
+      ...FCFS_LOG_BASE,
+      { timeMs: 27000, message: "VS Code (P3) → TERMINATED" },
+    ],
+  },
+
+  // ── Step 9: Chrome FINISHES! (Burst 2 -> 0) ──
+  {
+    processes: {
+      chrome: p(CHROME, "terminated", { cpuBurstMs: 0 }),
+      spotify: p(SPOTIFY, "terminated", { cpuBurstMs: 0 }),
+      vscode: p(VSCODE, "terminated", { cpuBurstMs: 0 }),
+      discord: p(DISCORD, "terminated", { cpuBurstMs: 0 }),
+    },
+    newQueue: [],
+    readyQueue: [],
+    waitQueue: [],
+    suspendedQueue: [],
+    terminatedList: ["discord", "spotify", "vscode", "chrome"],
+    cpu: { currentProcess: null, mode: "idle", utilizationPct: 0 },
+    memory: mem(p(CHROME, "terminated"), p(SPOTIFY, "terminated"), p(VSCODE, "terminated"), p(DISCORD, "terminated")),
+    explanation:
+      "Chrome only needs 2ms, so it finishes early before its quantum expires. Chrome TERMINATES! All processes have completed successfully.",
+    toastMessage: "Chrome Terminated! All done!",
+    chapter: "Round Robin (RR)",
+    logEntries: [
+      ...FCFS_LOG_BASE,
+      { timeMs: 29000, message: "Chrome (P1) → TERMINATED" },
     ],
   },
 ];

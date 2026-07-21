@@ -121,7 +121,10 @@ export function CPUBlock({ cpu, process }: CPUBlockProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-base font-bold text-foreground truncate">{process.name}</p>
-                <p className="text-xs font-mono text-muted-foreground/60">{process.pid} · {process.memoryMB} MB</p>
+                <p className="text-xs font-mono text-muted-foreground/60">
+                  {process.pid} · {process.memoryMB} MB
+                  {process.cpuBurstMs !== undefined && ` · Burst: ${process.cpuBurstMs}ms`}
+                </p>
               </div>
               {/* Running indicator dots */}
               <div className="flex gap-1 shrink-0">

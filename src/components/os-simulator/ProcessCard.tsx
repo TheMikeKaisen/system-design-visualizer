@@ -63,6 +63,7 @@ export function ProcessCard({
         </span>
         <span className="block text-[10px] font-mono text-muted-foreground/50 mt-0.5">
           {process.pid} · {process.memoryMB} MB
+          {process.cpuBurstMs !== undefined && ` · Burst: ${process.cpuBurstMs}ms`}
         </span>
       </div>
 
