@@ -17,6 +17,17 @@ export type ProcessState =
   | "suspend_ready"
   | "suspend_waiting";
 
+export interface ProcessControlBlock {
+  programCounter: string;
+  registers: { eax: string; ebx: string; ecx: string };
+  openFiles: string[];
+  memoryLimits: { base: string; limit: string };
+  /** Force the PCB viewer to expand */
+  forceExpand?: boolean;
+  /** Array of field IDs to highlight (e.g. "programCounter", "registers") */
+  highlightFields?: string[];
+}
+
 export interface OSProcess {
   /** Unique identifier (e.g., "chrome", "spotify") */
   id: string;
@@ -36,6 +47,8 @@ export interface OSProcess {
   cpuBurstMs?: number;
   /** Process priority (lower = higher priority) */
   priority?: number;
+  /** Process Control Block data (for visualizing context switches) */
+  pcb?: ProcessControlBlock;
 }
 
 // ───────────────────────────────────────────────────────
@@ -51,6 +64,10 @@ export interface CPUState {
   timerMs?: number;
   /** CPU utilization percentage (0-100) */
   utilizationPct: number;
+  /** Current CPU Program Counter */
+  programCounter?: string;
+  /** Current CPU Registers */
+  registers?: { eax: string; ebx: string; ecx: string };
 }
 
 // ───────────────────────────────────────────────────────
