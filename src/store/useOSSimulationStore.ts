@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import type { OSSimulationScenario, SchedulingMode, ChapterMeta } from "@/lib/os-simulator/engine";
+import { PROCESS_STATES_SCENARIO } from "@/lib/os-simulator/process-states-scenario";
 import {
-  PROCESS_STATES_SCENARIO,
-  createProcessStatesScenario,
-} from "@/lib/os-simulator/process-states-scenario";
+  CPU_SCHEDULING_SCENARIO,
+  createCpuSchedulingScenario,
+} from "@/lib/os-simulator/cpu-scheduling-scenario";
 
 interface OSSimulationState {
   scenario: OSSimulationScenario;
@@ -84,20 +85,12 @@ export const useOSSimulationStore = create<OSSimulationState>((set, get) => ({
   },
 
   setSchedulingMode: (mode: SchedulingMode) => {
-    const { scenario, currentStepIndex } = get();
-    const newScenario = createProcessStatesScenario(mode);
-
-    // If currently in Chapter 2, reset to start of Chapter 2
-    const ch1End = scenario.chapters[0]?.endStep ?? 0;
-    let newIndex = currentStepIndex;
-    if (currentStepIndex > ch1End) {
-      newIndex = newScenario.chapters[1]?.startStep ?? 0;
-    }
+    const newScenario = createCpuSchedulingScenario(mode);
 
     set({
       scenario: newScenario,
       schedulingMode: mode,
-      currentStepIndex: newIndex,
+      currentStepIndex: 0,
       isPlaying: false,
     });
   },

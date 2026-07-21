@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { PROCESS_STATES_SCENARIO } from "@/lib/os-simulator/process-states-scenario";
+import { CPU_SCHEDULING_SCENARIO } from "@/lib/os-simulator/cpu-scheduling-scenario";
 
 import { ProcessCard } from "@/components/os-simulator/ProcessCard";
 import { ZoneContainer } from "@/components/os-simulator/ZoneContainer";
@@ -17,7 +17,7 @@ import { MemoryGauge } from "@/components/os-simulator/MemoryGauge";
 import { OSLogPanel } from "@/components/os-simulator/OSLogPanel";
 import { InterruptOverlay } from "@/components/os-simulator/InterruptOverlay";
 
-export default function OSProcessStatesSimulator() {
+export default function OSCpuSchedulingSimulator() {
   const {
     scenario,
     currentStepIndex,
@@ -36,10 +36,10 @@ export default function OSProcessStatesSimulator() {
     getCurrentChapter,
   } = useOSSimulationStore();
 
-  // Initialize with process states scenario on mount
+  // Initialize with CPU scheduling scenario on mount
   useEffect(() => {
-    if (scenario.id !== PROCESS_STATES_SCENARIO.id) {
-      setScenario(PROCESS_STATES_SCENARIO);
+    if (scenario.id !== CPU_SCHEDULING_SCENARIO.id) {
+      setScenario(CPU_SCHEDULING_SCENARIO);
     }
   }, [scenario.id, setScenario]);
 
@@ -66,7 +66,8 @@ export default function OSProcessStatesSimulator() {
     }
   }, [currentStepIndex, scenario.steps]);
 
-  const step = scenario.steps[currentStepIndex];
+  // Handle case where scenario might not be loaded yet
+  const step = scenario.steps[currentStepIndex] || CPU_SCHEDULING_SCENARIO.steps[0];
   const progress = ((currentStepIndex + 1) / scenario.steps.length) * 100;
   const currentChapter = getCurrentChapter();
 
@@ -207,8 +208,40 @@ export default function OSProcessStatesSimulator() {
             </div>
           </div>
 
-          {/* Right: Theme toggle */}
+          {/* Right: Theme toggle + scheduling toggle */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Scheduling mode toggle is ALWAYS visible in Episode 2 */}
+            <AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="hidden sm:flex items-center gap-1 rounded-lg border border-border/50 p-0.5"
+              >
+                <button
+                  onClick={() => setSchedulingMode("non_preemptive")}
+                  className={cn(
+                    "px-2 py-1 rounded text-[10px] font-medium transition-all",
+                    schedulingMode === "non_preemptive"
+                      ? "bg-teal-500/15 text-teal-500 shadow-sm"
+                      : "text-muted-foreground/50 hover:text-foreground"
+                  )}
+                >
+                  Non-Preemptive
+                </button>
+                <button
+                  onClick={() => setSchedulingMode("preemptive")}
+                  className={cn(
+                    "px-2 py-1 rounded text-[10px] font-medium transition-all",
+                    schedulingMode === "preemptive"
+                      ? "bg-teal-500/15 text-teal-500 shadow-sm"
+                      : "text-muted-foreground/50 hover:text-foreground"
+                  )}
+                >
+                  Preemptive (RR)
+                </button>
+              </motion.div>
+            </AnimatePresence>
             <ThemeToggle />
           </div>
         </div>
