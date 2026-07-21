@@ -4,17 +4,17 @@ import { useOSSimulationStore } from "@/store/useOSSimulationStore";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PROCESS_STATES_SCENARIO } from "@/lib/os-simulator/process-states-scenario";
 
-import { ProcessCard } from "@/components/os-simulator/ProcessCard";
 import { ZoneContainer } from "@/components/os-simulator/ZoneContainer";
 import { CPUBlock } from "@/components/os-simulator/CPUBlock";
 import { SchedulerBadge } from "@/components/os-simulator/SchedulerBadge";
-import { MemoryGauge } from "@/components/os-simulator/MemoryGauge";
-import { OSLogPanel } from "@/components/os-simulator/OSLogPanel";
+import { OSStatsSidebar } from "@/components/os-simulator/OSStatsSidebar";
+import { OSExplanationPanel } from "@/components/os-simulator/OSExplanationPanel";
+import { OSToast } from "@/components/os-simulator/OSToast";
 import { InterruptOverlay } from "@/components/os-simulator/InterruptOverlay";
 
 export default function OSProcessStatesSimulator() {
@@ -23,15 +23,12 @@ export default function OSProcessStatesSimulator() {
     currentStepIndex,
     isPlaying,
     playbackSpeed,
-    schedulingMode,
     nextStep,
     prevStep,
     reset,
     togglePlay,
-    setStep,
     setScenario,
     jumpToChapter,
-    setSchedulingMode,
     setPlaybackSpeed,
     getCurrentChapter,
   } = useOSSimulationStore();
@@ -43,19 +40,16 @@ export default function OSProcessStatesSimulator() {
     }
   }, [scenario.id, setScenario]);
 
-  // Auto-play effect
+  // Auto-play
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying) {
-      const delay = 2000 / playbackSpeed;
-      timer = setTimeout(() => {
-        nextStep();
-      }, delay);
+      timer = setTimeout(nextStep, 2000 / playbackSpeed);
     }
     return () => clearTimeout(timer);
   }, [isPlaying, currentStepIndex, nextStep, playbackSpeed]);
 
-  // Toast effect
+  // Toast
   const [activeToast, setActiveToast] = useState<string | null>(null);
   useEffect(() => {
     const step = scenario.steps[currentStepIndex];
@@ -66,11 +60,33 @@ export default function OSProcessStatesSimulator() {
     }
   }, [currentStepIndex, scenario.steps]);
 
+  // Context switch counter — derived deterministically up to current step
+  const contextSwitchCount = useMemo(() => {
+    let count = 0;
+    let prevProcess: string | null = null;
+    for (let i = 0; i <= currentStepIndex; i++) {
+      const current = scenario.steps[i]?.cpu.currentProcess;
+      if (prevProcess !== null && current !== prevProcess) {
+        count++;
+      }
+      prevProcess = current ?? null;
+    }
+    return count;
+  }, [currentStepIndex, scenario.steps]);
+
   const step = scenario.steps[currentStepIndex];
   const progress = ((currentStepIndex + 1) / scenario.steps.length) * 100;
   const currentChapter = getCurrentChapter();
 
-  // Resolve processes from IDs for each zone
+  // Chapter-relative step index
+  const chapterStep = currentChapter
+    ? currentStepIndex - currentChapter.startStep + 1
+    : currentStepIndex + 1;
+  const chapterTotal = currentChapter
+    ? currentChapter.endStep - currentChapter.startStep + 1
+    : scenario.steps.length;
+
+  // Resolve processes
   const newProcesses = useMemo(
     () => step.newQueue.map((id) => step.processes[id]).filter(Boolean),
     [step.newQueue, step.processes]
@@ -93,14 +109,13 @@ export default function OSProcessStatesSimulator() {
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
-      {/* ──────────── NAVIGATION ──────────── */}
+
+      {/* ──────────── NAVBAR ──────────── */}
       <nav className="h-14 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0 z-30">
         <div className="h-full px-4 flex items-center gap-3">
-          {/* Left: Back link */}
-          <Link
-            href="/operating-systems"
-            className="flex items-center gap-2 group shrink-0"
-          >
+
+          {/* Left: Back link + title */}
+          <Link href="/operating-systems" className="flex items-center gap-2 group shrink-0">
             <Logo size={22} />
             <span className="hidden sm:inline text-sm font-semibold tracking-tight text-foreground group-hover:text-teal-500 transition-colors">
               Back to OS
@@ -122,7 +137,7 @@ export default function OSProcessStatesSimulator() {
                   key={ch.title}
                   onClick={() => jumpToChapter(i)}
                   className={cn(
-                    "px-2 py-1 rounded text-[10px] font-medium transition-colors",
+                    "px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors",
                     currentChapter?.title === ch.title
                       ? "bg-teal-500/15 text-teal-500"
                       : "text-muted-foreground/50 hover:text-foreground hover:bg-muted"
@@ -134,32 +149,19 @@ export default function OSProcessStatesSimulator() {
             </div>
 
             {/* Controls */}
-            <button
-              onClick={reset}
-              className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-              title="Restart"
-            >
+            <button onClick={reset} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" title="Restart">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                 <polyline points="3 3 3 8 8 8" />
               </svg>
             </button>
-            <button
-              onClick={prevStep}
-              disabled={currentStepIndex === 0}
-              className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40"
-              title="Previous Step"
-            >
+            <button onClick={prevStep} disabled={currentStepIndex === 0} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40" title="Previous Step">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="19 20 9 12 19 4 19 20" />
                 <line x1="5" y1="19" x2="5" y2="5" />
               </svg>
             </button>
-            <button
-              onClick={togglePlay}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-teal-500 text-white hover:bg-teal-600 hover:scale-105 transition-all shadow-sm"
-              title={isPlaying ? "Pause" : "Play"}
-            >
+            <button onClick={togglePlay} className="w-8 h-8 flex items-center justify-center rounded-full bg-teal-500 text-white hover:bg-teal-600 hover:scale-105 transition-all shadow-sm" title={isPlaying ? "Pause" : "Play"}>
               {isPlaying ? (
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                   <rect x="6" y="4" width="4" height="16" />
@@ -171,24 +173,17 @@ export default function OSProcessStatesSimulator() {
                 </svg>
               )}
             </button>
-            <button
-              onClick={nextStep}
-              disabled={currentStepIndex === scenario.steps.length - 1}
-              className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40"
-              title="Next Step"
-            >
+            <button onClick={nextStep} disabled={currentStepIndex === scenario.steps.length - 1} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40" title="Next Step">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="5 4 15 12 5 20 5 4" />
                 <line x1="19" y1="5" x2="19" y2="19" />
               </svg>
             </button>
 
-            {/* Step counter */}
-            <span className="hidden sm:block text-[10px] font-mono text-muted-foreground/60 ml-2 whitespace-nowrap">
+            <span className="hidden sm:block text-[10px] font-mono text-muted-foreground/50 ml-2 whitespace-nowrap">
               {currentStepIndex + 1}/{scenario.steps.length}
             </span>
 
-            {/* Speed control */}
             <div className="hidden md:flex items-center gap-1 ml-2">
               {[0.5, 1, 2].map((speed) => (
                 <button
@@ -224,144 +219,124 @@ export default function OSProcessStatesSimulator() {
         </div>
       </nav>
 
-      {/* ──────────── MAIN CONTENT ──────────── */}
+      {/* ──────────── 3-PANEL BODY ──────────── */}
       <div className="flex-1 flex overflow-hidden">
-        {/* ── LEFT SIDEBAR (desktop only) ── */}
-        <aside className="hidden lg:flex w-72 flex-col gap-3 border-r border-border/40 bg-background/50 p-3 overflow-y-auto">
-          <MemoryGauge memory={step.memory} />
-          <OSLogPanel entries={step.logEntries} />
+
+        {/* ── LEFT SIDEBAR: Stats ── */}
+        <aside className="hidden lg:flex w-64 flex-col border-r border-border/40 bg-background/40 p-3 overflow-y-auto flex-shrink-0">
+          <OSStatsSidebar
+            cpu={step.cpu}
+            memory={step.memory}
+            processes={step.processes}
+            contextSwitchCount={contextSwitchCount}
+          />
         </aside>
 
-        {/* ── MAIN STAGE ── */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          {/* Stage area */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
-            <div className="mx-auto max-w-md relative">
-              {/* Interrupt overlay */}
-              <InterruptOverlay interrupt={step.activeInterrupt} />
+        {/* ── CENTER STAGE ── */}
+        <main className="flex-1 relative overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {/* Interrupt overlay — full width of center stage */}
+          <InterruptOverlay interrupt={step.activeInterrupt} />
 
-              <LayoutGroup>
-                {/* ── NEW QUEUE ── */}
-                <ZoneContainer
-                  title="New"
-                  accentClass="text-slate-400"
-                  processes={newProcesses}
-                  icon="📥"
-                />
+          <div className="px-6 py-5 max-w-2xl mx-auto">
+            <LayoutGroup>
+              {/* NEW QUEUE */}
+              <ZoneContainer
+                title="New"
+                accentClass="text-slate-400"
+                processes={newProcesses}
+                icon="📥"
+              />
 
-                {/* Long-Term Scheduler */}
-                <SchedulerBadge
-                  label="Long-Term Scheduler"
-                  event={
-                    step.activeScheduler?.type === "long_term"
-                      ? step.activeScheduler
-                      : undefined
-                  }
-                />
+              {/* Long-Term Scheduler */}
+              <SchedulerBadge
+                label="Long-Term Scheduler"
+                event={step.activeScheduler?.type === "long_term" ? step.activeScheduler : undefined}
+              />
 
-                {/* ── READY QUEUE ── */}
-                <ZoneContainer
-                  title="Ready Queue"
-                  accentClass="text-blue-400"
-                  processes={readyProcesses}
-                  icon="📋"
-                />
+              {/* READY QUEUE */}
+              <ZoneContainer
+                title="Ready Queue"
+                accentClass="text-blue-400"
+                processes={readyProcesses}
+                icon="📋"
+              />
 
-                {/* Short-Term Scheduler */}
-                <SchedulerBadge
-                  label="Short-Term Scheduler (Dispatcher)"
-                  event={
-                    step.activeScheduler?.type === "short_term"
-                      ? step.activeScheduler
-                      : undefined
-                  }
-                />
+              {/* Short-Term Scheduler */}
+              <SchedulerBadge
+                label="Short-Term Scheduler (Dispatcher)"
+                event={step.activeScheduler?.type === "short_term" ? step.activeScheduler : undefined}
+              />
 
-                {/* ── CPU ── */}
-                <CPUBlock cpu={step.cpu} process={cpuProcess} />
+              {/* CPU */}
+              <CPUBlock cpu={step.cpu} process={cpuProcess} />
 
-                {/* Split: Waiting + Terminated */}
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <div className="flex flex-col">
-                    <SchedulerBadge
-                      label="I/O Request"
-                      event={undefined}
-                      direction="down"
-                    />
-                    <ZoneContainer
-                      title="Waiting"
-                      accentClass="text-amber-400"
-                      processes={waitProcesses}
-                      showDevices
-                      icon="⏳"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <SchedulerBadge
-                      label="Exit"
-                      event={undefined}
-                      direction="down"
-                    />
-                    <ZoneContainer
-                      title="Terminated"
-                      accentClass="text-rose-400"
-                      processes={terminatedProcesses}
-                      isTerminated
-                      icon="🏁"
-                    />
-                  </div>
+              {/* Waiting + Terminated */}
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <SchedulerBadge label="I/O Request" event={undefined} direction="down" />
+                  <ZoneContainer
+                    title="Waiting"
+                    accentClass="text-amber-400"
+                    processes={waitProcesses}
+                    showDevices
+                    icon="⏳"
+                  />
                 </div>
-              </LayoutGroup>
-            </div>
-          </div>
-
-          {/* ── EXPLANATION BANNER ── */}
-          <div className="border-t border-border/40 bg-card/50 backdrop-blur-sm px-4 sm:px-6 py-3 flex-shrink-0">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStepIndex}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
-              >
-                {currentChapter && (
-                  <div className="mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-teal-500/70">
-                      {currentChapter.title}
-                    </span>
-                  </div>
-                )}
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
-                  {step.explanation}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* ── MOBILE SIDEBAR (below explanation on small screens) ── */}
-          <div className="lg:hidden border-t border-border/40 bg-background/50 px-4 py-3 overflow-y-auto max-h-48">
-            <div className="space-y-3">
-              <MemoryGauge memory={step.memory} />
-              <OSLogPanel entries={step.logEntries} />
-            </div>
+                <div className="flex flex-col">
+                  <SchedulerBadge label="Exit" event={undefined} direction="down" />
+                  <ZoneContainer
+                    title="Terminated"
+                    accentClass="text-rose-400"
+                    processes={terminatedProcesses}
+                    isTerminated
+                    icon="🏁"
+                  />
+                </div>
+              </div>
+            </LayoutGroup>
           </div>
         </main>
+
+        {/* ── RIGHT SIDEBAR: Explanation + Log ── */}
+        <aside className="hidden xl:flex w-80 flex-col border-l border-border/40 bg-background/40 overflow-hidden flex-shrink-0">
+          <OSExplanationPanel
+            explanation={step.explanation}
+            chapter={currentChapter ?? undefined}
+            stepIndex={currentStepIndex}
+            chapterStep={chapterStep}
+            chapterTotal={chapterTotal}
+            logEntries={step.logEntries}
+            activeToast={activeToast}
+          />
+        </aside>
       </div>
 
-      {/* ──────────── TOAST ──────────── */}
-      <AnimatePresence>
-        {activeToast && (
+      {/* ── MOBILE: Explanation below stage ── */}
+      <div className="xl:hidden border-t border-border/40 bg-card/30 px-4 py-3 flex-shrink-0">
+        <AnimatePresence mode="wait">
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg bg-foreground text-background text-sm font-medium shadow-lg"
+            key={currentStepIndex}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
           >
-            {activeToast}
+            {currentChapter && (
+              <span className="block text-[10px] font-bold uppercase tracking-widest text-teal-500/70 mb-1">
+                {currentChapter.title}
+              </span>
+            )}
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
+              {step.explanation}
+            </p>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
+      </div>
+
+      {/* ── TOAST (Floating fallback for mobile) ── */}
+      <div className="xl:hidden">
+        <OSToast message={activeToast} />
+      </div>
     </div>
   );
 }

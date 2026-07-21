@@ -7,64 +7,80 @@ interface InterruptOverlayProps {
   interrupt?: InterruptEvent;
 }
 
-const INTERRUPT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+const INTERRUPT_CONFIG: Record<string, {
+  bg: string;
+  border: string;
+  text: string;
+  icon: string;
+  label: string;
+}> = {
   timer: {
-    bg: "bg-amber-500/10",
-    text: "text-amber-500",
-    border: "border-amber-500/30",
+    bg: "bg-amber-500/15",
+    border: "border-amber-500/40",
+    text: "text-amber-400",
+    icon: "⏰",
+    label: "TIMER INTERRUPT",
   },
   io_complete: {
-    bg: "bg-emerald-500/10",
-    text: "text-emerald-500",
-    border: "border-emerald-500/30",
+    bg: "bg-emerald-500/15",
+    border: "border-emerald-500/40",
+    text: "text-emerald-400",
+    icon: "✅",
+    label: "I/O COMPLETE",
   },
   syscall: {
-    bg: "bg-indigo-500/10",
-    text: "text-indigo-500",
-    border: "border-indigo-500/30",
+    bg: "bg-indigo-500/15",
+    border: "border-indigo-500/40",
+    text: "text-indigo-400",
+    icon: "🔧",
+    label: "SYSTEM CALL",
   },
   page_fault: {
-    bg: "bg-red-500/10",
-    text: "text-red-500",
-    border: "border-red-500/30",
+    bg: "bg-red-500/15",
+    border: "border-red-500/40",
+    text: "text-red-400",
+    icon: "⚠️",
+    label: "PAGE FAULT",
   },
-};
-
-const INTERRUPT_ICONS: Record<string, string> = {
-  timer: "⏰",
-  io_complete: "✅",
-  syscall: "🔧",
-  page_fault: "⚠️",
 };
 
 export function InterruptOverlay({ interrupt }: InterruptOverlayProps) {
+  const config = interrupt
+    ? INTERRUPT_CONFIG[interrupt.type] ?? {
+        bg: "bg-muted/50",
+        border: "border-border",
+        text: "text-foreground",
+        icon: "⚡",
+        label: "INTERRUPT",
+      }
+    : null;
+
   return (
     <AnimatePresence>
-      {interrupt && (
+      {interrupt && config && (
         <motion.div
           key={interrupt.message}
-          initial={{ opacity: 0, y: -10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -10, scale: 0.95 }}
-          transition={{ duration: 0.3 }}
-          className="pointer-events-none absolute left-1/2 top-4 z-20 -translate-x-1/2"
+          initial={{ opacity: 0, y: -56 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -56 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          className={`absolute top-0 left-0 right-0 z-20 flex items-center gap-3 px-5 py-3 backdrop-blur-md border-b ${config.bg} ${config.border}`}
         >
-          <div
-            className={`flex items-center gap-2 rounded-lg border px-4 py-2 backdrop-blur-sm ${
-              INTERRUPT_COLORS[interrupt.type]?.bg ?? "bg-muted/50"
-            } ${INTERRUPT_COLORS[interrupt.type]?.border ?? "border-border"}`}
-          >
-            <span className="text-base">
-              {INTERRUPT_ICONS[interrupt.type] ?? "⚡"}
-            </span>
-            <span
-              className={`text-xs font-bold ${
-                INTERRUPT_COLORS[interrupt.type]?.text ?? "text-foreground"
-              }`}
-            >
+          <span className="text-xl shrink-0">{config.icon}</span>
+          <div className="flex-1 min-w-0">
+            <p className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${config.text}`}>
+              {config.label}
+            </p>
+            <p className="text-sm font-medium text-foreground/80 truncate">
               {interrupt.message}
-            </span>
+            </p>
           </div>
+          {/* Pulsing indicator */}
+          <motion.div
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 1, repeat: Infinity }}
+            className={`w-2.5 h-2.5 rounded-full shrink-0 ${config.text.replace("text-", "bg-")}`}
+          />
         </motion.div>
       )}
     </AnimatePresence>

@@ -6,11 +6,8 @@ import { cn } from "@/lib/utils";
 
 interface ProcessCardProps {
   process: OSProcess;
-  /** Show device icon when in WAITING state */
   showDevice?: boolean;
-  /** Whether this card is inside the CPU (slightly different style) */
   isInCPU?: boolean;
-  /** Whether this card is in TERMINATED zone */
   isTerminated?: boolean;
 }
 
@@ -32,49 +29,60 @@ export function ProcessCard({
     <motion.div
       layoutId={`process-${process.id}`}
       layout
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: isTerminated ? 0.5 : 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
+      initial={{ opacity: 0, scale: 0.85, x: -8 }}
+      animate={{ opacity: isTerminated ? 0.45 : 1, scale: 1, x: 0 }}
+      exit={{ opacity: 0, scale: 0.85, x: 8 }}
       transition={{
-        layout: { type: "spring", stiffness: 300, damping: 30 },
+        layout: { type: "spring", stiffness: 280, damping: 28 },
         opacity: { duration: 0.2 },
         scale: { duration: 0.2 },
       }}
       className={cn(
-        "flex items-center gap-2.5 rounded-lg border px-3 py-2 transition-shadow",
+        "relative flex items-center gap-3 rounded-lg border-l-4 pr-3 py-2.5 pl-3 overflow-hidden transition-shadow",
         isInCPU
-          ? "border-teal-500/50 bg-teal-500/10 shadow-[0_0_12px_-2px_rgba(6,182,212,0.3)]"
+          ? "bg-teal-500/10 border-t border-r border-b border-t-teal-500/30 border-r-teal-500/30 border-b-teal-500/30 ring-1 ring-teal-500/30 shadow-[0_0_16px_-4px_rgba(6,182,212,0.4)]"
           : isTerminated
-          ? "border-border/30 bg-muted/30"
-          : "border-border/60 bg-card/80 hover:border-border"
+          ? "bg-muted/20 border-t border-r border-b border-border/20"
+          : "bg-card/80 border-t border-r border-b border-border/50 hover:border-border/80 hover:shadow-sm"
       )}
+      style={{ borderLeftColor: isTerminated ? "rgba(148,163,184,0.2)" : process.color }}
     >
-      {/* Color dot */}
-      <div
-        className={cn("h-3 w-3 shrink-0 rounded-full", isTerminated && "opacity-40")}
-        style={{ backgroundColor: process.color }}
-      />
-
-      {/* Name */}
-      <span
-        className={cn(
-          "text-sm font-semibold leading-tight",
-          isTerminated ? "text-muted-foreground/50 line-through" : "text-foreground"
-        )}
-      >
-        {process.name}
-      </span>
-
-      {/* PID badge */}
-      <span className="ml-auto text-[10px] font-mono text-muted-foreground/60">
-        {process.pid}
-      </span>
+      {/* Name + PID stacked */}
+      <div className="flex-1 min-w-0">
+        <span
+          className={cn(
+            "block text-sm font-bold leading-tight truncate",
+            isTerminated
+              ? "text-muted-foreground/40 line-through"
+              : isInCPU
+              ? "text-teal-100"
+              : "text-foreground"
+          )}
+        >
+          {process.name}
+        </span>
+        <span className="block text-[10px] font-mono text-muted-foreground/50 mt-0.5">
+          {process.pid} · {process.memoryMB} MB
+        </span>
+      </div>
 
       {/* Device icon when waiting */}
       {showDevice && process.ioDevice && (
-        <span className="text-sm" title={process.ioDevice}>
+        <span className="text-base shrink-0" title={process.ioDevice}>
           {DEVICE_ICONS[process.ioDevice] ?? "⏳"}
         </span>
+      )}
+
+      {/* CPU glow shimmer overlay */}
+      {isInCPU && (
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ opacity: [0, 0.06, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            background: `linear-gradient(90deg, transparent, ${process.color}40, transparent)`,
+          }}
+        />
       )}
     </motion.div>
   );
