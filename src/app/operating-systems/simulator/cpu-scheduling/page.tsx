@@ -743,6 +743,9 @@ export default function UniversalSchedulingSimulator() {
                       BT
                       <InfoTooltip termKey="bt" />
                     </th>
+                    <th className="text-center text-[10px] font-bold uppercase tracking-wider text-teal-500/70 px-1 py-2">
+                      Rem BT
+                    </th>
                     <th className="text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 px-1 py-2">
                       CT
                       <InfoTooltip termKey="ct" />
@@ -791,6 +794,19 @@ export default function UniversalSchedulingSimulator() {
                         </td>
                         <td className="text-center text-[11px] font-mono text-muted-foreground px-1 py-2">
                           {proc.burstTime}
+                        </td>
+                        <td className="text-center text-[11px] font-mono font-bold text-teal-400 px-1 py-2">
+                          {(() => {
+                            let executed = 0;
+                            for (const b of proc.executionBlocks) {
+                              if (b.endTime <= currentTime) {
+                                executed += b.endTime - b.startTime;
+                              } else if (b.startTime < currentTime) {
+                                executed += currentTime - b.startTime;
+                              }
+                            }
+                            return proc.burstTime - executed;
+                          })()}
                         </td>
                         <td className="text-center text-[11px] font-mono px-1 py-2">
                           <span
