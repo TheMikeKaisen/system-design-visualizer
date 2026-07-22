@@ -3,7 +3,7 @@
 // Supports: FCFS, SJF (more to be added)
 // ═══════════════════════════════════════════════════════
 
-export type SchedulingAlgorithm = "FCFS" | "SJF";
+export type SchedulingAlgorithm = "FCFS" | "SJF" | "SRTF";
 
 export interface UniversalProcess {
   id: string;
@@ -88,12 +88,12 @@ export const PROCESS_COLORS = [
   "#EC4899",
 ];
 
-// Whiteboard SJF Preset
+// Whiteboard SRTF Preset
 export const DEFAULT_UNIVERSAL_PROCESSES: UniversalProcess[] = [
-  { id: "p1", pid: "P1", name: "P1", color: "#4285F4", arrivalTime: 1, burstTime: 3 },
-  { id: "p2", pid: "P2", name: "P2", color: "#1DB954", arrivalTime: 2, burstTime: 4 },
-  { id: "p3", pid: "P3", name: "P3", color: "#FF6B6B", arrivalTime: 1, burstTime: 2 },
-  { id: "p4", pid: "P4", name: "P4", color: "#FFD93D", arrivalTime: 4, burstTime: 4 },
+  { id: "p1", pid: "P1", name: "P1", color: "#4285F4", arrivalTime: 0, burstTime: 5 },
+  { id: "p2", pid: "P2", name: "P2", color: "#1DB954", arrivalTime: 1, burstTime: 3 },
+  { id: "p3", pid: "P3", name: "P3", color: "#FF6B6B", arrivalTime: 2, burstTime: 4 },
+  { id: "p4", pid: "P4", name: "P4", color: "#FFD93D", arrivalTime: 4, burstTime: 1 },
 ];
 
 export const TERM_INFO: Record<
@@ -127,6 +127,10 @@ export const TERM_INFO: Record<
     name: "Response Time (RT)",
     description: "The time from arrival to the very first time the process gets the CPU.",
     formula: "RT = First Start Time − AT",
+  },
+  preemption: {
+    name: "Preemption",
+    description: "When the CPU stops executing the current process and places it back in the Ready Queue because a higher-priority process arrived.",
   },
   cpuUtil: {
     name: "CPU Utilization",
@@ -168,7 +172,7 @@ export function computeUniversalScheduling(
     };
   }
 
-  const results: UniversalProcessResult[] = processes.map((p) => ({
+  const results = processes.map((p) => ({
     ...p,
     executionBlocks: [],
     firstStartTime: -1,
@@ -176,7 +180,8 @@ export function computeUniversalScheduling(
     turnaroundTime: 0,
     waitingTime: 0,
     responseTime: 0,
-  }));
+    _remainingBurst: p.burstTime,
+  })) as (UniversalProcessResult & { _remainingBurst: number })[];
 
   const ganttBlocks: GanttBlock[] = [];
   const events: UniversalEvent[] = [];
@@ -202,11 +207,17 @@ export function computeUniversalScheduling(
   }
 
   // Simulation Loop
+  let currentProcId: string | null = null;
+  let currentBlockStart = -1;
+
   while (completedCount < n) {
     const available = results.filter((p) => p.arrivalTime <= currentTime && p.completionTime === 0);
 
     if (available.length === 0) {
       // CPU is IDLE, jump to next arrival
+      if (currentProcId !== null) {
+        currentProcId = null;
+      }
       const nextArrivals = results
         .filter((p) => p.completionTime === 0)
         .map((p) => p.arrivalTime)
@@ -230,61 +241,123 @@ export function computeUniversalScheduling(
     // Select process based on algorithm
     let selectedProc = available[0];
     if (algorithm === "FCFS") {
-      available.sort((a, b) => {
-        if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
-        return a.pid.localeCompare(b.pid);
-      });
-      selectedProc = available[0];
+      if (currentProcId) {
+        selectedProc = available.find(p => p.id === currentProcId)!;
+      } else {
+        available.sort((a, b) => {
+          if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
+          return a.pid.localeCompare(b.pid);
+        });
+        selectedProc = available[0];
+      }
     } else if (algorithm === "SJF") {
+      if (currentProcId) {
+        selectedProc = available.find(p => p.id === currentProcId)!;
+      } else {
+        available.sort((a, b) => {
+          if (a.burstTime !== b.burstTime) return a.burstTime - b.burstTime;
+          if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
+          return a.pid.localeCompare(b.pid);
+        });
+        selectedProc = available[0];
+      }
+    } else if (algorithm === "SRTF") {
       available.sort((a, b) => {
-        if (a.burstTime !== b.burstTime) return a.burstTime - b.burstTime;
+        if (a._remainingBurst !== b._remainingBurst) return a._remainingBurst - b._remainingBurst;
         if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
         return a.pid.localeCompare(b.pid);
       });
       selectedProc = available[0];
     }
 
-    // Non-preemptive execution block
-    const startTime = currentTime;
-    const endTime = startTime + selectedProc.burstTime;
+    // Context switch detected
+    if (currentProcId !== selectedProc.id) {
+      if (currentProcId !== null) {
+        // Close previous block
+        const prevProc = results.find(p => p.id === currentProcId)!;
+        prevProc.executionBlocks.push({ startTime: currentBlockStart, endTime: currentTime });
+        ganttBlocks.push({
+          type: "process",
+          processId: prevProc.id,
+          pid: prevProc.pid,
+          color: prevProc.color,
+          startTime: currentBlockStart,
+          endTime: currentTime,
+        });
+
+        // Preemption log
+        if (prevProc._remainingBurst > 0) {
+          events.push({
+            time: currentTime,
+            type: "warning",
+            processId: prevProc.id,
+            pid: prevProc.pid,
+            message: `⚡ Preemption: ${prevProc.pid} was preempted by ${selectedProc.pid}!`,
+          });
+        }
+      }
+      
+      currentProcId = selectedProc.id;
+      currentBlockStart = currentTime;
+      
+      if (selectedProc.firstStartTime === -1) {
+        selectedProc.firstStartTime = currentTime;
+      }
+      
+      events.push({
+        time: currentTime,
+        type: "cpu_select",
+        processId: selectedProc.id,
+        pid: selectedProc.pid,
+        message: `CPU selected ${selectedProc.pid}  [Remaining BT = ${selectedProc._remainingBurst}ms]`,
+      });
+    }
+
+    // Calculate step amount
+    let stepAmount = 0;
     
-    if (selectedProc.firstStartTime === -1) {
-      selectedProc.firstStartTime = startTime;
+    if (algorithm === "FCFS" || algorithm === "SJF") {
+       stepAmount = selectedProc._remainingBurst;
+    } else if (algorithm === "SRTF") {
+       const futureArrivals = results
+         .filter(p => p.arrivalTime > currentTime && p.completionTime === 0)
+         .map(p => p.arrivalTime)
+         .sort((a,b)=>a-b);
+       const nextArrival = futureArrivals.length > 0 ? futureArrivals[0] : Infinity;
+       stepAmount = Math.min(selectedProc._remainingBurst, nextArrival - currentTime);
     }
     
-    events.push({
-      time: startTime,
-      type: "cpu_select",
-      processId: selectedProc.id,
-      pid: selectedProc.pid,
-      message: `CPU selected ${selectedProc.pid}  [BT = ${selectedProc.burstTime}ms, runs ${startTime} → ${endTime}]`,
-    });
+    currentTime += stepAmount;
+    selectedProc._remainingBurst -= stepAmount;
 
-    selectedProc.executionBlocks.push({ startTime, endTime });
-    ganttBlocks.push({
-      type: "process",
-      processId: selectedProc.id,
-      pid: selectedProc.pid,
-      color: selectedProc.color,
-      startTime,
-      endTime,
-    });
+    // Check completion
+    if (selectedProc._remainingBurst === 0) {
+      selectedProc.completionTime = currentTime;
+      selectedProc.turnaroundTime = currentTime - selectedProc.arrivalTime;
+      selectedProc.waitingTime = selectedProc.turnaroundTime - selectedProc.burstTime;
+      selectedProc.responseTime = selectedProc.firstStartTime - selectedProc.arrivalTime;
+      
+      events.push({
+        time: currentTime,
+        type: "complete",
+        processId: selectedProc.id,
+        pid: selectedProc.pid,
+        message: `${selectedProc.pid} completed  [CT = ${currentTime}, TAT = ${selectedProc.turnaroundTime}, WT = ${selectedProc.waitingTime}]`,
+      });
 
-    selectedProc.completionTime = endTime;
-    selectedProc.turnaroundTime = endTime - selectedProc.arrivalTime;
-    selectedProc.waitingTime = selectedProc.turnaroundTime - selectedProc.burstTime;
-    selectedProc.responseTime = selectedProc.firstStartTime - selectedProc.arrivalTime;
-    
-    events.push({
-      time: endTime,
-      type: "complete",
-      processId: selectedProc.id,
-      pid: selectedProc.pid,
-      message: `${selectedProc.pid} completed  [CT = ${endTime}, TAT = ${selectedProc.turnaroundTime}, WT = ${selectedProc.waitingTime}]`,
-    });
+      selectedProc.executionBlocks.push({ startTime: currentBlockStart, endTime: currentTime });
+      ganttBlocks.push({
+        type: "process",
+        processId: selectedProc.id,
+        pid: selectedProc.pid,
+        color: selectedProc.color,
+        startTime: currentBlockStart,
+        endTime: currentTime,
+      });
 
-    currentTime = endTime;
-    completedCount++;
+      currentProcId = null;
+      completedCount++;
+    }
   }
 
   const totalTime = currentTime;
@@ -332,7 +405,7 @@ export function computeUniversalScheduling(
         }
       }
     }
-  } else if (algorithm === "SJF") {
+  } else if (algorithm === "SJF" || algorithm === "SRTF") {
     // Starvation detection: A process waits more than 3x its burst time due to shorter arrivals
     for (const result of results) {
       if (result.waitingTime > result.burstTime * 3 && result.waitingTime > 0) {

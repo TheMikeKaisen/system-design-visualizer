@@ -401,6 +401,15 @@ export default function UniversalSchedulingSimulator() {
             Interactive Scheduler
           </h1>
 
+          {!isEditMode && (
+            <button
+              onClick={handleReset}
+              className="px-2.5 py-1 bg-teal-500/10 text-teal-500 hover:bg-teal-500/20 text-[10px] font-bold uppercase tracking-wider rounded transition-colors ml-1"
+            >
+              Change Algorithm
+            </button>
+          )}
+
           {/* Center: Playback controls (only in playback mode) */}
           <div className="flex-1 flex justify-center items-center gap-1 sm:gap-2">
             {!isEditMode && (
@@ -936,12 +945,12 @@ export default function UniversalSchedulingSimulator() {
             /* ─── PRE-SIMULATION EXPLANATION ─── */
             <div className="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center p-8">
               <div className="mb-8 flex p-1 bg-muted/50 rounded-lg">
-                {(["FCFS", "SJF"] as SchedulingAlgorithm[]).map((alg) => (
+                {(["FCFS", "SJF", "SRTF"] as SchedulingAlgorithm[]).map((alg) => (
                   <button
                     key={alg}
                     onClick={() => setAlgorithm(alg)}
                     className={cn(
-                      "px-6 py-2 rounded-md text-xs font-bold transition-all",
+                      "px-4 py-2 rounded-md text-xs font-bold transition-all",
                       algorithm === alg
                         ? "bg-card shadow-sm text-foreground"
                         : "text-muted-foreground hover:text-foreground"
@@ -970,26 +979,41 @@ export default function UniversalSchedulingSimulator() {
               </div>
 
               <h2 className="text-xl font-bold text-foreground mb-2">
-                {algorithm === "FCFS" ? "First Come, First Served (FCFS)" : "Shortest Job First (SJF)"}
+                {algorithm === "FCFS"
+                  ? "First Come, First Served (FCFS)"
+                  : algorithm === "SJF"
+                    ? "Shortest Job First (SJF)"
+                    : "Shortest Remaining Time First (SRTF)"}
               </h2>
               <p className="text-sm text-muted-foreground mb-6">
-                {algorithm === "FCFS" ? "The simplest CPU scheduling algorithm." : "Schedules the process with the shortest burst time."}
+                {algorithm === "FCFS"
+                  ? "The simplest CPU scheduling algorithm."
+                  : algorithm === "SJF"
+                    ? "Schedules the process with the shortest burst time."
+                    : "The preemptive version of SJF."}
               </p>
 
               <div className="text-left space-y-3 w-full">
                 <div className="flex items-start gap-3">
                   <span className="text-teal-500 mt-0.5 shrink-0">•</span>
                   <p className="text-xs text-muted-foreground">
-                    {algorithm === "FCFS" 
-                      ? "Processes are served in order of arrival time" 
-                      : "Always selects the process with the lowest Burst Time from the Ready Queue"}
+                    {algorithm === "FCFS"
+                      ? "Processes are served in order of arrival time"
+                      : "Always selects the process with the lowest Remaining Burst Time from the Ready Queue"}
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-teal-500 mt-0.5 shrink-0">•</span>
-                  <p className="text-xs text-muted-foreground">
-                    Non-preemptive: once started, a process runs to completion
-                  </p>
+                  <div className="text-xs text-muted-foreground flex items-center flex-wrap gap-1">
+                    {algorithm === "SRTF" ? (
+                      <>
+                        <span className="font-bold text-foreground">Preemptive:</span> A running process can be interrupted
+                        <InfoTooltip termKey="preemption" />
+                      </>
+                    ) : (
+                      "Non-preemptive: once started, a process runs to completion"
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-teal-500 mt-0.5 shrink-0">•</span>
