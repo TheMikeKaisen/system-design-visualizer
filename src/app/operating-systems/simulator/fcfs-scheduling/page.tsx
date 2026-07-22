@@ -12,6 +12,7 @@ import {
   useRef,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -40,31 +41,29 @@ type ViewMode = "gantt" | "visualization";
 
 /** Small ? icon that shows explanation + formula on hover/click */
 function InfoTooltip({ termKey }: { termKey: string }) {
-  const [isOpen, setIsOpen] = useState(false);
   const info = TERM_INFO[termKey];
   if (!info) return null;
 
   return (
-    <span className="relative inline-flex align-middle ml-1">
-      <button
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen((p) => !p);
-        }}
-        className="w-3.5 h-3.5 rounded-full bg-muted/80 text-muted-foreground/60 text-[8px] font-bold inline-flex items-center justify-center hover:bg-teal-500/20 hover:text-teal-500 transition-colors cursor-help"
-      >
-        ?
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 top-full left-1/2 -translate-x-1/2 mt-2 w-56 p-3 rounded-xl bg-popover border border-border shadow-xl pointer-events-none"
+    <Tooltip.Provider delayDuration={100}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="w-3.5 h-3.5 rounded-full bg-muted/80 text-muted-foreground/60 text-[8px] font-bold inline-flex items-center justify-center hover:bg-teal-500/20 hover:text-teal-500 transition-colors cursor-help align-middle ml-1"
+          >
+            ?
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            side="bottom"
+            sideOffset={8}
+            collisionPadding={10}
+            className="z-[100] w-56 p-3 rounded-xl bg-popover border border-border shadow-xl animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95"
           >
             <div className="text-[11px] font-bold text-foreground mb-1">
               {info.name}
@@ -77,10 +76,10 @@ function InfoTooltip({ termKey }: { termKey: string }) {
                 {info.formula}
               </div>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </span>
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
   );
 }
 
