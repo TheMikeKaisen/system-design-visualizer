@@ -131,6 +131,7 @@ function StateBadge({ state }: { state: ProcessStateAtTime }) {
 export default function UniversalSchedulingSimulator() {
   // ─── STATE ─────────────────────────────────────────
   const [algorithm, setAlgorithm] = useState<SchedulingAlgorithm>("FCFS");
+  const [timeQuantum, setTimeQuantum] = useState<number>(2);
   const [inputProcesses, setInputProcesses] =
     useState<UniversalProcess[]>(DEFAULT_UNIVERSAL_PROCESSES);
   const [simulation, setSimulation] = useState<UniversalSimulation | null>(null);
@@ -265,15 +266,32 @@ export default function UniversalSchedulingSimulator() {
     return Array.from(times).sort((a, b) => a - b);
   }, [simulation]);
 
+  /** Current Ready Queue ordered list (for visualizer) */
+  const currentReadyQueueSnapshot = useMemo(() => {
+    if (!simulation) return [];
+    
+    // Find the latest snapshot up to currentTime
+    const snapshot = [...(simulation.readyQueueSnapshots || [])]
+      .reverse()
+      .find(s => s.time <= currentTime);
+      
+    if (!snapshot) return [];
+    
+    // Map process IDs to UniversalProcessResult for rendering
+    return snapshot.queue.map(
+      id => simulation.processResults.find(p => p.id === id)!
+    );
+  }, [simulation, currentTime]);
+
   // ─── HANDLERS ──────────────────────────────────────
 
   const handleRun = useCallback(() => {
-    const sim = computeUniversalScheduling(inputProcesses, algorithm);
+    const sim = computeUniversalScheduling(inputProcesses, algorithm, timeQuantum);
     setSimulation(sim);
     setCurrentTime(0);
     setIsPlaying(true);
     setViewMode("gantt");
-  }, [inputProcesses, algorithm]);
+  }, [inputProcesses, algorithm, timeQuantum]);
 
   const handleReset = useCallback(() => {
     setSimulation(null);
@@ -402,12 +420,19 @@ export default function UniversalSchedulingSimulator() {
           </h1>
 
           {!isEditMode && (
-            <button
-              onClick={handleReset}
-              className="px-2.5 py-1 bg-teal-500/10 text-teal-500 hover:bg-teal-500/20 text-[10px] font-bold uppercase tracking-wider rounded transition-colors ml-1"
-            >
-              Change Algorithm
-            </button>
+            <div className="flex items-center gap-1.5 ml-1">
+              {algorithm === "RR" && (
+                <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider rounded">
+                  TQ = {timeQuantum}
+                </span>
+              )}
+              <button
+                onClick={handleReset}
+                className="px-2.5 py-1 bg-teal-500/10 text-teal-500 hover:bg-teal-500/20 text-[10px] font-bold uppercase tracking-wider rounded transition-colors"
+              >
+                Change Algorithm
+              </button>
+            </div>
           )}
 
           {/* Center: Playback controls (only in playback mode) */}
@@ -960,21 +985,46 @@ export default function UniversalSchedulingSimulator() {
           {isEditMode ? (
             /* ─── PRE-SIMULATION EXPLANATION ─── */
             <div className="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center p-8">
-              <div className="mb-8 flex p-1 bg-muted/50 rounded-lg">
-                {(["FCFS", "SJF", "SRTF"] as SchedulingAlgorithm[]).map((alg) => (
-                  <button
-                    key={alg}
-                    onClick={() => setAlgorithm(alg)}
-                    className={cn(
-                      "px-4 py-2 rounded-md text-xs font-bold transition-all",
-                      algorithm === alg
-                        ? "bg-card shadow-sm text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {alg}
-                  </button>
-                ))}
+              <div className="mb-6 flex flex-col items-center gap-4">
+                <div className="flex p-1 bg-muted/50 rounded-lg">
+                  {(["FCFS", "SJF", "SRTF", "RR"] as SchedulingAlgorithm[]).map((alg) => (
+                    <button
+                      key={alg}
+                      onClick={() => setAlgorithm(alg)}
+                      className={cn(
+                        "px-4 py-2 rounded-md text-xs font-bold transition-all",
+                        algorithm === alg
+                          ? "bg-card shadow-sm text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {alg}
+                    </button>
+                  ))}
+                </div>
+
+                <AnimatePresence>
+                  {algorithm === "RR" && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="flex items-center gap-3 overflow-hidden"
+                    >
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        Time Quantum
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={timeQuantum}
+                        onChange={(e) => setTimeQuantum(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-16 bg-card border border-border/50 rounded-md px-2 py-1 text-sm font-mono text-center text-foreground outline-none focus:border-teal-500 transition-colors"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <div className="w-16 h-16 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-6">
@@ -999,14 +1049,18 @@ export default function UniversalSchedulingSimulator() {
                   ? "First Come, First Served (FCFS)"
                   : algorithm === "SJF"
                     ? "Shortest Job First (SJF)"
-                    : "Shortest Remaining Time First (SRTF)"}
+                    : algorithm === "SRTF"
+                      ? "Shortest Remaining Time First (SRTF)"
+                      : "Round Robin (RR)"}
               </h2>
               <p className="text-sm text-muted-foreground mb-6">
                 {algorithm === "FCFS"
                   ? "The simplest CPU scheduling algorithm."
                   : algorithm === "SJF"
                     ? "Schedules the process with the shortest burst time."
-                    : "The preemptive version of SJF."}
+                    : algorithm === "SRTF"
+                      ? "The preemptive version of SJF."
+                      : "A time-sharing algorithm with a fixed Time Quantum."}
               </p>
 
               <div className="text-left space-y-3 w-full">
@@ -1015,13 +1069,15 @@ export default function UniversalSchedulingSimulator() {
                   <p className="text-xs text-muted-foreground">
                     {algorithm === "FCFS"
                       ? "Processes are served in order of arrival time"
-                      : "Always selects the process with the lowest Remaining Burst Time from the Ready Queue"}
+                      : algorithm === "RR"
+                        ? "Processes take turns executing for a fixed Time Quantum"
+                        : "Always selects the process with the lowest Remaining Burst Time from the Ready Queue"}
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-teal-500 mt-0.5 shrink-0">•</span>
                   <div className="text-xs text-muted-foreground flex items-center flex-wrap gap-1">
-                    {algorithm === "SRTF" ? (
+                    {algorithm === "SRTF" || algorithm === "RR" ? (
                       <>
                         <span className="font-bold text-foreground">Preemptive:</span> A running process can be interrupted
                         <InfoTooltip termKey="preemption" />
@@ -1037,21 +1093,23 @@ export default function UniversalSchedulingSimulator() {
                     CT = StartTime + BT &nbsp;•&nbsp; TAT = CT − AT &nbsp;•&nbsp; WT = TAT − BT
                   </p>
                 </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-amber-500 mt-0.5 shrink-0">⚠</span>
-                  <p className="text-xs text-muted-foreground">
-                    Drawback:{" "}
-                    {algorithm === "FCFS" ? (
-                      <>
-                        <strong>Convoy Effect</strong> — long processes delay all shorter processes behind them
-                      </>
-                    ) : (
-                      <>
-                        <strong>Starvation</strong> — long processes may wait forever if short processes keep arriving
-                      </>
-                    )}
-                  </p>
-                </div>
+                {algorithm !== "RR" && (
+                  <div className="flex items-start gap-3">
+                    <span className="text-amber-500 mt-0.5 shrink-0">⚠</span>
+                    <p className="text-xs text-muted-foreground">
+                      Drawback:{" "}
+                      {algorithm === "FCFS" ? (
+                        <>
+                          <strong>Convoy Effect</strong> — long processes delay all shorter processes behind them
+                        </>
+                      ) : (
+                        <>
+                          <strong>Starvation</strong> — long processes may wait forever if short processes keep arriving
+                        </>
+                      )}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="mt-10 text-xs text-muted-foreground/40">
@@ -1220,7 +1278,7 @@ export default function UniversalSchedulingSimulator() {
                   </div>
 
                   {/* Timeline scrubber slider */}
-                  <div className="mt-2">
+                  <div className="mt-2 mb-6">
                     <input
                       type="range"
                       min={0}
@@ -1232,6 +1290,76 @@ export default function UniversalSchedulingSimulator() {
                       }}
                       className="w-full h-1.5 bg-muted/40 rounded-full appearance-none cursor-pointer accent-teal-500 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-teal-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-lg"
                     />
+                  </div>
+
+                  {/* Ready Queue Conveyor Belt */}
+                  <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 overflow-hidden">
+                    <div className="flex items-center gap-2 mb-3">
+                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-blue-400">
+                        📋 Ready Queue
+                      </h3>
+                      <span className="text-[9px] text-muted-foreground/60 font-mono border border-border/50 rounded px-1.5 py-0.5">
+                        t = {currentTime}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 min-h-[50px] items-center overflow-x-auto pt-3 pb-2 scrollbar-thin scrollbar-thumb-muted/30">
+                      <AnimatePresence mode="popLayout">
+                        {currentReadyQueueSnapshot.length === 0 ? (
+                          <motion.p
+                            key="empty-queue"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="text-xs text-muted-foreground/40 italic px-2"
+                          >
+                            Queue is empty
+                          </motion.p>
+                        ) : (
+                          currentReadyQueueSnapshot.map((proc, idx) => (
+                            <motion.div
+                              key={`q-${proc.id}`}
+                              layout
+                              initial={{ opacity: 0, x: 20, scale: 0.9 }}
+                              animate={{ opacity: 1, x: 0, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.5 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                              className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 mr-2 rounded-lg border shadow-sm relative bg-card"
+                              style={{ borderColor: `${proc.color}40` }}
+                            >
+                              <div
+                                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+                                style={{ backgroundColor: proc.color }}
+                              >
+                                {proc.pid.replace("P", "")}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold leading-none mb-0.5">
+                                  {proc.pid}
+                                </span>
+                                <span className="text-[9px] text-muted-foreground font-mono leading-none">
+                                  Rem BT: {(() => {
+                                    let executed = 0;
+                                    for (const b of proc.executionBlocks) {
+                                      if (b.endTime <= currentTime) {
+                                        executed += b.endTime - b.startTime;
+                                      } else if (b.startTime < currentTime) {
+                                        executed += currentTime - b.startTime;
+                                      }
+                                    }
+                                    return proc.burstTime - executed;
+                                  })()}
+                                </span>
+                              </div>
+                              
+                              {/* Order indicator */}
+                              <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-blue-500/10 text-blue-500 text-[8px] font-bold flex items-center justify-center border border-blue-500/20">
+                                {idx + 1}
+                              </div>
+                            </motion.div>
+                          ))
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
               )}

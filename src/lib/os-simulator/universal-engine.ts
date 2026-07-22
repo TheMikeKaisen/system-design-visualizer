@@ -3,7 +3,7 @@
 // Supports: FCFS, SJF (more to be added)
 // ═══════════════════════════════════════════════════════
 
-export type SchedulingAlgorithm = "FCFS" | "SJF" | "SRTF";
+export type SchedulingAlgorithm = "FCFS" | "SJF" | "SRTF" | "RR";
 
 export interface UniversalProcess {
   id: string;
@@ -77,6 +77,8 @@ export interface UniversalSimulation {
   totalTime: number;
   metrics: UniversalMetrics;
   warning: SchedulingWarning;
+  timeQuantum?: number;
+  readyQueueSnapshots: { time: number; queue: string[] }[];
 }
 
 export const PROCESS_COLORS = [
@@ -150,7 +152,8 @@ export const TERM_INFO: Record<
 
 export function computeUniversalScheduling(
   processes: UniversalProcess[],
-  algorithm: SchedulingAlgorithm
+  algorithm: SchedulingAlgorithm,
+  timeQuantum: number = 2
 ): UniversalSimulation {
   if (processes.length === 0) {
     return {
@@ -169,6 +172,8 @@ export function computeUniversalScheduling(
         totalTime: 0,
       },
       warning: { detected: false },
+      timeQuantum: algorithm === "RR" ? timeQuantum : undefined,
+      readyQueueSnapshots: [],
     };
   }
 
@@ -185,180 +190,190 @@ export function computeUniversalScheduling(
 
   const ganttBlocks: GanttBlock[] = [];
   const events: UniversalEvent[] = [];
+  const readyQueueSnapshots: { time: number; queue: string[] }[] = [];
   
   let currentTime = 0;
   let completedCount = 0;
   let totalIdleTime = 0;
   const n = results.length;
 
-  // Generate arrival events for log
-  const sortedArrivals = [...results].sort((a, b) => {
-    if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
-    return a.pid.localeCompare(b.pid);
-  });
-  for (const proc of sortedArrivals) {
-    events.push({
-      time: proc.arrivalTime,
-      type: "arrive",
-      processId: proc.id,
-      pid: proc.pid,
-      message: `${proc.pid} arrived → Ready Queue  [AT = ${proc.arrivalTime}]`,
-    });
-  }
-
-  // Simulation Loop
-  let currentProcId: string | null = null;
+  // Tick-by-Tick Simulation State
+  const readyQueue: (UniversalProcessResult & { _remainingBurst: number })[] = [];
+  let currentProc: (UniversalProcessResult & { _remainingBurst: number }) | null = null;
   let currentBlockStart = -1;
+  let currentQuantumUsed = 0;
+  const hasArrived = new Set<string>();
+
+  // Helper to coalesce idle blocks
+  const addIdleTick = (t: number) => {
+    if (ganttBlocks.length === 0 || ganttBlocks[ganttBlocks.length - 1].type !== "idle") {
+      ganttBlocks.push({ type: "idle", startTime: t, endTime: t + 1 });
+    } else {
+      ganttBlocks[ganttBlocks.length - 1].endTime = t + 1;
+    }
+  };
 
   while (completedCount < n) {
-    const available = results.filter((p) => p.arrivalTime <= currentTime && p.completionTime === 0);
-
-    if (available.length === 0) {
-      // CPU is IDLE, jump to next arrival
-      if (currentProcId !== null) {
-        currentProcId = null;
-      }
-      const nextArrivals = results
-        .filter((p) => p.completionTime === 0)
-        .map((p) => p.arrivalTime)
-        .sort((a, b) => a - b);
-      
-      const nextArrival = nextArrivals[0];
-      const idleStart = currentTime;
-      const idleEnd = nextArrival;
-      
-      ganttBlocks.push({ type: "idle", startTime: idleStart, endTime: idleEnd });
+    // 1. Handle New Arrivals at this exact tick
+    const newArrivals = results
+      .filter((p) => p.arrivalTime === currentTime && !hasArrived.has(p.id))
+      .sort((a, b) => a.pid.localeCompare(b.pid)); // Sort alphabetically for deterministic tie-breaking
+    
+    for (const p of newArrivals) {
+      hasArrived.add(p.id);
+      readyQueue.push(p);
       events.push({
-        time: idleStart,
-        type: "idle_start",
-        message: `CPU IDLE — no process in Ready Queue  [${idleStart} → ${idleEnd}]`,
+        time: currentTime,
+        type: "arrive",
+        processId: p.id,
+        pid: p.pid,
+        message: `${p.pid} arrived → Ready Queue  [AT = ${p.arrivalTime}]`,
       });
-      totalIdleTime += idleEnd - idleStart;
-      currentTime = nextArrival;
-      continue;
     }
 
-    // Select process based on algorithm
-    let selectedProc = available[0];
-    if (algorithm === "FCFS") {
-      if (currentProcId) {
-        selectedProc = available.find(p => p.id === currentProcId)!;
-      } else {
-        available.sort((a, b) => {
-          if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
-          return a.pid.localeCompare(b.pid);
+    // 2. Handle Preemptions & Completions (from the PREVIOUS tick)
+    if (currentProc) {
+      if (currentProc._remainingBurst === 0) {
+        // Completion
+        currentProc.completionTime = currentTime;
+        currentProc.turnaroundTime = currentTime - currentProc.arrivalTime;
+        currentProc.waitingTime = currentProc.turnaroundTime - currentProc.burstTime;
+        currentProc.responseTime = currentProc.firstStartTime - currentProc.arrivalTime;
+        
+        events.push({
+          time: currentTime,
+          type: "complete",
+          processId: currentProc.id,
+          pid: currentProc.pid,
+          message: `${currentProc.pid} completed  [CT = ${currentTime}, TAT = ${currentProc.turnaroundTime}, WT = ${currentProc.waitingTime}]`,
         });
-        selectedProc = available[0];
-      }
-    } else if (algorithm === "SJF") {
-      if (currentProcId) {
-        selectedProc = available.find(p => p.id === currentProcId)!;
-      } else {
-        available.sort((a, b) => {
-          if (a.burstTime !== b.burstTime) return a.burstTime - b.burstTime;
-          if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
-          return a.pid.localeCompare(b.pid);
-        });
-        selectedProc = available[0];
-      }
-    } else if (algorithm === "SRTF") {
-      available.sort((a, b) => {
-        if (a._remainingBurst !== b._remainingBurst) return a._remainingBurst - b._remainingBurst;
-        if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
-        return a.pid.localeCompare(b.pid);
-      });
-      selectedProc = available[0];
-    }
 
-    // Context switch detected
-    if (currentProcId !== selectedProc.id) {
-      if (currentProcId !== null) {
-        // Close previous block
-        const prevProc = results.find(p => p.id === currentProcId)!;
-        prevProc.executionBlocks.push({ startTime: currentBlockStart, endTime: currentTime });
+        currentProc.executionBlocks.push({ startTime: currentBlockStart, endTime: currentTime });
         ganttBlocks.push({
           type: "process",
-          processId: prevProc.id,
-          pid: prevProc.pid,
-          color: prevProc.color,
+          processId: currentProc.id,
+          pid: currentProc.pid,
+          color: currentProc.color,
           startTime: currentBlockStart,
           endTime: currentTime,
         });
 
-        // Preemption log
-        if (prevProc._remainingBurst > 0) {
-          events.push({
-            time: currentTime,
-            type: "warning",
-            processId: prevProc.id,
-            pid: prevProc.pid,
-            message: `⚡ Preemption: ${prevProc.pid} was preempted by ${selectedProc.pid}!`,
-          });
+        currentProc = null;
+        completedCount++;
+      } else if (algorithm === "RR" && currentQuantumUsed === timeQuantum) {
+        // RR Quantum Expiration (Preemption)
+        events.push({
+          time: currentTime,
+          type: "warning",
+          processId: currentProc.id,
+          pid: currentProc.pid,
+          message: `⏱ Quantum Expired: ${currentProc.pid} preempted after ${timeQuantum}ms.`,
+        });
+
+        currentProc.executionBlocks.push({ startTime: currentBlockStart, endTime: currentTime });
+        ganttBlocks.push({
+          type: "process",
+          processId: currentProc.id,
+          pid: currentProc.pid,
+          color: currentProc.color,
+          startTime: currentBlockStart,
+          endTime: currentTime,
+        });
+
+        // Add BACK to ready queue (happens AFTER new arrivals per standard convention)
+        readyQueue.push(currentProc);
+        currentProc = null;
+      } else if (algorithm === "SRTF") {
+        // SRTF Preemption Check: Is there a strictly shorter job in the ready queue?
+        let shortestInQueue = readyQueue.length > 0 ? readyQueue[0] : null;
+        for (const p of readyQueue) {
+          if (p._remainingBurst < (shortestInQueue?._remainingBurst ?? Infinity)) {
+            shortestInQueue = p;
+          }
+        }
+        
+        if (shortestInQueue && shortestInQueue._remainingBurst < currentProc._remainingBurst) {
+           events.push({
+             time: currentTime,
+             type: "warning",
+             processId: currentProc.id,
+             pid: currentProc.pid,
+             message: `⚡ Preemption: ${currentProc.pid} preempted by shorter job ${shortestInQueue.pid}!`,
+           });
+           
+           currentProc.executionBlocks.push({ startTime: currentBlockStart, endTime: currentTime });
+           ganttBlocks.push({
+             type: "process",
+             processId: currentProc.id,
+             pid: currentProc.pid,
+             color: currentProc.color,
+             startTime: currentBlockStart,
+             endTime: currentTime,
+           });
+
+           readyQueue.push(currentProc);
+           currentProc = null;
         }
       }
+    }
+
+    // 3. Select Next Process if CPU is idle
+    if (!currentProc && readyQueue.length > 0) {
+      if (algorithm === "SJF") {
+        readyQueue.sort((a, b) => {
+          if (a.burstTime !== b.burstTime) return a.burstTime - b.burstTime;
+          if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
+          return a.pid.localeCompare(b.pid);
+        });
+      } else if (algorithm === "SRTF") {
+        readyQueue.sort((a, b) => {
+          if (a._remainingBurst !== b._remainingBurst) return a._remainingBurst - b._remainingBurst;
+          if (a.arrivalTime !== b.arrivalTime) return a.arrivalTime - b.arrivalTime;
+          return a.pid.localeCompare(b.pid);
+        });
+      }
+      // FCFS and RR use natural FIFO order of the queue, no sorting needed!
       
-      currentProcId = selectedProc.id;
+      currentProc = readyQueue.shift()!;
       currentBlockStart = currentTime;
+      currentQuantumUsed = 0;
       
-      if (selectedProc.firstStartTime === -1) {
-        selectedProc.firstStartTime = currentTime;
+      if (currentProc.firstStartTime === -1) {
+        currentProc.firstStartTime = currentTime;
       }
       
       events.push({
         time: currentTime,
         type: "cpu_select",
-        processId: selectedProc.id,
-        pid: selectedProc.pid,
-        message: `CPU selected ${selectedProc.pid}  [Remaining BT = ${selectedProc._remainingBurst}ms]`,
+        processId: currentProc.id,
+        pid: currentProc.pid,
+        message: `CPU selected ${currentProc.pid}  [Rem BT = ${currentProc._remainingBurst}ms]`,
       });
     }
 
-    // Calculate step amount
-    let stepAmount = 0;
-    
-    if (algorithm === "FCFS" || algorithm === "SJF") {
-       stepAmount = selectedProc._remainingBurst;
-    } else if (algorithm === "SRTF") {
-       const futureArrivals = results
-         .filter(p => p.arrivalTime > currentTime && p.completionTime === 0)
-         .map(p => p.arrivalTime)
-         .sort((a,b)=>a-b);
-       const nextArrival = futureArrivals.length > 0 ? futureArrivals[0] : Infinity;
-       stepAmount = Math.min(selectedProc._remainingBurst, nextArrival - currentTime);
+    // 4. Capture Ready Queue Snapshot (Exclude currently running process)
+    readyQueueSnapshots.push({
+      time: currentTime,
+      queue: readyQueue.map(p => p.id),
+    });
+
+    // 5. Execute for 1 tick or idle
+    if (!currentProc) {
+      addIdleTick(currentTime);
+      totalIdleTime++;
+    } else {
+      currentProc._remainingBurst--;
+      currentQuantumUsed++;
     }
-    
-    currentTime += stepAmount;
-    selectedProc._remainingBurst -= stepAmount;
 
-    // Check completion
-    if (selectedProc._remainingBurst === 0) {
-      selectedProc.completionTime = currentTime;
-      selectedProc.turnaroundTime = currentTime - selectedProc.arrivalTime;
-      selectedProc.waitingTime = selectedProc.turnaroundTime - selectedProc.burstTime;
-      selectedProc.responseTime = selectedProc.firstStartTime - selectedProc.arrivalTime;
-      
-      events.push({
-        time: currentTime,
-        type: "complete",
-        processId: selectedProc.id,
-        pid: selectedProc.pid,
-        message: `${selectedProc.pid} completed  [CT = ${currentTime}, TAT = ${selectedProc.turnaroundTime}, WT = ${selectedProc.waitingTime}]`,
-      });
-
-      selectedProc.executionBlocks.push({ startTime: currentBlockStart, endTime: currentTime });
-      ganttBlocks.push({
-        type: "process",
-        processId: selectedProc.id,
-        pid: selectedProc.pid,
-        color: selectedProc.color,
-        startTime: currentBlockStart,
-        endTime: currentTime,
-      });
-
-      currentProcId = null;
-      completedCount++;
-    }
+    currentTime++;
   }
+
+  // Handle final completion state at the exact moment the last process finishes
+  readyQueueSnapshots.push({
+    time: currentTime,
+    queue: [],
+  });
 
   const totalTime = currentTime;
 
@@ -467,6 +482,8 @@ export function computeUniversalScheduling(
       totalTime,
     },
     warning,
+    timeQuantum: algorithm === "RR" ? timeQuantum : undefined,
+    readyQueueSnapshots,
   };
 }
 
