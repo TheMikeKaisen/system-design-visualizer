@@ -132,11 +132,31 @@ The goal is not to replace formal education. It is to give students the visual i
 
 ### Currently Available
 
+#### Java & JVM
 | Simulation | Topic | Concepts Covered | Status |
 |---|---|---|---|
 | **Java Flow of Execution** | Java Fundamentals | Source code → bytecode → JVM execution lifecycle | ✅ Live |
 | **Platform Independence** | Java / JVM | Write Once Run Anywhere, bytecode portability, OS abstraction | ✅ Live |
 | **JVM Class Loading** | JVM Internals | Bootstrap → Extension → Application classloader chain | ✅ Live |
+
+#### JavaScript Internals
+| Simulation | Topic | Concepts Covered | Status |
+|---|---|---|---|
+| **Call Stack & Execution** | Execution Context | Call stack, Global & Function Execution Contexts | ✅ Live |
+| **Hoisting** | Memory Allocation | `var` vs `let`/`const`, Function declarations vs expressions | ✅ Live |
+| **Let & Const (TDZ)** | Variable Declarations| Temporal Dead Zone, Block scoping basics | ✅ Live |
+| **Scope & Scope Chain** | Lexical Environment | Lexical scoping, variable lookup | ✅ Live |
+| **Block Scope** | Lexical Environment | Block-level bindings, shadowed variables | ✅ Live |
+| **Closures** | Advanced Functions | State retention, returning functions, private variables | ✅ Live |
+| **Event Loop** | Asynchronous JS | Call Stack, Web APIs, Task Queue, Microtask Queue | ✅ Live |
+
+#### Operating Systems
+| Simulation | Topic | Concepts Covered | Status |
+|---|---|---|---|
+| **Process States** | Process Management | New, Ready, Running, Waiting, Terminated transitions | ✅ Live |
+| **Process Control Block**| Process Management | PID, State, Program Counter, Registers, Memory limits | ✅ Live |
+| **CPU Scheduling Basics**| CPU Scheduling | Context switching, scheduling queues, dispatch latency | ✅ Live |
+| **FCFS Scheduling** | CPU Scheduling | First-Come First-Served algorithm, Gantt chart, wait time | ✅ Live |
 
 ### On the Roadmap
 
