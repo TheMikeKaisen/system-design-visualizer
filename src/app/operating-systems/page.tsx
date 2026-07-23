@@ -157,7 +157,7 @@ export default function OperatingSystemsPathPage() {
           </Link>
 
           {/* Episode 4: FCFS Interactive Scheduler */}
-          <Link href="/operating-systems/simulator/fcfs-scheduling" className="group">
+          {/* <Link href="/operating-systems/simulator/fcfs-scheduling" className="group">
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-violet-500/50 hover:shadow-[0_0_30px_-5px_rgba(139,92,246,0.2)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 4</div>
@@ -190,13 +190,13 @@ export default function OperatingSystemsPathPage() {
                 </div>
               </div>
             </div>
-          </Link>
+          </Link> */}
 
-          {/* Episode 5: Universal CPU Scheduler */}
+          {/* Episode 4: Universal CPU Scheduler */}
           <Link href="/operating-systems/simulator/cpu-scheduling" className="group">
             <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-violet-500/50 hover:shadow-[0_0_30px_-5px_rgba(139,92,246,0.2)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 5</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 4</div>
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
@@ -207,9 +207,9 @@ export default function OperatingSystemsPathPage() {
                   <div className="flex sm:hidden items-center gap-2 mb-1">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 5</span>
                   </div>
-                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-teal-500 transition-colors line-clamp-2">Universal CPU Scheduler</h3>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-teal-500 transition-colors line-clamp-2">CPU Schedulers</h3>
                   <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
-                    A universal engine supporting FCFS and SJF scheduling. Compare algorithms side-by-side with identical inputs.
+                    A universal engine supporting FCFS, SJF, SRTF and RR scheduling. Compare algorithms side-by-side with identical inputs.
                   </p>
                 </div>
                 <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-teal-500 transition-colors">
