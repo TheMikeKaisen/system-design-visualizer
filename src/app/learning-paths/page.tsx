@@ -102,6 +102,26 @@ export default function LearningPathsPage() {
               </div>
             </div>
           </Link>
+        {/* Active Route: Backend */}
+          <Link href="/backend" className="group">
+            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-emerald-500/50 hover:shadow-[0_0_30px_-5px_rgba(16,185,129,0.2)] transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                  <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                  <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-emerald-500 transition-colors">Backend</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
+                Visualize Node.js internals, Thread Pools, non-blocking I/O, and the 5 phases of the Event Loop.
+              </p>
+              <div className="flex items-center text-sm font-semibold text-emerald-500 group-hover:translate-x-1 transition-transform">
+                Explore Backend Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </div>
+          </Link>
         </div>
       </main>
     </div>
