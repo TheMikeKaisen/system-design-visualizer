@@ -82,6 +82,26 @@ export default function LearningPathsPage() {
               </div>
             </div>
           </Link>
+
+          {/* Active Route: Frontend */}
+          <Link href="/frontend" className="group">
+            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-blue-500/50 hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.2)] transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-blue-500/20 transition-all duration-300">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <ellipse cx="12" cy="12" rx="10" ry="4"></ellipse>
+                  <ellipse cx="12" cy="12" rx="4" ry="10"></ellipse>
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-blue-500 transition-colors">Frontend</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
+                Visualize React's rendering pipeline, from JSX compilation down to Virtual DOM diffing and DOM reconciliation.
+              </p>
+              <div className="flex items-center text-sm font-semibold text-blue-500 group-hover:translate-x-1 transition-transform">
+                Explore Frontend Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </div>
+          </Link>
         </div>
       </main>
     </div>
