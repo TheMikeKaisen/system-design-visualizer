@@ -59,7 +59,7 @@ export default function FrontendPathPage() {
                     <span className="px-2 py-0.5 rounded-full bg-border text-xs font-medium text-muted-foreground">Interactive</span>
                   </div>
                   <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-blue-500 transition-colors">
-                    JSX, Virtual DOM & Reconciliation
+                    JSX, Virtual DOM &amp; Reconciliation
                   </h3>
                   <p className="text-muted-foreground leading-relaxed max-w-2xl">
                     Discover how React transforms your components into a Virtual DOM tree, performs diffing to find exactly what changed, and updates the real DOM with pinpoint accuracy.
@@ -73,7 +73,60 @@ export default function FrontendPathPage() {
             </div>
           </Link>
 
+          {/* Episode 2 */}
+          <Link href="/frontend/episodes/2" className="block group">
+            <div className="relative p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-violet-500/50 hover:shadow-[0_0_30px_-5px_rgba(139,92,246,0.2)] transition-all duration-300 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-sm font-bold tracking-wider text-violet-500 uppercase">Episode 2</span>
+                    <span className="px-2 py-0.5 rounded-full bg-border text-xs font-medium text-muted-foreground">Interactive</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-violet-500 transition-colors">
+                    Props, State &amp; One-Way Data Flow
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-2xl">
+                    Visualize how props flow downward from parent to child, why components can never modify their own props, and how the &quot;lifting state up&quot; pattern keeps your app predictable.
+                  </p>
+                </div>
+
+                <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-violet-500 text-white shadow-lg shadow-violet-500/25 group-hover:scale-110 group-hover:shadow-violet-500/40 transition-all duration-300">
+                  <Play className="w-5 h-5 ml-1" fill="currentColor" />
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Episode 3 */}
+          <Link href="/frontend/episodes/3" className="block group">
+            <div className="relative p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-amber-500/50 hover:shadow-[0_0_30px_-5px_rgba(245,158,11,0.2)] transition-all duration-300 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-sm font-bold tracking-wider text-amber-500 uppercase">Episode 3</span>
+                    <span className="px-2 py-0.5 rounded-full bg-border text-xs font-medium text-muted-foreground">Interactive</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-amber-500 transition-colors">
+                    useState — Batching &amp; Stale State
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-2xl">
+                    Unpack the #1 live-coding interview trap: calling setState multiple times in one handler. Watch React&apos;s update queue in real time and see exactly why the functional update form exists.
+                  </p>
+                </div>
+
+                <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-amber-500 text-white shadow-lg shadow-amber-500/25 group-hover:scale-110 group-hover:shadow-amber-500/40 transition-all duration-300">
+                  <Play className="w-5 h-5 ml-1" fill="currentColor" />
+                </div>
+              </div>
+            </div>
+          </Link>
+
         </div>
+
       </main>
     </div>
   );

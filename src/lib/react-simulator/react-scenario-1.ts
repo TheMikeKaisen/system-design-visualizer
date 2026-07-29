@@ -4,6 +4,7 @@ export const REACT_SCENARIO_1: ReactSimulationScenario = {
   id: "react-rendering-1",
   title: "React Rendering & Virtual DOM",
   description: "Learn how React actually shows things on screen: JSX -> Virtual DOM -> Real DOM -> Diffing.",
+  layoutMode: "vdom",
   steps: [
     // ---------------------------------------------------------
     // EXAMPLE 1: INITIAL RENDER

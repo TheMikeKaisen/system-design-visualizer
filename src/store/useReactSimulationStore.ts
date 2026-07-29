@@ -18,6 +18,7 @@ export const useReactSimulationStore = create<ReactSimulationState>((set, get) =
     id: "default",
     title: "",
     description: "",
+    layoutMode: "vdom",
     steps: []
   },
   currentStepIndex: 0,
