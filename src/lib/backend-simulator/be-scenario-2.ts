@@ -18,7 +18,7 @@ export const BE_SCENARIO_2: BackendSimulationScenario = {
   steps: [
     {
       id: "step-1",
-      explanation: "Imagine a web server that needs to read a file from disk for Request A. Meanwhile, Request B arrives for something simple.",
+      explanation: "Node.js is famous for being non-blocking. But to understand why that's awesome, we first need to see what would happen if it wasn't. Let's pretend Node acted like a traditional blocking server...",
       toastMessage: "Simulating concurrent requests...",
       code: codeSnippet,
       activeLine: null,
@@ -29,7 +29,7 @@ export const BE_SCENARIO_2: BackendSimulationScenario = {
     },
     {
       id: "step-2",
-      explanation: "In a **Blocking** architecture (like traditional PHP/Ruby), the main thread starts Request A and hits the file read command.",
+      explanation: "In this hypothetical blocking mode, the main thread starts Request A and hits the file read command.",
       toastMessage: "Request A arrives",
       code: codeSnippet,
       activeLine: 3,
@@ -69,7 +69,7 @@ export const BE_SCENARIO_2: BackendSimulationScenario = {
     },
     {
       id: "step-5",
-      explanation: "Now let's look at Node's **Non-Blocking** approach. Node starts Request A, prints '1: Starting', and calls `fs.readFile`.",
+      explanation: "Now let's look at Node's REAL Non-Blocking approach. Node starts Request A and prints '1: Starting'.",
       toastMessage: "Switching to Non-Blocking",
       code: codeSnippet,
       activeLine: 3,
@@ -78,20 +78,54 @@ export const BE_SCENARIO_2: BackendSimulationScenario = {
         { id: "A", label: "Request A", startPct: 0, widthPct: 10, status: "processing", isBlocking: false }
       ],
       threadStatus: "working",
-      consoleOutput: ["1: Starting"]
+      threadStatus: "working",
+      consoleOutput: ["1: Starting"],
+      threadPool: [
+        { id: 1, status: "idle", task: "" },
+        { id: 2, status: "idle", task: "" },
+        { id: 3, status: "idle", task: "" },
+        { id: 4, status: "idle", task: "" }
+      ]
+    },
+    {
+      id: "step-5-half",
+      explanation: "The Main Thread hits the slow file read command. Instead of freezing, it packages this task up and passes it to libuv in the background. The Main Thread is now completely free.",
+      toastMessage: "Task passed to libuv",
+      code: codeSnippet,
+      activeLine: 5,
+      timelineMode: "nonblocking",
+      timelineRequests: [
+        { id: "A", label: "Request A", startPct: 0, widthPct: 10, status: "complete", isBlocking: false },
+        { id: "pool_A", label: "Reading File", startPct: 10, widthPct: 50, status: "processing" }
+      ],
+      threadStatus: "free",
+      consoleOutput: ["1: Starting"],
+      threadPool: [
+        { id: 1, status: "working", task: "fs.readFile('bigfile.txt')" },
+        { id: 2, status: "idle", task: "" },
+        { id: 3, status: "idle", task: "" },
+        { id: 4, status: "idle", task: "" }
+      ]
     },
     {
       id: "step-6",
-      explanation: "Instead of waiting, Node **hands the work off** to libuv's Thread Pool. The main thread immediately continues to the next line. It is **free**.",
-      toastMessage: "Work handed off! Thread free",
+      explanation: "Because the task was offloaded, the Main Thread immediately moves to the next line without wasting a single millisecond. It prints '2: This runs immediately'.",
+      toastMessage: "Main thread moves on",
       code: codeSnippet,
       activeLine: 9,
       timelineMode: "nonblocking",
       timelineRequests: [
-        { id: "A", label: "Request A", startPct: 0, widthPct: 15, status: "complete", isBlocking: false }
+        { id: "A", label: "Request A", startPct: 0, widthPct: 15, status: "complete", isBlocking: false },
+        { id: "pool_A", label: "Reading File", startPct: 10, widthPct: 50, status: "processing" }
       ],
-      threadStatus: "free",
-      consoleOutput: ["1: Starting", "2: This runs immediately"]
+      threadStatus: "working",
+      consoleOutput: ["1: Starting", "2: This runs immediately"],
+      threadPool: [
+        { id: 1, status: "working", task: "fs.readFile('bigfile.txt')" },
+        { id: 2, status: "idle", task: "" },
+        { id: 3, status: "idle", task: "" },
+        { id: 4, status: "idle", task: "" }
+      ]
     },
     {
       id: "step-7",
@@ -102,10 +136,17 @@ export const BE_SCENARIO_2: BackendSimulationScenario = {
       timelineMode: "nonblocking",
       timelineRequests: [
         { id: "A", label: "Request A", startPct: 0, widthPct: 15, status: "complete", isBlocking: false },
-        { id: "B", label: "Request B", startPct: 25, widthPct: 15, status: "complete" }
+        { id: "B", label: "Request B", startPct: 25, widthPct: 15, status: "complete" },
+        { id: "pool_A", label: "Reading File", startPct: 10, widthPct: 50, status: "processing" }
       ],
       threadStatus: "working",
-      consoleOutput: ["1: Starting", "2: This runs immediately"]
+      consoleOutput: ["1: Starting", "2: This runs immediately"],
+      threadPool: [
+        { id: 1, status: "working", task: "fs.readFile('bigfile.txt')" },
+        { id: 2, status: "idle", task: "" },
+        { id: 3, status: "idle", task: "" },
+        { id: 4, status: "idle", task: "" }
+      ]
     },
     {
       id: "step-8",
@@ -117,10 +158,17 @@ export const BE_SCENARIO_2: BackendSimulationScenario = {
       timelineRequests: [
         { id: "A", label: "Request A", startPct: 0, widthPct: 15, status: "complete", isBlocking: false },
         { id: "B", label: "Request B", startPct: 25, widthPct: 15, status: "complete" },
+        { id: "pool_A", label: "Reading File", startPct: 10, widthPct: 50, status: "complete" },
         { id: "A_cb", label: "Req A Callback", startPct: 60, widthPct: 15, status: "processing" }
       ],
       threadStatus: "working",
-      consoleOutput: ["1: Starting", "2: This runs immediately", "3: File read complete"]
+      consoleOutput: ["1: Starting", "2: This runs immediately", "3: File read complete"],
+      threadPool: [
+        { id: 1, status: "idle", task: "" },
+        { id: 2, status: "idle", task: "" },
+        { id: 3, status: "idle", task: "" },
+        { id: 4, status: "idle", task: "" }
+      ]
     },
     {
       id: "step-9",
@@ -132,10 +180,17 @@ export const BE_SCENARIO_2: BackendSimulationScenario = {
       timelineRequests: [
         { id: "A", label: "Request A", startPct: 0, widthPct: 15, status: "complete", isBlocking: false },
         { id: "B", label: "Request B", startPct: 25, widthPct: 15, status: "complete" },
+        { id: "pool_A", label: "Reading File", startPct: 10, widthPct: 50, status: "complete" },
         { id: "A_cb", label: "Req A Callback", startPct: 60, widthPct: 15, status: "complete" }
       ],
       threadStatus: "free",
-      consoleOutput: ["1: Starting", "2: This runs immediately", "3: File read complete"]
+      consoleOutput: ["1: Starting", "2: This runs immediately", "3: File read complete"],
+      threadPool: [
+        { id: 1, status: "idle", task: "" },
+        { id: 2, status: "idle", task: "" },
+        { id: 3, status: "idle", task: "" },
+        { id: 4, status: "idle", task: "" }
+      ]
     }
   ]
 };

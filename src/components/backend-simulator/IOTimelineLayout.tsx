@@ -4,6 +4,7 @@ import { BackendCodePanel } from "./BackendCodePanel";
 import { IOTimelinePanel } from "./IOTimelinePanel";
 import { ThreadStatusPanel } from "./ThreadStatusPanel";
 import { ConsoleOutputPanel } from "./ConsoleOutputPanel";
+import { ThreadPoolPanel } from "./ThreadPoolPanel";
 
 interface Props {
   step: BackendStepState;
@@ -17,11 +18,15 @@ export function IOTimelineLayout({ step }: Props) {
         <div className="flex-1 min-w-0">
           <BackendCodePanel step={step} />
         </div>
-        <div className="w-80 shrink-0 flex flex-col gap-4">
+        <div className="w-64 shrink-0 flex flex-col gap-4">
           <ThreadStatusPanel status={step.threadStatus} />
           <div className="flex-1 min-h-0">
             <ConsoleOutputPanel output={step.consoleOutput} />
           </div>
+        </div>
+        {/* Thread Pool (shows contrast between blocking vs non-blocking) */}
+        <div className="w-80 shrink-0">
+          <ThreadPoolPanel threads={step.threadPool} />
         </div>
       </div>
 

@@ -17,7 +17,7 @@ export function IOTimelinePanel({ mode, requests }: Props) {
         ${mode === 'blocking' ? 'border-rose-900/50 bg-rose-950/40' : 'border-emerald-900/50 bg-emerald-950/40'}`}>
         <Clock className={`w-4 h-4 mr-2 ${mode === 'blocking' ? 'text-rose-400' : 'text-emerald-400'}`} />
         <span className={`text-xs font-semibold tracking-wider uppercase ${mode === 'blocking' ? 'text-rose-400' : 'text-emerald-400'}`}>
-          {mode === 'blocking' ? 'Blocking Server Timeline' : 'Non-Blocking Server Timeline'}
+          {mode === 'blocking' ? 'Timeline: IF NODE WAS BLOCKING' : 'Timeline: REAL NON-BLOCKING NODE'}
         </span>
       </div>
 
@@ -81,6 +81,30 @@ export function IOTimelinePanel({ mode, requests }: Props) {
               ))}
             </div>
           </div>
+
+          {/* Row C (Background/libuv) */}
+          {mode === 'nonblocking' && (
+            <div className="flex items-center h-8 relative pr-6">
+              <div className="w-[85px] shrink-0 text-xs font-bold text-zinc-400 uppercase tracking-wider">libuv</div>
+              <div className="flex-1 relative h-full">
+                {requests.filter(r => r.id.startsWith("pool_")).map(req => (
+                  <div 
+                    key={req.id}
+                    className={`absolute top-0 bottom-0 rounded-md border flex items-center justify-center overflow-hidden transition-all duration-700
+                      ${req.status === 'processing' ? 'bg-purple-900/40 border-purple-500/50' :
+                        req.status === 'complete' ? 'bg-emerald-900/40 border-emerald-500/50' : 'bg-zinc-800 border-zinc-700'}`}
+                    style={{ left: `${req.startPct}%`, width: `${req.widthPct}%` }}
+                  >
+                    <span className={`text-[10px] font-bold uppercase truncate px-2
+                      ${req.status === 'processing' ? 'text-purple-300' :
+                        req.status === 'complete' ? 'text-emerald-300' : 'text-zinc-500'}`}>
+                      {req.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>
       </div>

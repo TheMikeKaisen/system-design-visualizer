@@ -33,7 +33,7 @@ export function ThreadPoolPanel({ threads = [] }: Props) {
                 </span>
               </div>
               
-              <div className={`text-sm font-medium h-6 flex items-center ${isWorking ? 'text-purple-100' : 'text-zinc-600'}`}>
+              <div className={`text-sm font-medium h-6 flex items-center truncate ${isWorking ? 'text-purple-100' : 'text-zinc-600'}`}>
                 {isWorking ? thread.task : "Idle"}
               </div>
             </div>
