@@ -56,7 +56,15 @@ export default function BackendPathPage() {
                     <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 1</span>
                   </div>
                   <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1 group-hover:text-emerald-500 transition-colors truncate sm:whitespace-normal">Node Architecture</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 hidden sm:block">What happens when you type `node server.js`? Threads, V8, and libuv.</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2 hidden sm:block mb-6">What happens when you type `node server.js`? Threads, V8, and libuv.</p>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  29 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>
@@ -77,7 +85,15 @@ export default function BackendPathPage() {
                     <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 2</span>
                   </div>
                   <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1 group-hover:text-emerald-500 transition-colors truncate sm:whitespace-normal">Blocking vs Non-Blocking</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 hidden sm:block">Compare a frozen server against Node's instant handoffs.</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2 hidden sm:block mb-6">Compare a frozen server against Node's instant handoffs.</p>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  29 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>
@@ -98,7 +114,15 @@ export default function BackendPathPage() {
                     <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 3</span>
                   </div>
                   <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1 group-hover:text-emerald-500 transition-colors truncate sm:whitespace-normal">Event Loop Phases</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 hidden sm:block">Trace nextTick, Microtasks, and the 5 libuv phases step by step.</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2 hidden sm:block mb-6">Trace nextTick, Microtasks, and the 5 libuv phases step by step.</p>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  29 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>

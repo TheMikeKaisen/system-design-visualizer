@@ -63,7 +63,7 @@ export function BackendCodePanel({ step }: Props) {
                 <div
                   key={i}
                   ref={isActive ? activeLineRef : null}
-                  className={`leading-6 relative w-full transition-colors duration-300 ${
+                  className={`leading-6 relative w-full transition-colors duration-300 whitespace-pre-wrap ${
                     isActive ? "text-foreground" : "text-zinc-400"
                   }`}
                 >
