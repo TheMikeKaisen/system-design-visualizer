@@ -125,6 +125,84 @@ export default function FrontendPathPage() {
             </div>
           </Link>
 
+          {/* Episode 4 */}
+          <Link href="/frontend/episodes/4" className="block group">
+            <div className="relative p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-emerald-500/50 hover:shadow-[0_0_30px_-5px_rgba(52,211,153,0.2)] transition-all duration-300 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-sm font-bold tracking-wider text-emerald-500 uppercase">Episode 4</span>
+                    <span className="px-2 py-0.5 rounded-full bg-border text-xs font-medium text-muted-foreground">Interactive</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-emerald-500 transition-colors">
+                    useEffect — Side Effects &amp; the Dependency Array
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-2xl">
+                    Understand why side effects can&apos;t live inside the render body, trace the exact render → DOM update → paint → effect pipeline, and master all three forms of the dependency array.
+                  </p>
+                </div>
+
+                <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 group-hover:scale-110 group-hover:shadow-emerald-500/40 transition-all duration-300">
+                  <Play className="w-5 h-5 ml-1" fill="currentColor" />
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Episode 5 */}
+          <Link href="/frontend/episodes/5" className="block group">
+            <div className="relative p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-rose-500/50 hover:shadow-[0_0_30px_-5px_rgba(244,63,94,0.2)] transition-all duration-300 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-sm font-bold tracking-wider text-rose-500 uppercase">Episode 5</span>
+                    <span className="px-2 py-0.5 rounded-full bg-border text-xs font-medium text-muted-foreground">Interactive</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-rose-500 transition-colors">
+                    Cleanup &amp; Race Conditions
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-2xl">
+                    If your effect sets something up, your cleanup tears it down. Trace the exact cleanup lifecycle, fix the LiveClock bug, and watch how a stale network response overwrites the UI — and how to stop it.
+                  </p>
+                </div>
+
+                <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-rose-500 text-white shadow-lg shadow-rose-500/25 group-hover:scale-110 group-hover:shadow-rose-500/40 transition-all duration-300">
+                  <Play className="w-5 h-5 ml-1" fill="currentColor" />
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Episode 6 */}
+          <Link href="/frontend/episodes/6" className="block group">
+            <div className="relative p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-purple-500/50 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.2)] transition-all duration-300 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-sm font-bold tracking-wider text-purple-500 uppercase">Episode 6</span>
+                    <span className="px-2 py-0.5 rounded-full bg-border text-xs font-medium text-muted-foreground">Interactive</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-purple-500 transition-colors">
+                    useLayoutEffect vs useEffect
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-2xl">
+                    Both run after the DOM is updated — only one runs before the browser paints. Watch the tooltip flicker bug appear with useEffect and disappear with useLayoutEffect, then learn why useLayoutEffect is almost never the right default.
+                  </p>
+                </div>
+
+                <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-500 text-white shadow-lg shadow-purple-500/25 group-hover:scale-110 group-hover:shadow-purple-500/40 transition-all duration-300">
+                  <Play className="w-5 h-5 ml-1" fill="currentColor" />
+                </div>
+              </div>
+            </div>
+          </Link>
+
         </div>
 
       </main>

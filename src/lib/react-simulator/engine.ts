@@ -104,12 +104,43 @@ export interface ReactStepState {
   updateQueue?: UpdateQueueEntry[];
   resolvedValue?: string | null;  // final value after queue processing
   renderCount?: number;           // which render cycle we're on
+
+  // --- Episode 4: useEffect Lifecycle ---
+  effectPhase?: "render" | "dom-update" | "paint" | "effect-runs" | null;
+  depArrayMode?: "no-array" | "empty" | "with-value";  // which dep array form is shown
+  depArrayCurrent?: string | null;   // e.g. '"u2"'
+  depArrayPrevious?: string | null;  // e.g. '"u1"' or 'none (first render)'
+  depArrayChanged?: boolean;         // true = red (run), false = green (skip)
+
+  // --- Episode 5: Cleanup & Race Conditions ---
+  cleanupMoment?: "first-run" | "dep-changed" | "unmount" | null; // which lifecycle moment is active
+  cleanupPhase?: "effect-setup" | "cleanup-runs" | "new-effect" | null; // within a dep-change sequence
+  raceConditionRequests?: RaceConditionRequest[]; // in-flight requests for race panel
+  cancelledRequestId?: string | null; // which request was blocked by cleanup
+
+  // --- Episode 6: useLayoutEffect Timing ---
+  timingMode?: "use-effect" | "use-layout-effect" | "both";
+  useEffectPhaseActive?: "render" | "dom-update" | "paint" | "effect" | null;
+  useLayoutEffectPhaseActive?: "render" | "dom-update" | "layout-effect" | "paint" | null;
+  viewportElementPosition?: "initial" | "wrong" | "correct";
+  viewportShowFlickerFlash?: boolean; // triggers the flicker animation
+  viewportLabel?: string;             // label on the element in the viewport
+}
+
+// ---------------------------------------------------------------------------
+// RACE CONDITION PANEL (used by Episode 5)
+// ---------------------------------------------------------------------------
+export interface RaceConditionRequest {
+  id: string;
+  label: string;       // e.g. 'Fetch user "u1"'
+  status: "in-flight" | "resolved" | "blocked" | "applied";
+  isSlow?: boolean;    // the stale request that arrives late
 }
 
 // ---------------------------------------------------------------------------
 // SCENARIO
 // ---------------------------------------------------------------------------
-export type LayoutMode = "vdom" | "props-flow" | "usestate-batching";
+export type LayoutMode = "vdom" | "props-flow" | "usestate-batching" | "use-effect" | "use-effect-cleanup" | "use-layout-effect";
 
 export interface ReactSimulationScenario {
   id: string;
