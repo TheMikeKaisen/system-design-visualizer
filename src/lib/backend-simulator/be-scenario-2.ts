@@ -78,7 +78,6 @@ export const BE_SCENARIO_2: BackendSimulationScenario = {
         { id: "A", label: "Request A", startPct: 0, widthPct: 10, status: "processing", isBlocking: false }
       ],
       threadStatus: "working",
-      threadStatus: "working",
       consoleOutput: ["1: Starting"],
       threadPool: [
         { id: 1, status: "idle", task: "" },

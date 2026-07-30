@@ -3,6 +3,7 @@ import { BackendStepState } from "@/lib/backend-simulator/engine";
 import { BackendCodePanel } from "./BackendCodePanel";
 import { BackendCallStackPanel } from "./BackendCallStackPanel";
 import { ThreadPoolPanel } from "./ThreadPoolPanel";
+import { ConsoleOutputPanel } from "./ConsoleOutputPanel";
 import { EventLoopPhasesPanel } from "./EventLoopPhasesPanel";
 import { PriorityQueuesPanel } from "./PriorityQueuesPanel";
 
@@ -27,11 +28,9 @@ export function NodeRuntimeLayout({ step }: Props) {
       <div className="w-[28%] flex flex-col gap-4 min-w-0">
         <ThreadPoolPanel threads={step.threadPool} />
         
-        {/* Placeholder for visual balance if needed */}
-        <div className="h-48 shrink-0 bg-zinc-950/50 rounded-xl border border-zinc-800 border-dashed flex items-center justify-center p-6 text-center">
-          <p className="text-zinc-600 text-xs font-mono">
-            "The worker never touches the Call Stack. It sends the result to the Poll queue."
-          </p>
+        {/* Console Output (replaces the placeholder) */}
+        <div className="h-48 shrink-0">
+          <ConsoleOutputPanel output={step.consoleOutput || []} />
         </div>
       </div>
 

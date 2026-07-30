@@ -44,7 +44,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       eventLoopPhases: emptyPhases(),
       nextTickQueue: [],
       microtaskQueue: [],
-      activePhase: "idle"
+      activePhase: "idle",
+      consoleOutput: []
     },
     {
       id: "step-2",
@@ -61,7 +62,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       eventLoopPhases: emptyPhases(),
       nextTickQueue: [],
       microtaskQueue: [],
-      activePhase: "idle"
+      activePhase: "idle",
+      consoleOutput: []
     },
     {
       id: "step-3",
@@ -76,7 +78,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       eventLoopPhases: emptyPhases(),
       nextTickQueue: [],
       microtaskQueue: [ { id: "p1", label: "() => log('promise')", type: "microtask", isProcessed: false } ],
-      activePhase: "idle"
+      activePhase: "idle",
+      consoleOutput: []
     },
     {
       id: "step-4",
@@ -91,7 +94,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       eventLoopPhases: emptyPhases(),
       nextTickQueue: [ { id: "nt1", label: "() => log('tick')", type: "nextTick", isProcessed: false } ],
       microtaskQueue: [ { id: "p1", label: "() => log('promise')", type: "microtask", isProcessed: false } ],
-      activePhase: "idle"
+      activePhase: "idle",
+      consoleOutput: []
     },
     {
       id: "step-5",
@@ -112,7 +116,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [ { id: "nt1", label: "() => log('tick')", type: "nextTick", isProcessed: false } ],
       microtaskQueue: [ { id: "p1", label: "() => log('promise')", type: "microtask", isProcessed: false } ],
-      activePhase: "idle"
+      activePhase: "idle",
+      consoleOutput: []
     },
     {
       id: "step-6",
@@ -133,7 +138,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [ { id: "nt1", label: "() => log('tick')", type: "nextTick", isProcessed: false } ],
       microtaskQueue: [ { id: "p1", label: "() => log('promise')", type: "microtask", isProcessed: false } ],
-      activePhase: "nextTick"
+      activePhase: "nextTick",
+      consoleOutput: []
     },
     {
       id: "step-7",
@@ -154,7 +160,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [ { id: "nt1", label: "() => log('tick')", type: "nextTick", isProcessed: true } ],
       microtaskQueue: [ { id: "p1", label: "() => log('promise')", type: "microtask", isProcessed: false } ],
-      activePhase: "nextTick"
+      activePhase: "nextTick",
+      consoleOutput: ["tick"]
     },
     {
       id: "step-8",
@@ -175,7 +182,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [],
       microtaskQueue: [ { id: "p1", label: "() => log('promise')", type: "microtask", isProcessed: true } ],
-      activePhase: "microtasks"
+      activePhase: "microtasks",
+      consoleOutput: ["tick", "promise"]
     },
     {
       id: "step-9",
@@ -196,7 +204,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [],
       microtaskQueue: [],
-      activePhase: "timers"
+      activePhase: "timers",
+      consoleOutput: ["tick", "promise", "timer"]
     },
     {
       id: "step-10",
@@ -217,7 +226,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [],
       microtaskQueue: [],
-      activePhase: "poll"
+      activePhase: "poll",
+      consoleOutput: ["tick", "promise", "timer"]
     },
     {
       id: "step-11",
@@ -238,7 +248,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [],
       microtaskQueue: [],
-      activePhase: "poll"
+      activePhase: "poll",
+      consoleOutput: ["tick", "promise", "timer", "A"]
     },
     {
       id: "step-12",
@@ -259,7 +270,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [],
       microtaskQueue: [{ id: "p2", label: "() => log('B')", type: "microtask", isProcessed: false }],
-      activePhase: "poll"
+      activePhase: "poll",
+      consoleOutput: ["tick", "promise", "timer", "A", "C"]
     },
     {
       id: "step-13",
@@ -280,7 +292,8 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       ],
       nextTickQueue: [],
       microtaskQueue: [{ id: "p2", label: "() => log('B')", type: "microtask", isProcessed: true }],
-      activePhase: "microtasks"
+      activePhase: "microtasks",
+      consoleOutput: ["tick", "promise", "timer", "A", "C", "B"]
     },
     {
       id: "step-14",
@@ -302,6 +315,7 @@ export const BE_SCENARIO_3: BackendSimulationScenario = {
       nextTickQueue: [],
       microtaskQueue: [],
       activePhase: "idle",
+      consoleOutput: ["tick", "promise", "timer", "A", "C", "B"],
       notes: [
         {
           title: "Priority Hierarchy",
