@@ -190,41 +190,42 @@ export default function JavaPathPage() {
             </div>
           </Link>
 
-          {/* Episode 5: Memory Management */}
-          {/* <Link href="/java/canvas/memory-management" className="group">
-            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-pink-500/50 hover:shadow-[0_0_30px_-5px_rgba(236,72,153,0.25)] transition-all duration-300 flex flex-col justify-center">
+          {/* Episode 5: Primitive Typecasting */}
+          <Link href="/java/simulator/typecasting" className="group">
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-blue-500/50 hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.25)] transition-all duration-300 flex flex-col justify-center">
               <div className="hidden sm:flex items-center justify-between mb-4">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 5</div>
+                <div className="bg-blue-500/10 text-blue-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div>
               </div>
               
               <div className="flex items-center sm:block gap-4 sm:gap-0">
-                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex sm:hidden items-center gap-2 mb-1">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 5</span>
                   </div>
-                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-pink-500 transition-colors line-clamp-2">Memory Management</h3>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-blue-500 transition-colors line-clamp-2">Primitive Typecasting</h3>
                   <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
-                    Visualize how the JVM manages memory. Start by exploring the Method Area where class blueprints are stored.
+                    Master implicit widening, explicit narrowing, sign extension, and arithmetic promotion through interactive bit surgery!
                   </p>
                 </div>
-                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-pink-500 transition-colors">
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-blue-500 transition-colors">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
                 </div>
               </div>
 
               <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
                 <div className="flex items-center text-xs font-medium text-muted-foreground">
-                  12 July 2026
+                  30 July 2026
                 </div>
-                <div className="flex items-center text-xs font-bold text-pink-500 bg-pink-500/10 px-3 py-1.5 rounded-lg group-hover:bg-pink-500/20 transition-colors">
+                <div className="flex items-center text-xs font-bold text-blue-500 bg-blue-500/10 px-3 py-1.5 rounded-lg group-hover:bg-blue-500/20 transition-colors">
                   Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             </div>
-          </Link> */}
+          </Link>
         </div>
       </main>
     </div>

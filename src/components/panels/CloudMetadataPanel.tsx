@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import type { SystemNode, NodeKind } from "@/types";
 import { UpdateNodeDataCommand } from "@/lib/patterns/commands/UpdateNodeDataCommand";
 import { commandInvoker } from "@/lib/store/useHistoryStore";
-import { Select } from "@/components/ui/Select";
+import { NativeSelect } from "@/components/ui/NativeSelect";
 import { Input } from "@/components/ui/Input";
 
 // ─── Field definitions per NodeKind ───────────────────────────────────
@@ -184,14 +184,14 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
             <label className="text-[10px] font-medium text-muted-foreground">{field.label}</label>
 
             {field.type === "select" ? (
-              <Select
+              <NativeSelect
                 value={getValue(field.key)}
                 onChange={(e) => commit(field.key, e.target.value)}
               >
                 {field.options!.map((opt) => (
                   <option key={opt} value={opt} className="bg-white dark:bg-zinc-900 text-foreground">{opt}</option>
                 ))}
-              </Select>
+              </NativeSelect>
             ) : field.type === "number" ? (
               <Input
                 type="number"
@@ -234,7 +234,7 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-medium text-muted-foreground">Memory (MB)</label>
-              <Select
+              <NativeSelect
                 value={getCapValue("memoryMB")}
                 onChange={(e) => commitCap("memoryMB", e.target.value)}
               >
@@ -245,7 +245,7 @@ export function CloudMetadataPanel({ node }: { node: SystemNode }) {
                 <option value="8192" className="bg-white dark:bg-zinc-900 text-foreground">8 GB</option>
                 <option value="16384" className="bg-white dark:bg-zinc-900 text-foreground">16 GB</option>
                 <option value="32768" className="bg-white dark:bg-zinc-900 text-foreground">32 GB</option>
-              </Select>
+              </NativeSelect>
             </div>
           </div>
 

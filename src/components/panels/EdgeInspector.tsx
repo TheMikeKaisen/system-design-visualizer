@@ -5,7 +5,7 @@ import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { commandInvoker } from "@/lib/store/useHistoryStore";
 import { UpdateEdgeDataCommand } from "@/lib/patterns/commands/UpdateEdgeDataCommand";
 import type { SystemEdge, Protocol } from "@/types";
-import { Select } from "@/components/ui/Select";
+import { NativeSelect } from "@/components/ui/NativeSelect";
 import { Input } from "@/components/ui/Input";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import { Waypoints } from "lucide-react";
@@ -41,14 +41,14 @@ export function EdgeInspector({ edge }: { edge: SystemEdge }) {
 
       {/* Protocol */}
       <Field label="Protocol">
-        <Select
+        <NativeSelect
           value={data.protocol}
           onChange={(e) => update({ protocol: e.target.value as Protocol })}
         >
           {PROTOCOLS.map((p) => (
             <option key={p} value={p} className="bg-white dark:bg-zinc-900 text-foreground">{p}</option>
           ))}
-        </Select>
+        </NativeSelect>
       </Field>
 
       {/* Latency */}
