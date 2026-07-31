@@ -1,4 +1,5 @@
 import { OOPSimulationScenario, OOPMemoryState, OOPStackFrame, OOPHeapObject } from "./oop-engine";
+import { constructorScenario } from "./constructor-scenarios";
 
 const codeString = `public class Demo {
     public static void main(String[] args) {
@@ -496,5 +497,6 @@ export const OOP_SCENARIOS: OOPSimulationScenario[] = [
         ]
       }
     ]
-  }
+  },
+  constructorScenario
 ];
