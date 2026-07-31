@@ -125,6 +125,17 @@ export interface ReactStepState {
   viewportElementPosition?: "initial" | "wrong" | "correct";
   viewportShowFlickerFlash?: boolean; // triggers the flicker animation
   viewportLabel?: string;             // label on the element in the viewport
+
+  // --- Episode 7: useRef ---
+  useRefMode?: "state-vs-ref" | "dom-ref" | "react-memory" | null;
+  stateValue?: number | string | null;
+  refValue?: number | string | null;
+  letValue?: number | string | null;
+  isRenderTriggered?: boolean;
+  domNodeExists?: boolean;
+  refCurrentStatus?: "null" | "dom-node";
+  activeBoxId?: string; 
+  boxShelfStatus?: "shelf" | "handed-down" | "mutating" | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -140,7 +151,7 @@ export interface RaceConditionRequest {
 // ---------------------------------------------------------------------------
 // SCENARIO
 // ---------------------------------------------------------------------------
-export type LayoutMode = "vdom" | "props-flow" | "usestate-batching" | "use-effect" | "use-effect-cleanup" | "use-layout-effect";
+export type LayoutMode = "vdom" | "props-flow" | "usestate-batching" | "use-effect" | "use-effect-cleanup" | "use-layout-effect" | "use-ref";
 
 export interface ReactSimulationScenario {
   id: string;
