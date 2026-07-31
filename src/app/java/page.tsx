@@ -263,6 +263,42 @@ export default function JavaPathPage() {
               </div>
             </div>
           </Link>
+          {/* Episode 7: Java OOP Basics */}
+          <Link href="/java/simulator/oop-basics" className="group">
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-pink-500/50 hover:shadow-[0_0_30px_-5px_rgba(236,72,153,0.25)] transition-all duration-300 flex flex-col justify-center">
+              <div className="hidden sm:flex items-center justify-between mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 7</div>
+                <div className="bg-pink-500/10 text-pink-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">Interactive</div>
+              </div>
+              
+              <div className="flex items-center sm:block gap-4 sm:gap-0">
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <span className="text-xl sm:text-lg font-bold">7</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex sm:hidden items-center gap-2 mb-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 7</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-pink-500 transition-colors line-clamp-2">Object Oriented Programming</h3>
+                  <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
+                    Visualize how objects are created in the Heap, how reference variables track them in the Stack, and trace method executions live.
+                  </p>
+                </div>
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-pink-500 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  31 July 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-pink-500 bg-pink-500/10 px-3 py-1.5 rounded-lg group-hover:bg-pink-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </Link>
         </div>
       </main>
     </div>
