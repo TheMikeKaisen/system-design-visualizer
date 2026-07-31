@@ -4,6 +4,32 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# Antigravity Skills
+
+This repository contains reusable engineering skills located in `/skills`.
+
+## Mandatory Workflow
+
+Before making ANY code changes:
+
+1. Determine whether an existing skill applies.
+2. Search the `/skills` directory by capability or task.
+3. Load ONLY the most relevant skill(s).
+4. Follow the workflow described by that skill.
+5. If no skill applies, continue normally.
+
+Never read every skill.
+Only load skills directly relevant to the current task.
+
+Examples:
+
+- React component → react skill
+- Animation → framer-motion skill
+- Refactoring → refactoring skill
+- Bug fixing → debugging skill
+- Performance → performance skill
+- Next.js routing → nextjs skill
+
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 
