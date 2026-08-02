@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, Box, Cpu } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, Box, Cpu, Code, X } from "lucide-react";
 import { 
   PRODUCER_CONSUMER_SCENARIO_A, 
   PRODUCER_CONSUMER_SCENARIO_B, 
@@ -20,6 +20,7 @@ export default function ProducerConsumerSimulator() {
   const [scenario, setScenario] = useState<PCScenario>(PRODUCER_CONSUMER_SCENARIO_A);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [activeCodeDialog, setActiveCodeDialog] = useState<'producer' | 'consumer' | null>(null);
 
   const step = scenario.steps[currentStepIndex];
 
@@ -114,7 +115,13 @@ export default function ProducerConsumerSimulator() {
                     <Cpu className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-amber-500">Producer Thread</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold text-amber-500">Producer Thread</h2>
+                      <button onClick={() => setActiveCodeDialog('producer')} className="p-1 rounded hover:bg-amber-500/20 text-amber-500/70 hover:text-amber-500 transition-colors group relative">
+                        <Code size={16} />
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity shadow-lg">View C Code</span>
+                      </button>
+                    </div>
                     <div className="text-xs font-mono text-amber-500/70 uppercase">Code: count = count + 1</div>
                   </div>
                 </div>
@@ -176,7 +183,13 @@ export default function ProducerConsumerSimulator() {
                     <Cpu className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-violet-500">Consumer Thread</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold text-violet-500">Consumer Thread</h2>
+                      <button onClick={() => setActiveCodeDialog('consumer')} className="p-1 rounded hover:bg-violet-500/20 text-violet-500/70 hover:text-violet-500 transition-colors group relative">
+                        <Code size={16} />
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity shadow-lg">View C Code</span>
+                      </button>
+                    </div>
                     <div className="text-xs font-mono text-violet-500/70 uppercase">Code: count = count - 1</div>
                   </div>
                 </div>
@@ -396,6 +409,102 @@ export default function ProducerConsumerSimulator() {
           </div>
         </div>
       </main>
+
+      {/* Code Dialog Modal */}
+      <AnimatePresence>
+        {activeCodeDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+          >
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm cursor-pointer" 
+              onClick={() => setActiveCodeDialog(null)}
+            />
+            
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl bg-[#1E1E1E] rounded-xl overflow-hidden shadow-2xl border border-[#333]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 h-12 border-b border-[#333] bg-[#2D2D2D]">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1.5 mr-4">
+                    <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
+                    <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
+                    <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
+                  </div>
+                  <span className="text-sm font-mono text-zinc-400">
+                    {activeCodeDialog === 'producer' ? 'producer.c' : 'consumer.c'}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => setActiveCodeDialog(null)}
+                  className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Code Content */}
+              <div className="p-6 font-mono text-sm leading-loose text-[#D4D4D4] overflow-x-auto whitespace-pre">
+                <span className="text-[#569CD6]">while</span> (true) {"{\n"}
+                {activeCodeDialog === 'producer' ? (
+                  <>
+                    {"    "}
+                    <span className="text-[#6A9955]">/* produce an item */</span>
+                    {"\n    "}
+                    <span className="text-[#569CD6]">while</span> (count == BUFFER_SIZE) {"{\n"}
+                    {"        "}
+                    <span className="text-[#6A9955]">/* do nothing - buffer is full */</span>
+                    {"\n    }\n\n"}
+                    {"    "}buffer[in] = item;{"\n"}
+                    {"    "}in = (in + 1) % BUFFER_SIZE;{"\n\n"}
+                    
+                    <div className="bg-amber-500/10 border-l-4 border-amber-500 -mx-6 px-6 py-2 my-2 relative group">
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-widest text-amber-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Critical Section (Lost Update)
+                      </div>
+                      <span className="text-[#6A9955] block -mt-1 mb-1">// CRITICAL SECTION (The 3 Assembly Instructions)</span>
+                      count++;
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {"    "}
+                    <span className="text-[#569CD6]">while</span> (count == 0) {"{\n"}
+                    {"        "}
+                    <span className="text-[#6A9955]">/* do nothing - buffer is empty */</span>
+                    {"\n    }\n\n"}
+                    {"    "}item = buffer[out];{"\n"}
+                    {"    "}out = (out + 1) % BUFFER_SIZE;{"\n\n"}
+                    
+                    <div className="bg-violet-500/10 border-l-4 border-violet-500 -mx-6 px-6 py-2 my-2 relative group">
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-widest text-violet-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Critical Section (Lost Update)
+                      </div>
+                      <span className="text-[#6A9955] block -mt-1 mb-1">// CRITICAL SECTION (The 3 Assembly Instructions)</span>
+                      count--;
+                    </div>
+                    
+                    {"\n    "}
+                    <span className="text-[#6A9955]">/* consume the item */</span>
+                    {"\n"}
+                  </>
+                )}
+                {"}"}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
