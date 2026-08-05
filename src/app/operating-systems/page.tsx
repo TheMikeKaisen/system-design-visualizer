@@ -299,6 +299,42 @@ export default function OperatingSystemsPathPage() {
               </div>
             </div>
           </Link>
+
+          {/* Episode 7: Lock Variables */}
+          <Link href="/operating-systems/simulator/lock-variables" className="group">
+            <div className="relative h-full p-4 sm:p-6 rounded-2xl border border-border bg-card hover:border-violet-500/50 hover:shadow-[0_0_30px_-5px_rgba(139,92,246,0.2)] transition-all duration-300 flex flex-col justify-center">
+              <div className="hidden sm:flex items-center justify-between mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 7</div>
+              </div>
+              
+              <div className="flex items-center sm:block gap-4 sm:gap-0">
+                <div className="w-12 h-12 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex sm:hidden items-center gap-2 mb-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">Episode 7</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground sm:mb-3 group-hover:text-violet-500 transition-colors line-clamp-2">Lock Variables</h3>
+                  <p className="hidden sm:block text-sm text-muted-foreground mb-6 leading-relaxed line-clamp-3">
+                    See why a naive lock variable fails due to a race in the check-and-set gap, then watch how the atomic TSL hardware instruction solves it.
+                  </p>
+                </div>
+                <div className="sm:hidden flex items-center justify-center text-muted-foreground group-hover:text-violet-500 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  5 August 2026
+                </div>
+                <div className="flex items-center text-xs font-bold text-violet-500 bg-violet-500/10 px-3 py-1.5 rounded-lg group-hover:bg-violet-500/20 transition-colors">
+                  Launch <svg className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </Link>
         </div>
       </main>
     </div>

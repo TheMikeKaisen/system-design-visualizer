@@ -380,7 +380,7 @@ export default function ProducerConsumerSimulator() {
 
           {/* Student Notes Panel */}
           <div className="flex-1 p-6 overflow-y-auto">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">Instructor Notes</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">Notes</h3>
             
             <AnimatePresence mode="popLayout">
               {step.noteTitle && (
