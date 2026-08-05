@@ -108,7 +108,7 @@ export default function LockVariablesSimulator() {
   const lockRace = step.lockRaceDetected;
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden flex flex-col font-sans selection:bg-violet-500/30">
+    <div className="h-screen bg-background text-foreground overflow-hidden flex flex-col font-sans selection:bg-violet-500/30">
       {/* Navigation ─────────────────────────────────────────────────────── */}
       <nav className="shrink-0 h-14 border-b border-border/40 bg-background/80 backdrop-blur-md flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-4">
@@ -551,14 +551,14 @@ function ProcessPanel({
       )}
 
       {/* C Code Block */}
-      <div className="bg-[#1E1E1E] rounded-xl border border-[#333] overflow-hidden shadow-2xl font-mono text-sm mb-8">
-        <div className="h-8 bg-[#2D2D2D] border-b border-[#333] flex items-center px-4 gap-2">
+      <div className="bg-[#1E1E1E] rounded-xl border border-[#333] overflow-hidden shadow-2xl font-mono text-sm mb-8 flex-1 min-h-0 flex flex-col">
+        <div className="h-8 shrink-0 bg-[#2D2D2D] border-b border-[#333] flex items-center px-4 gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
           <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
           <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
           <span className="ml-2 text-xs text-zinc-400">{process === "processA" ? "process_a.c" : "process_b.c"}</span>
         </div>
-        <div className="p-4 relative min-h-[140px]">
+        <div className="p-4 relative flex-1 overflow-y-auto min-h-[140px]">
           {cCode.map((line, i) => {
             const isLineActive = codeLine !== null && line.asmIdxs.includes(codeLine);
             const isBusyLine = isLineActive && codeLine === 2; // JNE line
@@ -584,7 +584,7 @@ function ProcessPanel({
                 
                 {/* Code Text */}
                 <span className={cn(
-                  "flex-1", 
+                  "flex-1 whitespace-pre", 
                   line.isComment ? "text-[#6A9955]" : isLineActive ? "" : isKeyword ? "text-[#569CD6]" : ""
                 )}>
                   {line.text}
