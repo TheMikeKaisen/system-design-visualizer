@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
+import { MonitorSmartphone, ArrowLeft } from "lucide-react";
 
 export default function LearningPathsPage() {
   return (
@@ -18,8 +19,39 @@ export default function LearningPathsPage() {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-20">
+      {/* Mobile Only: Coming Soon Message */}
+      <main className="flex-1 flex md:hidden flex-col items-center justify-center px-6 py-12 text-center">
+        <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center mb-8 relative">
+          <MonitorSmartphone className="w-12 h-12 text-primary" strokeWidth={1.5} />
+          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-background flex items-center justify-center">
+            <span className="relative flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-primary"></span>
+            </span>
+          </div>
+        </div>
+        
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-4">
+          Bigger Screen Required
+        </h1>
+        
+        <p className="text-muted-foreground text-lg leading-relaxed max-w-sm mb-10">
+          Our interactive simulators are packed with complex memory visualizations and CPU states that demand a larger canvas. 
+          <br /><br />
+          Please switch to a desktop or tablet for the full experience. We're crafting a mobile-optimized version!
+        </p>
+        
+        <Link 
+          href="/"
+          className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Link>
+      </main>
+
+      {/* Desktop Only: Main Content */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-20 hidden md:block">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
             Learning Paths
