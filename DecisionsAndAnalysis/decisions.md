@@ -70,4 +70,94 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - Resolved TypeScript empty-interface ESLint errors in `src/components/ui/Input.tsx` and `src/components/ui/NativeSelect.tsx` to ensure `npx eslint src/components/ui` passes cleanly.
 - **Blast Radius**: Zero outside `src/app/javascript`, `src/components/ui`, and newly created `EpisodeCard` primitive.
 
+---
+
+## Decision Record 005: Brand Identity Modernization — The Isometric Strata & Core (Stage 1)
+- **Status**: Implemented & Verified
+- **Category**: Brand Identity & Visual Language
+- **Problem**:
+  - The previous logo was an overly generic 1-to-2 network router graph, and the sign-in page used an inconsistent 4-square icon with the legacy name `sysvis`.
+  - The product had fragmented naming (`System Design Visualizer`, `sysvis`, `System Simulator`), whereas the canonical product identity is `System Simulator` (matching `systemsimulator.vercel.app`).
+  - The visual identity needed to communicate the platform's multi-layered simulation scope (JavaScript runtime, OS kernel/processes, JVM architecture, frontend DOM reconciliation, and distributed system canvas) with editorial, Awwwards-tier geometric precision rather than neon/cyberpunk clichés.
+- **Decision & Implementation**:
+  - **Logo Geometry ("The Isometric Strata & Core")**:
+    - Modeled an isometric coordinate system (`dx: 11, dy: 6.25`, corresponding to an exact ~30-degree isometric projection angle within a 32x32 bounding box).
+    - Structured into 3 stratified computational tiers:
+      1. Top facet (Application / Execution Context): `M 16 3.25 L 27 9.5 L 16 15.75 L 5 9.5 Z` with crisp 1.75px stroke.
+      2. Middle shelf (Runtime & Kernel / Memory Strata): `M 5 16 L 16 22.25 L 27 16` with 1.25px stroke and 0.55 opacity.
+      3. Base chassis & spine (Infrastructure Substrate): `M 5 9.5 V 22.5 L 16 28.75 L 27 22.5 V 9.5` and `M 16 15.75 V 28.75`.
+    - Integrated an active execution nucleus at the focal top aperture: an amber diamond (`polygon points="16,6.25 21,9.5 16,12.75 11,9.5"` with `className="fill-amber-500 dark:fill-amber-400"`) anchored by a white spark core (`circle cx="16" cy="9.5" r="1.5"`).
+  - **Standardized Component**:
+    - Updated [`src/components/ui/Logo.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/Logo.tsx) with backward-compatible `size?: number` and `className?: string` props.
+  - **Unified Auth & Brand Heading**:
+    - Updated [`src/app/auth/sign-in/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/auth/sign-in/page.tsx) to import `<Logo size={28} />` and display `System Simulator`, removing the redundant inline `LogoIcon`.
+  - **Automated Verification**:
+    - Created unit test suite [`src/components/ui/__tests__/Logo.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/__tests__/Logo.test.tsx) testing default sizing, custom dimensions, class forwarding, and amber nucleus coordinates.
+    - Verified all 35 test files (266 tests) pass cleanly; `tsc` and `eslint` pass with 0 errors.
+- **Blast Radius**: Zero regressions; backwards-compatible across all 24 existing header and toolbar call-sites.
+
+---
+
+## Decision Record 006: Hero Interactive Multi-Discipline Runtime Sandbox (Stage 2)
+- **Status**: Implemented & Verified
+- **Category**: Landing Page Architecture & Multi-Discipline Demonstration
+- **Problem**:
+  - The previous landing page hero only displayed an abstract SVG diagram of distributed system canvas nodes, misrepresenting the platform as primarily a diagramming tool.
+  - The platform's true core differentiator is its 33 interactive, multi-discipline runtime simulators (JavaScript execution contexts, Operating Systems kernel & CPU schedulers, Java JVM bytecode & memory models).
+  - Users needed an instant, tangible sandbox in the hero that demonstrates these execution runtimes with tactile controls and idle auto-cycling.
+- **Decision & Implementation**:
+  - **Component Architecture (`src/components/landing/HeroRuntimeSandbox.tsx`)**:
+    - Built a high-performance, self-contained interactive sandbox spanning 3 disciplines:
+      1. **JavaScript**: Call Stack lifecycle, TDZ creation phase, closure capture (`makeCounter() -> increment()`), and scope chain lookup.
+      2. **Operating Systems**: Round-Robin CPU scheduling, time quantum expiration (20ms), PCB context switching, and I/O wait queue blocking.
+      3. **Java & JVM**: Stack frames, Eden space heap allocation (`new User("Alice")`), reference pointers (`0x7A4F`), and method invocation.
+    - Follows all 7 Simulation Rules in `AGENTS.md`:
+      - Rule 1: Discrete step-by-step data model.
+      - Rule 2: Transparency rendering for collections (showing inactive frames/queues dimmed).
+      - Rule 3: Deterministic keys (`${tab.id}-${item.id}`).
+      - Rule 4: Hardcoded terminal typography (`text-zinc-200`, `text-zinc-400`, `bg-[#0b0c0f]`).
+      - Rule 5: Multi-modal feedback (step badge, banner explanation, line highlight, state indicator).
+      - Rule 6: Engine initialization lifecycle (empty stack at step 0).
+      - Rule 7: Two-phase context creation (TDZ creation before assignment).
+  - **Idle Auto-Cycling**:
+    - Automatically advances through tabs every 8 seconds when idle, showing an animated hairline progress indicator.
+    - Seamlessly pauses when hovered or interacted with, and supports manual step scrubbing (`Prev`, `Next`, `Reset`) and continuous internal playback (`Step Run / Pause`).
+  - **Automated Verification**:
+    - Created unit test suite [`src/components/landing/__tests__/HeroRuntimeSandbox.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroRuntimeSandbox.test.tsx) testing default JS state, tab switching, step navigation, reset, internal play/pause, idle auto-cycle, and hover pause.
+    - Verified all 36 test files (274 tests) pass; `tsc` and `eslint` clean (0 errors, 0 warnings).
+- **Blast Radius**: Zero (isolated new component ready to be mounted in the redesigned hero).
+
+---
+
+## Decision Record 007: Editorial Landing Page Redesign & Architectural Capstone Rebalance (Stage 3)
+- **Status**: Implemented & Verified
+- **Category**: Product Positioning, UI/UX & Landing Page Redesign
+- **Problem**:
+  - The legacy landing page was 88% weighted toward the Canvas Studio and only advertised Java while displaying dummy "Coming Soon" locks for other topics, completely hiding the 33 live interactive simulations across JavaScript, Operating Systems, Java/JVM, Frontend Architecture, and Backend Internals.
+  - The visual hierarchy lacked Awwwards-caliber editorial polish, relying on generic neon purple accents and stock SVG diagrams rather than tactile computational demonstrations.
+- **Decision & Implementation**:
+  - **Hero Rebalance with Embedded Runtime Sandbox**:
+    - Featured the new headline: *"Understand systems from the inside out."*
+    - Mounted [`HeroRuntimeSandbox`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroRuntimeSandbox.tsx) directly in the hero, showcasing real code syntax, call stack frames, OS process queues, and JVM heap pointers with idle auto-cycling.
+    - Set dual CTAs: Primary *"Explore 33 Simulations"* (`/learning-paths`) and Secondary *"Launch Canvas Studio"* (`/canvas`).
+  - **Five Core Disciplines Showcase**:
+    - JavaScript (7 episodes • `/javascript`), Operating Systems (7 episodes • `/operating-systems`), Java/JVM (9 episodes • `/java`), Frontend Architecture (7 episodes • `/frontend`), and Backend Internals (3 episodes • `/backend`).
+    - Every discipline card displays exact episode counts, topic tag pills, and direct launch links.
+    - Added a 6th Master Directory card linking to `/learning-paths`.
+  - **Simulation Mechanics Editorial Section**:
+    - Articulated the 4 core engineering principles: Strict Two-Phase Execution, Transparent Abstractions, Live Memory Pointers, and Hardware Interrupt Modeling.
+  - **Architectural Capstone Rebalance**:
+    - Repositioned the Canvas Studio as the architectural summit: *"Once you master component internals, assemble distributed systems at scale."*
+    - Highlighted 20+ cloud node types, Token Bucket rate limiting, Circuit Breaker state machines, and real-time multiplayer Yjs collaboration.
+  - **Brand & Metadata Synchronization**:
+    - Updated [`src/app/layout.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/layout.tsx) with canonical branding: *"System Simulator — Interactive Computational & System Design Runtimes"*.
+    - Updated navigation and footer with the new *"Isometric Strata & Core"* [`Logo`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/Logo.tsx).
+  - **Automated Verification**:
+    - Created [`LandingPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/LandingPage.test.tsx) verifying navigation, hero headline, all 5 discipline links, metrics, and footer.
+    - Verified `npx tsc --noEmit` (0 errors), `npx eslint` (0 errors), all 37 Vitest test suites (278 tests passing), and full Next.js production build (`npm run build` compiling all 49 static & dynamic routes).
+- **Blast Radius**: Zero regressions.
+
+
+
+
 

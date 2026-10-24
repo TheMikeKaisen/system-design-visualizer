@@ -1,16 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
-import { HeroVisual } from "./hero-visual";
+import { HeroRuntimeSandbox } from "./HeroRuntimeSandbox";
+import {
+  Terminal,
+  Cpu,
+  Database,
+  Layers,
+  Server,
+  ArrowRight,
+  ExternalLink,
+  ShieldCheck,
+  Zap,
+  Activity,
+  Play,
+} from "lucide-react";
 import "./landing.css";
 
 /* ═══════════════════════════════════════════════════════════════
    Scroll-reveal hook (Intersection Observer)
    ═══════════════════════════════════════════════════════════════ */
-
 function useScrollReveal() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -18,7 +30,6 @@ function useScrollReveal() {
     const container = containerRef.current;
     if (!container) return;
 
-    // Respect reduced-motion
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) {
       container.querySelectorAll(".landing-reveal").forEach((el) => {
@@ -36,7 +47,7 @@ function useScrollReveal() {
           }
         });
       },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
     );
 
     container.querySelectorAll(".landing-reveal").forEach((el) => {
@@ -50,172 +61,81 @@ function useScrollReveal() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Section icons (inline SVG, consistent with NodePalette style)
+   Landing Page Root
    ═══════════════════════════════════════════════════════════════ */
-
-function BlocksIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="3" width="7" height="7" rx="1.5" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" />
-      <rect x="14" y="14" width="7" height="7" rx="1.5" />
-    </svg>
-  );
-}
-
-function FlowIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="5" cy="12" r="2.5" />
-      <circle cx="19" cy="6" r="2.5" />
-      <circle cx="19" cy="18" r="2.5" />
-      <path d="M7.5 11L16.5 7" />
-      <path d="M7.5 13L16.5 17" />
-    </svg>
-  );
-}
-
-function LayersIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3L2 9l10 6 10-6-10-6z" />
-      <path d="M2 15l10 6 10-6" />
-      <path d="M2 12l10 6 10-6" />
-    </svg>
-  );
-}
-
-function SimulateIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="5,3 19,12 5,21" />
-    </svg>
-  );
-}
-
-function RouteIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 17h2a4 4 0 0 0 4-4V7a4 4 0 0 1 4-4h2" />
-      <path d="M21 7h-2a4 4 0 0 0-4 4v6a4 4 0 0 1-4 4H9" />
-      <circle cx="5" cy="17" r="2" />
-      <circle cx="19" cy="7" r="2" />
-    </svg>
-  );
-}
-
-function MetricsIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="12" width="4" height="9" rx="1" />
-      <rect x="10" y="7" width="4" height="14" rx="1" />
-      <rect x="17" y="3" width="4" height="18" rx="1" />
-    </svg>
-  );
-}
-
-function BookIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-    </svg>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   Landing Page Component
-   ═══════════════════════════════════════════════════════════════ */
-
 export function LandingPage() {
   const containerRef = useScrollReveal();
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* ── Navigation ──────────────────────────────────── */}
+    <div ref={containerRef} className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-amber-500/20 selection:text-amber-300">
       <Nav />
-
       <main>
-        {/* ── Hero ────────────────────────────────────────── */}
         <HeroSection />
-
-        {/* ── Learn by Building ───────────────────────────── */}
-        <LearnByBuildingSection />
-
-        {/* ── Interactive Simulations ─────────────────────── */}
-        <SimulationsSection />
-
-        {/* ── Guided Learning (Coming Soon) ───────────────── */}
-        <GuidedLearningSection />
-
-        {/* ── Final CTA ───────────────────────────────────── */}
+        <DisciplinesSection />
+        <SimulationEngineSection />
+        <CanvasStudioSection />
+        <MetricsQuoteSection />
         <FinalCTASection />
       </main>
-
-      {/* ── Footer ──────────────────────────────────────── */}
       <Footer />
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Navigation
+   1. Navigation
    ═══════════════════════════════════════════════════════════════ */
-
 function Nav() {
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 64) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
-
   return (
     <nav
-      className={`landing-nav fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 transition-transform duration-300 ${
-        isVisible ? "translate-y-0" : "-translate-y-full"
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl transition-all"
       aria-label="Main navigation"
     >
-      <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        {/* Logo + wordmark */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center justify-between">
+        {/* Brand */}
         <Link href="/" className="flex items-center gap-2.5 group" aria-label="System Simulator home">
           <Logo size={28} />
-          <span className="text-sm font-semibold tracking-tight text-foreground">
+          <span className="text-base font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
             System Simulator
           </span>
         </Link>
 
-        {/* Right side */}
+        {/* Center Nav Links */}
+        <div className="hidden md:flex items-center gap-6 text-xs font-medium text-muted-foreground">
+          <a href="#disciplines" className="hover:text-foreground transition-colors">
+            Disciplines
+          </a>
+          <a href="#how-it-works" className="hover:text-foreground transition-colors">
+            Simulation Mechanics
+          </a>
+          <a href="#canvas-studio" className="hover:text-foreground transition-colors">
+            Canvas Studio
+          </a>
+          <Link href="/learning-paths" className="hover:text-foreground transition-colors flex items-center gap-1.5">
+            <span>33 Episodes</span>
+            <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 text-[10px] font-semibold">
+              All Tracks
+            </span>
+          </Link>
+        </div>
+
+        {/* Right Actions */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {/* Guided Learning — enabled */}
           <Link
             href="/learning-paths"
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground border border-border/50 rounded-lg hover:bg-muted/50 transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-foreground border border-border/60 rounded-xl hover:bg-muted/50 transition-colors"
           >
             Learning Paths
           </Link>
 
-          {/* Open Canvas — primary */}
           <Link
             href="/canvas"
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-90 shadow-sm transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            Open Canvas
+            <span>Open Canvas</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>
@@ -224,263 +144,342 @@ function Nav() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Hero Section
+   2. Hero Section
    ═══════════════════════════════════════════════════════════════ */
-
 function HeroSection() {
   return (
-    <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 overflow-hidden">
-      {/* Subtle radial glow */}
+    <section className="relative pt-28 sm:pt-36 pb-20 sm:pb-28 overflow-hidden">
+      {/* Editorial ambient light */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full pointer-events-none"
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[480px] rounded-full pointer-events-none opacity-40 blur-3xl"
         style={{
-          background: "radial-gradient(ellipse at center, oklch(0.55 0.08 260 / 0.04) 0%, transparent 70%)",
+          background: "radial-gradient(circle at center, rgba(245, 158, 11, 0.08) 0%, rgba(14, 165, 233, 0.04) 50%, transparent 80%)",
         }}
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-6xl px-6">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Text column */}
-          <div className="max-w-xl">
-            <h1 className="hero-fade-in text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-foreground">
-              Design.
-              <br />
-              Simulate.
-              <br />
-              <span style={{ color: "oklch(0.55 0.12 260)" }}>Understand.</span>
-            </h1>
-
-            <p className="hero-fade-in-delayed mt-6 text-lg sm:text-xl leading-relaxed text-muted-foreground max-w-[520px]">
-              Build distributed systems visually. Drag servers, databases, and load balancers onto a canvas — then simulate real request flows to see how your architecture behaves.
-            </p>
-
-            <div className="hero-fade-in-delayed-2 mt-10 flex flex-wrap items-center gap-4">
-              {/* Primary CTA */}
-              <Link
-                href="/canvas"
-                className="inline-flex items-center gap-2 px-6 py-3 text-base font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-90 transition-all hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                id="hero-cta-canvas"
-              >
-                Open Canvas
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 8h10M9 4l4 4-4 4" />
-                </svg>
-              </Link>
-
-              {/* Secondary CTA — enabled */}
-              <Link
-                href="/learning-paths"
-                className="group inline-flex items-center gap-2 px-6 py-3 text-base font-semibold text-muted-foreground border border-border/60 rounded-xl hover:bg-muted/50 transition-colors"
-                id="hero-cta-guided"
-              >
-                Learning Paths
-              </Link>
-            </div>
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+        {/* Header copy */}
+        <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
+          {/* Kicker badge */}
+          <div className="hero-fade-in inline-flex items-center gap-2 px-3 py-1 mb-5 rounded-full border border-border/70 bg-muted/40 text-xs font-medium text-muted-foreground backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span>Interactive Runtime Engineering • 33 Modular Simulations</span>
           </div>
 
-          {/* Hero visual */}
-          <div className="hero-fade-in-delayed-3 lg:pl-4">
-            <HeroVisual className="w-full max-w-lg mx-auto lg:max-w-none" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+          <h1 className="hero-fade-in text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-foreground">
+            Understand systems from the{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-sky-500 to-emerald-500">
+              inside out.
+            </span>
+          </h1>
 
-/* ═══════════════════════════════════════════════════════════════
-   Learn by Building
-   ═══════════════════════════════════════════════════════════════ */
-
-function LearnByBuildingSection() {
-  return (
-    <section className="py-24 sm:py-32 border-t border-border/40" aria-labelledby="learn-heading">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="grid lg:grid-cols-[1fr_1.2fr] gap-16 items-start">
-          {/* Left: copy */}
-          <div className="landing-reveal max-w-md">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
-              A different approach
-            </p>
-            <h2 id="learn-heading" className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground leading-tight">
-              Learn by Building
-            </h2>
-            <p className="mt-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              Stop memorizing architecture diagrams. Build real systems on a visual canvas, configure each component, and simulate how requests flow. Understanding comes from experimentation, not reading.
-            </p>
-          </div>
-
-          {/* Right: feature cards */}
-          <div className="landing-reveal-stagger grid sm:grid-cols-2 gap-4">
-            <FeatureCard
-              icon={<BlocksIcon />}
-              title="Drag & Drop Components"
-              description="Servers, databases, load balancers, caches, message queues, CDNs — everything you need."
-            />
-            <FeatureCard
-              icon={<FlowIcon />}
-              title="Connect & Configure"
-              description="Wire components together. Set protocols, latency, error rates, and throughput limits."
-            />
-            <FeatureCard
-              icon={<LayersIcon />}
-              title="Cloud Provider Nodes"
-              description="AWS, GCP, and Azure components with accurate representations and behaviors."
-            />
-            <FeatureCard
-              icon={<SimulateIcon />}
-              title="Run Simulations"
-              description="Hit play and watch requests flow through your system in real time."
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
-  return (
-    <div className="landing-reveal group p-5 rounded-xl border border-border/50 bg-card hover:border-border hover:shadow-sm transition-all duration-300">
-      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-foreground mb-4 group-hover:scale-105 transition-transform duration-300">
-        {icon}
-      </div>
-      <h3 className="text-sm font-semibold text-foreground mb-1.5">{title}</h3>
-      <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   Interactive Simulations
-   ═══════════════════════════════════════════════════════════════ */
-
-function SimulationsSection() {
-  return (
-    <section className="py-24 sm:py-32 border-t border-border/40" aria-labelledby="simulations-heading">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="landing-reveal text-center max-w-2xl mx-auto mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
-            See it in action
+          <p className="hero-fade-in-delayed mt-5 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-2xl mx-auto">
+            Step inside execution engines, memory allocators, OS kernel schedulers, and distributed topologies. No passive videos or static slide decks—tactile, deterministic simulations.
           </p>
-          <h2 id="simulations-heading" className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            Interactive Simulations
+
+          {/* Action CTAs */}
+          <div className="hero-fade-in-delayed mt-8 flex flex-wrap items-center justify-center gap-3.5">
+            <Link
+              href="/learning-paths"
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-95 shadow-md hover:shadow-lg transition-all group"
+            >
+              <span>Explore 33 Simulations</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <Link
+              href="/canvas"
+              className="inline-flex items-center gap-2 px-5 py-3 text-sm font-medium text-foreground border border-border/70 rounded-xl hover:bg-muted/40 transition-colors"
+            >
+              <span>Launch Canvas Studio</span>
+              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+            </Link>
+          </div>
+        </div>
+
+        {/* ── Interactive Hero Runtime Sandbox Component ── */}
+        <div className="hero-fade-in-delayed mt-6 max-w-5xl mx-auto">
+          <HeroRuntimeSandbox />
+          <p className="mt-3 text-center text-xs text-muted-foreground/80 flex items-center justify-center gap-2">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-zinc-500/80" />
+            <span>Live interactive sandbox auto-cycles every 8 seconds when idle • Hover to pause and step manually</span>
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3. The 5 Core Disciplines
+   ═══════════════════════════════════════════════════════════════ */
+interface DisciplineItem {
+  id: string;
+  title: string;
+  episodesCount: number;
+  description: string;
+  topics: string[];
+  icon: React.ComponentType<{ className?: string }>;
+  accentColor: string;
+  accentBg: string;
+  accentBorder: string;
+  accentText: string;
+  href: string;
+}
+
+const DISCIPLINES: DisciplineItem[] = [
+  {
+    id: "javascript",
+    title: "JavaScript Runtimes",
+    episodesCount: 7,
+    description:
+      "Inspect execution contexts, the temporal dead zone, variable environments, closure lexical scope, and the event loop microtask queue.",
+    topics: ["Call Stack", "Hoisting & TDZ", "Scope Chain", "Closures", "Event Loop"],
+    icon: Terminal,
+    accentColor: "#f59e0b",
+    accentBg: "bg-amber-500/10",
+    accentBorder: "border-amber-500/30 group-hover:border-amber-500/70",
+    accentText: "text-amber-500 dark:text-amber-400",
+    href: "/javascript",
+  },
+  {
+    id: "operating-systems",
+    title: "Operating Systems",
+    episodesCount: 7,
+    description:
+      "Follow kernel thread scheduling, hardware timer interrupts, context switching, process control blocks, and mutex race condition synchronization.",
+    topics: ["Process States", "Round-Robin CPU", "FCFS", "Mutex Locks", "Producer-Consumer"],
+    icon: Cpu,
+    accentColor: "#0ea5e9",
+    accentBg: "bg-sky-500/10",
+    accentBorder: "border-sky-500/30 group-hover:border-sky-500/70",
+    accentText: "text-sky-500 dark:text-sky-400",
+    href: "/operating-systems",
+  },
+  {
+    id: "java",
+    title: "Java & JVM Architecture",
+    episodesCount: 9,
+    description:
+      "Trace classloader hierarchies, bytecode execution, thread stack frames, OOP memory layout, and generational garbage collection.",
+    topics: ["Class Loading", "Memory Management", "Stack & Heap", "Bytecode", "OOP Internals"],
+    icon: Database,
+    accentColor: "#10b981",
+    accentBg: "bg-emerald-500/10",
+    accentBorder: "border-emerald-500/30 group-hover:border-emerald-500/70",
+    accentText: "text-emerald-500 dark:text-emerald-400",
+    href: "/java",
+  },
+  {
+    id: "frontend",
+    title: "Frontend Architecture",
+    episodesCount: 7,
+    description:
+      "Understand the mechanics beneath modern frameworks: Virtual DOM diffing, Fiber tree reconcilers, hydration lifecycles, and layout/paint pipelines.",
+    topics: ["VDOM Reconciliation", "Fiber Trees", "Hydration", "Layout & Paint", "Event Delegation"],
+    icon: Layers,
+    accentColor: "#8b5cf6",
+    accentBg: "bg-violet-500/10",
+    accentBorder: "border-violet-500/30 group-hover:border-violet-500/70",
+    accentText: "text-violet-500 dark:text-violet-400",
+    href: "/frontend",
+  },
+  {
+    id: "backend",
+    title: "Backend Internals",
+    episodesCount: 3,
+    description:
+      "Deep dive into persistent systems: database indexing structures, cache invalidation strategies, connection pooling, and message broker partitions.",
+    topics: ["B-Tree Indexing", "Cache Invalidation", "Message Brokers", "Connection Pools"],
+    icon: Server,
+    accentColor: "#3b82f6",
+    accentBg: "bg-blue-500/10",
+    accentBorder: "border-blue-500/30 group-hover:border-blue-500/70",
+    accentText: "text-blue-500 dark:text-blue-400",
+    href: "/backend",
+  },
+];
+
+function DisciplinesSection() {
+  return (
+    <section id="disciplines" className="py-24 sm:py-32 border-t border-border/40" aria-labelledby="disciplines-heading">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        {/* Section Header */}
+        <div className="landing-reveal max-w-2xl mb-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-border/60 bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Core Tracks
+          </div>
+          <h2 id="disciplines-heading" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Five Runtimes. Zero Black Boxes.
           </h2>
-          <p className="mt-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Watch packets traverse your architecture in real time. Observe bottlenecks form, queues fill, and caches warm — all in a visual, interactive environment.
+          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
+            Every simulation is built with authentic computational models—not video clips. Choose a discipline to inspect memory, register states, and queues.
           </p>
         </div>
 
-        <div className="landing-reveal-stagger grid sm:grid-cols-3 gap-6">
-          <SimFeatureCard
-            icon={<RouteIcon />}
-            title="Visual Packet Flow"
-            description="Animated packets travel along your connections, showing exactly how requests propagate through the system."
-          />
-          <SimFeatureCard
-            icon={<MetricsIcon />}
-            title="Real-Time Metrics"
-            description="Monitor throughput, latency, queue depth, and error rates as your simulation runs."
-          />
-          <SimFeatureCard
-            icon={<FlowIcon />}
-            title="Load & Stress Testing"
-            description="Configure request volume and patterns to observe how your system handles real-world conditions."
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
+        {/* Discipline Cards Grid */}
+        <div className="landing-reveal-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {DISCIPLINES.map((disc) => {
+            const Icon = disc.icon;
+            return (
+              <Link
+                key={disc.id}
+                href={disc.href}
+                className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-card hover:border-border/90 hover:shadow-xl transition-all duration-300"
+              >
+                <div>
+                  {/* Top Row: Icon + Count */}
+                  <div className="flex items-center justify-between mb-5">
+                    <div className={`w-11 h-11 rounded-xl ${disc.accentBg} ${disc.accentText} flex items-center justify-center transition-transform group-hover:scale-105 duration-300`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-muted/70 text-muted-foreground">
+                      {disc.episodesCount} Episodes
+                    </span>
+                  </div>
 
-function SimFeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
-  return (
-    <div className="landing-reveal group relative p-6 sm:p-8 rounded-2xl border border-border/50 bg-card hover:border-border transition-all duration-300">
-      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-foreground mb-5 group-hover:scale-105 transition-transform duration-300">
-        {icon}
-      </div>
-      <h3 className="text-base font-semibold text-foreground mb-2">{title}</h3>
-      <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
-    </div>
-  );
-}
+                  <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {disc.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                    {disc.description}
+                  </p>
+                </div>
 
-/* ═══════════════════════════════════════════════════════════════
-   Guided Learning (Coming Soon)
-   ═══════════════════════════════════════════════════════════════ */
+                {/* Bottom Row: Topics & Link */}
+                <div>
+                  <div className="flex flex-wrap gap-1.5 mb-5">
+                    {disc.topics.map((t) => (
+                      <span
+                        key={t}
+                        className="text-[11px] font-mono px-2 py-0.5 rounded bg-muted/60 text-muted-foreground"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
 
-function GuidedLearningSection() {
-  return (
-    <section className="py-24 sm:py-32 border-t border-border/40" aria-labelledby="guided-heading">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="landing-reveal text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-5 text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-            Now Available
-          </div>
-          <h2 id="guided-heading" className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            Explore Learning Paths
-          </h2>
-          <p className="mt-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Structured lessons that walk you through fundamental system design concepts and language internals.
-          </p>
-        </div>
+                  <div className={`flex items-center gap-1.5 text-xs font-semibold ${disc.accentText}`}>
+                    <span>Launch track</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
 
-        <div className="landing-reveal-stagger grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {/* Active Route: Java */}
-          <Link href="/java" className="group">
-            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.2)] transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-orange-500/20 transition-all duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
+          {/* 6th Card: All 33 Episodes Overview */}
+          <Link
+            href="/learning-paths"
+            className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-muted/20 hover:border-border/90 hover:shadow-xl transition-all duration-300"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-5">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
+                  <Play className="w-5 h-5 fill-current" />
+                </div>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                  Master Directory
+                </span>
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">Java</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-                Understand how Java code is compiled, converted to bytecode, and executed by the JVM and CPU.
+
+              <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                All 33 Learning Modules
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                Browse our complete, unrolled syllabus across all 5 tracks. Compare difficulty ratings, prerequisite paths, and simulation objectives.
               </p>
-              <div className="flex items-center text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform">
-                Explore Java Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+              <span>View full syllabus</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-          {/* Locked Route: Computer Networks */}
-          <div className="relative p-6 sm:p-8 rounded-2xl border border-border/40 bg-card/50 opacity-70 select-none">
-            <div className="absolute top-4 right-4">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/50">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
+/* ═══════════════════════════════════════════════════════════════
+   4. How We Simulate (The Engine Principles)
+   ═══════════════════════════════════════════════════════════════ */
+function SimulationEngineSection() {
+  return (
+    <section id="how-it-works" className="py-24 sm:py-32 border-t border-border/40" aria-labelledby="engine-heading">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid lg:grid-cols-[1fr_1.3fr] gap-12 lg:gap-16 items-start">
+          {/* Left copy */}
+          <div className="landing-reveal max-w-md">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-border/60 bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Simulation Mechanics
             </div>
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground mb-5">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 17h2a4 4 0 0 0 4-4V7a4 4 0 0 1 4-4h2"/><circle cx="5" cy="17" r="2"/><circle cx="19" cy="7" r="2"/></svg>
-            </div>
-            <h3 className="text-xl font-bold text-foreground/70 mb-3">Computer Networks</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground/70 mb-6">
-              Learn the foundations of networking: TCP/IP, DNS, Routing, and Load Balancing in real-time.
+            <h2 id="engine-heading" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
+              Engineered with Mathematical Precision
+            </h2>
+            <p className="mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed">
+              Most online tutorials rely on hand-waving animations or pre-rendered GIFs. System Simulator models actual runtime memory, hardware registers, and queuing mathematics.
             </p>
-            <div className="inline-block px-2 py-1 text-[10px] font-bold tracking-widest uppercase bg-muted text-muted-foreground rounded">
-              Coming Soon
+            <div className="mt-8 flex items-center gap-4 text-xs font-mono text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" /> No mock assumptions
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Zap className="w-4 h-4 text-amber-500" /> Discrete step state
+              </span>
             </div>
           </div>
 
-          {/* Locked Route: Database Internals */}
-          <div className="relative p-6 sm:p-8 rounded-2xl border border-border/40 bg-card/50 opacity-70 select-none hidden lg:block">
-            <div className="absolute top-4 right-4">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/50">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
+          {/* Right feature cards */}
+          <div className="landing-reveal-stagger grid sm:grid-cols-2 gap-4">
+            <div className="p-5 rounded-xl border border-border/60 bg-card">
+              <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
+                <Terminal className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground mb-1.5">
+                Strict Two-Phase Execution
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Every context push passes through discrete creation (TDZ & hoisting) before execution assignments parse.
+              </p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground mb-5">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+
+            <div className="p-5 rounded-xl border border-border/60 bg-card">
+              <div className="w-9 h-9 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center mb-4">
+                <Cpu className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground mb-1.5">
+                Transparent Abstractions
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Background frames and suspended processes remain visible in dimmed states—never omitted or hidden away.
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-foreground/70 mb-3">Database Internals</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground/70 mb-6">
-              Explore how databases store data, B-Trees, transaction logs, ACID properties, and sharding.
-            </p>
-            <div className="inline-block px-2 py-1 text-[10px] font-bold tracking-widest uppercase bg-muted text-muted-foreground rounded">
-              Coming Soon
+
+            <div className="p-5 rounded-xl border border-border/60 bg-card">
+              <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
+                <Database className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground mb-1.5">
+                Live Memory Pointers
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Stack frame references directly connect to heap object allocations with real memory addresses and GC reachability.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-xl border border-border/60 bg-card">
+              <div className="w-9 h-9 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center mb-4">
+                <Activity className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground mb-1.5">
+                Hardware Interrupt Modeling
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Experience timer interrupts, scheduler preemption, and thread synchronization barriers firsthand.
+              </p>
             </div>
           </div>
         </div>
@@ -489,56 +488,142 @@ function GuidedLearningSection() {
   );
 }
 
-function LessonPreviewCard({ number, title, topics }: { number: number; title: string; topics: string[] }) {
+/* ═══════════════════════════════════════════════════════════════
+   5. Architectural Capstone: System Design Canvas Studio
+   ═══════════════════════════════════════════════════════════════ */
+function CanvasStudioSection() {
   return (
-    <div className="landing-reveal relative p-5 rounded-xl border border-border/40 bg-card/50 opacity-70 select-none">
-      {/* Lock overlay */}
-      <div className="absolute top-4 right-4">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-muted-foreground/40">
-          <rect x="3" y="7" width="10" height="7" rx="1.5" />
-          <path d="M5 7V5a3 3 0 0 1 6 0v2" />
-        </svg>
+    <section id="canvas-studio" className="py-24 sm:py-32 border-t border-border/40 relative overflow-hidden" aria-labelledby="canvas-heading">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="rounded-3xl border border-border/80 bg-gradient-to-b from-card/80 to-card/40 p-8 sm:p-12 lg:p-16 backdrop-blur-xl relative">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-5 rounded-full border border-border/70 bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Architectural Capstone
+            </div>
+
+            <h2 id="canvas-heading" className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.1]">
+              From Language Internals to Distributed Systems at Scale
+            </h2>
+
+            <p className="mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed">
+              Once you master how individual processes, stacks, and threads behave, step into our full <strong>System Design Canvas Studio</strong>. Assemble distributed topologies, simulate request packet flows, and stress-test architecture under load.
+            </p>
+
+            {/* Canvas capabilities grid */}
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-6 font-mono text-xs">
+              <div>
+                <span className="text-foreground font-bold block mb-1">20+ Cloud Node Types</span>
+                <span className="text-muted-foreground">Gateways, Caches, Kafka, DBs, Microservices</span>
+              </div>
+              <div>
+                <span className="text-foreground font-bold block mb-1">Traffic & Rate Limiting</span>
+                <span className="text-muted-foreground">Token Bucket & Circuit Breaker State Machines</span>
+              </div>
+              <div>
+                <span className="text-foreground font-bold block mb-1">Multiplayer Collaboration</span>
+                <span className="text-muted-foreground">Zero-latency collaborative rooms via Yjs</span>
+              </div>
+            </div>
+
+            {/* Direct Launch CTA */}
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Link
+                href="/canvas"
+                className="inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-95 shadow-lg transition-all group"
+              >
+                <span>Launch Canvas Studio</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+
+              <span className="text-xs text-muted-foreground font-mono">
+                No sign-in required • Runs 100% in your browser
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground mb-3">
-        {number}
-      </div>
-      <h3 className="text-sm font-semibold text-foreground/70 mb-2">{title}</h3>
-      <div className="flex flex-wrap gap-1.5">
-        {topics.map((topic) => (
-          <span key={topic} className="inline-block px-2 py-0.5 text-[11px] font-medium bg-muted/60 text-muted-foreground/50 rounded">
-            {topic}
-          </span>
-        ))}
-      </div>
-    </div>
+    </section>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Final CTA
+   6. Metrics & Perspective Quote
    ═══════════════════════════════════════════════════════════════ */
+function MetricsQuoteSection() {
+  return (
+    <section className="py-20 border-t border-border/40">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+          <div className="p-6 rounded-2xl border border-border/40 bg-card/40">
+            <span className="block text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
+              33
+            </span>
+            <span className="mt-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Interactive Episodes
+            </span>
+          </div>
 
+          <div className="p-6 rounded-2xl border border-border/40 bg-card/40">
+            <span className="block text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
+              5
+            </span>
+            <span className="mt-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Core Disciplines
+            </span>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-border/40 bg-card/40">
+            <span className="block text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
+              0
+            </span>
+            <span className="mt-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Passive Slide Decks
+            </span>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-border/40 bg-card/40">
+            <span className="block text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
+              100%
+            </span>
+            <span className="mt-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Deterministic Models
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   7. Final Call to Action
+   ═══════════════════════════════════════════════════════════════ */
 function FinalCTASection() {
   return (
     <section className="py-24 sm:py-32 border-t border-border/40">
-      <div className="mx-auto max-w-6xl px-6 text-center">
-        <div className="landing-reveal max-w-xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            Ready to build?
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
+        <div className="landing-reveal">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+            Start mastering computational runtimes today.
           </h2>
-          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Open the canvas and start designing your first distributed system.
+          <p className="mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
+            Choose an interactive module or dive straight into the distributed system canvas.
           </p>
-          <div className="mt-8">
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/learning-paths"
+              className="inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-95 shadow-md transition-all group"
+            >
+              <span>Explore All Modules</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
             <Link
               href="/canvas"
-              className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-90 transition-all hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-              id="final-cta-canvas"
+              className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-medium text-foreground border border-border/70 rounded-xl hover:bg-muted/40 transition-colors"
             >
-              Open Canvas
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 8h10M9 4l4 4-4 4" />
-              </svg>
+              <span>Open Canvas Studio</span>
             </Link>
           </div>
         </div>
@@ -548,20 +633,87 @@ function FinalCTASection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Footer
+   8. Footer
    ═══════════════════════════════════════════════════════════════ */
-
 function Footer() {
   return (
-    <footer className="border-t border-border/40 py-8">
-      <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Logo size={20} />
-          <span className="text-xs font-medium">System Simulator</span>
+    <footer className="border-t border-border/40 py-12 bg-card/30">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-border/40">
+          {/* Brand Col */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2.5">
+              <Logo size={24} />
+              <span className="text-sm font-bold tracking-tight text-foreground">
+                System Simulator
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Interactive runtime engineering and distributed system simulation platform.
+            </p>
+          </div>
+
+          {/* Disciplines */}
+          <div className="flex flex-col gap-2 text-xs">
+            <span className="font-semibold text-foreground mb-1">Disciplines</span>
+            <Link href="/javascript" className="text-muted-foreground hover:text-foreground transition-colors">
+              JavaScript Runtimes
+            </Link>
+            <Link href="/operating-systems" className="text-muted-foreground hover:text-foreground transition-colors">
+              Operating Systems
+            </Link>
+            <Link href="/java" className="text-muted-foreground hover:text-foreground transition-colors">
+              Java & JVM Architecture
+            </Link>
+            <Link href="/frontend" className="text-muted-foreground hover:text-foreground transition-colors">
+              Frontend Architecture
+            </Link>
+            <Link href="/backend" className="text-muted-foreground hover:text-foreground transition-colors">
+              Backend Internals
+            </Link>
+          </div>
+
+          {/* Platform */}
+          <div className="flex flex-col gap-2 text-xs">
+            <span className="font-semibold text-foreground mb-1">Platform</span>
+            <Link href="/learning-paths" className="text-muted-foreground hover:text-foreground transition-colors">
+              All 33 Episodes
+            </Link>
+            <Link href="/canvas" className="text-muted-foreground hover:text-foreground transition-colors">
+              Canvas Studio
+            </Link>
+            <Link href="/auth/sign-in" className="text-muted-foreground hover:text-foreground transition-colors">
+              Sign In
+            </Link>
+          </div>
+
+          {/* External */}
+          <div className="flex flex-col gap-2 text-xs">
+            <span className="font-semibold text-foreground mb-1">Open Source & Community</span>
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <span>GitHub Repository</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+            <span className="text-muted-foreground/60 text-[11px] mt-2">
+              Deployed at systemsimulator.vercel.app
+            </span>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground/60">
-          © {new Date().getFullYear()} System Simulator. Built for learning.
-        </p>
+
+        {/* Bottom copyright */}
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} System Simulator. Built for deep engineering learning.</p>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span>Deterministic Runtimes</span>
+            <span>•</span>
+            <span>Client-Side Execution</span>
+          </div>
+        </div>
       </div>
     </footer>
   );

@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "System Simulator — Design, Simulate, Understand",
+  title: "System Simulator — Interactive Computational & System Design Runtimes",
   description:
-    "An interactive platform for learning system design. Build distributed systems visually, simulate request flows, and understand how architectures behave.",
+    "Master computer systems from the inside out. 33 interactive simulations spanning JavaScript execution runtimes, Operating Systems, JVM internals, frontend rendering pipelines, and distributed architecture canvas.",
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";
