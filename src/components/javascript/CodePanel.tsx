@@ -1,25 +1,24 @@
 "use client";
 
-import { useJSSimulationStore } from "@/store/useJSSimulationStore";
-import { cn } from "@/lib/utils";
+import { useActiveSimulation } from "@/context/JSSimulationContext";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
 
 export function CodePanel() {
-  const { scenario, currentStepIndex } = useJSSimulationStore();
-  const currentState = scenario.steps[currentStepIndex];
-  const activeLine = currentState.currentLine;
+  const { scenario, currentStepIndex } = useActiveSimulation();
+  const steps = scenario?.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
 
-  const codeLines = scenario.code.split("\n");
-  
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  if (!currentState) return null;
+  const activeLine = currentState.currentLine;
 
   const isDark = !mounted || resolvedTheme === "dark";
 
@@ -60,12 +59,12 @@ export function CodePanel() {
             lineHeight: "1.6"
           }}
         >
-          {scenario.code}
+          {scenario?.code ?? ""}
         </SyntaxHighlighter>
       </div>
       
       {/* Console Output */}
-      {currentState.consoleOutput && !scenario.id.startsWith("el-") && (
+      {currentState.consoleOutput && !scenario?.id?.startsWith("el-") && (
         <div className="hidden lg:flex h-32 border-t border-border/40 bg-black flex-col shrink-0">
           <div className="bg-[#2d2d2d] px-4 py-1 border-b border-border/40 flex items-center">
             <span className="text-[10px] font-bold text-green-400 font-mono tracking-wider">
@@ -84,7 +83,8 @@ export function CodePanel() {
         </div>
       )}
 
-      {/* Explanation Banner */}
+      {/* Explanation Banner - Preserved commented out until new UI is verified across all episodes */}
+      {/*
       {!scenario.id.startsWith("el-") && (
         <div className="bg-primary/10 border-t border-primary/20 p-4 shrink-0">
           <p className="text-sm text-foreground dark:text-gray-200 leading-relaxed font-medium">
@@ -92,6 +92,7 @@ export function CodePanel() {
           </p>
         </div>
       )}
+      */}
     </div>
   );
 }
