@@ -1,3 +1,4 @@
+import { Logo }   from "@/components/ui/Logo";
 import { signIn } from "@/lib/auth/auth";
 import { env }    from "@/lib/env";
 
@@ -31,9 +32,9 @@ export default async function SignInPage({ searchParams }: Props) {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <LogoIcon />
-          <span className="text-lg font-medium text-foreground">sysvis</span>
+        <div className="flex items-center justify-center gap-2.5 mb-8">
+          <Logo size={28} />
+          <span className="text-lg font-semibold tracking-tight text-foreground">System Simulator</span>
         </div>
 
         <div className="border border-border rounded-2xl bg-background p-8 flex flex-col gap-6">
@@ -122,16 +123,6 @@ export default async function SignInPage({ searchParams }: Props) {
   );
 }
 
-function LogoIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
-      <rect x="1" y="1" width="8" height="8" rx="2" fill="currentColor" opacity={0.8}/>
-      <rect x="11" y="1" width="8" height="8" rx="2" fill="currentColor" opacity={0.4}/>
-      <rect x="1" y="11" width="8" height="8" rx="2" fill="currentColor" opacity={0.4}/>
-      <rect x="11" y="11" width="8" height="8" rx="2" fill="currentColor" opacity={0.8}/>
-    </svg>
-  );
-}
 
 function GithubIcon() {
   return (
