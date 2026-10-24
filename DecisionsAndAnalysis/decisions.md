@@ -50,3 +50,24 @@ This document serves as the single source of truth for architectural, UI/UX, rel
      - Maintained backwards-compatibility by updating `StepExplanationPopup.tsx` to alias `StepExplanationBar`.
 - **Blast Radius**: Zero regressions; eliminates floating card occlusion and timer race conditions across all 7 episodes.
 
+---
+
+## Decision Record 004: Reusable Episode Card Primitive & Typed Metadata Architecture
+- **Status**: Approved & Implemented
+- **Category**: Component Architecture & UI Consistency
+- **Problem**:
+  - Episode listings on learning path pages (such as JavaScript) were previously hardcoded as repetitious, ~300-line blocks of markup directly in route `page.tsx` files.
+  - Repeating raw HTML cards created maintenance friction, visual divergence risks across subjects, and contrast defects (e.g., `text-[10px] text-muted-foreground/60` failing WCAG 2.1 AA standards).
+  - Lack of a consistent, color-tokenized card abstraction prevented uniform subject theming (e.g., JavaScript orange/amber vs. Operating Systems teal/pink/violet).
+- **Decision & Implementation**:
+  - Implemented Option 1 for Episode Configuration: isolated metadata array in `src/app/javascript/episodes.tsx` with a typed `EpisodeMetadata` interface.
+  - Implemented Option 1 for Component Architecture: built a reusable, accessible primitive in `src/components/ui/EpisodeCard.tsx` and refactored `src/app/javascript/page.tsx` with zero blast radius outside JavaScript.
+  - Integrated tokenized subject theming: supported accent presets (`amber` [default for JS], `yellow`, `orange`, `teal`, `cyan`, `sky`, `blue`, `indigo`, `green`, `emerald`, `pink`, `purple`, `violet`, `rose`) that uniformly style hover borders, shadows, icon containers, title hover transitions, and the "Launch" CTA button.
+  - Implemented robust episode label formatting supporting numbers, string numbers (`"5"` -> `"Episode 5"`), and pre-formatted strings (`"Episode 5"` -> `"Episode 5"`), with clean header rendering when episode numbers or badges are absent.
+  - Ensured WCAG 2.1 AA accessible names without trailing colons and upgraded badge typography to `text-xs font-semibold text-muted-foreground`.
+  - Preserved exact micro-interactions (icon `group-hover:scale-110`, arrow `group-hover:translate-x-0.5`).
+  - Added comprehensive unit test suite `src/components/ui/__tests__/EpisodeCard.test.tsx` covering all variants, props configurations, accessible labels, string formatting, and color presets.
+  - Resolved TypeScript empty-interface ESLint errors in `src/components/ui/Input.tsx` and `src/components/ui/NativeSelect.tsx` to ensure `npx eslint src/components/ui` passes cleanly.
+- **Blast Radius**: Zero outside `src/app/javascript`, `src/components/ui`, and newly created `EpisodeCard` primitive.
+
+
