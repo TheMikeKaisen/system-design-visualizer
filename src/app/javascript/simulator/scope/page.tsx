@@ -5,6 +5,7 @@ import { CodePanel } from "@/components/javascript/CodePanel";
 import { CallStackPanel } from "@/components/javascript/CallStackPanel";
 import { ExecutionContextPanel } from "@/components/javascript/ExecutionContextPanel";
 import { MobileTabbedPanels } from "@/components/javascript/MobileTabbedPanels";
+import { StepExplanationBar } from "@/components/javascript/StepExplanationBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
@@ -12,11 +13,12 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ALL_SCOPE_SCENARIOS } from "@/lib/js-simulator/scope-scenarios";
+import { JSSimulationProvider } from "@/context/JSSimulationContext";
 
 export default function JSScopeSimulator() {
   const { 
-    scenario, 
-    currentStepIndex, 
+    scenario: storeScenario, 
+    currentStepIndex: storeStepIndex, 
     isPlaying,
     nextStep,
     prevStep,
@@ -26,12 +28,23 @@ export default function JSScopeSimulator() {
     setScenario
   } = useJSSimulationStore();
 
+  const isCurrentEpisode = ALL_SCOPE_SCENARIOS.some(s => s.id === storeScenario.id);
+  const scenario = isCurrentEpisode ? storeScenario : ALL_SCOPE_SCENARIOS[0];
+  const currentStepIndex = isCurrentEpisode ? storeStepIndex : 0;
+
   // Initialize with the first scope scenario on mount
   useEffect(() => {
-    if (!ALL_SCOPE_SCENARIOS.find(s => s.id === scenario.id)) {
+    if (!ALL_SCOPE_SCENARIOS.some(s => s.id === storeScenario.id)) {
       setScenario(ALL_SCOPE_SCENARIOS[0]);
     }
-  }, [scenario.id, setScenario]);
+  }, [storeScenario.id, setScenario]);
+
+  // On unmount: pause and reset
+  useEffect(() => {
+    return () => {
+      useJSSimulationStore.getState().reset();
+    };
+  }, []);
 
   // Auto-play effect
   useEffect(() => {
@@ -44,19 +57,10 @@ export default function JSScopeSimulator() {
     return () => clearTimeout(timer);
   }, [isPlaying, currentStepIndex, nextStep]);
 
-  // Toast effect
-  const [activeToast, setActiveToast] = useState<string | null>(null);
-  useEffect(() => {
-    if (scenario.steps[currentStepIndex]?.toastMessage) {
-      setActiveToast(scenario.steps[currentStepIndex].toastMessage!);
-      const t = setTimeout(() => setActiveToast(null), 2500);
-      return () => clearTimeout(t);
-    } else {
-      setActiveToast(null);
-    }
-  }, [currentStepIndex, scenario.steps]);
-
-  const progress = ((currentStepIndex + 1) / scenario.steps.length) * 100;
+  const steps = scenario.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
+  const progress = steps.length > 0 ? ((safeIndex + 1) / steps.length) * 100 : 0;
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -72,10 +76,9 @@ export default function JSScopeSimulator() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const currentState = scenario.steps[currentStepIndex];
-
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+    <JSSimulationProvider scenario={scenario} currentStepIndex={currentStepIndex}>
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Navigation */}
       <nav className="relative z-40 h-16 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0">
         <div className="h-full px-6 flex items-center justify-between">
@@ -141,7 +144,7 @@ export default function JSScopeSimulator() {
               <button onClick={reset} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" title="Restart">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
               </button>
-              <button onClick={prevStep} disabled={currentStepIndex === 0} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent" title="Previous Step">
+              <button onClick={prevStep} disabled={safeIndex === 0} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent" title="Previous Step">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
               </button>
               <button onClick={togglePlay} className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground text-background hover:scale-105 transition-all shadow-sm mx-1" title={isPlaying ? "Pause" : "Play"}>
@@ -151,19 +154,19 @@ export default function JSScopeSimulator() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 )}
               </button>
-              <button onClick={nextStep} disabled={currentStepIndex === scenario.steps.length - 1} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent" title="Next Step">
+              <button onClick={nextStep} disabled={safeIndex >= steps.length - 1} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent" title="Next Step">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
               </button>
             </div>
 
             <div className="hidden md:flex flex-1 items-center gap-3">
               <span className="text-[10px] font-mono text-muted-foreground font-medium whitespace-nowrap">
-                {currentStepIndex + 1} / {scenario.steps.length}
+                {safeIndex + 1} / {steps.length}
               </span>
               <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden flex relative group cursor-pointer">
                 {/* Invisible clickable track */}
                 <div className="absolute inset-0 z-10 flex">
-                  {scenario.steps.map((_, idx) => (
+                  {steps.map((_, idx) => (
                     <div key={idx} className="flex-1 h-full hover:bg-white/10 transition-colors" onClick={() => setStep(idx)} title={`Go to step ${idx + 1}`}></div>
                   ))}
                 </div>
@@ -178,23 +181,8 @@ export default function JSScopeSimulator() {
         </div>
       </nav>
 
-      {/* Toast Narration */}
-      <AnimatePresence>
-        {activeToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 bg-card border border-border text-foreground px-6 py-3 rounded-full shadow-xl shadow-black/20 font-medium text-sm flex items-center gap-3"
-          >
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-            </span>
-            {activeToast}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Step Explanation Bar in layout flow */}
+      <StepExplanationBar />
 
       {/* Main Simulator Area */}
       <main className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 gap-6 relative">
@@ -222,7 +210,7 @@ export default function JSScopeSimulator() {
                 )}
               </div>
               <div className="flex flex-col gap-1.5 font-mono text-[11px] leading-relaxed">
-                {currentState.scopeLookup.traceLog.map((log, i) => (
+                {(currentState.scopeLookup.traceLog ?? []).map((log, i) => (
                   <motion.div 
                     key={i}
                     initial={{ opacity: 0, x: -10 }}
@@ -269,5 +257,6 @@ export default function JSScopeSimulator() {
         </div>
       </main>
     </div>
+    </JSSimulationProvider>
   );
 }

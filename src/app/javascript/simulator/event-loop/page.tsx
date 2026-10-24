@@ -9,7 +9,7 @@ import { MicrotaskQueuePanel } from "@/components/javascript/MicrotaskQueuePanel
 import { CallbackQueuePanel } from "@/components/javascript/CallbackQueuePanel";
 import { EventLoopIndicator } from "@/components/javascript/EventLoopIndicator";
 import { EventLoopMobilePanels } from "@/components/javascript/EventLoopMobilePanels";
-import { StepExplanationPopup } from "@/components/javascript/StepExplanationPopup";
+import { StepExplanationBar } from "@/components/javascript/StepExplanationBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
@@ -17,11 +17,12 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ALL_EVENT_LOOP_SCENARIOS } from "@/lib/js-simulator/event-loop-scenarios";
+import { JSSimulationProvider } from "@/context/JSSimulationContext";
 
 export default function JSEventLoopSimulator() {
   const { 
-    scenario, 
-    currentStepIndex, 
+    scenario: storeScenario, 
+    currentStepIndex: storeStepIndex, 
     isPlaying,
     nextStep,
     prevStep,
@@ -31,12 +32,23 @@ export default function JSEventLoopSimulator() {
     setScenario
   } = useJSSimulationStore();
 
+  const isCurrentEpisode = ALL_EVENT_LOOP_SCENARIOS.some(s => s.id === storeScenario.id);
+  const scenario = isCurrentEpisode ? storeScenario : ALL_EVENT_LOOP_SCENARIOS[0];
+  const currentStepIndex = isCurrentEpisode ? storeStepIndex : 0;
+
   // Initialize with the first event loop scenario on mount
   useEffect(() => {
-    if (!ALL_EVENT_LOOP_SCENARIOS.find(s => s.id === scenario.id)) {
+    if (!ALL_EVENT_LOOP_SCENARIOS.some(s => s.id === storeScenario.id)) {
       setScenario(ALL_EVENT_LOOP_SCENARIOS[0]);
     }
-  }, [scenario.id, setScenario]);
+  }, [storeScenario.id, setScenario]);
+
+  // On unmount: pause and reset
+  useEffect(() => {
+    return () => {
+      useJSSimulationStore.getState().reset();
+    };
+  }, []);
 
   // Auto-play effect
   useEffect(() => {
@@ -54,7 +66,9 @@ export default function JSEventLoopSimulator() {
   // Explanation popup is now an isolated component (StepExplanationPopup)
   // to prevent its timer from triggering parent re-renders.
 
-  const progress = ((currentStepIndex + 1) / scenario.steps.length) * 100;
+  const steps = scenario.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const progress = steps.length > 0 ? ((safeIndex + 1) / steps.length) * 100 : 0;
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -69,10 +83,9 @@ export default function JSEventLoopSimulator() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const currentState = scenario.steps[currentStepIndex];
-
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+    <JSSimulationProvider scenario={scenario} currentStepIndex={currentStepIndex}>
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Navigation */}
       <nav className="relative z-40 h-16 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0">
         <div className="h-full px-6 flex items-center justify-between">
@@ -136,7 +149,7 @@ export default function JSEventLoopSimulator() {
               <button onClick={reset} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" title="Restart">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
               </button>
-              <button onClick={prevStep} disabled={currentStepIndex === 0} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent" title="Previous Step">
+              <button onClick={prevStep} disabled={safeIndex === 0} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent" title="Previous Step">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
               </button>
               <button onClick={togglePlay} className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground text-background hover:scale-105 transition-all shadow-sm mx-1" title={isPlaying ? "Pause" : "Play"}>
@@ -146,18 +159,18 @@ export default function JSEventLoopSimulator() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 )}
               </button>
-              <button onClick={nextStep} disabled={currentStepIndex === scenario.steps.length - 1} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent" title="Next Step">
+              <button onClick={nextStep} disabled={safeIndex >= steps.length - 1} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent" title="Next Step">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
               </button>
             </div>
 
             <div className="hidden md:flex flex-1 items-center gap-3">
               <span className="text-[10px] font-mono text-muted-foreground font-medium whitespace-nowrap">
-                {currentStepIndex + 1} / {scenario.steps.length}
+                {safeIndex + 1} / {steps.length}
               </span>
               <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden flex relative group cursor-pointer">
                 <div className="absolute inset-0 z-10 flex">
-                  {scenario.steps.map((_, idx) => (
+                  {steps.map((_, idx) => (
                     <div key={idx} className="flex-1 h-full hover:bg-white/10 transition-colors" onClick={() => setStep(idx)} title={`Go to step ${idx + 1}`}></div>
                   ))}
                 </div>
@@ -172,16 +185,14 @@ export default function JSEventLoopSimulator() {
         </div>
       </nav>
 
-      {/* Toast Narration - Removed because we use the Step Explanation Banner now */}
+      {/* Step Explanation Bar in layout flow (0% panel occlusion) */}
+      <StepExplanationBar />
 
       {/* Main Simulator Area */}
       <main className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 gap-4 relative">
         
-        {/* Step Explanation Banner - isolated component to avoid re-render interference */}
-        <StepExplanationPopup />
-
         {/* Desktop Layout - "Runtime Landscape" */}
-        <div className="hidden lg:flex flex-col h-full gap-4 min-h-0 pt-10">
+        <div className="hidden lg:flex flex-col h-full gap-4 min-h-0">
           
           {/* Top Half: Code & Engine */}
           <div className="flex-[3] flex gap-4 min-h-0">
@@ -223,8 +234,8 @@ export default function JSEventLoopSimulator() {
             <EventLoopMobilePanels />
           </div>
         </div>
-
       </main>
     </div>
+    </JSSimulationProvider>
   );
 }
