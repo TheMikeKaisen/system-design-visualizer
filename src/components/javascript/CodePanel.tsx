@@ -83,16 +83,6 @@ export function CodePanel() {
         </div>
       )}
 
-      {/* Explanation Banner - Preserved commented out until new UI is verified across all episodes */}
-      {/*
-      {!scenario.id.startsWith("el-") && (
-        <div className="bg-primary/10 border-t border-primary/20 p-4 shrink-0">
-          <p className="text-sm text-foreground dark:text-gray-200 leading-relaxed font-medium">
-            {currentState.explanation}
-          </p>
-        </div>
-      )}
-      */}
     </div>
   );
 }
