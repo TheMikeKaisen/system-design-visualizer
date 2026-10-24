@@ -66,7 +66,7 @@ interface JavaStep {
 }
 
 /* ───────────────────────────────────────────────────────────────
-   1. JavaScript Scenario: Closures & Lexical Scope
+   1. JavaScript Scenario: Call Stack, Scope & Closures
    ─────────────────────────────────────────────────────────────── */
 const JS_CODE_LINES = [
   "function makeCounter() {",
@@ -77,7 +77,7 @@ const JS_CODE_LINES = [
   "  };",
   "}",
   "const counter = makeCounter();",
-  "counter(); // -> 1",
+  "counter(); // -> returns 1",
 ];
 
 const JS_STEPS: JSStep[] = [
@@ -99,7 +99,7 @@ const JS_STEPS: JSStep[] = [
   },
   {
     line: 1,
-    badge: "Creation Phase",
+    badge: "Declaration",
     explanation: "makeCounter() declared in Global Scope. Function memory reference registered.",
     callStack: [
       { id: "g-exec-0", name: "Global", phase: "creation", active: true },
@@ -118,7 +118,7 @@ const JS_STEPS: JSStep[] = [
   {
     line: 8,
     badge: "Function Call",
-    explanation: "Invoking makeCounter(). Pushing new Execution Context to Call Stack.",
+    explanation: "makeCounter() invoked. Pushing new Execution Context to Call Stack in Creation Phase.",
     callStack: [
       { id: "g-exec-1", name: "Global", phase: "execution", active: false },
       { id: "mc-create-2", name: "makeCounter()", phase: "creation", active: true },
@@ -141,7 +141,7 @@ const JS_STEPS: JSStep[] = [
   },
   {
     line: 2,
-    badge: "Execution",
+    badge: "Assignment",
     explanation: "let count = 0 initialized in local scope. Entering Execution Phase.",
     callStack: [
       { id: "g-exec-2", name: "Global", phase: "execution", active: false },
@@ -156,14 +156,17 @@ const JS_STEPS: JSStep[] = [
       {
         id: "global-scope-3",
         name: "Global Scope",
-        vars: [{ name: "makeCounter", value: "ƒ makeCounter()" }, { name: "counter", value: "<TDZ>", isTDZ: true }],
+        vars: [
+          { name: "makeCounter", value: "ƒ makeCounter()" },
+          { name: "counter", value: "<TDZ>", isTDZ: true },
+        ],
       },
     ],
   },
   {
     line: 3,
-    badge: "Closure Capture",
-    explanation: "makeCounter returns increment(). Function bundles count variable into [[Scopes]] closure.",
+    badge: "Closure Formed",
+    explanation: "makeCounter returns increment(). Function bundles count variable into closure scope [[Scopes]].",
     callStack: [
       { id: "g-exec-3", name: "Global", phase: "execution", active: true },
     ],
@@ -186,7 +189,7 @@ const JS_STEPS: JSStep[] = [
   {
     line: 9,
     badge: "Scope Lookup",
-    explanation: "counter() called. Looks up count in Closure scope, increments to 1, and returns value.",
+    explanation: "counter() called. Looks up count in Closure scope, increments to 1, and returns 1.",
     callStack: [
       { id: "g-exec-4", name: "Global", phase: "execution", active: false },
       { id: "inc-exec-5", name: "increment()", phase: "execution", active: true },
@@ -213,13 +216,13 @@ const JS_STEPS: JSStep[] = [
    2. Operating Systems Scenario: CPU Scheduling & Context Switch
    ─────────────────────────────────────────────────────────────── */
 const OS_CODE_LINES = [
-  "// Round-Robin Scheduler (Time Quantum = 20ms)",
+  "// Round-Robin CPU Scheduler (Quantum = 20ms)",
   "void schedule() {",
   "  Process* prev = current_process;",
   "  save_context(&prev->pcb);",
   "  Process* next = dequeue_ready();",
   "  load_context(&next->pcb);",
-  "  dispatch(next);",
+  "  dispatch_to_cpu(next);",
   "}",
 ];
 
@@ -227,71 +230,71 @@ const OS_STEPS: OSStep[] = [
   {
     line: 1,
     badge: "Round-Robin",
-    explanation: "Scheduler assigns CPU to P1 (Chrome). Time quantum set to 20ms.",
-    cpu: { pid: "P1", name: "Chrome", pc: "0x0040", quantumRemaining: 20 },
+    explanation: "Scheduler assigns CPU to P1 (Browser). Time quantum set to 20ms.",
+    cpu: { pid: "P1", name: "Browser", pc: "0x0040", quantumRemaining: 20 },
     readyQueue: [
-      { id: "os-p2", pid: "P2", name: "Spotify", state: "Ready" },
+      { id: "os-p2", pid: "P2", name: "Music", state: "Ready" },
       { id: "os-p3", pid: "P3", name: "Terminal", state: "Ready" },
     ],
     waitingQueue: [],
   },
   {
     line: 2,
-    badge: "Quantum Expiry",
-    explanation: "Timer interrupt fires! P1 time slice depleted. OS Scheduler prepares context switch.",
-    cpu: { pid: "P1", name: "Chrome", pc: "0x0058", quantumRemaining: 0 },
+    badge: "Timer Interrupt",
+    explanation: "Hardware timer interrupt fires. P1 time slice depleted (0ms left).",
+    cpu: { pid: "P1", name: "Browser", pc: "0x0058", quantumRemaining: 0 },
     readyQueue: [
-      { id: "os-p2-b", pid: "P2", name: "Spotify", state: "Ready" },
+      { id: "os-p2-b", pid: "P2", name: "Music", state: "Ready" },
       { id: "os-p3-b", pid: "P3", name: "Terminal", state: "Ready" },
     ],
     waitingQueue: [],
   },
   {
     line: 3,
-    badge: "Save PCB",
-    explanation: "Hardware registers, Program Counter (PC: 0x0058), and stack pointers saved to P1 PCB.",
+    badge: "Save State",
+    explanation: "Registers, Program Counter (PC: 0x0058), and stack pointers saved to P1 PCB.",
     cpu: null,
     readyQueue: [
-      { id: "os-p2-c", pid: "P2", name: "Spotify", state: "Ready" },
+      { id: "os-p2-c", pid: "P2", name: "Music", state: "Ready" },
       { id: "os-p3-c", pid: "P3", name: "Terminal", state: "Ready" },
-      { id: "os-p1-c", pid: "P1", name: "Chrome", state: "Ready" },
+      { id: "os-p1-c", pid: "P1", name: "Browser", state: "Ready" },
     ],
     waitingQueue: [],
   },
   {
     line: 4,
     badge: "Dispatch P2",
-    explanation: "Context switch complete. P2 (Spotify) restored from PCB into CPU registers.",
-    cpu: { pid: "P2", name: "Spotify", pc: "0x10A4", quantumRemaining: 20 },
+    explanation: "Context switch complete. P2 (Music) loaded into CPU registers at PC 0x10A4.",
+    cpu: { pid: "P2", name: "Music", pc: "0x10A4", quantumRemaining: 20 },
     readyQueue: [
       { id: "os-p3-d", pid: "P3", name: "Terminal", state: "Ready" },
-      { id: "os-p1-d", pid: "P1", name: "Chrome", state: "Ready" },
+      { id: "os-p1-d", pid: "P1", name: "Browser", state: "Ready" },
     ],
     waitingQueue: [],
   },
   {
     line: 6,
     badge: "I/O Trap",
-    explanation: "P2 requests audio buffer read (syscall sys_read). Moves to I/O Blocked queue.",
+    explanation: "P2 requests audio buffer read (sys_read). Moved from CPU to I/O Blocked queue.",
     cpu: null,
     readyQueue: [
       { id: "os-p3-e", pid: "P3", name: "Terminal", state: "Ready" },
-      { id: "os-p1-e", pid: "P1", name: "Chrome", state: "Ready" },
+      { id: "os-p1-e", pid: "P1", name: "Browser", state: "Ready" },
     ],
     waitingQueue: [
-      { id: "os-p2-wait", pid: "P2", name: "Spotify", reason: "Audio DMA Read" },
+      { id: "os-p2-wait", pid: "P2", name: "Music", reason: "Disk DMA Read" },
     ],
   },
   {
     line: 7,
     badge: "Avoid Idle",
-    explanation: "CPU immediately dispatches P3 (Terminal) without wasting CPU clock cycles.",
+    explanation: "CPU immediately dispatches P3 (Terminal) without wasting clock cycles.",
     cpu: { pid: "P3", name: "Terminal", pc: "0x8200", quantumRemaining: 20 },
     readyQueue: [
-      { id: "os-p1-f", pid: "P1", name: "Chrome", state: "Ready" },
+      { id: "os-p1-f", pid: "P1", name: "Browser", state: "Ready" },
     ],
     waitingQueue: [
-      { id: "os-p2-wait-f", pid: "P2", name: "Spotify", reason: "Audio DMA Read" },
+      { id: "os-p2-wait-f", pid: "P2", name: "Music", reason: "Disk DMA Read" },
     ],
   },
 ];
@@ -303,7 +306,7 @@ const JAVA_CODE_LINES = [
   "public class Main {",
   "  public static void main(String[] args) {",
   '    User user = new User("Alice");',
-  "    user.activate();",
+  "    user.login();",
   "  }",
   "}",
 ];
@@ -335,7 +338,7 @@ const JAVA_STEPS: JavaStep[] = [
   {
     line: 2,
     badge: "Heap Allocation",
-    explanation: "new User(\"Alice\") allocates memory block in Eden Heap space at address 0x7A4F.",
+    explanation: "new User(\"Alice\") allocates memory in Eden Heap space at address 0x7A4F.",
     stackFrames: [
       {
         id: "java-main-1",
@@ -359,7 +362,7 @@ const JAVA_STEPS: JavaStep[] = [
         address: "0x7A4F",
         fields: [
           { name: "name", value: '"Alice"' },
-          { name: "isActive", value: "false" },
+          { name: "isOnline", value: "false" },
         ],
       },
     ],
@@ -367,7 +370,7 @@ const JAVA_STEPS: JavaStep[] = [
   {
     line: 3,
     badge: "Method Push",
-    explanation: "user.activate() pushes activate() frame to JVM stack with 'this' reference pointer.",
+    explanation: "user.login() pushes login() frame to JVM stack with 'this' reference pointer.",
     stackFrames: [
       {
         id: "java-main-2",
@@ -379,7 +382,7 @@ const JAVA_STEPS: JavaStep[] = [
       },
       {
         id: "java-act-2",
-        name: "User.activate()",
+        name: "User.login()",
         vars: [
           { name: "this", type: "User", value: "0x7A4F", isRef: true, refId: "obj-user" },
         ],
@@ -398,7 +401,7 @@ const JAVA_STEPS: JavaStep[] = [
         address: "0x7A4F",
         fields: [
           { name: "name", value: '"Alice"' },
-          { name: "isActive", value: "true" },
+          { name: "isOnline", value: "true" },
         ],
       },
     ],
@@ -406,7 +409,7 @@ const JAVA_STEPS: JavaStep[] = [
   {
     line: 4,
     badge: "Frame Pop",
-    explanation: "activate() finishes and pops from Call Stack. user object remains alive in Heap.",
+    explanation: "login() completes and pops from Stack. user object remains alive in Heap.",
     stackFrames: [
       {
         id: "java-main-3",
@@ -430,7 +433,7 @@ const JAVA_STEPS: JavaStep[] = [
         address: "0x7A4F",
         fields: [
           { name: "name", value: '"Alice"' },
-          { name: "isActive", value: "true" },
+          { name: "isOnline", value: "true" },
         ],
       },
     ],
@@ -488,18 +491,16 @@ const TABS: TabConfig[] = [
   },
 ];
 
-const IDLE_CYCLE_INTERVAL = 8000; // 8 seconds per tab when idle
+const STEP_INTERVAL_MS = 2400; // Time per step during auto-play
+const SUBJECT_TRANSITION_DELAY_MS = 2200; // Pause at end of scenario before switching subject
 
 export function HeroRuntimeSandbox() {
   const [activeTab, setActiveTab] = useState<"javascript" | "os" | "java">("javascript");
   const [stepIndex, setStepIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isUserHovering, setIsUserHovering] = useState(false);
-  const [cycleProgress, setCycleProgress] = useState(0);
+  const [isAutoCycling, setIsAutoCycling] = useState(true); // Auto-plays step-by-step then changes subject until user interacts
+  const [isPlayingManual, setIsPlayingManual] = useState(false);
 
-  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoStepTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Maximum step count for current active scenario
   const maxSteps =
@@ -509,103 +510,87 @@ export function HeroRuntimeSandbox() {
       ? OS_STEPS.length
       : JAVA_STEPS.length;
 
-  // Safe clamp helper
   const currentStep = Math.max(0, Math.min(stepIndex, maxSteps - 1));
 
-  // Change active tab
+  // Switch to specific tab manually (pauses auto-cycling)
   const selectTab = useCallback((tabId: "javascript" | "os" | "java") => {
+    setIsAutoCycling(false);
+    setIsPlayingManual(false);
     setActiveTab(tabId);
     setStepIndex(0);
-    setIsPlaying(false);
-    setCycleProgress(0);
   }, []);
 
-  // Idle auto-cycling effect (every 8 seconds unless hovered or playing)
+  // Natural continuous simulation progression:
+  // Completes all steps for current subject -> brief pause -> switches to next subject -> auto-plays
   useEffect(() => {
-    if (isUserHovering || isPlaying) {
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    if (!isAutoCycling && !isPlayingManual) {
+      if (autoStepTimerRef.current) clearTimeout(autoStepTimerRef.current);
       return;
     }
 
-    const intervalStart = Date.now();
+    const isLastStep = stepIndex >= maxSteps - 1;
+    const delay = isLastStep ? SUBJECT_TRANSITION_DELAY_MS : STEP_INTERVAL_MS;
 
-    progressIntervalRef.current = setInterval(() => {
-      const elapsed = Date.now() - intervalStart;
-      const progress = Math.min(100, (elapsed / IDLE_CYCLE_INTERVAL) * 100);
-      setCycleProgress(progress);
-    }, 100);
-
-    idleTimerRef.current = setTimeout(() => {
-      const tabOrder: Array<"javascript" | "os" | "java"> = ["javascript", "os", "java"];
-      const currentIndex = tabOrder.indexOf(activeTab);
-      const nextIndex = (currentIndex + 1) % tabOrder.length;
-      selectTab(tabOrder[nextIndex]);
-    }, IDLE_CYCLE_INTERVAL);
-
-    return () => {
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-    };
-  }, [activeTab, isUserHovering, isPlaying, selectTab]);
-
-  // Internal scenario auto-play effect
-  useEffect(() => {
-    if (!isPlaying) {
-      if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
-      return;
-    }
-
-    autoPlayTimerRef.current = setTimeout(() => {
-      setStepIndex((prev) => {
-        if (prev + 1 >= maxSteps) {
-          setIsPlaying(false);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 2200);
+    autoStepTimerRef.current = setTimeout(() => {
+      if (!isLastStep) {
+        setStepIndex((prev) => prev + 1);
+      } else if (isAutoCycling) {
+        const tabOrder: Array<"javascript" | "os" | "java"> = ["javascript", "os", "java"];
+        const nextIndex = (tabOrder.indexOf(activeTab) + 1) % tabOrder.length;
+        setActiveTab(tabOrder[nextIndex]);
+        setStepIndex(0);
+      } else {
+        setIsPlayingManual(false);
+      }
+    }, delay);
 
     return () => {
-      if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
+      if (autoStepTimerRef.current) clearTimeout(autoStepTimerRef.current);
     };
-  }, [isPlaying, stepIndex, maxSteps]);
+  }, [isAutoCycling, isPlayingManual, stepIndex, maxSteps, activeTab]);
 
-  // Step controls
+  // Step controls (disable auto-cycle when clicked by user)
   const handleNext = () => {
-    setIsPlaying(false);
+    setIsAutoCycling(false);
+    setIsPlayingManual(false);
     setStepIndex((prev) => Math.min(maxSteps - 1, prev + 1));
   };
 
   const handlePrev = () => {
-    setIsPlaying(false);
+    setIsAutoCycling(false);
+    setIsPlayingManual(false);
     setStepIndex((prev) => Math.max(0, prev - 1));
   };
 
   const handleReset = () => {
-    setIsPlaying(false);
+    setIsAutoCycling(false);
+    setIsPlayingManual(false);
     setStepIndex(0);
   };
 
   const togglePlay = () => {
-    if (currentStep >= maxSteps - 1) {
-      setStepIndex(0);
+    if (isAutoCycling) {
+      setIsAutoCycling(false);
+      setIsPlayingManual(false);
+    } else {
+      if (currentStep >= maxSteps - 1) {
+        setStepIndex(0);
+      }
+      setIsPlayingManual((prev) => !prev);
     }
-    setIsPlaying((prev) => !prev);
   };
 
   const activeConfig = TABS.find((t) => t.id === activeTab) ?? TABS[0];
+  const isPlayingActive = isAutoCycling || isPlayingManual;
 
   return (
     <div
-      className="w-full rounded-2xl bg-[#111216]/95 border border-zinc-800/90 shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col text-zinc-100 transition-all duration-300"
-      onMouseEnter={() => setIsUserHovering(true)}
-      onMouseLeave={() => setIsUserHovering(false)}
+      className="w-full rounded-2xl bg-[#0f1013]/95 border border-zinc-800/80 shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col text-zinc-100 transition-all duration-300"
       role="region"
       aria-label="Interactive Multi-Discipline System Simulator Sandbox"
     >
       {/* ── Top Window Bar: Tactile Tab Navigation ── */}
-      <div className="border-b border-zinc-800/80 bg-[#16171d]/90 px-4 py-3 flex flex-wrap items-center justify-between gap-3 select-none">
+      <div className="border-b border-zinc-800/80 bg-[#14151b] px-4 py-3 flex flex-wrap items-center justify-between gap-3 select-none">
         {/* Left: Window Dots & Tabs */}
         <div className="flex items-center gap-3">
           {/* OS Window dots */}
@@ -636,17 +621,9 @@ export function HeroRuntimeSandbox() {
                   <Icon className={`w-3.5 h-3.5 ${isActive ? tab.accentText : "text-zinc-500"}`} />
                   <span className="tracking-tight">{tab.label}</span>
 
-                  {/* Auto-cycle indicator bar for active tab when idle */}
-                  {isActive && !isUserHovering && !isPlaying && (
-                    <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-zinc-700/60 rounded-full overflow-hidden">
-                      <div
-                        className="h-full transition-all duration-100 ease-linear"
-                        style={{
-                          width: `${cycleProgress}%`,
-                          backgroundColor: tab.accentColor,
-                        }}
-                      />
-                    </div>
+                  {/* Active running pulse indicator */}
+                  {isActive && isPlayingActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
                   )}
                 </button>
               );
@@ -660,37 +637,39 @@ export function HeroRuntimeSandbox() {
             href={activeConfig.targetUrl}
             className="flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white transition-colors group"
           >
-            <span>Launch simulator</span>
+            <span>Run simulation</span>
             <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>
 
       {/* ── Center Stage: Code Inspector + Runtime Simulation ── */}
-      <div className="p-4 sm:p-5 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="p-4 sm:p-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[380px]">
         {/* Left Column: Synchronized Code Panel (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl overflow-hidden">
-          <div className="px-3.5 py-2 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+        <div className="lg:col-span-5 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl overflow-hidden shadow-inner">
+          <div className="px-3.5 py-2.5 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
             <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: activeConfig.accentColor }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: activeConfig.accentColor }} />
               {activeTab === "javascript" && "counter.js"}
               {activeTab === "os" && "scheduler.c"}
               {activeTab === "java" && "Main.java"}
             </span>
-            <span className="text-zinc-500 text-[10px]">Step {currentStep + 1} of {maxSteps}</span>
+            <span className="text-zinc-500 text-[10px]">
+              Step {currentStep + 1} of {maxSteps}
+            </span>
           </div>
 
           {/* Syntax Code Body */}
-          <div className="p-3 font-mono text-xs leading-relaxed overflow-x-auto text-zinc-300 select-none">
+          <div className="p-3.5 font-mono text-xs leading-relaxed overflow-x-auto text-zinc-300 select-none flex-1 flex flex-col justify-center">
             {activeTab === "javascript" &&
               JS_CODE_LINES.map((codeLine, idx) => {
                 const isCurrent = JS_STEPS[currentStep].line === idx + 1;
                 return (
                   <div
                     key={`js-line-${idx}`}
-                    className={`flex items-center px-2 py-0.5 rounded transition-colors ${
+                    className={`flex items-center px-2 py-0.5 rounded transition-all duration-200 ${
                       isCurrent
-                        ? "bg-amber-500/15 text-amber-200 border-l-2 border-amber-500 font-medium"
+                        ? "bg-amber-500/20 text-amber-200 border-l-2 border-amber-500 font-medium translate-x-0.5"
                         : "hover:bg-zinc-800/30 text-zinc-400"
                     }`}
                   >
@@ -708,9 +687,9 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`os-line-${idx}`}
-                    className={`flex items-center px-2 py-0.5 rounded transition-colors ${
+                    className={`flex items-center px-2 py-0.5 rounded transition-all duration-200 ${
                       isCurrent
-                        ? "bg-sky-500/15 text-sky-200 border-l-2 border-sky-500 font-medium"
+                        ? "bg-sky-500/20 text-sky-200 border-l-2 border-sky-500 font-medium translate-x-0.5"
                         : "hover:bg-zinc-800/30 text-zinc-400"
                     }`}
                   >
@@ -728,9 +707,9 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`java-line-${idx}`}
-                    className={`flex items-center px-2 py-0.5 rounded transition-colors ${
+                    className={`flex items-center px-2 py-0.5 rounded transition-all duration-200 ${
                       isCurrent
-                        ? "bg-emerald-500/15 text-emerald-200 border-l-2 border-emerald-500 font-medium"
+                        ? "bg-emerald-500/20 text-emerald-200 border-l-2 border-emerald-500 font-medium translate-x-0.5"
                         : "hover:bg-zinc-800/30 text-zinc-400"
                     }`}
                   >
@@ -745,7 +724,7 @@ export function HeroRuntimeSandbox() {
         </div>
 
         {/* Right Column: Architectural Runtime Engine (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl p-3.5 relative overflow-hidden">
+        <div className="lg:col-span-7 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl p-4 relative overflow-hidden shadow-inner">
           <AnimatePresence>
             {/* 1. JAVASCRIPT: CALL STACK & SCOPE CHAIN */}
             {activeTab === "javascript" && (
@@ -755,19 +734,19 @@ export function HeroRuntimeSandbox() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-3"
+                className="flex-1 flex flex-col gap-3.5"
               >
                 {/* Call Stack Section */}
                 <div>
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-amber-400/90 mb-2 flex items-center justify-between">
-                    <span>Call Stack</span>
+                    <span>Call Stack (LIFO)</span>
                     <span className="text-[10px] text-zinc-500 font-normal">
                       {JS_STEPS[currentStep].callStack.length === 0 ? "Empty" : `${JS_STEPS[currentStep].callStack.length} Frame(s)`}
                     </span>
                   </div>
-                  <div className="min-h-[72px] bg-zinc-900/60 rounded-lg p-2 border border-zinc-800/60 flex flex-col-reverse gap-1.5 justify-end">
+                  <div className="min-h-[80px] bg-zinc-900/60 rounded-lg p-2.5 border border-zinc-800/60 flex flex-col-reverse gap-1.5 justify-end">
                     {JS_STEPS[currentStep].callStack.length === 0 ? (
-                      <div className="text-xs text-zinc-500 italic py-2 text-center">
+                      <div className="text-xs text-zinc-500 italic py-2.5 text-center">
                         Engine idle — Stack is empty
                       </div>
                     ) : (
@@ -793,22 +772,22 @@ export function HeroRuntimeSandbox() {
                 {/* Scope & Memory Environment */}
                 <div className="flex-1">
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">
-                    Scope Environment
+                    Scope Environment & Closures
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {JS_STEPS[currentStep].scopes.map((scope) => (
                       <div
                         key={`scope-${scope.id}`}
-                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2.5 flex flex-col gap-1.5"
+                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-3 flex flex-col gap-1.5"
                       >
                         <span className="text-[10px] font-medium text-amber-400/80 uppercase tracking-tight">
                           {scope.name}
                         </span>
-                        <div className="flex flex-col gap-1 font-mono text-xs">
+                        <div className="flex flex-col gap-1.5 font-mono text-xs">
                           {scope.vars.map((v) => (
                             <div key={`var-${scope.id}-${v.name}`} className="flex items-center justify-between">
                               <span className="text-zinc-400">{v.name}:</span>
-                              <span className={v.isTDZ ? "text-rose-400 text-[10px]" : "text-emerald-400"}>
+                              <span className={v.isTDZ ? "text-rose-400 text-[10px] font-semibold" : "text-emerald-400"}>
                                 {v.value}
                               </span>
                             </div>
@@ -829,7 +808,7 @@ export function HeroRuntimeSandbox() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-3"
+                className="flex-1 flex flex-col gap-3.5"
               >
                 {/* Active CPU Core */}
                 <div>
@@ -837,10 +816,10 @@ export function HeroRuntimeSandbox() {
                     <span>CPU Core (Hardware Execution)</span>
                     <span className="text-[10px] text-zinc-500 font-normal">Quantum: 20ms</span>
                   </div>
-                  <div className="min-h-[64px] bg-zinc-900/60 rounded-lg p-2.5 border border-zinc-800/60 flex items-center justify-between">
+                  <div className="min-h-[72px] bg-zinc-900/60 rounded-lg p-3 border border-zinc-800/60 flex items-center justify-between">
                     {OS_STEPS[currentStep].cpu ? (
                       <div className="w-full flex items-center justify-between px-2">
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-3">
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                           <div>
                             <span className="text-xs font-mono font-bold text-sky-200">
@@ -852,14 +831,16 @@ export function HeroRuntimeSandbox() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 font-mono text-xs">
-                          <span className="text-zinc-500">PC: <strong className="text-zinc-300">{OS_STEPS[currentStep].cpu?.pc}</strong></span>
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                          <span className="text-zinc-500">
+                            PC: <strong className="text-zinc-300">{OS_STEPS[currentStep].cpu?.pc}</strong>
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">
                             {OS_STEPS[currentStep].cpu?.quantumRemaining}ms left
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full text-center text-xs text-zinc-500 italic py-1">
+                      <div className="w-full text-center text-xs text-zinc-500 italic py-2">
                         Context Switch in progress... CPU pipeline flushing
                       </div>
                     )}
@@ -867,18 +848,18 @@ export function HeroRuntimeSandbox() {
                 </div>
 
                 {/* Ready & Waiting Queues */}
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {/* Ready Queue */}
-                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2.5 flex flex-col gap-1.5">
+                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-3 flex flex-col gap-1.5">
                     <span className="text-[10px] font-medium text-sky-400/80 uppercase tracking-tight">
                       Ready Queue (FIFO)
                     </span>
-                    <div className="flex flex-col gap-1 font-mono text-xs">
+                    <div className="flex flex-col gap-1.5 font-mono text-xs">
                       {OS_STEPS[currentStep].readyQueue.length === 0 ? (
                         <span className="text-zinc-600 text-xs italic">Queue empty</span>
                       ) : (
                         OS_STEPS[currentStep].readyQueue.map((proc) => (
-                          <div key={proc.id} className="flex items-center justify-between px-2 py-1 bg-zinc-800/40 rounded">
+                          <div key={proc.id} className="flex items-center justify-between px-2.5 py-1 bg-zinc-800/40 rounded">
                             <span className="text-zinc-300 font-semibold">{proc.pid}: {proc.name}</span>
                             <span className="text-[10px] text-zinc-500">{proc.state}</span>
                           </div>
@@ -888,16 +869,16 @@ export function HeroRuntimeSandbox() {
                   </div>
 
                   {/* Blocked / I/O Queue */}
-                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2.5 flex flex-col gap-1.5">
+                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-3 flex flex-col gap-1.5">
                     <span className="text-[10px] font-medium text-rose-400/80 uppercase tracking-tight">
                       I/O Wait Queue (Blocked)
                     </span>
-                    <div className="flex flex-col gap-1 font-mono text-xs">
+                    <div className="flex flex-col gap-1.5 font-mono text-xs">
                       {OS_STEPS[currentStep].waitingQueue.length === 0 ? (
                         <span className="text-zinc-600 text-xs italic">No blocked processes</span>
                       ) : (
                         OS_STEPS[currentStep].waitingQueue.map((proc) => (
-                          <div key={proc.id} className="flex items-center justify-between px-2 py-1 bg-rose-500/10 border border-rose-500/20 rounded">
+                          <div key={proc.id} className="flex items-center justify-between px-2.5 py-1 bg-rose-500/10 border border-rose-500/20 rounded">
                             <span className="text-rose-200 font-semibold">{proc.pid}</span>
                             <span className="text-[10px] text-rose-300/80">{proc.reason}</span>
                           </div>
@@ -917,7 +898,7 @@ export function HeroRuntimeSandbox() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-3"
+                className="flex-1 flex flex-col gap-3.5"
               >
                 {/* JVM Stack Frames */}
                 <div>
@@ -925,11 +906,11 @@ export function HeroRuntimeSandbox() {
                     <span>JVM Thread Stack</span>
                     <span className="text-[10px] text-zinc-500 font-normal">LIFO Frames</span>
                   </div>
-                  <div className="min-h-[72px] bg-zinc-900/60 rounded-lg p-2 border border-zinc-800/60 flex flex-col-reverse gap-1.5 justify-end">
+                  <div className="min-h-[80px] bg-zinc-900/60 rounded-lg p-2.5 border border-zinc-800/60 flex flex-col-reverse gap-1.5 justify-end">
                     {JAVA_STEPS[currentStep].stackFrames.map((frame, fIdx) => (
                       <div
                         key={frame.id}
-                        className={`px-2.5 py-1.5 rounded text-xs font-mono ${
+                        className={`px-3 py-1.5 rounded text-xs font-mono ${
                           fIdx === JAVA_STEPS[currentStep].stackFrames.length - 1
                             ? "bg-emerald-500/15 border border-emerald-500/40 text-emerald-200"
                             : "bg-zinc-800/40 text-zinc-400"
@@ -942,7 +923,10 @@ export function HeroRuntimeSandbox() {
                         <div className="flex flex-wrap gap-x-4 text-[11px]">
                           {frame.vars.map((v) => (
                             <span key={`${frame.id}-${v.name}`} className="text-zinc-400">
-                              {v.name}: <strong className={v.isRef ? "text-emerald-300 font-normal underline decoration-dotted" : "text-zinc-200"}>{v.value}</strong>
+                              {v.name}:{" "}
+                              <strong className={v.isRef ? "text-emerald-300 font-semibold underline decoration-dotted" : "text-zinc-200"}>
+                                {v.value}
+                              </strong>
                             </span>
                           ))}
                         </div>
@@ -956,11 +940,11 @@ export function HeroRuntimeSandbox() {
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">
                     Heap Space (Eden Generation)
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {JAVA_STEPS[currentStep].heapObjects.map((obj) => (
                       <div
                         key={obj.id}
-                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2.5 flex flex-col gap-1.5 font-mono text-xs"
+                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-3 flex flex-col gap-1.5 font-mono text-xs"
                       >
                         <div className="flex items-center justify-between pb-1 border-b border-zinc-800/60">
                           <span className="text-emerald-400 font-semibold">{obj.className}</span>
@@ -1023,10 +1007,10 @@ export function HeroRuntimeSandbox() {
           </button>
           <button
             onClick={togglePlay}
-            title={isPlaying ? "Pause simulation" : "Play simulation"}
+            title={isPlayingActive ? "Pause simulation" : "Play simulation"}
             className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-100 transition-colors flex items-center gap-1.5"
           >
-            {isPlaying ? (
+            {isPlayingActive ? (
               <>
                 <Pause className="w-3 h-3 text-amber-400" />
                 <span>Pause</span>

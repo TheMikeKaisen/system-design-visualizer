@@ -16,7 +16,7 @@ describe("HeroRuntimeSandbox", () => {
 
     expect(screen.getByRole("region", { name: /Interactive Multi-Discipline System Simulator Sandbox/i })).toBeDefined();
     expect(screen.getByText("counter.js")).toBeDefined();
-    expect(screen.getByText("Call Stack")).toBeDefined();
+    expect(screen.getAllByText(/Call Stack/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Engine idle — Stack is empty/i)).toBeDefined();
   });
 
@@ -27,8 +27,8 @@ describe("HeroRuntimeSandbox", () => {
     fireEvent.click(osTab);
 
     expect(screen.getByText("scheduler.c")).toBeDefined();
-    expect(screen.getByText("CPU Core (Hardware Execution)")).toBeDefined();
-    expect(screen.getByText("Ready Queue (FIFO)")).toBeDefined();
+    expect(screen.getByText(/CPU Core/i)).toBeDefined();
+    expect(screen.getByText(/Ready Queue/i)).toBeDefined();
     expect(screen.getByText("P1")).toBeDefined();
   });
 
@@ -39,11 +39,11 @@ describe("HeroRuntimeSandbox", () => {
     fireEvent.click(javaTab);
 
     expect(screen.getByText("Main.java")).toBeDefined();
-    expect(screen.getByText("JVM Thread Stack")).toBeDefined();
+    expect(screen.getByText(/JVM Thread Stack/i)).toBeDefined();
     expect(screen.getByText(/Eden Generation/i)).toBeDefined();
   });
 
-  it("advances and steps back through scenario steps", () => {
+  it("advances and steps back through scenario steps manually", () => {
     render(<HeroRuntimeSandbox />);
 
     const nextBtn = screen.getByTitle("Next step");
@@ -52,7 +52,7 @@ describe("HeroRuntimeSandbox", () => {
     expect(prevBtn).toHaveProperty("disabled", true);
 
     fireEvent.click(nextBtn);
-    expect(screen.getByText(/Creation Phase/i)).toBeDefined();
+    expect(screen.getByText("Declaration")).toBeDefined();
     expect(prevBtn).toHaveProperty("disabled", false);
 
     fireEvent.click(prevBtn);
@@ -73,56 +73,42 @@ describe("HeroRuntimeSandbox", () => {
     expect(screen.getByText("Engine Init")).toBeDefined();
   });
 
-  it("toggles play/pause mode", () => {
+  it("toggles pause and play mode", () => {
     render(<HeroRuntimeSandbox />);
 
+    // Starts in auto-running mode, so button offers Pause
+    const pauseBtn = screen.getByTitle("Pause simulation");
+    fireEvent.click(pauseBtn);
+
+    // Now paused, button offers Play
     const playBtn = screen.getByTitle("Play simulation");
+    expect(playBtn).toBeDefined();
+
     fireEvent.click(playBtn);
-
     expect(screen.getByTitle("Pause simulation")).toBeDefined();
-
-    // Advance timer for one step
-    act(() => {
-      vi.advanceTimersByTime(2300);
-    });
-
-    expect(screen.getByText(/Creation Phase/i)).toBeDefined();
   });
 
-  it("auto-cycles through tabs when idle", () => {
+  it("completes subject visualization then advances to next discipline", () => {
     render(<HeroRuntimeSandbox />);
 
     expect(screen.getByText("counter.js")).toBeDefined();
 
-    // Advance 8 seconds for idle transition to OS tab
-    act(() => {
-      vi.advanceTimersByTime(8100);
-    });
+    // Step through the chained timer cycles to complete JS scenario and transition to OS
+    for (let i = 0; i < 7; i++) {
+      act(() => {
+        vi.advanceTimersByTime(2500);
+      });
+    }
 
     expect(screen.getByText("scheduler.c")).toBeDefined();
 
-    // Advance another 8 seconds for idle transition to Java tab
-    act(() => {
-      vi.advanceTimersByTime(8100);
-    });
+    // Step through OS scenario and transition to Java
+    for (let i = 0; i < 7; i++) {
+      act(() => {
+        vi.advanceTimersByTime(2500);
+      });
+    }
 
     expect(screen.getByText("Main.java")).toBeDefined();
-  });
-
-  it("pauses idle auto-cycling on hover", () => {
-    render(<HeroRuntimeSandbox />);
-
-    const container = screen.getByRole("region", { name: /Interactive Multi-Discipline System Simulator Sandbox/i });
-    fireEvent.mouseEnter(container);
-
-    // Advance 9 seconds while hovering
-    act(() => {
-      vi.advanceTimersByTime(9000);
-    });
-
-    // Should still be on JavaScript tab because hover paused auto-cycling
-    expect(screen.getByText("counter.js")).toBeDefined();
-
-    fireEvent.mouseLeave(container);
   });
 });

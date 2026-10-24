@@ -73,7 +73,7 @@ export default function LearningPathsPage() {
                 Understand how Java code is compiled, converted to bytecode, and executed by the JVM and CPU.
               </p>
               <div className="flex items-center text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform">
-                Explore Java Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Explore<svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
             </div>
           </Link>
@@ -89,7 +89,7 @@ export default function LearningPathsPage() {
                 Master the Execution Context, Call Stack, Memory Heap, and Event Loop in real-time.
               </p>
               <div className="flex items-center text-sm font-semibold text-yellow-500 group-hover:translate-x-1 transition-transform">
-                Explore JS Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Explore <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
             </div>
           </Link>
@@ -110,7 +110,7 @@ export default function LearningPathsPage() {
                 Visualize process states, CPU scheduling, memory management, and hardware interaction in real-time.
               </p>
               <div className="flex items-center text-sm font-semibold text-teal-500 group-hover:translate-x-1 transition-transform">
-                Explore OS Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Explore <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
             </div>
           </Link>
@@ -130,7 +130,7 @@ export default function LearningPathsPage() {
                 Visualize React's rendering pipeline, from JSX compilation down to Virtual DOM diffing and DOM reconciliation.
               </p>
               <div className="flex items-center text-sm font-semibold text-blue-500 group-hover:translate-x-1 transition-transform">
-                Explore Frontend Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Explore <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
             </div>
           </Link>
@@ -150,7 +150,7 @@ export default function LearningPathsPage() {
                 Visualize Node.js internals, Thread Pools, non-blocking I/O, and the 5 phases of the Event Loop.
               </p>
               <div className="flex items-center text-sm font-semibold text-emerald-500 group-hover:translate-x-1 transition-transform">
-                Explore Backend Path <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Explore <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </div>
             </div>
           </Link>

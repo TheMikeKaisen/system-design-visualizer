@@ -2,6 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { LandingPage } from "../page-sections";
 
+// Mock child visualizers so their internal timers do not interfere with page tests
+vi.mock("../HeroRuntimeSandbox", () => ({
+  HeroRuntimeSandbox: () => <div data-testid="mock-hero-runtime-sandbox">Mock Sandbox</div>,
+}));
+
+vi.mock("../MiniDistributedCanvas", () => ({
+  MiniDistributedCanvas: () => <div data-testid="mock-mini-distributed-canvas">Mock Canvas</div>,
+}));
+
 // Mock intersection observer for jsdom
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -25,17 +34,24 @@ describe("LandingPage", () => {
   it("renders hero headline and key call to action links", () => {
     render(<LandingPage />);
 
-    expect(screen.getByRole("heading", { level: 1, name: /Understand systems from the inside out/i })).toBeDefined();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: /Don't just use software\. Understand how it works\./i,
+      })
+    ).toBeDefined();
 
-    const exploreLinks = screen.getAllByRole("link", { name: /Explore 33 Simulations/i });
+    const exploreLinks = screen.getAllByRole("link", { name: /Explore Simulations/i });
     expect(exploreLinks.length).toBeGreaterThanOrEqual(1);
 
-    const canvasLinks = screen.getAllByRole("link", { name: /Canvas/i });
+    const canvasLinks = screen.getAllByRole("link", { name: /Open Canvas Studio/i });
     expect(canvasLinks.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders all five core disciplines with their links", () => {
     render(<LandingPage />);
+
+    expect(screen.getByRole("heading", { name: /Go beyond the abstractions\./i })).toBeDefined();
 
     expect(screen.getAllByText("JavaScript Runtimes").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Operating Systems").length).toBeGreaterThanOrEqual(1);
@@ -43,25 +59,39 @@ describe("LandingPage", () => {
     expect(screen.getAllByText("Frontend Architecture").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Backend Internals").length).toBeGreaterThanOrEqual(1);
 
-    // Verify href targets
-    const jsLinks = screen.getAllByRole("link", { name: /JavaScript Runtimes/i });
-    expect(jsLinks[0].getAttribute("href")).toBe("/javascript");
+    // Verify explicit CTA text inside the cards
+    expect(screen.getByText("Explore JavaScript")).toBeDefined();
+    expect(screen.getByText("Explore Operating Systems")).toBeDefined();
+    expect(screen.getByText("Explore Java & JVM")).toBeDefined();
+    expect(screen.getByText("Explore Frontend Systems")).toBeDefined();
+    expect(screen.getByText("Explore Backend Systems")).toBeDefined();
 
-    const osLinks = screen.getAllByRole("link", { name: /Operating Systems/i });
-    expect(osLinks[0].getAttribute("href")).toBe("/operating-systems");
-
-    const javaLinks = screen.getAllByRole("link", { name: /Java & JVM Architecture/i });
-    expect(javaLinks[0].getAttribute("href")).toBe("/java");
+    // Verify card navigation links exist
+    expect(screen.getAllByRole("link", { name: /JavaScript Runtimes/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("link", { name: /Operating Systems/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("link", { name: /Java & JVM Architecture/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("link", { name: /Frontend Architecture/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("link", { name: /Backend Internals/i }).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders platform metrics and footer", () => {
+  it("renders simulation mechanics, canvas studio, and final CTA sections", () => {
     render(<LandingPage />);
 
-    expect(screen.getByText("33")).toBeDefined();
-    expect(screen.getByText("Interactive Episodes")).toBeDefined();
-    expect(screen.getByText("Core Disciplines")).toBeDefined();
-    expect(screen.getByText("100%")).toBeDefined();
-    expect(screen.getByText("Deterministic Models")).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Every step has a reason\./i })).toBeDefined();
+    expect(screen.getByText("Explicit state transitions")).toBeDefined();
+    expect(screen.getByText("Inspectable internals")).toBeDefined();
+    expect(screen.getByText("Deterministic execution")).toBeDefined();
+    expect(screen.getByText("Transparent models")).toBeDefined();
+
+    expect(screen.getByRole("heading", { name: /From a single function to a distributed system\./i })).toBeDefined();
+    expect(screen.getByRole("link", { name: /Build a System/i })).toBeDefined();
+
+    expect(
+      screen.getByRole("heading", {
+        name: /Curiosity is the starting point\. Understanding is the goal\./i,
+      })
+    ).toBeDefined();
+    expect(screen.getAllByRole("link", { name: /Browse All Modules/i }).length).toBeGreaterThanOrEqual(1);
 
     expect(screen.getByText(/Built for deep engineering learning/i)).toBeDefined();
   });

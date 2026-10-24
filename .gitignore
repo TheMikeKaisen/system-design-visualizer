@@ -14,10 +14,14 @@
 /coverage
 /skills
 
+AGENTS.md
+
 .cursorrules
 .mcp.json
 .opencode.json
 .windsurfrules
+Agent Rules/
+Agents.md
 AGENTS.md
 CLAUDE.md
 .agent/
