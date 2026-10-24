@@ -10,11 +10,18 @@ import { MicrotaskQueuePanel } from "./MicrotaskQueuePanel";
 import { CallbackQueuePanel } from "./CallbackQueuePanel";
 import { EventLoopIndicator } from "./EventLoopIndicator";
 import { cn } from "@/lib/utils";
+import { useActiveSimulation } from "@/context/JSSimulationContext";
 
 type Tab = "callstack" | "context" | "webapis" | "queues" | "console";
 
 export function EventLoopMobilePanels() {
   const [activeTab, setActiveTab] = useState<Tab>("callstack");
+  const { scenario, currentStepIndex } = useActiveSimulation();
+  const steps = scenario?.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
+
+  if (!currentState) return null;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

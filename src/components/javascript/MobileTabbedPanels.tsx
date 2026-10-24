@@ -7,20 +7,21 @@ import { ExecutionContextPanel } from "./ExecutionContextPanel";
 import { ConsolePanel } from "./ConsolePanel";
 import { TaskQueuePanel } from "./TaskQueuePanel";
 import { cn } from "@/lib/utils";
-import { useJSSimulationStore } from "@/store/useJSSimulationStore";
+import { useActiveSimulation } from "@/context/JSSimulationContext";
 
 type Tab = "callstack" | "context" | "console" | "queue";
 
 export function MobileTabbedPanels() {
   const [activeTab, setActiveTab] = useState<Tab>("callstack");
-  const { scenario, currentStepIndex } = useJSSimulationStore();
-  const currentState = scenario.steps[currentStepIndex];
-  const hasTaskQueue = currentState?.taskQueue !== undefined;
+  const { scenario, currentStepIndex } = useActiveSimulation();
+  const steps = scenario?.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
 
-  // If the active tab is queue but there's no task queue in this state, switch back to callstack
-  if (activeTab === "queue" && !hasTaskQueue) {
-    setActiveTab("callstack");
-  }
+  if (!currentState) return null;
+
+  const hasTaskQueue = currentState.taskQueue !== undefined;
+  const effectiveTab = activeTab === "queue" && !hasTaskQueue ? "callstack" : activeTab;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -30,10 +31,10 @@ export function MobileTabbedPanels() {
           onClick={() => setActiveTab("callstack")}
           className={cn(
             "flex-1 relative py-2 px-2 min-w-[80px] text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-colors z-10",
-            activeTab === "callstack" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+            effectiveTab === "callstack" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          {activeTab === "callstack" && (
+          {effectiveTab === "callstack" && (
             <motion.div
               layoutId="mobile-tab-indicator"
               className="absolute inset-0 bg-background shadow-sm border border-border/50 rounded-lg -z-10"
@@ -46,10 +47,10 @@ export function MobileTabbedPanels() {
           onClick={() => setActiveTab("context")}
           className={cn(
             "flex-1 relative py-2 px-2 min-w-[80px] text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-colors z-10",
-            activeTab === "context" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+            effectiveTab === "context" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          {activeTab === "context" && (
+          {effectiveTab === "context" && (
             <motion.div
               layoutId="mobile-tab-indicator"
               className="absolute inset-0 bg-background shadow-sm border border-border/50 rounded-lg -z-10"
@@ -63,10 +64,10 @@ export function MobileTabbedPanels() {
             onClick={() => setActiveTab("queue")}
             className={cn(
               "flex-1 relative py-2 px-2 min-w-[80px] text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-colors z-10",
-              activeTab === "queue" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+              effectiveTab === "queue" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {activeTab === "queue" && (
+            {effectiveTab === "queue" && (
               <motion.div
                 layoutId="mobile-tab-indicator"
                 className="absolute inset-0 bg-background shadow-sm border border-border/50 rounded-lg -z-10"
@@ -80,10 +81,10 @@ export function MobileTabbedPanels() {
           onClick={() => setActiveTab("console")}
           className={cn(
             "flex-1 relative py-2 px-2 min-w-[80px] text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-colors z-10",
-            activeTab === "console" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+            effectiveTab === "console" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          {activeTab === "console" && (
+          {effectiveTab === "console" && (
             <motion.div
               layoutId="mobile-tab-indicator"
               className="absolute inset-0 bg-background shadow-sm border border-border/50 rounded-lg -z-10"
@@ -97,7 +98,7 @@ export function MobileTabbedPanels() {
       {/* Tab Content */}
       <div className="flex-1 relative min-h-0">
         <AnimatePresence mode="wait">
-          {activeTab === "callstack" ? (
+          {effectiveTab === "callstack" ? (
             <motion.div
               key="callstack"
               initial={{ opacity: 0, x: -10 }}
@@ -108,7 +109,7 @@ export function MobileTabbedPanels() {
             >
               <CallStackPanel />
             </motion.div>
-          ) : activeTab === "context" ? (
+          ) : effectiveTab === "context" ? (
             <motion.div
               key="context"
               initial={{ opacity: 0, x: 10 }}
@@ -119,7 +120,7 @@ export function MobileTabbedPanels() {
             >
               <ExecutionContextPanel />
             </motion.div>
-          ) : activeTab === "queue" ? (
+          ) : effectiveTab === "queue" ? (
             <motion.div
               key="queue"
               initial={{ opacity: 0, x: 10 }}

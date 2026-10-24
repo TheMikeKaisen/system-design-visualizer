@@ -1,12 +1,17 @@
 "use client";
 
-import { useJSSimulationStore } from "@/store/useJSSimulationStore";
+import { useActiveSimulation } from "@/context/JSSimulationContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export function CallbackQueuePanel() {
-  const { scenario, currentStepIndex } = useJSSimulationStore();
-  const currentState = scenario.steps[currentStepIndex];
+  const { scenario, currentStepIndex } = useActiveSimulation();
+  const steps = scenario?.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
+
+  if (!currentState) return null;
+
   const callbackQueue = currentState.callbackQueue || [];
   const eventLoop = currentState.eventLoop || { phase: "idle" };
 

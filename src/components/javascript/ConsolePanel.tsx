@@ -1,10 +1,16 @@
 "use client";
 
-import { useJSSimulationStore } from "@/store/useJSSimulationStore";
+import { useActiveSimulation } from "@/context/JSSimulationContext";
 
 export function ConsolePanel() {
-  const { scenario, currentStepIndex } = useJSSimulationStore();
-  const currentState = scenario.steps[currentStepIndex];
+  const { scenario, currentStepIndex } = useActiveSimulation();
+  const steps = scenario?.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
+
+  if (!currentState) return null;
+
+  const consoleOutput = currentState.consoleOutput ?? [];
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
@@ -16,10 +22,10 @@ export function ConsolePanel() {
       </div>
       
       <div className="flex-1 bg-[#1e1e1e] p-4 font-mono text-sm text-green-400 overflow-y-auto">
-        {(!currentState.consoleOutput || currentState.consoleOutput.length === 0) ? (
+        {consoleOutput.length === 0 ? (
           <span className="text-gray-500 italic">No output yet...</span>
         ) : (
-          currentState.consoleOutput.map((out, idx) => (
+          consoleOutput.map((out, idx) => (
             <div key={idx} className="mb-1">{out}</div>
           ))
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useJSSimulationStore } from "@/store/useJSSimulationStore";
+import { useActiveSimulation } from "@/context/JSSimulationContext";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -65,13 +65,16 @@ interface TreeNode {
 }
 
 function ContextCard({ node }: { node: TreeNode }) {
-  const { scenario, currentStepIndex } = useJSSimulationStore();
-  const scopeLookup = scenario.steps[currentStepIndex].scopeLookup;
+  const { scenario, currentStepIndex } = useActiveSimulation();
+  const steps = scenario?.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
+  const scopeLookup = currentState?.scopeLookup;
   
   const ec = node.ec;
   const isStackActive = node.isTopStack && !scopeLookup;
   const isLookupActive = scopeLookup?.activeContextId === ec.id;
-  const isLookupChecked = scopeLookup?.checkedContextIds.includes(ec.id);
+  const isLookupChecked = scopeLookup?.checkedContextIds?.includes(ec.id) ?? false;
   const isLookupError = isLookupActive && scopeLookup?.status === "reference_error";
   
   let cardStyle = "bg-muted/10 border-border/40 opacity-80";
@@ -188,10 +191,10 @@ function ContextCard({ node }: { node: TreeNode }) {
                 {isClosure ? "Captured Variables" : "Lexical Environment"}
               </h3>
               <div className="flex flex-col gap-2 font-mono text-sm">
-                {ec.variables.length === 0 ? (
+                {(ec.variables ?? []).length === 0 ? (
                   <div className="text-muted-foreground text-xs italic">No variables</div>
                 ) : (
-                  ec.variables.map((v) => {
+                  (ec.variables ?? []).map((v) => {
                     const isTarget = scopeLookup?.targetVariable === v.name;
                     const isFoundHere = isLookupActive && isTarget && scopeLookup?.status === "found";
                     
@@ -249,9 +252,14 @@ function ContextCard({ node }: { node: TreeNode }) {
 }
 
 export function ExecutionContextPanel() {
-  const { scenario, currentStepIndex } = useJSSimulationStore();
-  const currentState = scenario.steps[currentStepIndex];
-  const callStack = currentState.callStack;
+  const { scenario, currentStepIndex } = useActiveSimulation();
+  const steps = scenario?.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
+
+  if (!currentState) return null;
+
+  const callStack = currentState.callStack ?? [];
 
   if (callStack.length === 0) {
     return (

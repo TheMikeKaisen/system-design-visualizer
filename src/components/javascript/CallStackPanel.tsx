@@ -1,18 +1,18 @@
 "use client";
 
-import { useJSSimulationStore } from "@/store/useJSSimulationStore";
+import { useActiveSimulation } from "@/context/JSSimulationContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export function CallStackPanel() {
-  const { scenario, currentStepIndex } = useJSSimulationStore();
-  const currentState = scenario.steps[currentStepIndex];
-  const callStack = currentState.callStack.filter(ec => !ec.isBlockScope && !ec.isClosure);
+  const { scenario, currentStepIndex } = useActiveSimulation();
+  const steps = scenario?.steps ?? [];
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const currentState = steps[safeIndex] ?? null;
 
-  // Only use layoutId in Event Loop simulator where tasks fly between panels.
-  // In all other episodes, execution contexts never cross panel boundaries,
-  // and layoutId causes Framer Motion to glitch on parent re-renders (toast/popup timers).
-  const isEventLoopMode = !!currentState.eventLoop;
+  if (!currentState) return null;
+
+  const callStack = (currentState.callStack ?? []).filter(ec => !ec.isBlockScope && !ec.isClosure);
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
