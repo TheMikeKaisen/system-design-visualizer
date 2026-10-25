@@ -75,7 +75,7 @@ export function LandingPage() {
       className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-amber-500/20 selection:text-amber-300"
     >
       <Nav />
-      <main>
+      <main className="pt-16">
         <HeroSection />
         <DisciplinesSection />
         <SimulationEngineSection />
@@ -118,9 +118,9 @@ function Nav() {
           </a>
           <Link href="/learning-paths" className="hover:text-foreground transition-colors flex items-center gap-1.5">
             <span>All Modules</span>
-            <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 text-[10px] font-semibold">
+            {/* <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 text-[10px] font-semibold">
               Interactive
-            </span>
+            </span> */}
           </Link>
         </div>
 
@@ -149,54 +149,54 @@ function Nav() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   2. Hero Section (Full-Width Centered Layout)
+   2. Hero Section (Option 1: Centered Viewport-Calibrated Layout)
    ═══════════════════════════════════════════════════════════════ */
 function HeroSection() {
   return (
-    <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-hidden">
-      {/* Editorial ambient light */}
+    <section className="relative pt-6 sm:pt-8 md:pt-10 pb-4 sm:pb-6 overflow-hidden flex flex-col justify-center min-h-[calc(100vh-4rem)]">
+      {/* Editorial ambient light with restrained, calibrated luminescence */}
       <div
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[520px] rounded-full pointer-events-none opacity-30 blur-3xl"
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[860px] h-[480px] rounded-full pointer-events-none opacity-25 blur-3xl"
         style={{
           background:
-            "radial-gradient(circle at center, rgba(245, 158, 11, 0.09) 0%, rgba(14, 165, 233, 0.05) 50%, transparent 80%)",
+            "radial-gradient(circle at center, rgba(245, 158, 11, 0.08) 0%, rgba(14, 165, 233, 0.04) 50%, transparent 80%)",
         }}
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-        {/* Header copy */}
-        <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
-          {/* Kicker badge */}
-          <div className="hero-fade-in inline-flex items-center gap-2 px-3 py-1 mb-5 rounded-full border border-border/70 bg-muted/40 text-xs font-medium text-muted-foreground backdrop-blur-md">
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 w-full flex flex-col items-center">
+        {/* Centered Editorial Header: Kicker, Headline, Supporting Copy & CTAs */}
+        <div className="max-w-3xl mx-auto text-center shrink-0">
+          {/* Kicker badge with animated active pulse */}
+          <div className="hero-fade-in inline-flex items-center gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 mb-2 sm:mb-2.5 rounded-full border border-border/70 bg-muted/40 text-[11px] sm:text-xs font-medium text-muted-foreground backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             <span>Interactive Runtime Engineering</span>
           </div>
 
-          <h1 className="hero-fade-in text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-foreground">
+          <h1 className="hero-fade-in text-xl sm:text-2xl md:text-3xl lg:text-[36px] xl:text-[40px] font-extrabold tracking-tight leading-[1.14] text-foreground">
             Don&apos;t just use software.{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-sky-500 to-emerald-500">
               Understand how it works.
             </span>
           </h1>
 
-          <p className="hero-fade-in-delayed mt-5 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-2xl mx-auto">
+          <p className="hero-fade-in-delayed mt-2 sm:mt-2.5 text-xs sm:text-sm md:text-base leading-relaxed text-muted-foreground max-w-2xl mx-auto line-clamp-3 sm:line-clamp-none">
             Explore what happens beneath the abstractions — from JavaScript execution and memory allocation to operating system scheduling and distributed systems. Run interactive simulations. Inspect internal state. Learn by experimenting.
           </p>
 
           {/* Action CTAs */}
-          <div className="hero-fade-in-delayed mt-8 flex flex-wrap items-center justify-center gap-3.5">
+          <div className="hero-fade-in-delayed mt-3 sm:mt-3.5 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
             <Link
               href="/learning-paths"
-              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-95 shadow-md hover:shadow-lg transition-all group"
+              className="inline-flex items-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-95 shadow-md hover:shadow-lg transition-all group active:scale-[0.98]"
             >
               <span>Explore Simulations</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
 
             <Link
               href="/canvas"
-              className="inline-flex items-center gap-2 px-5 py-3 text-sm font-medium text-foreground border border-border/70 rounded-xl hover:bg-muted/40 transition-colors"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-foreground border border-border/70 rounded-xl hover:bg-muted/40 transition-colors active:scale-[0.98]"
             >
               <span>Open Canvas Studio</span>
               <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
@@ -204,13 +204,9 @@ function HeroSection() {
           </div>
         </div>
 
-        {/* ── Full-Width Centered Hero Runtime Sandbox ── */}
-        <div className="hero-fade-in-delayed mt-6 w-full mx-auto">
+        {/* Centered HeroRuntimeSandbox Container: Strictly fits in 100vh on initial load */}
+        <div className="hero-fade-in-delayed mt-3 sm:mt-4 w-full max-w-5xl mx-auto">
           <HeroRuntimeSandbox />
-          <p className="mt-3 text-center text-xs text-muted-foreground/80 flex items-center justify-center gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-zinc-500/80" />
-            {/* <span>Continuous execution preview: runs each subject completely before transitioning • Use buttons to pause or inspect</span> */}
-          </p>
         </div>
       </div>
     </section>
@@ -310,7 +306,7 @@ const DISCIPLINES: DisciplineItem[] = [
 
 function DisciplinesSection() {
   return (
-    <section id="disciplines" className="py-20 sm:py-28 border-t border-border/40 bg-zinc-950/20" aria-labelledby="disciplines-heading">
+    <section id="disciplines" className="scroll-mt-16 py-20 sm:py-28 border-t border-border/40 bg-zinc-950/20" aria-labelledby="disciplines-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Section Header */}
         <div className="landing-reveal max-w-2xl mb-12">
@@ -333,20 +329,29 @@ function DisciplinesSection() {
               <Link
                 key={disc.id}
                 href={disc.href}
-                className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-card hover:border-border/90 hover:shadow-xl transition-all duration-300"
+                className={`group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-card/90 dark:bg-zinc-900/60 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/25 ${disc.accentBorder} shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] overflow-hidden`}
               >
+                {/* Subtle top hairline highlight on hover */}
+                <div
+                  className="absolute top-0 left-4 right-4 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, ${disc.accentColor}, transparent)`,
+                  }}
+                  aria-hidden="true"
+                />
+
                 <div>
                   {/* Top Row: Icon + Badge */}
                   <div className="flex items-center justify-between mb-5">
-                    <div className={`w-11 h-11 rounded-xl ${disc.accentBg} ${disc.accentText} flex items-center justify-center transition-transform group-hover:scale-105 duration-300`}>
+                    <div className={`w-11 h-11 rounded-xl ${disc.accentBg} ${disc.accentText} flex items-center justify-center transition-transform group-hover:scale-105 duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]`}>
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted/70 text-muted-foreground">
+                    <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/40">
                       {disc.badge}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                  <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight">
                     {disc.title}
                   </h3>
       
@@ -361,7 +366,7 @@ function DisciplinesSection() {
                     {disc.topics.map((t) => (
                       <span
                         key={t}
-                        className="text-[11px] font-mono px-2 py-0.5 rounded bg-muted/60 text-muted-foreground"
+                        className="text-[11px] font-mono px-2 py-0.5 rounded bg-muted/50 border border-border/40 text-muted-foreground group-hover:border-border/80 transition-colors"
                       >
                         {t}
                       </span>
@@ -380,19 +385,24 @@ function DisciplinesSection() {
           {/* 6th Card: All Modules Directory */}
           <Link
             href="/learning-paths"
-            className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-muted/20 hover:border-border/90 hover:shadow-xl transition-all duration-300"
+            className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-gradient-to-br from-card/95 via-card/80 to-muted/20 dark:from-zinc-900/80 dark:to-zinc-950/40 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl hover:shadow-black/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] overflow-hidden"
           >
+            <div
+              className="absolute top-0 left-4 right-4 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-primary to-transparent"
+              aria-hidden="true"
+            />
+
             <div>
               <div className="flex items-center justify-between mb-5">
-                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-105 duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]">
                   <Play className="w-5 h-5 fill-current" />
                 </div>
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
                   All Modules
                 </span>
               </div>
 
-              <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+              <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight">
                 Browse All Modules
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-6">
@@ -416,7 +426,7 @@ function DisciplinesSection() {
    ═══════════════════════════════════════════════════════════════ */
 function SimulationEngineSection() {
   return (
-    <section id="how-it-works" className="py-20 sm:py-28 border-t border-border/40" aria-labelledby="engine-heading">
+    <section id="how-it-works" className="scroll-mt-16 py-20 sm:py-28 border-t border-border/40" aria-labelledby="engine-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid lg:grid-cols-[1fr_1.3fr] gap-12 lg:gap-16 items-start">
           {/* Left copy */}
@@ -442,7 +452,7 @@ function SimulationEngineSection() {
 
           {/* Right feature cards */}
           <div className="landing-reveal-stagger grid sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-xl border border-border/60 bg-card">
+            <div className="p-5 rounded-xl border border-border/60 bg-card/90 dark:bg-zinc-900/50 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-border/90 transition-all duration-200">
               <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
                 <GitBranch className="w-4 h-4" />
               </div>
@@ -454,7 +464,7 @@ function SimulationEngineSection() {
               </p>
             </div>
 
-            <div className="p-5 rounded-xl border border-border/60 bg-card">
+            <div className="p-5 rounded-xl border border-border/60 bg-card/90 dark:bg-zinc-900/50 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-border/90 transition-all duration-200">
               <div className="w-9 h-9 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center mb-4">
                 <Eye className="w-4 h-4" />
               </div>
@@ -466,7 +476,7 @@ function SimulationEngineSection() {
               </p>
             </div>
 
-            <div className="p-5 rounded-xl border border-border/60 bg-card">
+            <div className="p-5 rounded-xl border border-border/60 bg-card/90 dark:bg-zinc-900/50 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-border/90 transition-all duration-200">
               <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
                 <Activity className="w-4 h-4" />
               </div>
@@ -478,7 +488,7 @@ function SimulationEngineSection() {
               </p>
             </div>
 
-            <div className="p-5 rounded-xl border border-border/60 bg-card">
+            <div className="p-5 rounded-xl border border-border/60 bg-card/90 dark:bg-zinc-900/50 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-border/90 transition-all duration-200">
               <div className="w-9 h-9 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center mb-4">
                 <Database className="w-4 h-4" />
               </div>
@@ -501,7 +511,7 @@ function SimulationEngineSection() {
    ═══════════════════════════════════════════════════════════════ */
 function CanvasStudioSection() {
   return (
-    <section id="canvas-studio" className="py-20 sm:py-28 border-t border-border/40 bg-zinc-950/40 relative overflow-hidden" aria-labelledby="canvas-heading">
+    <section id="canvas-studio" className="scroll-mt-16 py-20 sm:py-28 border-t border-border/40 bg-zinc-950/40 relative overflow-hidden" aria-labelledby="canvas-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Header copy */}
         <div className="max-w-3xl mb-10">

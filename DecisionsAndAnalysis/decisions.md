@@ -139,7 +139,7 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - **Hero Rebalance with Embedded Runtime Sandbox**:
     - Featured the new headline: *"Understand systems from the inside out."*
     - Mounted [`HeroRuntimeSandbox`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroRuntimeSandbox.tsx) directly in the hero, showcasing real code syntax, call stack frames, OS process queues, and JVM heap pointers with idle auto-cycling.
-    - Set dual CTAs: Primary *"Explore 33 Simulations"* (`/learning-paths`) and Secondary *"Launch Canvas Studio"* (`/canvas`).
+    - Set dual CTAs: Primary *"Explore Simulations"* (`/learning-paths`) and Secondary *"Launch Canvas Studio"* (`/canvas`).
   - **Five Core Disciplines Showcase**:
     - JavaScript (7 episodes • `/javascript`), Operating Systems (7 episodes • `/operating-systems`), Java/JVM (9 episodes • `/java`), Frontend Architecture (7 episodes • `/frontend`), and Backend Internals (3 episodes • `/backend`).
     - Every discipline card displays exact episode counts, topic tag pills, and direct launch links.
@@ -155,9 +155,151 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - **Automated Verification**:
     - Created [`LandingPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/LandingPage.test.tsx) verifying navigation, hero headline, all 5 discipline links, metrics, and footer.
     - Verified `npx tsc --noEmit` (0 errors), `npx eslint` (0 errors), all 37 Vitest test suites (278 tests passing), and full Next.js production build (`npm run build` compiling all 49 static & dynamic routes).
-- **Blast Radius**: Zero regressions.
 
+---
 
+## Decision Record 008: Comprehensive Editorial Copy Synchronization, Miniature Distributed Topology Centerpiece & Sequential Runtime Sandbox Progression
+- **Status**: Implemented & Verified
+- **Category**: Editorial Copy, Hero Layout, Runtime Simulation Progression & Canvas Centerpiece
+- **Problem**:
+  - The hero layout split attention between left-aligned copy and a side preview, which made the runtime visualization feel confined.
+  - The runtime sandbox auto-cycled across tabs prematurely after fixed timer intervals without completing the execution steps of the active discipline, leaving visitors unable to grasp the full execution lifecycle.
+  - Canvas Studio appeared as a static promotional card rather than an interactive architectural centerpiece connecting component runtimes to distributed scale.
+  - Section copy contained inconsistent phrasing and raw module counts ("33 Episodes", "7 Episodes"), conflicting with a unified product narrative: "discover mechanics -> inspect state -> experiment -> develop deep understanding".
+- **Decision & Implementation**:
+  - **Full-Width Centered Hero & Exact Editorial Copy**:
+    - Headline: *"Don't just use software. Understand how it works."* with gradient text accent.
+    - Supporting Copy: *"Explore what happens beneath the abstractions — from JavaScript execution and memory allocation to operating system scheduling and distributed systems. Run interactive simulations. Inspect internal state. Learn by experimenting."*
+    - Dual CTAs: Primary *"Explore Simulations"* (`/learning-paths`) and Secondary *"Open Canvas Studio"* (`/canvas`).
+    - Positioned `HeroRuntimeSandbox` directly beneath the centered hero headline in a full-width container.
+  - **Complete Subject-by-Subject Runtime Sandbox Progression (`HeroRuntimeSandbox.tsx`)**:
+    - Configured the continuous execution engine to play through all execution steps of the active subject (Step 0 through Step 5).
+    - Upon finishing the final step, it briefly pauses and automatically transitions to the next discipline (JavaScript -> Operating Systems -> Java & JVM -> loop).
+    - User interaction (scrubbing buttons, tab clicks, play/pause) instantly halts the auto-cycle and yields full manual control to the user.
+  - **Editorial Discipline Showcase (`page-sections.tsx`)**:
+    - Section Heading: *"Go beyond the abstractions."*
+    - Supporting Copy: *"Every module makes the invisible visible. Step through execution, inspect state transitions, and see how the underlying mechanics shape the software you build."*
+    - Strict qualitative labels ("Modules", "All Modules", "Interactive") replacing raw count numbers.
+    - Explicit card action labels matching user specifications: *"Explore JavaScript"*, *"Explore Operating Systems"*, *"Explore Java & JVM"*, *"Explore Frontend Systems"*, *"Explore Backend Systems"*.
+  - **Simulation Mechanics (`How It Works`)**:
+    - Section Heading: *"Every step has a reason."*
+    - Supporting Copy: *"These aren't prerecorded animations. Explore computational models that expose how state changes, operations execute, and systems respond to each action."*
+    - 4 Core Feature Badges: *"Explicit state transitions"*, *"Inspectable internals"*, *"Deterministic execution"*, *"Transparent models"*.
+  - **Canvas Studio as Centerpiece with Miniature Distributed Architecture (`MiniDistributedCanvas.tsx`)**:
+    - Heading: *"From a single function to a distributed system."*
+    - Supporting Copy: *"Start with the mechanics of a single execution environment. Then explore how services communicate, requests move through a system, and distributed architectures behave under load."*
+    - Action CTA: *"Build a System"* (`/canvas`) paired with *"No sign-up required"*.
+    - Visual Centerpiece: Interactive distributed topology with 6 connected nodes (Client, Load Balancer, Order Service, Redis Cache, Kafka Event Stream, PostgreSQL Database).
+    - Features live packet transit animation (HTTP request -> LB routing -> Service handling -> Redis Cache check & DB write -> Kafka event emission), telemetric latency/throughput HUD, and node inspection on click.
+  - **Final CTA**:
+    - Heading: *"Curiosity is the starting point. Understanding is the goal."*
+    - Copy: *"Pick a concept, run an experiment, and see what happens beneath the surface."*
+    - CTAs: *"Browse All Modules"* and *"Open Canvas Studio"*.
+  - **Negative Space & Layout Rhythm**:
+    - Rebalanced padding (`py-20 sm:py-28`) and alternating subtle ambient backgrounds (`bg-background`, `bg-zinc-950/20`, `bg-zinc-950/40`) to create intentional editorial breathing room without excessive empty darkness.
+  - **Automated Verification**:
+    - All 38 Vitest test suites (282 unit tests) pass 100%.
+    - `npx tsc --noEmit` clean with 0 errors.
+    - `npx eslint` clean with 0 errors / 0 warnings.
+    - Full Next.js production build (`npm run build`) succeeded across all 49 routes.
+- **Blast Radius**: Zero regressions; all modifications remain unstaged in the working tree per Rule #1.
 
+---
+
+## Decision Record 009: Unified `<SimulationShell>` Primitive, Global Keyboard Accessibility & Simulator Boilerplate Elimination
+- **Status**: Implemented & Verified
+- **Category**: Architecture, Accessibility & Component Unification
+- **Problem**:
+  - The 7 JavaScript simulator pages (`call-stack`, `hoisting`, `scope`, `let-const`, `block-scope`, `closures`, `event-loop`) contained over 1,400 lines of duplicate boilerplate for navigation bars, scenario selectors, playback controls, progress scrubbers, overlay wrappers, and auto-play timers.
+  - The simulators had zero keyboard navigation support, failing WCAG 2.1.1 accessibility guidelines.
+  - Route `page.tsx` files should never export helper components; an existing helper export (`BackendEpisodeShell` in `backend/episodes/1/page.tsx`) conflicted with Next.js App Router route type checking.
+- **Decision & Implementation**:
+  - **Unified `<SimulationShell>` (`src/components/javascript/SimulationShell.tsx`)**:
+    - Extracted a single declarative wrapper providing:
+      1. **Navigation & Scenario Switching**: Brand mark, back navigation link, and scenario title / dropdown listbox with click-outside detection.
+      2. **Unified Playback Controls**: Restart, Prev, Play/Pause, and Next buttons with accessible tooltips and ARIA attributes.
+      3. **Progress Scrubber**: Interactive step scrubber with percentage progress indicator and click-to-jump tracks.
+      4. **Explanation Integration**: Seamlessly mounts `StepExplanationBar` in normal layout flow with zero panel occlusion.
+      5. **Global Keyboard Accessibility (WCAG 2.1.1)**: Added `Space` (Play/Pause), `ArrowRight` (Next Step), `ArrowLeft` (Previous Step), and `KeyR` (Restart), safely ignoring events when focused in editable inputs.
+      6. **Integrated Overlays**: Centralized rendering for variable resolution searching, syntax error dialogs, and scope lookup traces.
+      7. **Lifecycle Management**: Automatically manages unmount reset and auto-play interval timers.
+  - **Migrated All 7 Simulator Pages**:
+    - Converted all 7 JavaScript simulator routes to consume `<SimulationShell>`, reducing page files from ~200–300 lines down to ~45–75 lines each (>1,400 lines of duplicate code eliminated).
+  - **Component Decoupling (`src/components/backend-simulator/BackendEpisodeShell.tsx`)**:
+    - Moved `BackendEpisodeShell` out of the route file `src/app/backend/episodes/1/page.tsx` into a dedicated component, restoring clean Next.js App Router type checking.
+  - **Automated Verification**:
+    - Created unit test suite [`SimulationShell.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/javascript/__tests__/SimulationShell.test.tsx) testing rendering, scenario switching, playback controls, keyboard events, and overlay activations.
+    - Verified all 39 Vitest suites (287 tests) pass cleanly.
+    - Verified `npx tsc --noEmit` (0 errors), `npx eslint` (0 errors / 0 warnings), and Next.js production build (`npm run build` compiling all 49 routes).
+- **Blast Radius**: Zero regressions; all modifications remain unstaged in the working tree per Rule #1.
+
+---
+
+## Decision Record 010: Centered Hero 100vh Viewport Calibration & Rich Token Syntax Highlighting Beautification
+- **Status**: Implemented & Verified
+- **Category**: UI/UX Layout, Hero Viewport Optimization & Syntax Theming
+- **Problem**:
+  - The user rejected the 2-column hero approach in favor of Option 1 (centered hero layout).
+  - The previous centered hero had loose vertical padding (`pt-28 sm:pt-36 pb-16 sm:pb-24`) that pushed `HeroRuntimeSandbox` below the fold, requiring users to scroll on initial page load.
+  - Code lines rendered inside `HeroRuntimeSandbox` used monochrome grey text (`text-zinc-400` / `text-zinc-300`), lacking the rich syntax tokenization found in the platform's simulators.
+- **Decision & Implementation**:
+  - **Strict 100vh Centered Hero Viewport Calibration (`src/components/landing/page-sections.tsx`)**:
+    - Reverted the 2-column layout and restored Option 1: centered architectural layout.
+    - Decoupled navbar clearance at the page root level (`<main className="pt-16">`), giving `HeroSection` an exact vertical budget of `min-h-[calc(100vh-4rem)]`.
+    - Calibrated hero vertical padding (`pt-6 sm:pt-8 md:pt-10 pb-4 sm:pb-6`), header margins (`mb-2 sm:mb-2.5`, `mt-2 sm:mt-2.5`, `mt-3 sm:mt-3.5`), typography scales (`text-xl sm:text-2xl md:text-3xl lg:text-[36px] xl:text-[40px] leading-[1.14]`), and CTA heights (`py-1.5 sm:py-2`).
+    - Added `scroll-mt-16` to all anchor sections (`#disciplines`, `#how-it-works`, `#canvas-studio`) so in-page anchor links land cleanly below the fixed 64px navbar.
+    - Calibrated `HeroRuntimeSandbox` center stage (`min-h-[210px] sm:min-h-[230px] lg:min-h-[245px]`) and compact window bars (`py-1.5 sm:py-2`), ensuring the entire hero composition (kicker badge, headline, supporting copy, CTAs, AND the complete `HeroRuntimeSandbox` with tabs, code panel, memory/stack panel, and bottom step explanation/control bar) fits strictly within 100vh on initial load across standard desktop and laptop screens (from 600px+ height) without requiring scrolling.
+  - **Rich Token Syntax Highlighting Beautification (`src/components/landing/HeroRuntimeSandbox.tsx`)**:
+    - Implemented a robust single-pass regex tokenizer `highlightCodeTokens(line: string, linePrefix?: string)`:
+      - **Strings**: Double and single-quoted literals (`"Alice"`, `'Alice'`) in emerald green (`text-emerald-400 font-medium`), correctly preventing internal slashes (e.g. `https://...`) from misidentifying as comments.
+      - **Comments**: Single-line comments (`// ...`) in muted zinc italic (`text-zinc-500 italic font-mono`).
+      - **Keywords**: JS, C/OS, and Java language keywords (`function`, `let`, `const`, `return`, `class`, `new`, `public`, `static`, `void`, `int`, `var`, `if`, `while`, etc.) in vibrant purple (`text-purple-400 font-medium`).
+      - **Types & Classes**: Known types (`User`, `Process`, `String`, `Main`) and PascalCase identifiers in teal (`text-teal-300 font-medium`).
+      - **Functions & Invocations**: Known function identifiers and dynamic function call detection (identifiers followed by `(`) in sky/blue (`text-sky-300 font-medium`).
+      - **Numbers & Hex**: Integers, decimals, and hex addresses (`0`, `1`, `20`, `0x0040`) in amber/orange (`text-amber-400 font-medium font-mono`).
+      - **Multi-Char Operators & Punctuation**: `->`, `+=`, `===`, `!==`, `==`, `!=`, `<=`, `>=`, `&&`, `||`, and symbols in muted zinc (`text-zinc-400`).
+      - **Variables & Identifiers**: `count`, `args`, `user`, `prev`, `next`, `pcb` in light zinc (`text-zinc-100 font-mono`).
+      - **Rule #4 Compliance**: Enforces deterministic composite keys `${linePrefix}-${i}-${token.slice(0, 8)}` instead of array index.
+    - Active line highlighting with radiant discipline-specific accent bars (`border-amber-400`, `border-sky-400`, `border-emerald-400`), ambient background glows, and line number indicators.
+  - **Canvas Studio Visual Polish**:
+    - Maintained authentic system design canvas preview (`MiniDistributedCanvas.tsx`) reflecting real architecture nodes (Client, Load Balancer / API Gateway with rate limits & circuit breakers, Order Service, Redis Cache, PostgreSQL Primary, Kafka Stream) with subtle glassmorphism and inner top highlights (`inset 0 1px 0 rgba(255,255,255,0.06)`).
+  - **Automated Verification**:
+    - Comprehensive unit tests in `HeroRuntimeSandbox.test.tsx` verifying multi-discipline syntax highlighting token classes, glowing active line styling, embedded slash URL tokenization, and hexadecimal address tokenization.
+    - Verified all 40 Vitest suites (294 tests) pass 100%.
+    - Verified `npx tsc --noEmit` (0 errors), `npx eslint` on touched files (0 errors / 0 warnings).
+- **Blast Radius**: Zero regressions; all modifications remain unstaged in the working tree per Rule #1.
+
+---
+
+## Decision Record 011: Design System Consistency — Standardized EpisodeCard Migration & Subject Accent Theming
+- **Status**: Implemented & Verified
+- **Category**: Design System, UI Consistency & Refactoring
+- **Problem**:
+  - While JavaScript had been migrated to the unified `EpisodeCard` primitive (Record 004), the remaining three discipline landing pages (`src/app/operating-systems/page.tsx`, `src/app/frontend/page.tsx`, and `src/app/backend/page.tsx`) were still handcrafting repetitive raw JSX card markup (>700 lines of duplicate code).
+  - The legacy cards exhibited visual inconsistencies: mismatched padding, inconsistent hover physics, random rainbow badge accents within the same discipline (e.g. green, pink, amber badges in Operating Systems), and copy typos (e.g. Operating Systems Episode 4 displaying "Episode 5").
+  - Lack of centralized metadata configurations made maintaining subject curricula error-prone.
+- **Decision & Implementation**:
+  - **Subject Configuration Decoupling**:
+    - Created typed metadata definitions:
+      - `src/app/operating-systems/episodes.tsx` (`OPERATING_SYSTEMS_EPISODES`: 7 episodes, unified `sky` accent theme).
+      - `src/app/frontend/episodes.tsx` (`FRONTEND_EPISODES`: 7 episodes, unified `violet` accent theme).
+      - `src/app/backend/episodes.tsx` (`BACKEND_EPISODES`: 3 episodes, unified `emerald` accent theme).
+    - Unified color themes strictly per discipline:
+      - Operating Systems: `sky` (replacing haphazard pink/green/amber mixes).
+      - Frontend Architecture: `violet` (replacing inconsistent badges).
+      - Backend Internals: `emerald` (clean backend systems branding).
+      - JavaScript: `amber` (as established in Record 004).
+  - **Page Template Standardization**:
+    - Refactored `operating-systems/page.tsx` (reduced from 342 lines down to 88 lines). Corrected the legacy Episode 4 badge typo.
+    - Refactored `frontend/page.tsx` (reduced from 251 lines down to 59 lines).
+    - Refactored `backend/page.tsx` (reduced from 135 lines down to 59 lines).
+    - Replaced hardcoded JSX blocks with clean declarative mapping over `EpisodeCard` with responsive `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`.
+  - **Automated Verification**:
+    - Created comprehensive unit test suite [`SubjectPathPages.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/__tests__/SubjectPathPages.test.tsx) testing all 3 subject index pages, verifying correct rendering of episode titles, links, badges, and accent theming.
+    - Full Vitest test suite passes 100% (40 test files, 291 unit tests).
+    - `npx tsc --noEmit` clean with 0 errors.
+    - `npx eslint` clean with 0 errors and 0 warnings.
+    - Full Next.js production build (`npm run build`) succeeded across all 49 routes.
+- **Blast Radius**: Zero regressions; eliminated >550 lines of duplicate markup, standardized visual experience across all 4 core subject directories. All changes remain unstaged per Rule #1.
 
 
