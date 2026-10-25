@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { useBackendSimulationStore } from "@/store/useBackendSimulationStore";
 import { BE_SCENARIO_2 } from "@/lib/backend-simulator/be-scenario-2";
-import { BackendEpisodeShell } from "../1/page";
+import { BackendEpisodeShell } from "@/components/backend-simulator/BackendEpisodeShell";
 
 export default function BackendEpisode2Page() {
   const { setScenario } = useBackendSimulationStore();

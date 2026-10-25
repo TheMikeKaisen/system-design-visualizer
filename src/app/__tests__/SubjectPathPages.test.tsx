@@ -1,0 +1,84 @@
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import OperatingSystemsPathPage from "../operating-systems/page";
+import FrontendPathPage from "../frontend/page";
+import BackendPathPage from "../backend/page";
+
+describe("Subject Path Pages (Design System Consistency)", () => {
+  describe("Operating Systems Path Page", () => {
+    it("renders all 7 operating systems episodes with their correct titles and links", () => {
+      render(<OperatingSystemsPathPage />);
+
+      expect(screen.getByRole("heading", { level: 1, name: /Operating Systems/i })).toBeDefined();
+
+      // Check all 7 episode titles
+      expect(screen.getByText("Process Lifecycle & Scheduling")).toBeDefined();
+      expect(screen.getByText("CPU Scheduling Deep-Dive")).toBeDefined();
+      expect(screen.getByText("Process Control Blocks (PCB)")).toBeDefined();
+      expect(screen.getByText("CPU Schedulers")).toBeDefined();
+      expect(screen.getByText("Producer-Consumer Problem")).toBeDefined();
+      expect(screen.getByText("Printer Spooler Problem")).toBeDefined();
+      expect(screen.getByText("Lock Variables")).toBeDefined();
+
+      // Check episode links
+      expect(screen.getByRole("link", { name: /Process Lifecycle & Scheduling/i })).toHaveAttribute(
+        "href",
+        "/operating-systems/simulator/process-states"
+      );
+      expect(screen.getByRole("link", { name: /Lock Variables/i })).toHaveAttribute(
+        "href",
+        "/operating-systems/simulator/lock-variables"
+      );
+    });
+  });
+
+  describe("Frontend Architecture Path Page", () => {
+    it("renders all 7 frontend architecture episodes with their correct titles and links", () => {
+      render(<FrontendPathPage />);
+
+      expect(screen.getByRole("heading", { level: 1, name: /Frontend Architecture/i })).toBeDefined();
+
+      // Check titles
+      expect(screen.getByText("JSX & Virtual DOM")).toBeDefined();
+      expect(screen.getByText("Props & State")).toBeDefined();
+      expect(screen.getByText("useState Batching")).toBeDefined();
+      expect(screen.getByText("useEffect Pipeline")).toBeDefined();
+      expect(screen.getByText("Cleanup & Race Conditions")).toBeDefined();
+      expect(screen.getByText("useLayoutEffect")).toBeDefined();
+      expect(screen.getByText("useRef & The DOM")).toBeDefined();
+
+      // Check links
+      expect(screen.getByRole("link", { name: /JSX & Virtual DOM/i })).toHaveAttribute(
+        "href",
+        "/frontend/episodes/1"
+      );
+      expect(screen.getByRole("link", { name: /useRef & The DOM/i })).toHaveAttribute(
+        "href",
+        "/frontend/episodes/7"
+      );
+    });
+  });
+
+  describe("Backend Internals Path Page", () => {
+    it("renders all 3 backend episodes with their correct titles and links", () => {
+      render(<BackendPathPage />);
+
+      expect(screen.getByRole("heading", { level: 1, name: /Backend internals/i })).toBeDefined();
+
+      // Check titles
+      expect(screen.getByText("Node Architecture")).toBeDefined();
+      expect(screen.getByText("Blocking vs Non-Blocking")).toBeDefined();
+      expect(screen.getByText("Event Loop Phases")).toBeDefined();
+
+      // Check links
+      expect(screen.getByRole("link", { name: /Node Architecture/i })).toHaveAttribute(
+        "href",
+        "/backend/episodes/1"
+      );
+      expect(screen.getByRole("link", { name: /Event Loop Phases/i })).toHaveAttribute(
+        "href",
+        "/backend/episodes/3"
+      );
+    });
+  });
+});

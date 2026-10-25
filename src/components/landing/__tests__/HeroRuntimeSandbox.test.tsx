@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { HeroRuntimeSandbox } from "../HeroRuntimeSandbox";
+import { HeroRuntimeSandbox, highlightCodeTokens } from "../HeroRuntimeSandbox";
 
 describe("HeroRuntimeSandbox", () => {
   beforeEach(() => {
@@ -111,4 +111,87 @@ describe("HeroRuntimeSandbox", () => {
 
     expect(screen.getByText("Main.java")).toBeDefined();
   });
+
+  it("beautifies code with syntax highlighting tokens and glowing active line styling", () => {
+    const { container } = render(<HeroRuntimeSandbox />);
+
+    // Verify keywords in purple
+    const functionKeywords = screen.getAllByText("function");
+    expect(functionKeywords.length).toBeGreaterThanOrEqual(1);
+    expect(functionKeywords[0].className).toContain("text-purple-400");
+
+    // Verify function name in sky/blue
+    const functionNames = screen.getAllByText("makeCounter");
+    expect(functionNames.length).toBeGreaterThanOrEqual(1);
+    expect(functionNames[0].className).toContain("text-sky-300");
+
+    // Verify comment in muted zinc italic
+    const comment = screen.getByText("// -> returns 1");
+    expect(comment.className).toContain("text-zinc-500");
+    expect(comment.className).toContain("italic");
+
+    // Verify number in amber
+    const numberZero = screen.getByText("0");
+    expect(numberZero.className).toContain("text-amber-400");
+
+    // Advance to step 1 (declaration) where line 1 is active
+    const nextBtn = screen.getByTitle("Next step");
+    fireEvent.click(nextBtn);
+
+    // Verify active line has glowing accent bar styling
+    const activeLineContainer = container.querySelector(".border-amber-400");
+    expect(activeLineContainer).not.toBeNull();
+  });
+
+  it("tokenizes across Operating Systems and Java tabs accurately", () => {
+    render(<HeroRuntimeSandbox />);
+
+    // Switch to Operating Systems
+    const osTab = screen.getByRole("tab", { name: /Operating Systems/i });
+    fireEvent.click(osTab);
+
+    // Verify OS keywords and types
+    const voidKeywords = screen.getAllByText("void");
+    expect(voidKeywords[0].className).toContain("text-purple-400");
+    const processTypes = screen.getAllByText("Process");
+    expect(processTypes[0].className).toContain("text-teal-300");
+    const scheduleFn = screen.getAllByText("schedule");
+    expect(scheduleFn[0].className).toContain("text-sky-300");
+
+    // Switch to Java
+    const javaTab = screen.getByRole("tab", { name: /Java & JVM/i });
+    fireEvent.click(javaTab);
+
+    // Verify Java keywords, types, and string literal
+    const classKeywords = screen.getAllByText("class");
+    expect(classKeywords[0].className).toContain("text-purple-400");
+    const userTypes = screen.getAllByText("User");
+    expect(userTypes[0].className).toContain("text-teal-300");
+    const stringLiteral = screen.getByText('"Alice"');
+    expect(stringLiteral.className).toContain("text-emerald-400");
+  });
+
+  it("safely tokenizes strings with embedded slashes without breaking into comments", () => {
+    const { container } = render(
+      <div>{highlightCodeTokens('const api = "https://example.com/api";', "test-url")}</div>
+    );
+
+    const stringToken = screen.getByText('"https://example.com/api"');
+    expect(stringToken.className).toContain("text-emerald-400");
+    // Ensure no comment span was mistakenly created
+    expect(container.querySelector(".text-zinc-500")).toBeNull();
+  });
+
+  it("tokenizes hexadecimal memory addresses and multi-character operators", () => {
+    render(
+      <div>{highlightCodeTokens("void* ptr = 0x0040; count += 1;", "test-hex")}</div>
+    );
+
+    const hexToken = screen.getByText("0x0040");
+    expect(hexToken.className).toContain("text-amber-400");
+
+    const opToken = screen.getByText("+=");
+    expect(opToken.className).toContain("text-zinc-400");
+  });
 });
+

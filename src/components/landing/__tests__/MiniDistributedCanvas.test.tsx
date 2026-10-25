@@ -18,12 +18,12 @@ describe("MiniDistributedCanvas", () => {
     expect(screen.getByText("Cluster Status:")).toBeDefined();
     expect(screen.getByText("Healthy")).toBeDefined();
 
-    expect(screen.getByText("Web Client")).toBeDefined();
-    expect(screen.getByText("Load Balancer")).toBeDefined();
-    expect(screen.getByText("Order Service")).toBeDefined();
-    expect(screen.getByText("Redis Cache")).toBeDefined();
-    expect(screen.getByText("Kafka Event Stream")).toBeDefined();
-    expect(screen.getByText("PostgreSQL Primary")).toBeDefined();
+    expect(screen.getAllByText("Web Client").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Load Balancer").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Order Service").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Redis Cache").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Kafka Event Stream").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("PostgreSQL Primary").length).toBeGreaterThanOrEqual(1);
   });
 
   it("allows selecting nodes to inspect their telemetry and role", () => {

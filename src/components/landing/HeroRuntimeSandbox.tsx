@@ -491,6 +491,204 @@ const TABS: TabConfig[] = [
   },
 ];
 
+/* ───────────────────────────────────────────────────────────────
+   SYNTAX HIGHLIGHTING TOKEN CLASSIFICATIONS
+   Adheres to rich simulation tokenization:
+   - Keywords (function, let, const, return, etc.) in vibrant purple
+   - Types & Classes (User, Process, String, Main) in teal
+   - Function & Method names (makeCounter, increment, etc.) in sky/blue
+   - Strings ("Alice", 'Alice') in emerald
+   - Numbers (0, 1, 20, 0x0040) in amber
+   - Comments (// ...) in muted zinc italic
+   - Variables & Identifiers (count, args, user, etc.) in light zinc
+   - Operators & Punctuation in muted zinc
+   ─────────────────────────────────────────────────────────────── */
+const KEYWORDS = new Set([
+  "function",
+  "let",
+  "const",
+  "var",
+  "return",
+  "class",
+  "new",
+  "public",
+  "static",
+  "void",
+  "int",
+  "if",
+  "else",
+  "while",
+  "for",
+  "switch",
+  "case",
+  "break",
+  "default",
+  "import",
+  "export",
+  "from",
+  "extends",
+  "implements",
+  "private",
+  "protected",
+  "final",
+  "try",
+  "catch",
+  "finally",
+  "throw",
+  "throws",
+  "null",
+  "true",
+  "false",
+  "this",
+  "super",
+]);
+
+const TYPES = new Set([
+  "User",
+  "Process",
+  "String",
+  "Main",
+  "System",
+  "Object",
+  "Integer",
+  "Boolean",
+  "Double",
+  "Float",
+  "Byte",
+  "Short",
+  "Long",
+  "Char",
+]);
+
+const FUNCTIONS = new Set([
+  "makeCounter",
+  "increment",
+  "counter",
+  "main",
+  "schedule",
+  "save_context",
+  "dequeue_ready",
+  "load_context",
+  "dispatch_to_cpu",
+  "login",
+  "println",
+  "print",
+]);
+
+const TOKEN_REGEX =
+  /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\/[^\r\n]*|[a-zA-Z_]\w*|0x[0-9a-fA-F]+|\d+(?:\.\d+)?|->|\+=|===|!==|==|!=|<=|>=|&&|\|\||[^\s\w]|\s+)/g;
+
+export function highlightCodeTokens(line: string, linePrefix = "tok"): React.ReactNode {
+  const matches = line.match(TOKEN_REGEX) || [line];
+
+  return (
+    <>
+      {matches.map((token, i) => {
+        // Deterministic composite key satisfying Rule #4
+        const key = `${linePrefix}-${i}-${token.slice(0, 8)}`;
+
+        if (/^\s+$/.test(token)) {
+          return <span key={key}>{token}</span>;
+        }
+
+        // Comments: // ...
+        if (token.startsWith("//")) {
+          return (
+            <span key={key} className="text-zinc-500 italic font-mono">
+              {token}
+            </span>
+          );
+        }
+
+        // Strings: "..." or '...'
+        if (
+          (token.startsWith('"') && token.endsWith('"')) ||
+          (token.startsWith("'") && token.endsWith("'"))
+        ) {
+          return (
+            <span key={key} className="text-emerald-400 font-medium">
+              {token}
+            </span>
+          );
+        }
+
+        // Numbers: decimals, integers, or hex (0x0040)
+        if (/^0x[0-9a-fA-F]+$/.test(token) || /^\d+(?:\.\d+)?$/.test(token)) {
+          return (
+            <span key={key} className="text-amber-400 font-medium font-mono">
+              {token}
+            </span>
+          );
+        }
+
+        // Language keywords
+        if (KEYWORDS.has(token)) {
+          return (
+            <span key={key} className="text-purple-400 font-medium">
+              {token}
+            </span>
+          );
+        }
+
+        // Types and Classes: Known types or PascalCase identifiers
+        if (TYPES.has(token) || /^[A-Z][a-zA-Z0-9_]*$/.test(token)) {
+          return (
+            <span key={key} className="text-teal-300 font-medium">
+              {token}
+            </span>
+          );
+        }
+
+        // Check if next non-whitespace token is '(' (function call/definition)
+        let isNextCall = false;
+        for (let nextIdx = i + 1; nextIdx < matches.length; nextIdx++) {
+          if (!/^\s+$/.test(matches[nextIdx])) {
+            isNextCall = matches[nextIdx] === "(";
+            break;
+          }
+        }
+
+        // Function or Method identifier
+        if (FUNCTIONS.has(token) || isNextCall) {
+          return (
+            <span key={key} className="text-sky-300 font-medium">
+              {token}
+            </span>
+          );
+        }
+
+        // Operators & Punctuation
+        if (
+          /^[{}()\[\];,\.=\+\->&*!~%^|/:?]$/.test(token) ||
+          token === "->" ||
+          token === "+=" ||
+          token === "===" ||
+          token === "!==" ||
+          token === "==" ||
+          token === "!=" ||
+          token === "<=" ||
+          token === ">=" ||
+          token === "&&" ||
+          token === "||"
+        ) {
+          return (
+            <span key={key} className="text-zinc-400">
+              {token}
+            </span>
+          );
+        }
+
+        // General Variables & Identifiers
+        return (
+          <span key={key} className="text-zinc-100 font-mono">
+            {token}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 const STEP_INTERVAL_MS = 2400; // Time per step during auto-play
 const SUBJECT_TRANSITION_DELAY_MS = 2200; // Pause at end of scenario before switching subject
 
@@ -585,23 +783,23 @@ export function HeroRuntimeSandbox() {
 
   return (
     <div
-      className="w-full rounded-2xl bg-[#0f1013]/95 border border-zinc-800/80 shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col text-zinc-100 transition-all duration-300"
+      className="w-full rounded-2xl bg-[#0f1013]/95 border border-zinc-800/80 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-xl overflow-hidden flex flex-col text-zinc-100 transition-all duration-300"
       role="region"
       aria-label="Interactive Multi-Discipline System Simulator Sandbox"
     >
       {/* ── Top Window Bar: Tactile Tab Navigation ── */}
-      <div className="border-b border-zinc-800/80 bg-[#14151b] px-4 py-3 flex flex-wrap items-center justify-between gap-3 select-none">
+      <div className="border-b border-zinc-800/80 bg-[#14151b] px-3 sm:px-4 py-1.5 sm:py-2 flex flex-wrap items-center justify-between gap-2 select-none">
         {/* Left: Window Dots & Tabs */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           {/* OS Window dots */}
-          <div className="hidden sm:flex items-center gap-1.5 mr-2">
+          <div className="hidden sm:flex items-center gap-1.5 mr-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
           </div>
 
           {/* Interactive Tabs */}
-          <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 border border-zinc-800/70 rounded-xl" role="tablist">
+          <div className="flex items-center gap-1 p-0.5 sm:p-1 bg-zinc-900/90 border border-zinc-800/70 rounded-xl" role="tablist">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -612,7 +810,7 @@ export function HeroRuntimeSandbox() {
                   role="tab"
                   aria-selected={isActive}
                   aria-controls={`panel-${tab.id}`}
-                  className={`relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  className={`relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
                     isActive
                       ? "text-zinc-100 bg-zinc-800/90 shadow-sm"
                       : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
@@ -644,10 +842,10 @@ export function HeroRuntimeSandbox() {
       </div>
 
       {/* ── Center Stage: Code Inspector + Runtime Simulation ── */}
-      <div className="p-4 sm:p-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[380px]">
+      <div className="p-2.5 sm:p-3 flex-1 grid grid-cols-1 md:grid-cols-12 gap-2.5 min-h-[210px] sm:min-h-[230px] lg:min-h-[245px]">
         {/* Left Column: Synchronized Code Panel (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl overflow-hidden shadow-inner">
-          <div className="px-3.5 py-2.5 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+        <div className="md:col-span-5 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl overflow-hidden shadow-inner min-w-0">
+          <div className="px-3 py-1.5 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: activeConfig.accentColor }} />
               {activeTab === "javascript" && "counter.js"}
@@ -659,24 +857,30 @@ export function HeroRuntimeSandbox() {
             </span>
           </div>
 
-          {/* Syntax Code Body */}
-          <div className="p-3.5 font-mono text-xs leading-relaxed overflow-x-auto text-zinc-300 select-none flex-1 flex flex-col justify-center">
+          {/* Syntax Code Body with Token Beautification */}
+          <div className="p-2 sm:p-2.5 font-mono text-xs leading-snug sm:leading-relaxed overflow-x-auto text-zinc-300 select-none flex-1 flex flex-col justify-center">
             {activeTab === "javascript" &&
               JS_CODE_LINES.map((codeLine, idx) => {
                 const isCurrent = JS_STEPS[currentStep].line === idx + 1;
                 return (
                   <div
                     key={`js-line-${idx}`}
-                    className={`flex items-center px-2 py-0.5 rounded transition-all duration-200 ${
+                    className={`flex items-center px-2 py-[1.5px] sm:py-[2px] rounded transition-all duration-200 border-l-2 ${
                       isCurrent
-                        ? "bg-amber-500/20 text-amber-200 border-l-2 border-amber-500 font-medium translate-x-0.5"
-                        : "hover:bg-zinc-800/30 text-zinc-400"
+                        ? "bg-amber-500/15 border-amber-400 shadow-[inset_0_1px_0_0_rgba(245,158,11,0.1),0_0_14px_rgba(245,158,11,0.12)] font-medium translate-x-0.5"
+                        : "border-transparent hover:bg-zinc-800/40 text-zinc-400"
                     }`}
                   >
-                    <span className="w-6 text-[10px] text-zinc-600 select-none text-right pr-2">
+                    <span
+                      className={`w-6 text-[10px] select-none text-right pr-2 font-mono transition-colors ${
+                        isCurrent ? "text-amber-400 font-bold" : "text-zinc-600"
+                      }`}
+                    >
                       {idx + 1}
                     </span>
-                    <span className="whitespace-pre">{codeLine}</span>
+                    <span className="whitespace-pre flex-1">
+                      {highlightCodeTokens(codeLine, `js-${idx}`)}
+                    </span>
                   </div>
                 );
               })}
@@ -687,16 +891,22 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`os-line-${idx}`}
-                    className={`flex items-center px-2 py-0.5 rounded transition-all duration-200 ${
+                    className={`flex items-center px-2 py-[1.5px] sm:py-[2px] rounded transition-all duration-200 border-l-2 ${
                       isCurrent
-                        ? "bg-sky-500/20 text-sky-200 border-l-2 border-sky-500 font-medium translate-x-0.5"
-                        : "hover:bg-zinc-800/30 text-zinc-400"
+                        ? "bg-sky-500/15 border-sky-400 shadow-[inset_0_1px_0_0_rgba(14,165,233,0.1),0_0_14px_rgba(14,165,233,0.12)] font-medium translate-x-0.5"
+                        : "border-transparent hover:bg-zinc-800/40 text-zinc-400"
                     }`}
                   >
-                    <span className="w-6 text-[10px] text-zinc-600 select-none text-right pr-2">
+                    <span
+                      className={`w-6 text-[10px] select-none text-right pr-2 font-mono transition-colors ${
+                        isCurrent ? "text-sky-400 font-bold" : "text-zinc-600"
+                      }`}
+                    >
                       {idx + 1}
                     </span>
-                    <span className="whitespace-pre">{codeLine}</span>
+                    <span className="whitespace-pre flex-1">
+                      {highlightCodeTokens(codeLine, `os-${idx}`)}
+                    </span>
                   </div>
                 );
               })}
@@ -707,16 +917,22 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`java-line-${idx}`}
-                    className={`flex items-center px-2 py-0.5 rounded transition-all duration-200 ${
+                    className={`flex items-center px-2 py-[1.5px] sm:py-[2px] rounded transition-all duration-200 border-l-2 ${
                       isCurrent
-                        ? "bg-emerald-500/20 text-emerald-200 border-l-2 border-emerald-500 font-medium translate-x-0.5"
-                        : "hover:bg-zinc-800/30 text-zinc-400"
+                        ? "bg-emerald-500/15 border-emerald-400 shadow-[inset_0_1px_0_0_rgba(16,185,129,0.1),0_0_14px_rgba(16,185,129,0.12)] font-medium translate-x-0.5"
+                        : "border-transparent hover:bg-zinc-800/40 text-zinc-400"
                     }`}
                   >
-                    <span className="w-6 text-[10px] text-zinc-600 select-none text-right pr-2">
+                    <span
+                      className={`w-6 text-[10px] select-none text-right pr-2 font-mono transition-colors ${
+                        isCurrent ? "text-emerald-400 font-bold" : "text-zinc-600"
+                      }`}
+                    >
                       {idx + 1}
                     </span>
-                    <span className="whitespace-pre">{codeLine}</span>
+                    <span className="whitespace-pre flex-1">
+                      {highlightCodeTokens(codeLine, `java-${idx}`)}
+                    </span>
                   </div>
                 );
               })}
@@ -724,7 +940,7 @@ export function HeroRuntimeSandbox() {
         </div>
 
         {/* Right Column: Architectural Runtime Engine (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl p-4 relative overflow-hidden shadow-inner">
+        <div className="md:col-span-7 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl p-2.5 sm:p-3 relative overflow-hidden shadow-inner min-w-0">
           <AnimatePresence>
             {/* 1. JAVASCRIPT: CALL STACK & SCOPE CHAIN */}
             {activeTab === "javascript" && (
@@ -734,26 +950,26 @@ export function HeroRuntimeSandbox() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-3.5"
+                className="flex-1 flex flex-col gap-2"
               >
                 {/* Call Stack Section */}
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-amber-400/90 mb-2 flex items-center justify-between">
+                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-amber-400/90 mb-1 flex items-center justify-between">
                     <span>Call Stack (LIFO)</span>
                     <span className="text-[10px] text-zinc-500 font-normal">
                       {JS_STEPS[currentStep].callStack.length === 0 ? "Empty" : `${JS_STEPS[currentStep].callStack.length} Frame(s)`}
                     </span>
                   </div>
-                  <div className="min-h-[80px] bg-zinc-900/60 rounded-lg p-2.5 border border-zinc-800/60 flex flex-col-reverse gap-1.5 justify-end">
+                  <div className="min-h-[50px] sm:min-h-[56px] bg-zinc-900/60 rounded-lg p-1.5 border border-zinc-800/60 flex flex-col-reverse gap-1 justify-end">
                     {JS_STEPS[currentStep].callStack.length === 0 ? (
-                      <div className="text-xs text-zinc-500 italic py-2.5 text-center">
+                      <div className="text-xs text-zinc-500 italic py-1 text-center">
                         Engine idle — Stack is empty
                       </div>
                     ) : (
                       JS_STEPS[currentStep].callStack.map((frame) => (
                         <div
                           key={`cs-${frame.id}`}
-                          className={`flex items-center justify-between px-3 py-1.5 rounded text-xs font-mono transition-all ${
+                          className={`flex items-center justify-between px-2.5 py-0.5 rounded text-xs font-mono transition-all ${
                             frame.active
                               ? "bg-amber-500/20 border border-amber-500/50 text-amber-200"
                               : "bg-zinc-800/50 text-zinc-400 opacity-60"
@@ -771,19 +987,19 @@ export function HeroRuntimeSandbox() {
 
                 {/* Scope & Memory Environment */}
                 <div className="flex-1">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
                     Scope Environment & Closures
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                     {JS_STEPS[currentStep].scopes.map((scope) => (
                       <div
                         key={`scope-${scope.id}`}
-                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-3 flex flex-col gap-1.5"
+                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2 flex flex-col gap-0.5"
                       >
                         <span className="text-[10px] font-medium text-amber-400/80 uppercase tracking-tight">
                           {scope.name}
                         </span>
-                        <div className="flex flex-col gap-1.5 font-mono text-xs">
+                        <div className="flex flex-col gap-0.5 font-mono text-[11px] sm:text-xs">
                           {scope.vars.map((v) => (
                             <div key={`var-${scope.id}-${v.name}`} className="flex items-center justify-between">
                               <span className="text-zinc-400">{v.name}:</span>
@@ -808,19 +1024,19 @@ export function HeroRuntimeSandbox() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-3.5"
+                className="flex-1 flex flex-col gap-2"
               >
                 {/* Active CPU Core */}
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-sky-400/90 mb-2 flex items-center justify-between">
+                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-sky-400/90 mb-1 flex items-center justify-between">
                     <span>CPU Core (Hardware Execution)</span>
                     <span className="text-[10px] text-zinc-500 font-normal">Quantum: 20ms</span>
                   </div>
-                  <div className="min-h-[72px] bg-zinc-900/60 rounded-lg p-3 border border-zinc-800/60 flex items-center justify-between">
+                  <div className="min-h-[46px] sm:min-h-[50px] bg-zinc-900/60 rounded-lg p-2 border border-zinc-800/60 flex items-center justify-between">
                     {OS_STEPS[currentStep].cpu ? (
-                      <div className="w-full flex items-center justify-between px-2">
-                        <div className="flex items-center gap-3">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <div className="w-full flex items-center justify-between px-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                           <div>
                             <span className="text-xs font-mono font-bold text-sky-200">
                               {OS_STEPS[currentStep].cpu?.pid}
@@ -830,17 +1046,17 @@ export function HeroRuntimeSandbox() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 font-mono text-xs">
-                          <span className="text-zinc-500">
+                        <div className="flex items-center gap-2 font-mono text-xs">
+                          <span className="text-zinc-500 text-[10px] sm:text-[11px]">
                             PC: <strong className="text-zinc-300">{OS_STEPS[currentStep].cpu?.pc}</strong>
                           </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">
-                            {OS_STEPS[currentStep].cpu?.quantumRemaining}ms left
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">
+                            {OS_STEPS[currentStep].cpu?.quantumRemaining}ms
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full text-center text-xs text-zinc-500 italic py-2">
+                      <div className="w-full text-center text-xs text-zinc-500 italic py-1">
                         Context Switch in progress... CPU pipeline flushing
                       </div>
                     )}
@@ -848,18 +1064,18 @@ export function HeroRuntimeSandbox() {
                 </div>
 
                 {/* Ready & Waiting Queues */}
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                   {/* Ready Queue */}
-                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-3 flex flex-col gap-1.5">
+                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2 flex flex-col gap-0.5">
                     <span className="text-[10px] font-medium text-sky-400/80 uppercase tracking-tight">
                       Ready Queue (FIFO)
                     </span>
-                    <div className="flex flex-col gap-1.5 font-mono text-xs">
+                    <div className="flex flex-col gap-0.5 font-mono text-[11px] sm:text-xs">
                       {OS_STEPS[currentStep].readyQueue.length === 0 ? (
                         <span className="text-zinc-600 text-xs italic">Queue empty</span>
                       ) : (
                         OS_STEPS[currentStep].readyQueue.map((proc) => (
-                          <div key={proc.id} className="flex items-center justify-between px-2.5 py-1 bg-zinc-800/40 rounded">
+                          <div key={proc.id} className="flex items-center justify-between px-1.5 py-0.5 bg-zinc-800/40 rounded">
                             <span className="text-zinc-300 font-semibold">{proc.pid}: {proc.name}</span>
                             <span className="text-[10px] text-zinc-500">{proc.state}</span>
                           </div>
@@ -869,16 +1085,16 @@ export function HeroRuntimeSandbox() {
                   </div>
 
                   {/* Blocked / I/O Queue */}
-                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-3 flex flex-col gap-1.5">
+                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2 flex flex-col gap-0.5">
                     <span className="text-[10px] font-medium text-rose-400/80 uppercase tracking-tight">
                       I/O Wait Queue (Blocked)
                     </span>
-                    <div className="flex flex-col gap-1.5 font-mono text-xs">
+                    <div className="flex flex-col gap-0.5 font-mono text-[11px] sm:text-xs">
                       {OS_STEPS[currentStep].waitingQueue.length === 0 ? (
                         <span className="text-zinc-600 text-xs italic">No blocked processes</span>
                       ) : (
                         OS_STEPS[currentStep].waitingQueue.map((proc) => (
-                          <div key={proc.id} className="flex items-center justify-between px-2.5 py-1 bg-rose-500/10 border border-rose-500/20 rounded">
+                          <div key={proc.id} className="flex items-center justify-between px-1.5 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded">
                             <span className="text-rose-200 font-semibold">{proc.pid}</span>
                             <span className="text-[10px] text-rose-300/80">{proc.reason}</span>
                           </div>
@@ -898,29 +1114,29 @@ export function HeroRuntimeSandbox() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-3.5"
+                className="flex-1 flex flex-col gap-2"
               >
                 {/* JVM Stack Frames */}
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400/90 mb-2 flex items-center justify-between">
+                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-emerald-400/90 mb-1 flex items-center justify-between">
                     <span>JVM Thread Stack</span>
                     <span className="text-[10px] text-zinc-500 font-normal">LIFO Frames</span>
                   </div>
-                  <div className="min-h-[80px] bg-zinc-900/60 rounded-lg p-2.5 border border-zinc-800/60 flex flex-col-reverse gap-1.5 justify-end">
+                  <div className="min-h-[50px] sm:min-h-[56px] bg-zinc-900/60 rounded-lg p-1.5 border border-zinc-800/60 flex flex-col-reverse gap-1 justify-end">
                     {JAVA_STEPS[currentStep].stackFrames.map((frame, fIdx) => (
                       <div
                         key={frame.id}
-                        className={`px-3 py-1.5 rounded text-xs font-mono ${
+                        className={`px-2 py-0.5 rounded text-xs font-mono ${
                           fIdx === JAVA_STEPS[currentStep].stackFrames.length - 1
                             ? "bg-emerald-500/15 border border-emerald-500/40 text-emerald-200"
                             : "bg-zinc-800/40 text-zinc-400"
                         }`}
                       >
-                        <div className="flex items-center justify-between font-semibold mb-1">
+                        <div className="flex items-center justify-between font-semibold mb-0.5">
                           <span>{frame.name}</span>
                           <span className="text-[10px] text-zinc-500">Frame</span>
                         </div>
-                        <div className="flex flex-wrap gap-x-4 text-[11px]">
+                        <div className="flex flex-wrap gap-x-2.5 text-[10px] sm:text-[11px]">
                           {frame.vars.map((v) => (
                             <span key={`${frame.id}-${v.name}`} className="text-zinc-400">
                               {v.name}:{" "}
@@ -937,22 +1153,22 @@ export function HeroRuntimeSandbox() {
 
                 {/* JVM Heap Space */}
                 <div className="flex-1">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
                     Heap Space (Eden Generation)
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                     {JAVA_STEPS[currentStep].heapObjects.map((obj) => (
                       <div
                         key={obj.id}
-                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-3 flex flex-col gap-1.5 font-mono text-xs"
+                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2 flex flex-col gap-0.5 font-mono text-xs"
                       >
-                        <div className="flex items-center justify-between pb-1 border-b border-zinc-800/60">
+                        <div className="flex items-center justify-between pb-0.5 border-b border-zinc-800/60">
                           <span className="text-emerald-400 font-semibold">{obj.className}</span>
                           <span className="text-[10px] text-zinc-500">{obj.address}</span>
                         </div>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-0.5">
                           {obj.fields.map((f) => (
-                            <div key={`${obj.id}-${f.name}`} className="flex items-center justify-between text-[11px]">
+                            <div key={`${obj.id}-${f.name}`} className="flex items-center justify-between text-[10px] sm:text-[11px]">
                               <span className="text-zinc-400">{f.name}:</span>
                               <span className="text-zinc-200 font-medium">{f.value}</span>
                             </div>
@@ -969,19 +1185,19 @@ export function HeroRuntimeSandbox() {
       </div>
 
       {/* ── Bottom Bar: Multi-Modal Step Explanation & Controls ── */}
-      <div className="border-t border-zinc-800/80 bg-[#14151b] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="border-t border-zinc-800/80 bg-[#14151b] px-3 sm:px-4 py-1.5 sm:py-2 flex flex-wrap items-center justify-between gap-2">
         {/* Step Explanation Banner */}
-        <div className="flex items-center gap-2.5 flex-1 min-w-[240px]">
+        <div className="flex items-center gap-2 flex-1 min-w-[220px]">
           <span
             className="w-2 h-2 rounded-full shrink-0 animate-pulse"
             style={{ backgroundColor: activeConfig.accentColor }}
           />
-          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-zinc-800/90 text-zinc-300 shrink-0">
+          <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 sm:px-2 py-0.5 rounded bg-zinc-800/90 text-zinc-300 shrink-0">
             {activeTab === "javascript" && JS_STEPS[currentStep].badge}
             {activeTab === "os" && OS_STEPS[currentStep].badge}
             {activeTab === "java" && JAVA_STEPS[currentStep].badge}
           </span>
-          <p className="text-xs text-zinc-300 line-clamp-1">
+          <p className="text-[11px] sm:text-xs text-zinc-300 line-clamp-1">
             {activeTab === "javascript" && JS_STEPS[currentStep].explanation}
             {activeTab === "os" && OS_STEPS[currentStep].explanation}
             {activeTab === "java" && JAVA_STEPS[currentStep].explanation}
@@ -989,11 +1205,11 @@ export function HeroRuntimeSandbox() {
         </div>
 
         {/* Micro-Step Controls */}
-        <div className="flex items-center gap-1.5 bg-zinc-900/90 border border-zinc-800/80 rounded-xl p-1 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-900/90 border border-zinc-800/80 rounded-xl p-0.5 sm:p-1 shrink-0">
           <button
             onClick={handleReset}
             title="Reset simulation to step 1"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors"
+            className="p-1 sm:p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
@@ -1001,14 +1217,14 @@ export function HeroRuntimeSandbox() {
             onClick={handlePrev}
             disabled={currentStep === 0}
             title="Previous step"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+            className="p-1 sm:p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
           >
             <SkipBack className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={togglePlay}
             title={isPlayingActive ? "Pause simulation" : "Play simulation"}
-            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-100 transition-colors flex items-center gap-1.5"
+            className="px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-100 transition-colors flex items-center gap-1.5"
           >
             {isPlayingActive ? (
               <>
@@ -1026,7 +1242,7 @@ export function HeroRuntimeSandbox() {
             onClick={handleNext}
             disabled={currentStep === maxSteps - 1}
             title="Next step"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+            className="p-1 sm:p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
           >
             <SkipForward className="w-3.5 h-3.5" />
           </button>
