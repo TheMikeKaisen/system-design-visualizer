@@ -1,20 +1,28 @@
 "use client";
 
+import React from "react";
 import { useActiveSimulation } from "@/context/JSSimulationContext";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function TaskQueuePanel() {
+export function TaskQueuePanel({ className }: { className?: string } = {}) {
   const { scenario, currentStepIndex } = useActiveSimulation();
   const steps = scenario?.steps ?? [];
-  const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
+  const safeIndex = Math.max(0, Math.min(currentStepIndex, Math.max(0, steps.length - 1)));
   const currentState = steps[safeIndex] ?? null;
 
   if (!currentState) return null;
 
-  const taskQueue = currentState.taskQueue || [];
+  const queueItems = (currentState.callbackQueue && currentState.callbackQueue.length > 0)
+    ? currentState.callbackQueue.map((item) => ({
+        id: item.id,
+        name: item.label,
+        timeout: item.source,
+        callback: item.callback,
+      }))
+    : (currentState.taskQueue || []);
 
   return (
-    <div className="flex flex-col h-full bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
+    <div className={`flex flex-col h-full bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden ${className ?? ""}`}>
       <div className="px-4 py-3 border-b border-border/50 bg-muted/20">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -23,13 +31,13 @@ export function TaskQueuePanel() {
       </div>
       
       <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3">
-        {taskQueue.length === 0 ? (
+        {queueItems.length === 0 ? (
           <div className="flex items-center justify-center h-full text-sm text-muted-foreground italic">
             Queue is empty
           </div>
         ) : (
           <AnimatePresence mode="popLayout">
-            {taskQueue.map((task) => (
+            {queueItems.map((task) => (
               <motion.div
                 key={task.id}
                 layout

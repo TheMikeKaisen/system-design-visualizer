@@ -20,7 +20,8 @@ export function MobileTabbedPanels() {
 
   if (!currentState) return null;
 
-  const hasTaskQueue = currentState.taskQueue !== undefined;
+  const hasTaskQueue = (currentState.taskQueue !== undefined && currentState.taskQueue.length > 0) ||
+                       (currentState.callbackQueue !== undefined && currentState.callbackQueue.length > 0);
   const effectiveTab = activeTab === "queue" && !hasTaskQueue ? "callstack" : activeTab;
 
   return (

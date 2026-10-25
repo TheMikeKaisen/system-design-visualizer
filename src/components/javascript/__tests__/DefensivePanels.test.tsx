@@ -7,6 +7,7 @@ import { ConsolePanel } from "../ConsolePanel";
 import { WebAPIsPanel } from "../WebAPIsPanel";
 import { MicrotaskQueuePanel } from "../MicrotaskQueuePanel";
 import { CallbackQueuePanel } from "../CallbackQueuePanel";
+import { QueuePanel } from "../QueuePanel";
 import { EventLoopIndicator } from "../EventLoopIndicator";
 import { TaskQueuePanel } from "../TaskQueuePanel";
 import { EventLoopMobilePanels } from "../EventLoopMobilePanels";
@@ -81,6 +82,8 @@ describe("Defensive Panels & Crash Prevention", () => {
     expect(() => render(<WebAPIsPanel />)).not.toThrow();
     expect(() => render(<MicrotaskQueuePanel />)).not.toThrow();
     expect(() => render(<CallbackQueuePanel />)).not.toThrow();
+    expect(() => render(<QueuePanel variant="microtask" />)).not.toThrow();
+    expect(() => render(<QueuePanel variant="callback" />)).not.toThrow();
     expect(() => render(<EventLoopIndicator />)).not.toThrow();
     expect(() => render(<TaskQueuePanel />)).not.toThrow();
     expect(() => render(<MobileTabbedPanels />)).not.toThrow();

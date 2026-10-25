@@ -14,7 +14,8 @@ function ClosuresLayout() {
   const steps = scenario?.steps ?? [];
   const safeIndex = Math.max(0, Math.min(currentStepIndex, Math.max(0, steps.length - 1)));
   const currentState = steps[safeIndex] ?? null;
-  const hasTaskQueue = currentState?.taskQueue !== undefined;
+  const hasTaskQueue = (currentState?.taskQueue !== undefined && currentState.taskQueue.length > 0) ||
+                       (currentState?.callbackQueue !== undefined && currentState.callbackQueue.length > 0);
 
   return (
     <main className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 gap-6 relative">
