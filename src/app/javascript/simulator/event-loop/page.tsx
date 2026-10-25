@@ -4,8 +4,7 @@ import { CodePanel } from "@/components/javascript/CodePanel";
 import { CallStackPanel } from "@/components/javascript/CallStackPanel";
 import { ConsolePanel } from "@/components/javascript/ConsolePanel";
 import { WebAPIsPanel } from "@/components/javascript/WebAPIsPanel";
-import { MicrotaskQueuePanel } from "@/components/javascript/MicrotaskQueuePanel";
-import { CallbackQueuePanel } from "@/components/javascript/CallbackQueuePanel";
+import { QueuePanel } from "@/components/javascript/QueuePanel";
 import { EventLoopIndicator } from "@/components/javascript/EventLoopIndicator";
 import { EventLoopMobilePanels } from "@/components/javascript/EventLoopMobilePanels";
 import { SimulationShell } from "@/components/javascript/SimulationShell";
@@ -36,13 +35,13 @@ export default function JSEventLoopSimulator() {
           {/* Bottom Half: Event Loop & Queues */}
           <div className="flex-[2] flex gap-4 bg-muted/5 p-4 rounded-xl border border-border/50 shadow-inner min-h-[160px] max-h-[240px]">
             <div className="flex-[2] min-w-0">
-              <MicrotaskQueuePanel />
+              <QueuePanel variant="microtask" />
             </div>
             <div className="flex-1 min-w-[160px]">
               <EventLoopIndicator />
             </div>
             <div className="flex-[2] min-w-0">
-              <CallbackQueuePanel />
+              <QueuePanel variant="callback" />
             </div>
             <div className="flex-[2] min-w-0">
               <ConsolePanel />

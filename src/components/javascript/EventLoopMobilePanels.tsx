@@ -6,8 +6,7 @@ import { CallStackPanel } from "./CallStackPanel";
 import { ExecutionContextPanel } from "./ExecutionContextPanel";
 import { ConsolePanel } from "./ConsolePanel";
 import { WebAPIsPanel } from "./WebAPIsPanel";
-import { MicrotaskQueuePanel } from "./MicrotaskQueuePanel";
-import { CallbackQueuePanel } from "./CallbackQueuePanel";
+import { QueuePanel } from "./QueuePanel";
 import { EventLoopIndicator } from "./EventLoopIndicator";
 import { cn } from "@/lib/utils";
 import { useActiveSimulation } from "@/context/JSSimulationContext";
@@ -97,13 +96,13 @@ export function EventLoopMobilePanels() {
               className="absolute inset-0 h-full flex flex-col gap-2 overflow-y-auto pb-4"
             >
               <div className="flex-shrink-0 h-[120px]">
-                <MicrotaskQueuePanel />
+                <QueuePanel variant="microtask" />
               </div>
               <div className="flex-shrink-0 h-[80px]">
                 <EventLoopIndicator />
               </div>
               <div className="flex-shrink-0 h-[120px]">
-                <CallbackQueuePanel />
+                <QueuePanel variant="callback" />
               </div>
             </motion.div>
           ) : (
