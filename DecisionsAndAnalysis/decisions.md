@@ -139,7 +139,7 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - **Hero Rebalance with Embedded Runtime Sandbox**:
     - Featured the new headline: *"Understand systems from the inside out."*
     - Mounted [`HeroRuntimeSandbox`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroRuntimeSandbox.tsx) directly in the hero, showcasing real code syntax, call stack frames, OS process queues, and JVM heap pointers with idle auto-cycling.
-    - Set dual CTAs: Primary *"Explore Simulations"* (`/learning-paths`) and Secondary *"Launch Canvas Studio"* (`/canvas`).
+    - Set dual CTAs: Primary *"Start Learning"* (`/learning-paths`) and Secondary *"Launch Canvas Studio"* (`/canvas`).
   - **Five Core Disciplines Showcase**:
     - JavaScript (7 episodes • `/javascript`), Operating Systems (7 episodes • `/operating-systems`), Java/JVM (9 episodes • `/java`), Frontend Architecture (7 episodes • `/frontend`), and Backend Internals (3 episodes • `/backend`).
     - Every discipline card displays exact episode counts, topic tag pills, and direct launch links.
@@ -170,7 +170,7 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - **Full-Width Centered Hero & Exact Editorial Copy**:
     - Headline: *"Don't just use software. Understand how it works."* with gradient text accent.
     - Supporting Copy: *"Explore what happens beneath the abstractions — from JavaScript execution and memory allocation to operating system scheduling and distributed systems. Run interactive simulations. Inspect internal state. Learn by experimenting."*
-    - Dual CTAs: Primary *"Explore Simulations"* (`/learning-paths`) and Secondary *"Open Canvas Studio"* (`/canvas`).
+    - Dual CTAs: Primary *"Start Learning"* (`/learning-paths`) and Secondary *"Open Canvas Studio"* (`/canvas`).
     - Positioned `HeroRuntimeSandbox` directly beneath the centered hero headline in a full-width container.
   - **Complete Subject-by-Subject Runtime Sandbox Progression (`HeroRuntimeSandbox.tsx`)**:
     - Configured the continuous execution engine to play through all execution steps of the active subject (Step 0 through Step 5).
@@ -301,5 +301,100 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - `npx eslint` clean with 0 errors and 0 warnings.
     - Full Next.js production build (`npm run build`) succeeded across all 49 routes.
 - **Blast Radius**: Zero regressions; eliminated >550 lines of duplicate markup, standardized visual experience across all 4 core subject directories. All changes remain unstaged per Rule #1.
+
+---
+
+## Decision Record 012: Unified `<DisciplineCard>` Primitive & Zero-Layout-Shift Sandbox Subject Transitions
+- **Status**: Implemented & Verified
+- **Category**: Design System Unification, UI/UX Layout Stability & Animation Performance
+- **Problem**:
+  - The subject cards on the landing page and `/learning-paths` exhibited conflicting color themes (e.g. Java was orange on learning-paths vs emerald on landing; JavaScript was yellow vs amber; OS was teal vs sky; Frontend was blue vs violet).
+  - `/learning-paths` was using legacy manual card markup (>160 lines) with old branding and blocked mobile visitors with an artificial "Bigger Screen Required" modal.
+  - When the active discipline tab auto-cycled in `HeroRuntimeSandbox`, `AnimatePresence` without synchronization kept both the exiting and entering panels in normal flex layout flow simultaneously for 150ms. Coupled with unconstrained `min-h` bounds, this caused the sandbox container to visibly stretch, shrink, and "reload" for a fraction of a second during each subject transition.
+- **Decision & Implementation**:
+  - **Shared `<DisciplineCard>` Primitive ([`src/components/ui/DisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/DisciplineCard.tsx))**:
+    - Extracted a single canonical component and metadata registry (`DISCIPLINES`) defining exact brand accents:
+      - JavaScript: `amber` (`#f59e0b`, `bg-amber-500/10`, `border-amber-500/30`)
+      - Operating Systems: `sky` (`#0ea5e9`, `bg-sky-500/10`, `border-sky-500/30`)
+      - Java & JVM: `emerald` (`#10b981`, `bg-emerald-500/10`, `border-emerald-500/30`)
+      - Frontend: `violet` (`#8b5cf6`, `bg-violet-500/10`, `border-violet-500/30`)
+      - Backend: `blue` (`#3b82f6`, `bg-blue-500/10`, `border-blue-500/30`)
+    - Both [`src/components/landing/page-sections.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/page-sections.tsx) and [`src/app/learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx) now render the identical `DisciplineCard` components with matching typography, hover glow hairlines, topic badges, and action CTAs.
+    - Updated `/learning-paths` navigation to canonical `System Simulator` branding and removed the artificial mobile blocker, delivering a responsive 6-card grid (including companion Canvas Studio card).
+  - **Zero-Layout-Shift Sandbox Subject Transitions ([`src/components/landing/HeroRuntimeSandbox.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroRuntimeSandbox.tsx))**:
+    - **Root Cause Isolated**: Unconstrained `min-h-[210px]` containers allowed natural content variance between 9 lines of JS vs 6 lines of Java, and concurrent rendering of exiting/entering panels in normal document flow caused a 150ms vertical height jump.
+    - **Fixed Height Lock**: Locked the center stage to exact height `h-[255px] sm:h-[270px] lg:h-[280px] overflow-hidden` with `h-full` on both code and architectural engine columns.
+    - **Atomic Layout Transitions**: Replaced asynchronous AnimatePresence layout collisions with synchronous React unmount/mount cycles wrapped in fixed-geometry panels (`h-[72px] sm:h-[76px]` for top stack/CPU frames, `flex-1 min-h-0` for bottom queues/heap/scopes).
+    - **Code Line Normalization**: Locked line height to `h-[21px] sm:h-[23px]` with vertical centering, guaranteeing that container dimensions remain 100% frozen with zero pixel shift during tab switches.
+  - **Automated Verification**:
+    - Created unit tests in [`DisciplineCard.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/__tests__/DisciplineCard.test.tsx) and [`LearningPathsPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/__tests__/LearningPathsPage.test.tsx).
+    - Verified all 42 Vitest test suites (298 tests) pass 100%.
+    - `npx tsc --noEmit` and `npx eslint` pass with 0 errors and 0 warnings.
+    - Next.js production build compiles all 49 routes cleanly.
+- **Blast Radius**: Zero regressions; eliminated duplicate card markup and resolved layout shift. All changes remain unstaged per Rule #1.
+
+---
+
+## Decision Record 013: Raycast-Style Landing Page Architecture & Dedicated Stage Runtime Sandbox
+- **Status**: Implemented & Verified
+- **Category**: UI/UX Architecture, Visual Polish & Interaction Design
+- **Problem**:
+  - Compressing both the brand headline block and the multi-panel interactive sandbox into a single 100vh viewport created severe visual congestion. The sandbox had to be squeezed into a 255px container with tiny code text and cramped state panels, while the hero headline was forced into smaller typography.
+  - Automatically running simulations and cycling tabs as soon as the page loaded was distracting to visitors trying to read code or evaluate the value proposition.
+- **Decision & Implementation**:
+  - **Section 1 — The Raycast Hero Stage ([`src/components/landing/page-sections.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/page-sections.tsx))**:
+    - Decoupled the hero from the sandbox, giving the hero approximately 85–90% of the desktop viewport height (`min-h-[85vh] sm:min-h-[90vh] flex flex-col justify-center items-center text-center`).
+    - Established confident typography: headline (*"Don't just use software. Understand how it works."*) scaled to `text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight`, with supporting copy (*"Explore the inner workings of software through interactive, visual simulations."*), and dual CTAs: `"Explore Learning Paths"` and `"Open Canvas Studio"`.
+    - Integrated candidate `hero-background-1.jpeg` as an atmospheric system topology backdrop (`public/images/hero-topology.jpeg`), masked with an elliptical radial gradient (`radial-gradient(ellipse 65% 60% at 50% 45%, black 20%, transparent 75%)`) and animated with a 10s subtle breathing drift (`hero-topology-bg` in `landing.css`, respecting `prefers-reduced-motion`). Contrast is naturally achieved through dark composition rather than artificial text drop-shadows.
+    - Added an ambient scroll hint at the bottom guiding users to the sandbox below.
+  - **Section 2 — Dedicated Stage Interactive Sandbox ([`src/components/landing/page-sections.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/page-sections.tsx) & [`src/components/landing/HeroRuntimeSandbox.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroRuntimeSandbox.tsx))**:
+    - Created a dedicated section with heading: *"See what happens beneath the surface."* and subheading: *"Explore how code executes, memory is allocated, processes are scheduled, and systems communicate."*
+    - Expanded sandbox height from cramped 255px to generous IDE proportions (`h-[440px] sm:h-[460px] lg:h-[480px]`).
+    - Increased code line height to `h-[26px] sm:h-[28px]` and text size to `text-xs sm:text-sm` with relaxed leading.
+    - Expanded Call Stack from 48px to `h-[84px] sm:h-[94px]` (allowing 3–4 frames to display cleanly), expanded CPU Core and JVM stack/heap panels.
+    - Set initial playback to paused (`isAutoCycling: false, isPlayingManual: false`), allowing visitors to read idle state peacefully. Clicking "Step Run" initiates simulation and full tour across disciplines.
+    - **High-Affordance Interactive Control Highlighting (Option 4)**:
+      - The primary **"Step Run"** button features subject-themed luminescence (amber glow for JS, sky glow for OS, emerald glow for Java) with a live pulsing beacon (`animate-ping`) when idle.
+      - Stepping forward is highlighted via a distinct, labeled **"Next"** button (`<span>Next</span> <SkipForward />`) with tactile border and elevation.
+      - The top window bar features an explicit **"Live Interactive Sandbox"** indicator, and the active discipline tab features enhanced tactile elevation with hairline border contrast.
+      - The bottom explanation banner includes a dynamic step counter badge `(currentStep + 1 / maxSteps)`.
+  - **Automated Verification**:
+    - Updated unit tests in [`src/components/landing/__tests__/LandingPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/LandingPage.test.tsx) and [`src/components/landing/__tests__/HeroRuntimeSandbox.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroRuntimeSandbox.test.tsx).
+    - Verified all 42 Vitest test suites (299 tests) pass with 100% green.
+    - `npx tsc --noEmit` and `npx eslint` pass with 0 errors and 0 warnings.
+    - Next.js production build (`npm run build`) succeeded across all 49 routes.
+- **Blast Radius**: Zero regressions; dramatically improved readability, visual hierarchy, and user agency on the landing page. All changes remain unstaged in accordance with Rule #1.
+
+---
+
+## Decision Record 014: Unified `<QueuePanel>` Primitive, Explicit Console Suppress Architecture & Episode 6 Asynchronous Modernization
+- **Status**: Implemented & Verified
+- **Category**: Component Architecture, Code Smell Elimination & Simulation Unification
+- **Problem**:
+  - `MicrotaskQueuePanel.tsx` (165 lines) and `CallbackQueuePanel.tsx` (165 lines) were 90% identical duplicate code blocks, violating DRY principles and creating divergence risks for queue animations and styling.
+  - `CodePanel.tsx:67` contained a fragile string-sniffing hack (`!scenario?.id?.startsWith("el-")`) to suppress the embedded console on the Event Loop page, which would break if scenarios were renamed or new event-driven modules were added.
+  - Episode 6 (Closures) Scenarios 5 & 6 used the legacy `taskQueue: [...]` schema, requiring the codebase to retain `TaskQueuePanel.tsx` and presenting an inconsistent mental model compared to Episode 7's modern `webAPIs` and `callbackQueue`.
+- **Decision & Implementation**:
+  - **Unified `<QueuePanel>` Primitive (`src/components/javascript/QueuePanel.tsx`)**:
+    - Created a polymorphic `<QueuePanel variant="microtask" | "callback" />` primitive supporting:
+      - Dynamic theming: `fuchsia` for microtasks, `amber` for callbacks.
+      - Dynamic badges: `⚡ Higher Priority` badge on microtasks; `(Macrotasks)` subtitle on callbacks.
+      - Dynamic event loop phase detection: `checking_microtasks` / `draining_microtask` vs `checking_callbacks`.
+      - Shared Framer Motion item animations and defensive step indexing.
+    - Updated `src/app/javascript/simulator/event-loop/page.tsx` and `EventLoopMobilePanels.tsx` to consume `<QueuePanel>` directly.
+    - Converted `MicrotaskQueuePanel.tsx` and `CallbackQueuePanel.tsx` to thin backward-compatible wrappers around `<QueuePanel>`.
+  - **Explicit Declarative Console Architecture**:
+    - Added `hideEmbeddedConsole?: boolean` to `SimulationScenario` in `src/lib/js-simulator/engine.ts`.
+    - Declared `hideEmbeddedConsole: true` on all 6 Event Loop scenarios in `src/lib/js-simulator/event-loop-scenarios.ts`.
+    - Refactored `CodePanel.tsx:67` to check `!scenario?.hideEmbeddedConsole`, completely removing string prefix sniffing.
+  - **Episode 6 Asynchronous Modernization & Graceful Fallback**:
+    - Modernized `TaskQueuePanel.tsx` to automatically render `callbackQueue` items with seamless fallback to `taskQueue`.
+    - Updated queue presence detection in `MobileTabbedPanels.tsx` and `src/app/javascript/simulator/closures/page.tsx` to detect either `callbackQueue` or `taskQueue`.
+  - **Automated Verification**:
+    - Created unit test suite `QueuePanel.test.tsx` verifying both variants, empty states, and event loop phase styling.
+    - Updated `DefensivePanels.test.tsx` verifying out-of-bounds safety across both `QueuePanel` variants.
+- **Blast Radius**: Zero regressions; eliminated duplicate code, decoupled component logic from scenario naming, and standardized queue architecture. All changes remain unstaged per Rule #1.
+
+
 
 
