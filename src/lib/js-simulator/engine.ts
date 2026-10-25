@@ -72,6 +72,7 @@ export interface SimulationScenario {
   title: string;
   code: string;
   steps: SimulationState[];
+  hideEmbeddedConsole?: boolean;
 }
 
 export const GREET_SCENARIO: SimulationScenario = {

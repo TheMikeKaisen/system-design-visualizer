@@ -3,6 +3,7 @@ import { SimulationScenario } from "./engine";
 export const EVENT_LOOP_SCENARIO_1: SimulationScenario = {
   id: "el-1",
   title: "1. setTimeout is NOT instant",
+  hideEmbeddedConsole: true,
   code: `console.log("Start");
 
 setTimeout(() => {
@@ -256,6 +257,7 @@ console.log("End");`,
 export const EVENT_LOOP_SCENARIO_2: SimulationScenario = {
   id: "el-2",
   title: "2. Promises Jump the Queue",
+  hideEmbeddedConsole: true,
   code: `console.log("Start");
 
 setTimeout(() => {
@@ -461,6 +463,7 @@ console.log("End");`,
 export const EVENT_LOOP_SCENARIO_3: SimulationScenario = {
   id: "el-3",
   title: "3. fetch() and the Microtask Queue",
+  hideEmbeddedConsole: true,
   code: `console.log("Start");
 
 fetch("https://api.example.com/data")
@@ -620,6 +623,7 @@ console.log("End");`,
 export const EVENT_LOOP_SCENARIO_4: SimulationScenario = {
   id: "el-4",
   title: "4. Nested Microtasks Drain Fully",
+  hideEmbeddedConsole: true,
   code: `console.log("Start");
 
 setTimeout(() => console.log("Timeout"), 0);
@@ -837,6 +841,7 @@ console.log("End");`,
 export const EVENT_LOOP_SCENARIO_5: SimulationScenario = {
   id: "el-5",
   title: "5. Multiple Timers and Ordering",
+  hideEmbeddedConsole: true,
   code: `console.log("Start");
 
 setTimeout(() => console.log("Timer 1 (1000ms)"), 1000);
@@ -1063,6 +1068,7 @@ console.log("End");`,
 export const EVENT_LOOP_SCENARIO_6: SimulationScenario = {
   id: "el-6",
   title: "6. The Full Orchestra",
+  hideEmbeddedConsole: true,
   code: `console.log("1");
 
 setTimeout(() => console.log("2"), 0);
