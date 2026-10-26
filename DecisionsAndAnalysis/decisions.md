@@ -421,7 +421,180 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Full Next.js production build (`npm run build`) succeeded across all 49 routes.
 - **Blast Radius**: Zero regressions; introduces permanent regression guardrails and clarifies JavaScript scope retention. All modifications remain unstaged in accordance with Rule #1.
 
+---
 
+## Decision Record 016: Editorial Light-Mode Architecture, Computational Graph Signature Motif & Continuum Bridge
+- **Status**: Implemented & Verified
+- **Category**: Design Systems, UI/UX Architecture, Visual Polish & Interactive Identity
+- **Problem**:
+  - The previous light mode suffered from stark, uncalibrated `#FFFFFF` backgrounds across all sections, causing severe eye strain and flat visual rhythm.
+  - Body and subtitle text used faint grey (`--muted-foreground: oklch(0.556 0 0)`), failing WCAG contrast standards and appearing washed out.
+  - The dark hero background image (`hero-topology.jpeg`) appeared as an unnatural black circular disc/smudge in light mode directly beneath the CTAs.
+  - The headline gradient (amber → sky → emerald) felt disjointed on light surfaces, and discipline cards lacked identity in their resting state.
+  - The dark simulator and canvas mockups felt pasted on without depth or ambient integration against light backgrounds.
+- **Decision & Implementation**:
+  - **Editorial Warm Stone Canvas & Alternating Sections ([`globals.css`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/globals.css) & [`page-sections.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/page-sections.tsx))**:
+    - Calibrated base light canvas to warm off-white **`#FAFAF9`** (Stone-50).
+    - Established rhythmic section alternation: Hero (`#FAFAF9`) → Sandbox (`#F5F5F4` Stone-100 tint) → Disciplines (`#FAFAF9`) → How It Works (`#F5F5F4` tint) → Canvas (`#FAFAF9`) → Final CTA (`#F5F5F4` tint).
+    - Darkened headings to dense ink **`#0A0A0A`** and body copy to rich, readable **`#52525B`** (`text-zinc-600 dark:text-zinc-400`).
+  - **Signature Motif: `<HeroComputationalGraph />` ([`src/components/landing/HeroComputationalGraph.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroComputationalGraph.tsx))**:
+    - Replaced the generic particle image with an engineered computational topology featuring 9 mathematical nodes (Ingress, Scheduler, Pipeline, Heap Pool, Queue, Registers, Cache, Sink, Bus Hub) connected by fine bezier circuit traces.
+    - Added autonomous data packet flows with discrete node activation state transitions.
+    - **Dual-Mode Treatment**: Soft monochrome blueprint with pale technical lines (`rgba(15,23,42,0.08)`) and cyan-teal diffuse halo in light mode; obsidian luminescence with subtle amber/sky accents in dark mode.
+    - **Cursor Parallax**: Added dampened 60fps cursor parallax with smooth lerp, gracefully disabled when `prefers-reduced-motion` is active.
+    - **Downward Vertical Circuit Bus Bridge**: A central bus conduit descends from the hero and connects seamlessly into Section 2 (*"See what happens beneath the surface"*), bridging abstract computation directly to the concrete runtime sandbox.
+  - **Harmonious Headline Gradient & Shimmer ([`landing.css`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/landing.css))**:
+    - Switched headline to closer cool hues: `from-teal-600 via-cyan-600 to-blue-600` in light mode (`dark:from-teal-400 dark:via-cyan-400 dark:to-blue-400`).
+    - Added a slow, luxurious 7-second hue shimmer (`headline-gradient-shimmer`) with reduced-motion protection.
+  - **Discipline Cards Permanent Resting Tints ([`DisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/DisciplineCard.tsx))**:
+    - Added permanent 20–25% discipline color borders (`border-amber-500/25`, `border-sky-500/25`, etc.) and permanent 8–10% icon background tints on pure white cards with soft elevation shadows (`shadow-[0_2px_10px_rgba(0,0,0,0.03)]`).
+  - **Soft Coloured Mockup Shadows**:
+    - Embedded both `HeroRuntimeSandbox` and `MiniDistributedCanvas` with soft atmospheric ambient back-glows (`from-amber-500/12 via-sky-500/12 to-emerald-500/12 blur-2xl`) and deep multi-layered shadows (`shadow-[0_24px_60px_-12px_rgba(15,23,42,0.22)]`), integrating the dark hardware mockups seamlessly onto the light background.
+  - **Automated Verification**:
+    - Created unit tests in [`HeroComputationalGraph.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroComputationalGraph.test.tsx).
+    - Verified all 46 Vitest test suites (417 unit tests) pass 100% green.
+    - `npx tsc --noEmit` and `npx eslint` pass with 0 errors and 0 warnings.
+    - Next.js production build (`npm run build`) succeeded across all 49 routes.
+- **Blast Radius**: Zero regressions; elevates the entire light mode visual experience to an award-winning editorial standard. All changes remain unstaged in working tree in accordance with Rule #1.
 
+---
 
+## Decision Record 017: Hero Background Refinement — Ambient Computational Field
+- **Status**: Implemented & Verified
+- **Category**: Visual Design, Creative Interaction & Design Systems
+- **Problem**:
+  - The previous hero background featured a closed elliptical loop surrounding the central headline, complete with 9 prominent technical text labels (`INGRESS`, `SCHEDULER`, `PIPELINE`, `HEAP_POOL`, `TASK_QUEUE`, `REGISTERS`, `L1_CACHE`, `STATE_SINK`, `BUS_HUB_01`) and repetitive concentric circles (`r="9"`, `r="14"`).
+  - This composition resembled a diagrammatic oval frame that enclosed and competed with the typography rather than providing an ambient, atmospheric computational background.
+  - Furthermore, cursor parallax across the entire canvas compromised typographic stability on various screen sizes.
+- **Decision & Implementation**:
+  - **Ambient Computational Field Architecture ([`HeroComputationalGraph.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroComputationalGraph.tsx))**:
+    - **Eliminated Closed Ellipse**: Replaced the closed framing loop with 4 disconnected, asymmetric, gently curved bezier traces (`field-path-a`, `field-path-b`, `field-path-c`, `field-path-d`) entering from peripheral corners and tapering out into the canvas.
+    - **Protected Central Negative Space**: Kept the central viewport area (`x: 380–820`, `y: 150–520`) completely clear of lines and nodes, guaranteeing unobstructed readability and maximum contrast for the headline, subtitle, and primary/secondary CTAs.
+    - **Eliminated All Permanent Labels**: Removed all 9 technical text labels and eliminated all `<text>` elements from the SVG background.
+    - **Restrained Geometric Nodes**: Scaled down to 7 discrete, restrained nodes (`r: 2.2–2.8px`) with subdued opacities and variable positioning across the peripheral quadrants. Eliminated concentric double rings; only two designated active nodes have a single, faint halo ring (`r: 7px`, `stroke-[0.9]`).
+    - **Continuous, Staggered Flow**: Integrated 4 out-of-phase data packet transitions with staggered durations (4.5s to 11s) along open paths, gracefully converging into the Section 2 vertical bus bridge.
+    - **Dual-Mode Art Direction**:
+      - *Light Mode*: Ultra-pale neutral gray linework (`stroke-zinc-900/[0.06]`), soft stone glow, and translucent cyan-teal accents seamlessly integrated on `#FAFAF9`.
+      - *Dark Mode*: Graphite/starlight linework (`stroke-white/[0.07]`) and obsidian luminescence.
+    - **Hydration-Safe Reduced-Motion**: Implemented `useSyncExternalStore` media query listener for `(prefers-reduced-motion: reduce)` to eliminate cascading re-renders and ESLint warnings while completely omitting animation loops when reduced motion is preferred.
+    - **Rock-Solid Typographic Stability**: Removed mouse parallax from the background SVG, ensuring the focal typography remains crisp and completely anchored.
+  - **Automated Verification**:
+    - Updated unit test suite in [`HeroComputationalGraph.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroComputationalGraph.test.tsx) asserting path existence, node counts, absence of technical labels, and reduced-motion compliance.
+    - Verified all 46 Vitest suites (417 unit tests) pass 100% green.
+    - `npx tsc --noEmit` and `npx eslint` pass with 0 errors and 0 warnings.
+- **Blast Radius**: Zero regressions outside the hero background. All modifications remain unstaged in working tree in accordance with Rule #1.
+
+---
+
+## Decision Record 018: Coherent Abstract Computational Network Hero Background
+- **Status**: Implemented & Verified
+- **Category**: Visual Design, Creative Interaction & Computational Systems Identity
+- **Problem**:
+  - The previous iteration removed the large elliptical outline and replaced it with disconnected curved paths and small colored particles.
+  - While it improved negative space, the background resembled generic decorative technology artwork rather than a coherent visualization of computational systems.
+  - It failed to communicate the product's identity as a platform exploring how software components communicate and how information flows through systems.
+- **Decision & Implementation**:
+  - **Canonical Distributed Request Architecture ([`HeroComputationalGraph.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroComputationalGraph.tsx))**:
+    - Modeled the core 7-node computational lifecycle:
+      - `CLIENT` (96, 145): Secondary node (`r: 3.5px`, cyan/teal), outbound request initiator and inbound response receiver.
+      - `INGRESS` (230, 80): Primary node (`r: 4.5px`, ring `r: 14px`, teal), entry point for HTTP requests.
+      - `LOAD_BALANCER` (920, 85): Primary node (`r: 4.8px`, ring `r: 16px`, blue), routes requests across application instances.
+      - `APP_SERVICE_A` (1110, 210): Primary node (`r: 4.5px`, ring `r: 14px`, teal), request processing and cache lookup coordinator.
+      - `APP_SERVICE_B` (1060, 420): Primary node (`r: 4.5px`, ring `r: 14px`, teal), alternate service instance.
+      - `APP_CACHE` (180, 520): Secondary node (`r: 3.8px`, ring `r: 11px`, cyan), cache hit return & subtle amber miss transition.
+      - `DATABASE` (460, 610): Secondary node (`r: 4.0px`, ring `r: 12px`, blue), persistent store queried exclusively on cache misses.
+    - Zero permanent text labels (`<text>` count: 0), preserving clean, confident typography without diagrammatic noise.
+  - **Quiet Central Negative Space & Peripheral Routing**:
+    - `C02` (Ingress ➔ LB) arcs high across the top periphery (`y: 40–85`) comfortably above the headline.
+    - `C05` / `C06` (App Services ➔ Cache) sweeps deeply along the bottom margin (`y: 560–580`) well below the dual CTAs.
+    - Central area (`x: 250–900, y: 100–550`) is 100% free of bright lines, nodes, or particle crossings.
+    - Relocated ambient glows from the center to peripheral node clusters, keeping text contrast pristine.
+  - **Deterministic 18s Repeating Lifecycle (Cycle A: Hit vs Cycle B: Miss)**:
+    - **Cycle A (0s–9s, Cache Hit)**: Outbound packet travels Client ➔ Ingress ➔ LB ➔ App Service A ➔ App Cache. Cache illuminates cyan; Database remains 100% idle. Response packet returns via reverse path to Client, followed by quiet resting idle.
+    - **Cycle B (9s–18s, Cache Miss)**: Outbound packet travels Client ➔ Ingress ➔ LB ➔ App Service B ➔ App Cache. Cache signals a miss, querying Database (which illuminates blue). Database returns result, and response travels back to Client, followed by quiet resting idle.
+    - Destination nodes illuminate with subtle ring and core pulse animations upon signal arrival.
+  - **Dual-Mode Sophistication & Section 2 Convergence**:
+    - *Light Mode*: Restrained pale neutral linework (`stroke-zinc-900/[0.08]`), muted colored nodes, zero harsh bloom.
+    - *Dark Mode*: Graphite starlight linework (`stroke-white/[0.09]`), glowing cyan/teal/blue accents.
+    - Lower traces converge seamlessly into Section 2 vertical bus bridge (`M 600 640 L 600 680`).
+  - **WCAG Reduced Motion & Performance**:
+    - Uses pure declarative SVG SMIL (`<animateMotion>`, `<animate>`) with zero React re-renders or runtime JS loops.
+    - `useSyncExternalStore` media query listener completely omits all motion packets and animations when `(prefers-reduced-motion: reduce)` is active, displaying the resting architectural topology.
+  - **Automated Verification**:
+    - Updated [`HeroComputationalGraph.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroComputationalGraph.test.tsx) testing canonical node export, IDs, connections C01–C07, packet counts, zero `<text>` labels, and reduced motion.
+    - Verified all 46 Vitest suites (418 unit tests) pass 100%.
+    - Verified `npx tsc --noEmit` (0 errors), `npx eslint` (0 errors / 0 warnings), and Next.js production build (`npm run build` compiling all 49 routes).
+- **Blast Radius**: Zero regressions; confined cleanly to hero background and its test suite. All changes remain unstaged per Rule #1.
+
+---
+
+## Decision Record 019: Gestalt Perimeter Loop Elimination & Open Asymmetric Computational Network Hero Background
+- **Status**: Implemented & Verified
+- **Category**: Visual Design, Creative Interaction, UI Architecture & Computational Systems Identity
+- **Problem**:
+  - The previous iteration (Record 018) placed all 7 canonical nodes along the outer perimeter (top, right, bottom, left) and connected them sequentially in a request-response cycle.
+  - While intended to keep the central text region clear, connecting perimeter nodes in a full cycle mathematically and visually formed an enclosing oval loop around the hero headline and CTAs.
+  - Under Gestalt visual principles (*Law of Closure and Continuity*), human perception grouped these perimeter curves into a single continuous oval wireframe enclosing the typography, causing the background to appear "more or less the same" despite code changes.
+  - In dark mode, low ambient opacity against the pitch-black void heightened the high-contrast wireframe outline.
+- **Decision & Implementation**:
+  - **Gestalt Perimeter Disruption ([`HeroComputationalGraph.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroComputationalGraph.tsx))**:
+    - **Complete Elimination of the Bottom Arc & Oval**: Rather than wrapping a sweeping curve across the entire bottom under the buttons, `APP_CACHE` ($1100, 460$) and `DATABASE` ($960, 570$) were repositioned into the right-hand backend cluster. The entire bottom-left quadrant is left as open negative space, completely eliminating the bottom half of the oval.
+    - **Asymmetric Composition (2 Nodes Left vs 5 Nodes Right)**: 
+      - Upper-left cluster: `CLIENT` ($90, 190$) and `INGRESS` ($230, 110$). External incoming request trace from off-screen ($(-20, 210)$).
+      - Top transit: `C02` ($230, 110 \rightarrow 950, 100$) high transit conduit skirting above the headline.
+      - Right-side backend cluster: `LOAD_BALANCER` ($950, 100$), `APP_SERVICE_A` ($1110, 190$), `APP_SERVICE_B` ($1040, 310$), `APP_CACHE` ($1100, 460$), and `DATABASE` ($960, 570$). External upstream & downstream mesh traces exiting the canvas ($1220\text{px}$).
+      - Section 2 downward conduit: Converges cleanly from the lower database bus into the central vertical conduit ($600, 640 \rightarrow 600, 680$).
+  - **Deterministic 18s Lifecycle**:
+    - Preserved the authentic 7-node request lifecycle:
+      - Cycle A ($0\text{s}–9\text{s}$): Inbound Request $\rightarrow$ App Service A $\rightarrow$ Cache Hit (Database $100\%$ idle) $\rightarrow$ Response returns to Client $\rightarrow$ Quiet resting idle.
+      - Cycle B ($9\text{s}–18\text{s}$): Inbound Request $\rightarrow$ App Service B $\rightarrow$ Cache Miss (amber signal) $\rightarrow$ Database query (blue signal) $\rightarrow$ Database result returns $\rightarrow$ Response returns to Client $\rightarrow$ Quiet resting idle.
+  - **Zero Permanent Text Labels & Clear Center**:
+    - Zero permanent text labels ($<\text{text}>$ count: 0). Central text region ($x: 270–930, y: 120–510$) remains $100\%$ free of bright nodes, lines, or packet crossings.
+  - **Automated Verification**:
+    - Unit tests in [`HeroComputationalGraph.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroComputationalGraph.test.tsx) asserting canonical node export, zero text labels, presence of connections C01–C07, absence of `<ellipse>` elements, and WCAG reduced motion compliance.
+    - All unit tests pass $100\%$ green.
+    - `npx tsc --noEmit` clean with 0 errors.
+    - All modifications remain unstaged in the working tree in strict adherence to Rule #1.
+- **Blast Radius**: Zero regressions; confined exclusively to the hero background SVG component and its test file.
+
+---
+
+## Decision Record 020: Operating Systems Phase 1 — Route Disambiguation, FCFS Decommissioning, Defensive Bounds Clamping & Reliability Hardening
+- **Status**: Implemented & Verified
+- **Category**: Architecture, Runtime Reliability, Curriculum Integrity & Code Quality
+- **Problem**:
+  - **Curriculum Route Collision (OS-CRIT-02)**: Episode 2 (*"CPU Scheduling Deep-Dive"*) and Episode 4 (*"CPU Schedulers"*) both pointed to the same URL (`/operating-systems/simulator/cpu-scheduling`). Episode 2's handcrafted 609-line scenario ([`cpu-scheduling-scenario.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/os-simulator/cpu-scheduling-scenario.ts)) simulating Chrome, Spotify, VS Code, and Discord was completely unmounted in the UI.
+  - **Orphaned Duplicate Code (OS-CRIT-03)**: An unused ghost route [`fcfs-scheduling/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/fcfs-scheduling/page.tsx) (1,589 lines) and [`fcfs-engine.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/os-simulator/fcfs-engine.ts) (349 lines) had zero incoming links or imports across the application.
+  - **Unchecked Bounds Crashes (OS-CRIT-01)**: Simulator pages read `scenario.steps[currentStepIndex].*` unconditionally without fallback clamping, risking fatal `TypeError: Cannot read properties of undefined` during fast clicking or scenario transitions.
+  - **22 ESLint Errors & 5 Warnings**: React 19 `react-hooks/set-state-in-effect` violations occurred across simulator pages, unescaped quote entities (`"`) and JSX comment text nodes existed in concurrency episodes, and unused imports/variables created build noise.
+  - **PCB Navigation & Array Safety (OS-MED-05, OS-LOW-04)**: PCB back link used raw HTML `<a>` triggering full browser reloads, and ready queue mappings lacked `.filter(Boolean)`.
+- **Decision & Implementation**:
+  - **1. Route Disambiguation & Restored Episode 2 Simulator**:
+    - Created dedicated route [`/operating-systems/simulator/cpu-scheduling-deep-dive`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/cpu-scheduling-deep-dive/page.tsx) for Episode 2, mounting `cpu-scheduling-scenario.ts` with the core OS visualizer components (`ZoneContainer`, `CPUBlock`, `SchedulerBadge`, `OSStatsSidebar`, `OSExplanationPanel`, `InterruptOverlay`, `OSToast`).
+    - Added an interactive Algorithm Selector toggle in the navbar (`[Non-Preemptive (FCFS) | Preemptive (Round Robin)]`), wired directly to `useOSSimulationStore.setSchedulingMode()`.
+    - Maintained Episode 4 as the universal multi-algorithm Gantt chart comparator at `/operating-systems/simulator/cpu-scheduling`.
+    - Updated [`src/app/operating-systems/episodes.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/episodes.tsx) with distinct routes.
+  - **2. Decommissioned Orphaned FCFS Code**:
+    - Confirmed 0 references via global search and deleted `src/app/operating-systems/simulator/fcfs-scheduling/page.tsx` and `src/lib/os-simulator/fcfs-engine.ts` (-1,938 lines of dead code).
+  - **3. Defensive Bounds Indexing & Fallback State (Decision Record 001)**:
+    - Added clamp-based indexing `const safeIndex = steps.length > 0 ? Math.max(0, Math.min(currentStepIndex, steps.length - 1)) : 0; const step = steps[safeIndex] ?? FALLBACK_STEP;` across all simulator pages (`cpu-scheduling-deep-dive`, `process-states`, `process-control-block`, `producer-consumer`, `printer-spooler`, `lock-variables`, `cpu-scheduling`).
+    - Provided fully typed `FALLBACK_STEP` instances for zero-undefined resilience.
+  - **4. Complete Elimination of All 22 ESLint Errors & 5 Warnings**:
+    - Eliminated `react-hooks/set-state-in-effect` violations in all auto-play timers by scheduling completion via asynchronous timeouts or derived state.
+    - Converted `OSToast.tsx` from a high-frequency 30ms JavaScript interval to declarative Framer Motion animations (`0` React re-renders) and fixed invalid CSS property value `borderLeftColor: "teal-500"` to canonical hex `#14b8a6`.
+    - Converted `PCBViewer.tsx` auto-expansion from an effect-based `setState` to idiomatic state adjustment during render.
+    - Fixed unescaped entities (`&quot;`) and converted JSX text comment nodes to string expressions (`{"// CRITICAL SECTION"}`) in `printer-spooler` and `producer-consumer`.
+    - Replaced React key array indices (`key={i}`) with composite keys (`key={`buffer-slot-${i}`}`, `key={`code-line-${process}-${idx}-${line.text.slice(0, 10)}`}`).
+    - Removed unused variables and imports in `OSStatsSidebar.tsx`, `process-states-scenario.ts`, and `useOSSimulationStore.ts`.
+  - **5. PCB Navigation & Array Safety**:
+    - Replaced `<a href="/operating-systems">` with Next.js `<Link href="/operating-systems">` in `process-control-block/page.tsx`.
+    - Added `.filter(Boolean)` on ready queue mappings in `process-control-block/page.tsx` and `cpu-scheduling/page.tsx`.
+  - **6. Automated Verification**:
+    - Created unit test suite [`CpuSchedulingDeepDive.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/cpu-scheduling-deep-dive/__tests__/CpuSchedulingDeepDive.test.tsx) testing navigation, heading, algorithm mode switching between FCFS and Round Robin, queue/CPU rendering, and step advancement.
+    - Updated [`SubjectPathPages.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/__tests__/SubjectPathPages.test.tsx) with assertions for Episode 2 and Episode 4 links.
+    - Verified all 47 Vitest test suites (423 unit tests) pass 100%.
+    - Verified `npx tsc --noEmit` clean with 0 errors.
+    - Verified `npx eslint` across all Operating Systems code clean with 0 errors / 0 warnings.
+    - All modifications remain unstaged in the working tree in strict compliance with Rule #1.
+- **Blast Radius**: Zero regressions; backwards-compatible across all learning paths and simulators.
 
