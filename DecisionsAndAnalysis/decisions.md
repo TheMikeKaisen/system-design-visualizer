@@ -769,4 +769,111 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Strict adherence to Rule #1: all changes remain unstaged in the working tree.
 - **Blast Radius**: Zero regressions; strictly elevated typographic craft, contrast, and visual maturity across the landing page.
 
+---
+
+## Decision Record 027: Hero Motion Engineering — Visual Hierarchy Restraint, Responsive Corridor Protection & GPU-Composited Lifecycle Optimization
+- **Status**: Implemented & Verified
+- **Category**: Motion Design, Animation Performance, Responsive Layout & Accessibility
+- **Problem**:
+  - The hero background computational graph previously ran 16 continuous neon packet orbs on desktop and 12 on mobile with SVG Gaussian blur filters (`#hcg-packet-glow`). Due to desynchronized loop timings (2.2s–3.6s), it created an anxious visual swarm that pulled peripheral eye focus away from the headline (*"Don't just use software. Understand how it works."*).
+  - On tablet and laptop viewports (768px–1150px), `preserveAspectRatio` scaled the 1280px coordinate space down, compressing left and right node boxes directly into the 896px `max-w-4xl` headline corridor. On mobile screens (<750px height), 4 bottom nodes at `cy: 585` crowded the CTA buttons.
+  - Moving SVG elements with `feGaussianBlur` filters cannot be cached as GPU textures, forcing expensive per-frame rasterization at 60/120fps. Furthermore, `.packet-dot-vertical` animated CSS `top: 0% -> 100%`, forcing layout and paint reflows every frame, and animations ran indefinitely even when scrolled off-screen.
+  - Under `prefers-reduced-motion`, `.packet-dot-vertical` had `transform: none`, removing `-translate-x-1/2` and knocking the static dot off-center. Sandbox badges also lacked `motion-reduce:animate-none`.
+- **Decision & Implementation**:
+  - **1. Visual Hierarchy & Calm Pacing ([`plans/001`](../plans/001-hero-background-restraint-and-hierarchy.md), [`HeroComputationalGraph.tsx`](../src/components/landing/HeroComputationalGraph.tsx))**:
+    - Halved packet density to 1 packet per connection (8 desktop, 6 mobile) and relaxed pacing to 4.5s–6.5s travel intervals.
+    - Subdued connection stroke opacities (`stroke-teal-500/22 dark:stroke-teal-400/16`, `stroke-amber-400/22 dark:stroke-amber-300/16`) and node chassis opacity (0.14/0.25).
+    - Choreographed hero entrance: headline enters crisply in 450ms (`--ease-out`), followed by a gentle background graph bloom over 700ms with a 180ms delay.
+  - **2. Responsive Text Corridor & Viewport Protection ([`plans/002`](../plans/002-responsive-viewbox-collision-remediation.md), [`HeroComputationalGraph.tsx`](../src/components/landing/HeroComputationalGraph.tsx), [`page-sections.tsx`](../src/components/landing/page-sections.tsx))**:
+    - Integrated `<mask id="hcg-corridor-mask">` with `<radialGradient id="hcg-mask-gradient">` in SVG `<defs>`, softly feathering connecting lines and packets behind the central text ellipse (`cx: 640, cy: 300, rx: 380, ry: 190`).
+    - Anchored desktop nodes outward: Left flank (`CLIENT`, `INGRESS`, `LOAD_BALANCER`) at `cx: 80`; Right flank (`APP_SERVICE_A`, `APP_SERVICE_B`, `APP_CACHE`, `DATABASE`) at `cx: 1180`.
+    - Refined foreground text container to `max-w-3xl lg:max-w-4xl`.
+    - Relocated mobile bottom row to `cy: 620` and adjusted mobile box to `32px` (`MOBILE_BR: 7`), creating 35px+ of breathing clearance below the CTAs.
+  - **3. GPU Hardware Acceleration, Visibility Lifecycle & Accessibility Hygiene ([`plans/003`](../plans/003-gpu-transform-and-performance-lifecycle.md), [`landing.css`](../src/components/landing/landing.css), [`HeroRuntimeSandbox.tsx`](../src/components/landing/HeroRuntimeSandbox.tsx))**:
+    - Replaced moving `<feGaussianBlur>` rasterization with zero-overhead concentric vector auras (`r="4.5"` aura + `r="2.2"` core dot).
+    - Refactored `@keyframes vertical-packet-flow` to GPU-composited `transform: translate3d(-50%, y, 0)` with `will-change: transform, opacity`.
+    - Added `IntersectionObserver` in `HeroComputationalGraph` to pause SMIL animations when off-screen, saving 100% of background animation resources when users view the simulator below.
+    - Fixed reduced-motion centering in `landing.css` (`transform: translate3d(-50%, 0, 0) !important; opacity: 0 !important;`) and added `motion-reduce:animate-none` across all sandbox indicators.
+    - Purged 70+ lines of dead, orphaned keyframes and consolidated tokens (`--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`, `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)`).
+- **Automated Verification**:
+  - Updated unit test suite in [`HeroComputationalGraph.test.tsx`](../src/components/landing/__tests__/HeroComputationalGraph.test.tsx) verifying canonical nodes, corridor clearance, mask integration, and reduced motion.
+  - All 4 landing test suites (29 tests) pass 100% green.
+  - Full Vitest suite passes 100% (47 test files, 426 tests passing).
+  - `npx tsc --noEmit` and `npx eslint` pass with 0 errors and 0 warnings.
+  - Strict Rule #1 adherence: all modifications remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; delivers an understated, Raycast/Linear-caliber motion design that elevates editorial clarity and respects system resources.
+
+---
+
+## Decision Record 028: App Navigation Architecture Unification, Learning Paths Impeccable Polish, Track Episode Normalization & OS Kernel Shell Consolidation
+- **Status**: Implemented & Verified
+- **Category**: UI/UX Architecture, Design Systems, Typography & Component Reusability
+- **Problem**:
+  - The `/learning-paths` route exhibited design inconsistencies: banned kicker/eyebrow badge (`All Learning Tracks`) cluttering the header, sub-optimal light-mode text selection contrast (`selection:text-amber-300`), mismatched tokens on Canvas Studio preview card, and requests to `/learning-path` (singular) produced a 404.
+  - Across the application, navbar and action button patterns were fragmented:
+    - Subject path pages (`/learning-paths`, `/javascript`, `/operating-systems`, `/frontend`, `/backend`, `/java`) used inconsistent navbar heights, hardcoded SVGs or inverted `ArrowRight rotate-180` hacks instead of standard `ArrowLeft` breadcrumb links, and divergent logo sizing.
+    - Java (`/java`) had never been migrated to the unified `EpisodeCard` component and was rendering 300+ lines of raw HTML cards with an unstyled "Open Canvas" button.
+    - Operating systems simulator pages (`process-states`, `cpu-scheduling-deep-dive`, `process-control-block`, `cpu-scheduling`) had duplicated custom navigation headers instead of utilizing the shared `OSKernelShell` primitive.
+- **Decision & Implementation**:
+  - **1. Unified App Navigation Primitive ([`AppNavbar.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/AppNavbar.tsx), [`AppNavbar.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/__tests__/AppNavbar.test.tsx))**:
+    - Created canonical `AppNavbar` supporting fixed header (`h-16`, `border-b border-border/50 bg-background/80 backdrop-blur-md`), canonical logo, optional back breadcrumb link (`ArrowLeft`), optional center navigation links, theme toggle, and standard `Canvas Studio` action button (`px-3 py-1.5 rounded-lg border border-border/60 hover:border-foreground/30`).
+    - Added comprehensive unit tests in `AppNavbar.test.tsx` (5/5 tests passing).
+  - **2. Learning Paths Polish & Route Redirect ([`learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx), [`next.config.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/next.config.ts))**:
+    - Removed banned kicker badge in compliance with Impeccable craft floor directives.
+    - Upgraded text selection to AAA contrast (`selection:bg-amber-500/25 selection:text-amber-950 dark:selection:text-amber-200`).
+    - Aligned Canvas Studio card tokens with `DisciplineCard`.
+    - Added permanent redirect in `next.config.ts` from `/learning-path` to `/learning-paths`.
+  - **3. Track Episode Normalization & Java Migration ([`episodes.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/java/episodes.tsx), [`java/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/java/page.tsx), [`SubjectPathPages.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/__tests__/SubjectPathPages.test.tsx))**:
+    - Created typed episode registry `JAVA_EPISODES` (8 episodes, unified `emerald` theme).
+    - Fully refactored `src/app/java/page.tsx` from raw HTML to `AppNavbar` and `EpisodeCard`.
+    - Standardized subject track pages (`/javascript`, `/operating-systems`, `/frontend`, `/backend`) with `AppNavbar` and standard Lucide `ArrowLeft` back buttons.
+    - Expanded test coverage across all 5 subject tracks in `SubjectPathPages.test.tsx` (5/5 tests passing).
+  - **4. OS Kernel Shell Consolidation ([`OSKernelShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/OSKernelShell.tsx), simulator pages)**:
+    - Standardized kernel visualizers (`process-states`, `cpu-scheduling-deep-dive`, `process-control-block`, `cpu-scheduling`) to use `OSKernelShell` with `headerExtra` for algorithm selection.
+    - Unified OS visualizer color tokens to Sky (`#0ea5e9`).
+- **Automated Verification**:
+  - `npx tsc --noEmit` clean with 0 errors across the entire codebase.
+  - `npx eslint` clean with 0 errors and 0 warnings across all touched files.
+  - All 50 Vitest test suites (447 tests) pass 100% green.
+  - Strict Rule #1 adherence: all modifications remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; delivers consistent navigation, elevated craft floor standards, and unified episode cards across all learning tracks.
+
+---
+
+## Decision Record 029: Operating Systems Phase 2 — Dual-Shell Architecture, Concurrency Trilogy Consolidation & Canonical Sky Theming
+- **Status**: Implemented & Verified
+- **Category**: UI/UX Architecture, Component Reusability, Accessibility & Design Systems
+- **Problem**:
+  - **Two Conflicting Simulation Paradigms**: Operating Systems simulations naturally bifurcated into two distinct archetypes: Full-viewport Kernel stages (Episodes 1–4) and Dual-thread split-screen stages (Episodes 5–7). Attempting to force both into a single bloated wrapper created brittle conditionals.
+  - **Massive Code Duplication in Concurrency Trilogy**: Episodes 5 (*Producer-Consumer*), 6 (*Printer Spooler*), and 7 (*Lock Variables & TSL*) duplicated over 1,400 lines of copy-pasted JSX: identical split-screen columns, duplicate timers and state handlers, identical assembly/C modal dialogs, and duplicate circular playback buttons.
+  - **Visual Token Fragmentation**: In violation of Decision Record 011 (establishing canonical **`sky`** `#0ea5e9` for Operating Systems), simulation controls and borders rendered a chaotic rainbow: Episode 1 used Teal, Episode 3 used Amber, Episode 4 used Teal, Episode 5 used Teal/Amber, Episode 6 used Cyan/Violet, and Episode 7 used Violet/Orange.
+  - **Zero Keyboard Navigation (WCAG 2.1.1 Deficit)**: Stepping through simulations required continuous manual mouse clicking; no keyboard controls existed.
+  - **Dead Code Overhead**: `OSLogPanel.tsx` (68 lines) remained completely unreferenced in the repository.
+- **Decision & Implementation**:
+  - **1. Shared Keyboard Navigation Hook ([`useOSKeyboardShortcuts.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/hooks/useOSKeyboardShortcuts.ts), [`useOSKeyboardShortcuts.test.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/hooks/__tests__/useOSKeyboardShortcuts.test.ts))**:
+    - Centralized global listeners for <kbd>Space</kbd> (play/pause), <kbd>→</kbd> (next step), <kbd>←</kbd> (prev step), and <kbd>R</kbd> (restart).
+    - Integrated automatic input suppression for active form fields (`input`, `textarea`, `select`, and `contentEditable`).
+    - Added unit test suite verifying all shortcuts and boundary conditions (8/8 tests passing).
+  - **2. Archetype A: Kernel & Scheduling Shell ([`OSKernelShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/OSKernelShell.tsx), [`OSKernelShell.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/__tests__/OSKernelShell.test.tsx))**:
+    - Encapsulated top navbar navigation, System Simulator logo, canonical back link, compact centered playback controls, step counter (`X/Y`), speed selector pills (`0.5x`, `1x`, `2x`), chapter selector pills, optional `headerExtra` slot, and 2px progress bar.
+    - Integrated across Episode 1 ([`process-states`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/process-states/page.tsx)), Episode 2 ([`cpu-scheduling-deep-dive`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/cpu-scheduling-deep-dive/page.tsx)), Episode 3 ([`process-control-block`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/process-control-block/page.tsx)), and Episode 4 ([`cpu-scheduling`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/cpu-scheduling/page.tsx)).
+    - Restored auto-play, ThemeToggle, Logo mark, and canonical `sky` theme to Episode 3 (PCB).
+    - Added unit test suite in `OSKernelShell.test.tsx` (5/5 tests passing).
+  - **3. Archetype B: Concurrency Stage Shell ([`OSConcurrencyShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/OSConcurrencyShell.tsx), [`OSConcurrencyShell.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/__tests__/OSConcurrencyShell.test.tsx))**:
+    - Encapsulated the split-stage layout: Top Shared Resource slot (Bounded Buffer, Spooler Directory, Shared Lock Variable), Dual-Thread split columns (Thread A vs Thread B), bottom explanation footer with hazard alert badges and segmented timeline scrubber bar, and right sidebar (`w-80`) with prominent circular simulation controls (`w-10`/`w-12`), scenario switcher tabs, animated notes, and reusable macOS-style C/Assembly code dialog modal.
+    - Integrated across Episode 5 ([`producer-consumer`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/producer-consumer/page.tsx)), Episode 6 ([`printer-spooler`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/printer-spooler/page.tsx)), and Episode 7 ([`lock-variables`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/lock-variables/page.tsx)), eliminating >1,400 lines of duplicate JSX and logic.
+    - Preserved semantic thread identity colors (Thread A in Cyan/Amber, Thread B in Violet/Orange) while unifying all simulator chrome, buttons, and notes to canonical `sky`.
+    - Added unit test suite in `OSConcurrencyShell.test.tsx` (5/5 tests passing).
+  - **4. Decommissioned Dead Code**:
+    - Safely removed orphaned component `src/components/os-simulator/OSLogPanel.tsx` (-68 lines) after confirming zero references across the entire repository.
+  - **5. Automated Verification**:
+    - `npx tsc --noEmit` passed with 0 errors across the entire application.
+    - `npx eslint` passed with 0 errors and 0 warnings.
+    - All 50+ Vitest test suites passed 100% green.
+    - Strict adherence to Rule #1: All changes remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; establishes clean separation of concerns, eliminates massive duplication, and standardizes design and accessibility across all Operating Systems simulators.
+
+
+
+
 

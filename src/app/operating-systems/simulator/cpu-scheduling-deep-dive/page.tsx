@@ -1,11 +1,9 @@
 "use client";
 
 import { useOSSimulationStore } from "@/store/useOSSimulationStore";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Logo } from "@/components/ui/Logo";
-import Link from "next/link";
+import { OSKernelShell } from "@/components/os-simulator/OSKernelShell";
 import { useEffect, useState, useMemo } from "react";
-import { motion, LayoutGroup } from "framer-motion";
+import { LayoutGroup } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { createCpuSchedulingScenario } from "@/lib/os-simulator/cpu-scheduling-scenario";
 import type { OSStepState, SchedulingMode } from "@/lib/os-simulator/engine";
@@ -105,10 +103,6 @@ export default function CPUSchedulingDeepDiveSimulator() {
     return count;
   }, [safeIndex, scenario.steps]);
 
-  const progress =
-    scenario.steps.length > 0
-      ? ((safeIndex + 1) / scenario.steps.length) * 100
-      : 0;
   const currentChapter = getCurrentChapter();
 
   // Chapter-relative step index
@@ -140,187 +134,49 @@ export default function CPUSchedulingDeepDiveSimulator() {
     setSchedulingMode(mode);
   };
 
+  const modeSwitcher = (
+    <div className="flex items-center p-0.5 rounded-lg bg-muted/60 border border-border/50">
+      <button
+        type="button"
+        onClick={() => handleModeChange("non_preemptive")}
+        className={cn(
+          "px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all",
+          schedulingMode === "non_preemptive"
+            ? "bg-sky-500 text-white shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        Non-Preemptive (FCFS)
+      </button>
+      <button
+        type="button"
+        onClick={() => handleModeChange("preemptive")}
+        className={cn(
+          "px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all",
+          schedulingMode === "preemptive"
+            ? "bg-sky-500 text-white shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        Preemptive (RR)
+      </button>
+    </div>
+  );
+
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden selection:bg-sky-500/30">
-      {/* ──────────── NAVBAR ──────────── */}
-      <nav className="h-14 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0 z-30">
-        <div className="h-full px-4 flex items-center justify-between gap-3">
-          {/* Left: Back link + title */}
-          <div className="flex items-center gap-3 shrink-0">
-            <Link
-              href="/operating-systems"
-              className="flex items-center gap-2 group shrink-0"
-            >
-              <Logo size={22} />
-              <span className="hidden sm:inline text-sm font-semibold tracking-tight text-foreground group-hover:text-sky-500 transition-colors">
-                Back to OS
-              </span>
-            </Link>
-
-            <div className="h-4 w-px bg-border/50 hidden md:block" />
-
-            <div className="hidden md:flex flex-col">
-              <span className="text-xs font-semibold text-foreground leading-tight">
-                CPU Scheduling Deep-Dive
-              </span>
-              <span className="text-[10px] text-muted-foreground/70 font-mono">
-                Episode 2 • {schedulingMode === "preemptive" ? "Round Robin (q=4ms)" : "FCFS (Non-preemptive)"}
-              </span>
-            </div>
-          </div>
-
-          {/* Center: Playback controls + Algorithm selector */}
-          <div className="flex-1 flex justify-center items-center gap-2 sm:gap-3 max-w-2xl">
-            {/* Algorithm Mode Switcher Pills */}
-            <div className="flex items-center p-0.5 rounded-lg bg-muted/60 border border-border/50">
-              <button
-                type="button"
-                onClick={() => handleModeChange("non_preemptive")}
-                className={cn(
-                  "px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all",
-                  schedulingMode === "non_preemptive"
-                    ? "bg-sky-500 text-white shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Non-Preemptive (FCFS)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleModeChange("preemptive")}
-                className={cn(
-                  "px-2 sm:px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all",
-                  schedulingMode === "preemptive"
-                    ? "bg-sky-500 text-white shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Preemptive (RR)
-              </button>
-            </div>
-
-            {/* Playback Controls */}
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={reset}
-                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                title="Restart"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <polyline points="3 3 3 8 8 8" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={prevStep}
-                disabled={safeIndex === 0}
-                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40"
-                title="Previous Step"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polygon points="19 20 9 12 19 4 19 20" />
-                  <line x1="5" y1="19" x2="5" y2="5" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={togglePlay}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-sky-500 text-white hover:bg-sky-600 hover:scale-105 transition-all shadow-sm"
-                title={isPlaying ? "Pause" : "Play"}
-              >
-                {isPlaying ? (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="4" width="4" height="16" />
-                    <rect x="14" y="4" width="4" height="16" />
-                  </svg>
-                ) : (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={nextStep}
-                disabled={safeIndex === scenario.steps.length - 1}
-                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40"
-                title="Next Step"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polygon points="5 4 15 12 5 20 5 4" />
-                  <line x1="19" y1="5" x2="19" y2="19" />
-                </svg>
-              </button>
-
-              <span className="hidden sm:block text-[10px] font-mono text-muted-foreground/60 ml-2 whitespace-nowrap">
-                {safeIndex + 1}/{scenario.steps.length}
-              </span>
-
-              <div className="hidden lg:flex items-center gap-1 ml-2">
-                {[0.5, 1, 2].map((speed) => (
-                  <button
-                    key={`speed-${speed}`}
-                    type="button"
-                    onClick={() => setPlaybackSpeed(speed)}
-                    className={cn(
-                      "px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors",
-                      playbackSpeed === speed
-                        ? "bg-sky-500/15 text-sky-500 font-bold"
-                        : "text-muted-foreground/40 hover:text-foreground"
-                    )}
-                  >
-                    {speed}x
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Theme toggle */}
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="h-[2px] bg-muted/30 -mt-[2px]">
-          <motion.div
-            className="h-full bg-sky-500/80"
-            initial={false}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-      </nav>
+    <OSKernelShell
+      title="CPU Scheduling Deep-Dive"
+      currentStepIndex={safeIndex}
+      totalSteps={scenario.steps.length}
+      isPlaying={isPlaying}
+      playbackSpeed={playbackSpeed}
+      onPlayPause={togglePlay}
+      onNext={nextStep}
+      onPrev={prevStep}
+      onReset={reset}
+      onSpeedChange={setPlaybackSpeed}
+      headerExtra={modeSwitcher}
+    >
 
       {/* ──────────── 3-PANEL BODY ──────────── */}
       <div className="flex-1 flex overflow-hidden">
@@ -416,6 +272,6 @@ export default function CPUSchedulingDeepDiveSimulator() {
 
       {/* ── FLOATING TOAST ── */}
       <OSToast message={activeToast} />
-    </div>
+    </OSKernelShell>
   );
 }

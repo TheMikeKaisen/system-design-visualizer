@@ -1,12 +1,9 @@
 "use client";
 
 import { useOSSimulationStore } from "@/store/useOSSimulationStore";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Logo } from "@/components/ui/Logo";
-import Link from "next/link";
+import { OSKernelShell } from "@/components/os-simulator/OSKernelShell";
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { PROCESS_STATES_SCENARIO } from "@/lib/os-simulator/process-states-scenario";
 import type { OSStepState } from "@/lib/os-simulator/engine";
 
@@ -103,7 +100,6 @@ export default function OSProcessStatesSimulator() {
     }
     return count;
   }, [safeIndex, scenario.steps]);
-  const progress = ((currentStepIndex + 1) / scenario.steps.length) * 100;
   const currentChapter = getCurrentChapter();
 
   // Chapter-relative step index
@@ -113,6 +109,10 @@ export default function OSProcessStatesSimulator() {
   const chapterTotal = currentChapter
     ? currentChapter.endStep - currentChapter.startStep + 1
     : scenario.steps.length;
+
+  const currentChapterIndex = currentChapter
+    ? scenario.chapters.findIndex((c) => c.title === currentChapter.title)
+    : 0;
 
   // Resolve processes
   const newProcesses = useMemo(
@@ -136,117 +136,21 @@ export default function OSProcessStatesSimulator() {
     : null;
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
-
-      {/* ──────────── NAVBAR ──────────── */}
-      <nav className="h-14 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0 z-30">
-        <div className="h-full px-4 flex items-center gap-3">
-
-          {/* Left: Back link + title */}
-          <Link href="/operating-systems" className="flex items-center gap-2 group shrink-0">
-            <Logo size={22} />
-            <span className="hidden sm:inline text-sm font-semibold tracking-tight text-foreground group-hover:text-teal-500 transition-colors">
-              Back to OS
-            </span>
-          </Link>
-
-          <div className="h-4 w-px bg-border/50 hidden sm:block" />
-
-          <h1 className="text-sm font-medium text-muted-foreground hidden sm:block truncate">
-            {scenario.title}
-          </h1>
-
-          {/* Center: Playback controls */}
-          <div className="flex-1 flex justify-center items-center gap-1 sm:gap-2">
-            {/* Chapter buttons */}
-            <div className="hidden lg:flex items-center gap-1 mr-3">
-              {scenario.chapters.map((ch, i) => (
-                <button
-                  key={ch.title}
-                  onClick={() => jumpToChapter(i)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors",
-                    currentChapter?.title === ch.title
-                      ? "bg-teal-500/15 text-teal-500"
-                      : "text-muted-foreground/50 hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  {ch.title}
-                </button>
-              ))}
-            </div>
-
-            {/* Controls */}
-            <button onClick={reset} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" title="Restart">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <polyline points="3 3 3 8 8 8" />
-              </svg>
-            </button>
-            <button onClick={prevStep} disabled={currentStepIndex === 0} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40" title="Previous Step">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="19 20 9 12 19 4 19 20" />
-                <line x1="5" y1="19" x2="5" y2="5" />
-              </svg>
-            </button>
-            <button onClick={togglePlay} className="w-8 h-8 flex items-center justify-center rounded-full bg-teal-500 text-white hover:bg-teal-600 hover:scale-105 transition-all shadow-sm" title={isPlaying ? "Pause" : "Play"}>
-              {isPlaying ? (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="4" width="4" height="16" />
-                  <rect x="14" y="4" width="4" height="16" />
-                </svg>
-              ) : (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-              )}
-            </button>
-            <button onClick={nextStep} disabled={currentStepIndex === scenario.steps.length - 1} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40" title="Next Step">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 4 15 12 5 20 5 4" />
-                <line x1="19" y1="5" x2="19" y2="19" />
-              </svg>
-            </button>
-
-            <span className="hidden sm:block text-[10px] font-mono text-muted-foreground/50 ml-2 whitespace-nowrap">
-              {currentStepIndex + 1}/{scenario.steps.length}
-            </span>
-
-            <div className="hidden md:flex items-center gap-1 ml-2">
-              {[0.5, 1, 2].map((speed) => (
-                <button
-                  key={speed}
-                  onClick={() => setPlaybackSpeed(speed)}
-                  className={cn(
-                    "px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors",
-                    playbackSpeed === speed
-                      ? "bg-teal-500/15 text-teal-500 font-bold"
-                      : "text-muted-foreground/40 hover:text-foreground"
-                  )}
-                >
-                  {speed}x
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: Theme toggle */}
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="h-[2px] bg-muted/30 -mt-[2px]">
-          <motion.div
-            className="h-full bg-teal-500/70"
-            initial={false}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-      </nav>
-
+    <OSKernelShell
+      title={scenario.title}
+      currentStepIndex={currentStepIndex}
+      totalSteps={scenario.steps.length}
+      isPlaying={isPlaying}
+      playbackSpeed={playbackSpeed}
+      onPlayPause={togglePlay}
+      onNext={nextStep}
+      onPrev={prevStep}
+      onReset={reset}
+      onSpeedChange={setPlaybackSpeed}
+      chapters={scenario.chapters}
+      currentChapterIndex={currentChapterIndex}
+      onChapterSelect={jumpToChapter}
+    >
       {/* ──────────── 3-PANEL BODY ──────────── */}
       <div className="flex-1 flex overflow-hidden">
 
@@ -350,7 +254,7 @@ export default function OSProcessStatesSimulator() {
             transition={{ duration: 0.2 }}
           >
             {currentChapter && (
-              <span className="block text-[10px] font-bold uppercase tracking-widest text-teal-500/70 mb-1">
+              <span className="block text-[10px] font-bold uppercase tracking-widest text-sky-500/80 mb-1">
                 {currentChapter.title}
               </span>
             )}
@@ -365,6 +269,6 @@ export default function OSProcessStatesSimulator() {
       <div className="xl:hidden">
         <OSToast message={activeToast} />
       </div>
-    </div>
+    </OSKernelShell>
   );
 }

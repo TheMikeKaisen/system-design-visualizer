@@ -40,7 +40,7 @@ export function ProcessCard({
       className={cn(
         "relative flex items-center gap-3 rounded-lg border-l-4 pr-3 py-2.5 pl-3 overflow-hidden transition-shadow",
         isInCPU
-          ? "bg-teal-500/10 border-t border-r border-b border-t-teal-500/30 border-r-teal-500/30 border-b-teal-500/30 ring-1 ring-teal-500/30 shadow-[0_0_16px_-4px_rgba(6,182,212,0.4)]"
+          ? "bg-sky-500/10 border-t border-r border-b border-t-sky-500/30 border-r-sky-500/30 border-b-sky-500/30 ring-1 ring-sky-500/30 shadow-[0_0_16px_-4px_rgba(14,165,233,0.35)]"
           : isTerminated
           ? "bg-muted/20 border-t border-r border-b border-border/20"
           : "bg-card/80 border-t border-r border-b border-border/50 hover:border-border/80 hover:shadow-sm"
@@ -55,7 +55,7 @@ export function ProcessCard({
             isTerminated
               ? "text-muted-foreground/40 line-through"
               : isInCPU
-              ? "text-teal-100"
+              ? "text-sky-950 dark:text-sky-100 font-extrabold"
               : "text-foreground"
           )}
         >

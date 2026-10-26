@@ -3,14 +3,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Logo } from "@/components/ui/Logo";
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, Box, Cpu, Code, X } from "lucide-react";
-import { 
-  PRODUCER_CONSUMER_SCENARIO_A, 
-  PRODUCER_CONSUMER_SCENARIO_B, 
-  PCScenario 
+import { Box, Cpu, Code, AlertTriangle } from "lucide-react";
+import { OSConcurrencyShell } from "@/components/os-simulator/OSConcurrencyShell";
+import {
+  PRODUCER_CONSUMER_SCENARIO_A,
+  PRODUCER_CONSUMER_SCENARIO_B,
+  PCScenario,
 } from "@/lib/os-simulator/producer-consumer-scenario";
 
 const PRODUCER_CODE = ["LOAD Rp, count", "INC Rp", "STORE Rp, count"];
@@ -20,7 +18,7 @@ export default function ProducerConsumerSimulator() {
   const [scenario, setScenario] = useState<PCScenario>(PRODUCER_CONSUMER_SCENARIO_A);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [activeCodeDialog, setActiveCodeDialog] = useState<'producer' | 'consumer' | null>(null);
+  const [activeCodeDialog, setActiveCodeDialog] = useState<"producer" | "consumer" | null>(null);
 
   const safeIndex =
     scenario.steps.length > 0
@@ -28,7 +26,7 @@ export default function ProducerConsumerSimulator() {
       : 0;
   const step = scenario.steps[safeIndex];
 
-  // Auto-play
+  // Auto-play timer
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying) {
@@ -49,467 +47,346 @@ export default function ProducerConsumerSimulator() {
     setCurrentStepIndex(0);
     setIsPlaying(false);
   };
-  
-  const switchScenario = (s: PCScenario) => {
-    setScenario(s);
+
+  const switchScenario = (scenarioId: string) => {
+    const target =
+      scenarioId === PRODUCER_CONSUMER_SCENARIO_B.id
+        ? PRODUCER_CONSUMER_SCENARIO_B
+        : PRODUCER_CONSUMER_SCENARIO_A;
+    setScenario(target);
     setCurrentStepIndex(0);
     setIsPlaying(false);
   };
 
-  const isCorrupted = step.sharedMemoryCount !== 3 && step.activeThread === "none" && step.producerState === "terminated" && step.consumerState === "terminated";
+  const isCorrupted =
+    step.sharedMemoryCount !== 3 &&
+    step.activeThread === "none" &&
+    step.producerState === "terminated" &&
+    step.consumerState === "terminated";
 
-  return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden flex flex-col font-sans selection:bg-teal-500/30">
-      {/* Navigation */}
-      <nav className="shrink-0 h-14 border-b border-border/40 bg-background/80 backdrop-blur-md flex items-center justify-between px-4 z-50">
-        <div className="flex items-center gap-4">
-          <Link href="/operating-systems" className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-muted/80 transition-colors">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Logo size={20} />
-            <span className="text-sm font-semibold tracking-tight text-foreground/80">Episode 5: Producer-Consumer Problem</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-        </div>
-      </nav>
+  // Top Shared Buffer + Central Shared Memory Count
+  const sharedResource = (
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center justify-between w-full max-w-2xl px-2">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Shared Bounded Buffer (Size = 5)
+        </span>
+        <span className="text-xs font-mono font-bold text-sky-500 dark:text-sky-400">
+          shared_count = {step.sharedMemoryCount}
+        </span>
+      </div>
 
-      <main className="flex-1 flex overflow-hidden">
-        {/* Left/Center Visualizer Area */}
-        <div className="flex-1 flex flex-col relative">
-          
-          {/* Buffer Visualization (Top) */}
-          <div className="shrink-0 h-24 border-b border-border/40 bg-card/30 flex items-center justify-center relative">
-            <div className="absolute top-2 left-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Shared Buffer</div>
-            <div className="flex gap-2 p-3 bg-background/50 rounded-2xl border border-border/50 shadow-inner">
-              {step.buffer.map((slot, i) => (
-                <div key={`buffer-slot-${i}`} className={cn(
-                  "w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-500",
-                  slot ? "bg-teal-500/20 border-teal-500/30 shadow-[0_0_15px_-3px_rgba(20,184,166,0.3)]" : "bg-muted/30 border-transparent border-dashed"
-                )}>
-                  <AnimatePresence mode="popLayout">
-                    {slot && (
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0, y: -20 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0, opacity: 0, y: 20 }}
-                        transition={{ type: "spring", bounce: 0.5 }}
-                      >
-                        <Box className="w-6 h-6 text-teal-500" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Main Stage (Split Screen) */}
-          <div className="flex-1 relative flex overflow-hidden">
-            
-            {/* PRODUCER PANEL (Left) */}
-            <div className={cn(
-              "flex-1 border-r border-border/40 p-8 flex flex-col transition-opacity duration-500",
-              step.producerState === "suspended" || step.producerState === "idle" ? "opacity-40" : "opacity-100"
-            )}>
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center">
-                    <Cpu className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold text-amber-500">Producer Thread</h2>
-                      <button onClick={() => setActiveCodeDialog('producer')} className="p-1 rounded hover:bg-amber-500/20 text-amber-500/70 hover:text-amber-500 transition-colors group relative">
-                        <Code size={16} />
-                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity shadow-lg">View C Code</span>
-                      </button>
-                    </div>
-                    <div className="text-xs font-mono text-amber-500/70 uppercase">Code: count = count + 1</div>
-                  </div>
-                </div>
-                <div className={cn(
-                  "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border",
-                  step.producerState === "running" ? "bg-amber-500/20 text-amber-500 border-amber-500/30 shadow-[0_0_15px_-3px_rgba(245,158,11,0.3)] animate-pulse" : "bg-muted text-muted-foreground border-transparent"
-                )}>
-                  {step.producerState}
-                </div>
-              </div>
-
-              {/* Code Block */}
-              <div className="bg-[#1E1E1E] rounded-xl border border-[#333] overflow-hidden shadow-2xl relative font-mono text-sm mb-8">
-                <div className="h-8 bg-[#2D2D2D] border-b border-[#333] flex items-center px-4 gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
-                  <span className="ml-2 text-xs text-zinc-400">producer.asm</span>
-                </div>
-                <div className="p-4 relative min-h-[120px]">
-                  {PRODUCER_CODE.map((line, i) => (
-                    <div key={i} className={cn(
-                      "flex items-center gap-4 py-1.5 px-2 rounded-md transition-colors",
-                      step.producerCodeLine === i ? "bg-amber-500/20 text-amber-400" : "text-zinc-300"
-                    )}>
-                      <span className="opacity-30 select-none w-4">{i + 1}</span>
-                      <span className="flex-1">{line}</span>
-                      {step.producerCodeLine === i && (
-                        <motion.div layoutId="prod-cursor" className="w-2 h-4 bg-amber-500 rounded-sm animate-pulse" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Producer Register */}
-              <div className="mt-auto grid grid-cols-2 gap-4">
-                <div className="bg-card rounded-2xl border border-amber-500/20 p-6 flex items-center justify-between shadow-[0_0_30px_-5px_rgba(245,158,11,0.1)]">
-                  <div>
-                    <div className="text-xs font-bold uppercase tracking-widest text-amber-500/60 mb-1">Private Register</div>
-                    <div className="text-2xl font-bold text-amber-500">Rp</div>
-                  </div>
-                  <div className="text-5xl font-mono text-amber-500">
-                    {step.registerRp !== null ? step.registerRp : "—"}
-                  </div>
-                </div>
-                <div>{/* Empty column */}</div>
-              </div>
-            </div>
-
-            {/* CONSUMER PANEL (Right) */}
-            <div className={cn(
-              "flex-1 p-8 flex flex-col transition-opacity duration-500",
-              step.consumerState === "suspended" || step.consumerState === "idle" ? "opacity-40" : "opacity-100"
-            )}>
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-500 flex items-center justify-center">
-                    <Cpu className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold text-violet-500">Consumer Thread</h2>
-                      <button onClick={() => setActiveCodeDialog('consumer')} className="p-1 rounded hover:bg-violet-500/20 text-violet-500/70 hover:text-violet-500 transition-colors group relative">
-                        <Code size={16} />
-                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity shadow-lg">View C Code</span>
-                      </button>
-                    </div>
-                    <div className="text-xs font-mono text-violet-500/70 uppercase">Code: count = count - 1</div>
-                  </div>
-                </div>
-                <div className={cn(
-                  "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border",
-                  step.consumerState === "running" ? "bg-violet-500/20 text-violet-500 border-violet-500/30 shadow-[0_0_15px_-3px_rgba(139,92,246,0.3)] animate-pulse" : "bg-muted text-muted-foreground border-transparent"
-                )}>
-                  {step.consumerState}
-                </div>
-              </div>
-
-              {/* Code Block */}
-              <div className="bg-[#1E1E1E] rounded-xl border border-[#333] overflow-hidden shadow-2xl relative font-mono text-sm mb-8">
-                <div className="h-8 bg-[#2D2D2D] border-b border-[#333] flex items-center px-4 gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
-                  <span className="ml-2 text-xs text-zinc-400">consumer.asm</span>
-                </div>
-                <div className="p-4 relative min-h-[120px]">
-                  {CONSUMER_CODE.map((line, i) => (
-                    <div key={i} className={cn(
-                      "flex items-center gap-4 py-1.5 px-2 rounded-md transition-colors",
-                      step.consumerCodeLine === i ? "bg-violet-500/20 text-violet-400" : "text-zinc-300"
-                    )}>
-                      <span className="opacity-30 select-none w-4">{i + 1}</span>
-                      <span className="flex-1">{line}</span>
-                      {step.consumerCodeLine === i && (
-                        <motion.div layoutId="cons-cursor" className="w-2 h-4 bg-violet-500 rounded-sm animate-pulse" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Consumer Register */}
-              <div className="mt-auto grid grid-cols-2 gap-4">
-                <div>{/* Empty column */}</div>
-                <div className="bg-card rounded-2xl border border-violet-500/20 p-6 flex items-center justify-between shadow-[0_0_30px_-5px_rgba(139,92,246,0.1)]">
-                  <div>
-                    <div className="text-xs font-bold uppercase tracking-widest text-violet-500/60 mb-1">Private Register</div>
-                    <div className="text-2xl font-bold text-violet-500">Rc</div>
-                  </div>
-                  <div className="text-5xl font-mono text-violet-500">
-                    {step.registerRc !== null ? step.registerRc : "—"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Context Switch Overlay (Flashes across the screen) */}
-            <div
-              className={cn(
-                "absolute inset-0 z-20 flex items-center justify-center bg-background/40 backdrop-blur-[2px] transition-all duration-300 ease-in-out",
-                step.isContextSwitch 
-                  ? "opacity-100 translate-y-0 pointer-events-auto" 
-                  : "opacity-0 -translate-y-4 pointer-events-none"
-              )}
-            >
-              <div className="w-full bg-rose-500 text-white py-4 border-y-2 border-white/20 shadow-2xl flex flex-col items-center justify-center overflow-hidden relative group animate-pulse">
-                <div className="text-2xl font-black uppercase tracking-[0.2em] relative z-10 flex items-center gap-4">
-                  <span>⚡</span> Context Switch <span>⚡</span>
-                </div>
-                <div className="text-xs font-medium uppercase tracking-widest opacity-80 mt-1 relative z-10">
-                  OS Preempts CPU
-                </div>
-              </div>
-            </div>
-
-            {/* SHARED MEMORY (Center overlapping widget) */}
-            <div className="absolute top-[76%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <motion.div 
-                key={step.sharedMemoryCount}
-                initial={{ scale: 0.9, opacity: 0.8 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className={cn(
-                  "w-48 h-48 rounded-full border-4 flex flex-col items-center justify-center shadow-2xl backdrop-blur-md transition-colors duration-500",
-                  isCorrupted ? "bg-rose-500/20 border-rose-500 text-rose-500 shadow-[0_0_50px_-10px_rgba(244,63,94,0.5)]" : "bg-teal-900/40 border-teal-500 text-teal-400 shadow-[0_0_40px_-10px_rgba(20,184,166,0.3)]"
-                )}
-              >
-                <div className="text-xs font-bold uppercase tracking-widest opacity-60 mb-2">Shared Memory</div>
-                <div className="text-xl font-mono mb-2">count =</div>
-                <div className="text-6xl font-black font-mono">{step.sharedMemoryCount}</div>
-                {isCorrupted && (
-                  <div className="absolute -top-5 bg-rose-500 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap shadow-xl border border-white/20">
-                    Expected: 3
-                  </div>
-                )}
-              </motion.div>
-            </div>
-
-          </div>
-          
-          {/* Explanation Footer Area */}
-          <div className="shrink-0 h-40 border-t border-border/40 bg-card flex flex-col">
-            <div className="flex-1 p-6 max-w-4xl mx-auto w-full flex flex-col justify-center">
-              <div className="text-xs font-bold uppercase tracking-widest text-teal-500 mb-2 flex items-center gap-2">
-                <span>{step.chapter}</span>
-                <span className="w-1 h-1 rounded-full bg-border" />
-                <span className="text-muted-foreground">Step {currentStepIndex + 1} of {scenario.steps.length}</span>
-              </div>
-              <motion.div
-                key={currentStepIndex}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-lg md:text-xl text-foreground leading-relaxed"
-              >
-                {step.explanation}
-              </motion.div>
-            </div>
-            {/* Timeline Progress */}
-            <div className="h-1.5 w-full bg-muted flex relative group cursor-pointer">
-              {scenario.steps.map((_, i) => (
-                <div 
-                  key={i} 
-                  className={cn(
-                    "h-full flex-1 transition-all duration-300 border-r border-background/20 last:border-0",
-                    i <= currentStepIndex ? "bg-teal-500" : "bg-transparent",
-                    i === currentStepIndex && "bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,1)]"
-                  )}
-                  onClick={() => setCurrentStepIndex(i)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Sidebar: Controls & Notes */}
-        <div className="w-80 shrink-0 border-l border-border/40 bg-card/30 flex flex-col z-10">
-          
-          {/* Controls */}
-          <div className="p-6 border-b border-border/40">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Simulation Controls</h3>
-            
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-center gap-2 mb-2">
-                <button
-                  onClick={prevStep}
-                  disabled={currentStepIndex === 0}
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-muted/50 hover:bg-muted text-foreground disabled:opacity-30 transition-colors"
-                >
-                  <SkipBack className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={togglePlay}
-                  className="w-12 h-12 rounded-full flex items-center justify-center bg-teal-500 hover:bg-teal-400 text-white shadow-lg shadow-teal-500/20 transition-all hover:scale-105 active:scale-95"
-                >
-                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-1" />}
-                </button>
-                <button
-                  onClick={nextStep}
-                  disabled={currentStepIndex === scenario.steps.length - 1}
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-muted/50 hover:bg-muted text-foreground disabled:opacity-30 transition-colors"
-                >
-                  <SkipForward className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={reset}
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-muted/50 hover:bg-muted text-foreground transition-colors ml-2"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Scenario Toggles */}
-              <div className="bg-background rounded-xl p-1 flex border border-border">
-                <button
-                  onClick={() => switchScenario(PRODUCER_CONSUMER_SCENARIO_A)}
-                  className={cn(
-                    "flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-colors",
-                    scenario.id === PRODUCER_CONSUMER_SCENARIO_A.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Scenario A
-                </button>
-                <button
-                  onClick={() => switchScenario(PRODUCER_CONSUMER_SCENARIO_B)}
-                  className={cn(
-                    "flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-colors",
-                    scenario.id === PRODUCER_CONSUMER_SCENARIO_B.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Scenario B
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Student Notes Panel */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">Notes</h3>
-            
+      <div className="flex gap-2.5 p-3 bg-background/60 rounded-2xl border border-border/50 shadow-inner">
+        {step.buffer.map((slot, i) => (
+          <div
+            key={`buffer-slot-${i}`}
+            className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-300",
+              slot
+                ? "bg-sky-500/20 border-sky-500/40 shadow-[0_0_15px_-3px_rgba(14,165,233,0.35)]"
+                : "bg-muted/30 border-transparent border-dashed"
+            )}
+          >
             <AnimatePresence mode="popLayout">
-              {step.noteTitle && (
+              {slot && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-teal-500/10 border border-teal-500/20 rounded-2xl p-5 relative overflow-hidden"
+                  initial={{ scale: 0, opacity: 0, y: -16 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0, opacity: 0, y: 16 }}
+                  transition={{ type: "spring", bounce: 0.4 }}
                 >
-                  <div className="absolute top-0 right-0 p-3 opacity-10">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  </div>
-                  <h4 className="text-sm font-bold text-teal-500 mb-2">{step.noteTitle}</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{step.noteContent}</p>
+                  <Box className="w-6 h-6 text-sky-500 dark:text-sky-400" />
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
-            {/* Static context info */}
-            {!step.noteTitle && (
-              <div className="opacity-50 text-xs leading-relaxed space-y-4">
-                <p>The Producer-Consumer problem is a classic example of a multi-process synchronization problem.</p>
-                <p>The problem describes two processes, the producer and the consumer, who share a common, fixed-size buffer used as a queue.</p>
-              </div>
-            )}
+  // Producer Column (Thread A)
+  const producerSlot = (
+    <div
+      className={cn(
+        "flex flex-col h-full transition-opacity duration-300",
+        step.producerState === "suspended" || step.producerState === "idle"
+          ? "opacity-40"
+          : "opacity-100"
+      )}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center">
+            <Cpu className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-amber-500">Producer Thread</h2>
+              <button
+                type="button"
+                onClick={() => setActiveCodeDialog("producer")}
+                className="p-1 rounded hover:bg-amber-500/20 text-amber-500/70 hover:text-amber-500 transition-colors"
+                title="View C Code"
+              >
+                <Code size={15} />
+              </button>
+            </div>
+            <div className="text-[10px] font-mono text-amber-500/70 uppercase">
+              count = count + 1
+            </div>
           </div>
         </div>
-      </main>
+        <div
+          className={cn(
+            "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border",
+            step.producerState === "running"
+              ? "bg-amber-500/20 text-amber-500 border-amber-500/30 animate-pulse"
+              : "bg-muted text-muted-foreground border-transparent"
+          )}
+        >
+          {step.producerState}
+        </div>
+      </div>
 
-      {/* Code Dialog Modal */}
-      <AnimatePresence>
-        {activeCodeDialog && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-          >
-            {/* Backdrop */}
-            <div 
-              className="absolute inset-0 bg-background/80 backdrop-blur-sm cursor-pointer" 
-              onClick={() => setActiveCodeDialog(null)}
-            />
-            
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-[#1E1E1E] rounded-xl overflow-hidden shadow-2xl border border-[#333]"
-              onClick={(e) => e.stopPropagation()}
+      {/* Assembly code box */}
+      <div className="bg-[#1E1E1E] rounded-xl border border-[#333] overflow-hidden shadow-md font-mono text-xs mb-4">
+        <div className="h-7 bg-[#2D2D2D] border-b border-[#333] flex items-center px-3 gap-1.5">
+          <div className="w-2 h-2 rounded-full bg-[#FF5F56]" />
+          <div className="w-2 h-2 rounded-full bg-[#FFBD2E]" />
+          <div className="w-2 h-2 rounded-full bg-[#27C93F]" />
+          <span className="ml-2 text-[10px] text-zinc-400">producer.asm</span>
+        </div>
+        <div className="p-3 min-h-[90px]">
+          {PRODUCER_CODE.map((line, i) => (
+            <div
+              key={`producer-line-${i}`}
+              className={cn(
+                "flex items-center gap-3 py-1 px-2 rounded transition-colors",
+                step.producerCodeLine === i
+                  ? "bg-amber-500/20 text-amber-300 font-bold"
+                  : "text-zinc-400"
+              )}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 h-12 border-b border-[#333] bg-[#2D2D2D]">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1.5 mr-4">
-                    <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-                    <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-                    <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
-                  </div>
-                  <span className="text-sm font-mono text-zinc-400">
-                    {activeCodeDialog === 'producer' ? 'producer.c' : 'consumer.c'}
-                  </span>
-                </div>
-                <button 
-                  onClick={() => setActiveCodeDialog(null)}
-                  className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+              <span className="opacity-30 select-none w-3 text-[10px]">{i + 1}</span>
+              <span className="flex-1">{line}</span>
+              {step.producerCodeLine === i && (
+                <div className="w-1.5 h-3.5 bg-amber-500 rounded-sm animate-pulse" />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
-              {/* Code Content */}
-              <div className="p-6 font-mono text-sm leading-loose text-[#D4D4D4] overflow-x-auto whitespace-pre">
-                <span className="text-[#569CD6]">while</span> (true) {"{\n"}
-                {activeCodeDialog === 'producer' ? (
-                  <>
-                    {"    "}
-                    <span className="text-[#6A9955]">{"/* produce an item */"}</span>
-                    {"\n    "}
-                    <span className="text-[#569CD6]">while</span> (count == BUFFER_SIZE) {"{\n"}
-                    {"        "}
-                    <span className="text-[#6A9955]">{"/* do nothing - buffer is full */"}</span>
-                    {"\n    }\n\n"}
-                    {"    "}buffer[in] = item;{"\n"}
-                    {"    "}in = (in + 1) % BUFFER_SIZE;{"\n\n"}
-                    
-                    <div className="bg-amber-500/10 border-l-4 border-amber-500 -mx-6 px-6 py-2 my-2 relative group">
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-widest text-amber-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Critical Section (Lost Update)
-                      </div>
-                      <span className="text-[#6A9955] block -mt-1 mb-1">{"// CRITICAL SECTION (The 3 Assembly Instructions)"}</span>
-                      count++;
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {"    "}
-                    <span className="text-[#569CD6]">while</span> (count == 0) {"{\n"}
-                    {"        "}
-                    <span className="text-[#6A9955]">{"/* do nothing - buffer is empty */"}</span>
-                    {"\n    }\n\n"}
-                    {"    "}item = buffer[out];{"\n"}
-                    {"    "}out = (out + 1) % BUFFER_SIZE;{"\n\n"}
-                    
-                    <div className="bg-violet-500/10 border-l-4 border-violet-500 -mx-6 px-6 py-2 my-2 relative group">
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-widest text-violet-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Critical Section (Lost Update)
-                      </div>
-                      <span className="text-[#6A9955] block -mt-1 mb-1">{"// CRITICAL SECTION (The 3 Assembly Instructions)"}</span>
-                      count--;
-                    </div>
-                    
-                    {"\n    "}
-                    <span className="text-[#6A9955]">{"/* consume the item */"}</span>
-                    {"\n"}
-                  </>
-                )}
-                {"}"}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Register Rp */}
+      <div className="mt-auto bg-card/60 rounded-xl border border-amber-500/20 p-4 flex items-center justify-between">
+        <div>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-amber-500/70 mb-0.5">
+            Private Register
+          </div>
+          <div className="text-lg font-bold text-amber-500">Rp</div>
+        </div>
+        <div className="text-3xl font-mono text-amber-500 font-bold">
+          {step.registerRp !== null ? step.registerRp : "—"}
+        </div>
+      </div>
     </div>
+  );
+
+  // Consumer Column (Thread B)
+  const consumerSlot = (
+    <div
+      className={cn(
+        "flex flex-col h-full transition-opacity duration-300",
+        step.consumerState === "suspended" || step.consumerState === "idle"
+          ? "opacity-40"
+          : "opacity-100"
+      )}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-violet-500/20 text-violet-500 flex items-center justify-center">
+            <Cpu className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-violet-500">Consumer Thread</h2>
+              <button
+                type="button"
+                onClick={() => setActiveCodeDialog("consumer")}
+                className="p-1 rounded hover:bg-violet-500/20 text-violet-500/70 hover:text-violet-500 transition-colors"
+                title="View C Code"
+              >
+                <Code size={15} />
+              </button>
+            </div>
+            <div className="text-[10px] font-mono text-violet-500/70 uppercase">
+              count = count - 1
+            </div>
+          </div>
+        </div>
+        <div
+          className={cn(
+            "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border",
+            step.consumerState === "running"
+              ? "bg-violet-500/20 text-violet-500 border-violet-500/30 animate-pulse"
+              : "bg-muted text-muted-foreground border-transparent"
+          )}
+        >
+          {step.consumerState}
+        </div>
+      </div>
+
+      {/* Assembly code box */}
+      <div className="bg-[#1E1E1E] rounded-xl border border-[#333] overflow-hidden shadow-md font-mono text-xs mb-4">
+        <div className="h-7 bg-[#2D2D2D] border-b border-[#333] flex items-center px-3 gap-1.5">
+          <div className="w-2 h-2 rounded-full bg-[#FF5F56]" />
+          <div className="w-2 h-2 rounded-full bg-[#FFBD2E]" />
+          <div className="w-2 h-2 rounded-full bg-[#27C93F]" />
+          <span className="ml-2 text-[10px] text-zinc-400">consumer.asm</span>
+        </div>
+        <div className="p-3 min-h-[90px]">
+          {CONSUMER_CODE.map((line, i) => (
+            <div
+              key={`consumer-line-${i}`}
+              className={cn(
+                "flex items-center gap-3 py-1 px-2 rounded transition-colors",
+                step.consumerCodeLine === i
+                  ? "bg-violet-500/20 text-violet-300 font-bold"
+                  : "text-zinc-400"
+              )}
+            >
+              <span className="opacity-30 select-none w-3 text-[10px]">{i + 1}</span>
+              <span className="flex-1">{line}</span>
+              {step.consumerCodeLine === i && (
+                <div className="w-1.5 h-3.5 bg-violet-500 rounded-sm animate-pulse" />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Register Rc */}
+      <div className="mt-auto bg-card/60 rounded-xl border border-violet-500/20 p-4 flex items-center justify-between">
+        <div>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-violet-500/70 mb-0.5">
+            Private Register
+          </div>
+          <div className="text-lg font-bold text-violet-500">Rc</div>
+        </div>
+        <div className="text-3xl font-mono text-violet-500 font-bold">
+          {step.registerRc !== null ? step.registerRc : "—"}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Modal code dialog
+  const codeModalContent = (
+    <div className="space-y-4">
+      <div className="whitespace-pre text-xs sm:text-sm">
+        <span className="text-[#569CD6]">while</span> (true) {"{\n"}
+        {activeCodeDialog === "producer" ? (
+          <>
+            {"    "}
+            <span className="text-[#6A9955]">{"/* produce an item */"}</span>
+            {"\n    "}
+            <span className="text-[#569CD6]">while</span> (count == BUFFER_SIZE) {"{\n"}
+            {"        "}
+            <span className="text-[#6A9955]">{"/* buffer is full */"}</span>
+            {"\n    }\n\n"}
+            {"    "}buffer[in] = item;{"\n"}
+            {"    "}in = (in + 1) % BUFFER_SIZE;{"\n\n"}
+            <div className="bg-amber-500/10 border-l-4 border-amber-500 -mx-6 px-6 py-2 my-2">
+              <span className="text-[#6A9955] block -mt-1 mb-1">
+                {"// CRITICAL SECTION (The 3 Assembly Instructions)"}
+              </span>
+              count++;
+            </div>
+          </>
+        ) : (
+          <>
+            {"    "}
+            <span className="text-[#569CD6]">while</span> (count == 0) {"{\n"}
+            {"        "}
+            <span className="text-[#6A9955]">{"/* buffer is empty */"}</span>
+            {"\n    }\n\n"}
+            {"    "}item = buffer[out];{"\n"}
+            {"    "}out = (out + 1) % BUFFER_SIZE;{"\n\n"}
+            <div className="bg-violet-500/10 border-l-4 border-violet-500 -mx-6 px-6 py-2 my-2">
+              <span className="text-[#6A9955] block -mt-1 mb-1">
+                {"// CRITICAL SECTION (The 3 Assembly Instructions)"}
+              </span>
+              count--;
+            </div>
+          </>
+        )}
+        {"}"}
+      </div>
+    </div>
+  );
+
+  return (
+    <OSConcurrencyShell
+      title="Episode 5: Producer-Consumer Problem"
+      subtitle={
+        scenario.id === PRODUCER_CONSUMER_SCENARIO_A.id
+          ? "Preemptive Race Condition"
+          : "Synchronized Execution"
+      }
+      currentStepIndex={safeIndex}
+      totalSteps={scenario.steps.length}
+      isPlaying={isPlaying}
+      onPlayPause={togglePlay}
+      onNext={nextStep}
+      onPrev={prevStep}
+      onReset={reset}
+      onStepSelect={setCurrentStepIndex}
+      scenarios={[
+        {
+          id: PRODUCER_CONSUMER_SCENARIO_A.id,
+          label: "Scenario A",
+          isActive: scenario.id === PRODUCER_CONSUMER_SCENARIO_A.id,
+        },
+        {
+          id: PRODUCER_CONSUMER_SCENARIO_B.id,
+          label: "Scenario B",
+          isActive: scenario.id === PRODUCER_CONSUMER_SCENARIO_B.id,
+        },
+      ]}
+      onScenarioSelect={switchScenario}
+      chapter={step.chapter}
+      explanation={step.explanation}
+      warningBadge={
+        isCorrupted
+          ? {
+              text: "Data Corruption (count != 3)",
+              icon: <AlertTriangle size={10} />,
+            }
+          : null
+      }
+      sharedResourceSlot={sharedResource}
+      processASlot={producerSlot}
+      processBSlot={consumerSlot}
+      noteTitle={step.noteTitle}
+      noteContent={step.noteContent}
+      fallbackNote={
+        <div className="opacity-60 text-xs leading-relaxed space-y-3">
+          <p>
+            The Producer-Consumer problem models processes sharing a fixed-size
+            buffer as a circular queue.
+          </p>
+          <p>
+            Notice how updating the shared count variable requires 3 assembly
+            instructions (LOAD, INC/DEC, STORE). If preemption occurs mid-update,
+            values are lost!
+          </p>
+        </div>
+      }
+      isCodeModalOpen={activeCodeDialog !== null}
+      onCloseCodeModal={() => setActiveCodeDialog(null)}
+      codeModalTitle={activeCodeDialog === "producer" ? "producer.c" : "consumer.c"}
+      codeModalContent={codeModalContent}
+    />
   );
 }

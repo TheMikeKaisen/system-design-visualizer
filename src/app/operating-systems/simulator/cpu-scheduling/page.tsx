@@ -14,9 +14,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Logo } from "@/components/ui/Logo";
+import { OSKernelShell } from "@/components/os-simulator/OSKernelShell";
 import {
   computeUniversalScheduling,
   getUniversalProcessStateAtTime,
@@ -54,7 +52,7 @@ function InfoTooltip({ termKey }: { termKey: string }) {
               e.preventDefault();
               e.stopPropagation();
             }}
-            className="w-3.5 h-3.5 rounded-full bg-muted/80 text-muted-foreground/60 text-[8px] font-bold inline-flex items-center justify-center hover:bg-teal-500/20 hover:text-teal-500 transition-colors cursor-help align-middle ml-1"
+            className="w-3.5 h-3.5 rounded-full bg-muted/80 text-muted-foreground/60 text-[8px] font-bold inline-flex items-center justify-center hover:bg-sky-500/20 hover:text-sky-500 transition-colors cursor-help align-middle ml-1"
           >
             ?
           </button>
@@ -73,7 +71,7 @@ function InfoTooltip({ termKey }: { termKey: string }) {
               {info.description}
             </div>
             {info.formula && (
-              <div className="mt-2 px-2 py-1.5 rounded-lg bg-muted/50 font-mono text-[10px] text-teal-500">
+              <div className="mt-2 px-2 py-1.5 rounded-lg bg-muted/50 font-mono text-[10px] text-sky-500">
                 {info.formula}
               </div>
             )}
@@ -98,8 +96,8 @@ function StateBadge({ state }: { state: ProcessStateAtTime }) {
     ready: { label: "READY", bg: "bg-blue-500/15", text: "text-blue-500" },
     running: {
       label: "RUNNING",
-      bg: "bg-teal-500/15",
-      text: "text-teal-500",
+      bg: "bg-sky-500/15",
+      text: "text-sky-500",
     },
     terminated: {
       label: "DONE",
@@ -314,13 +312,6 @@ export default function UniversalSchedulingSimulator() {
     }
   }, [currentTime]);
 
-  const handleInstant = useCallback(() => {
-    if (simulation) {
-      setCurrentTime(simulation.totalTime);
-      setIsPlaying(false);
-    }
-  }, [simulation]);
-
   const togglePlay = useCallback(() => {
     if (isComplete && !isPlaying) {
       // restart from beginning
@@ -392,200 +383,47 @@ export default function UniversalSchedulingSimulator() {
     }
   }, [visibleEvents.length]);
 
-  // ─── PROGRESS ──────────────────────────────────────
-  const progress = simulation
-    ? (currentTime / simulation.totalTime) * 100
-    : 0;
-
   // ═════════════════════════════════════════════════════
   // RENDER
   // ═════════════════════════════════════════════════════
+  const headerActions = !isEditMode ? (
+    <div className="flex items-center gap-1.5 ml-1">
+      {algorithm === "RR" && (
+        <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider rounded">
+          TQ = {timeQuantum}
+        </span>
+      )}
+      <button
+        onClick={handleReset}
+        className="px-2.5 py-1 bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 text-[10px] font-bold uppercase tracking-wider rounded transition-colors"
+      >
+        Change Algorithm
+      </button>
+    </div>
+  ) : null;
+
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
-      {/* ──────────── NAVBAR ──────────── */}
-      <nav className="h-14 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0 z-30">
-        <div className="h-full px-4 flex items-center gap-3">
-          <Link
-            href="/operating-systems"
-            className="flex items-center gap-2 group shrink-0"
-          >
-            <Logo size={22} />
-            <span className="hidden sm:inline text-sm font-semibold tracking-tight text-foreground group-hover:text-teal-500 transition-colors">
-              Back to OS
-            </span>
-          </Link>
-
-          <div className="h-4 w-px bg-border/50 hidden sm:block" />
-
-          <h1 className="text-sm font-medium text-muted-foreground hidden sm:block truncate">
-            Interactive Scheduler
-          </h1>
-
-          {!isEditMode && (
-            <div className="flex items-center gap-1.5 ml-1">
-              {algorithm === "RR" && (
-                <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider rounded">
-                  TQ = {timeQuantum}
-                </span>
-              )}
-              <button
-                onClick={handleReset}
-                className="px-2.5 py-1 bg-teal-500/10 text-teal-500 hover:bg-teal-500/20 text-[10px] font-bold uppercase tracking-wider rounded transition-colors"
-              >
-                Change Algorithm
-              </button>
-            </div>
-          )}
-
-          {/* Center: Playback controls (only in playback mode) */}
-          <div className="flex-1 flex justify-center items-center gap-1 sm:gap-2">
-            {!isEditMode && (
-              <>
-                {/* Restart */}
-                <button
-                  onClick={() => {
-                    setCurrentTime(0);
-                    setIsPlaying(false);
-                  }}
-                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                  title="Restart"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                    <polyline points="3 3 3 8 8 8" />
-                  </svg>
-                </button>
-
-                {/* Step back */}
-                <button
-                  onClick={handleStepBack}
-                  disabled={currentTime === 0}
-                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polygon points="19 20 9 12 19 4 19 20" />
-                    <line x1="5" y1="19" x2="5" y2="5" />
-                  </svg>
-                </button>
-
-                {/* Play/Pause */}
-                <button
-                  onClick={togglePlay}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-teal-500 text-white hover:bg-teal-600 hover:scale-105 transition-all shadow-sm"
-                >
-                  {isPlaying ? (
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <rect x="6" y="4" width="4" height="16" />
-                      <rect x="14" y="4" width="4" height="16" />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="ml-0.5"
-                    >
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  )}
-                </button>
-
-                {/* Step forward */}
-                <button
-                  onClick={handleStepForward}
-                  disabled={currentTime === simulation?.totalTime}
-                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-40"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polygon points="5 4 15 12 5 20 5 4" />
-                    <line x1="19" y1="5" x2="19" y2="19" />
-                  </svg>
-                </button>
-
-                {/* Time display */}
-                <span className="hidden sm:block text-[10px] font-mono text-muted-foreground/50 ml-2 whitespace-nowrap">
-                  t={currentTime} / {simulation?.totalTime}
-                </span>
-
-                {/* Speed controls */}
-                <div className="hidden md:flex items-center gap-1 ml-2">
-                  {[0.5, 1, 2, 5].map((speed) => (
-                    <button
-                      key={speed}
-                      onClick={() => setPlaybackSpeed(speed)}
-                      className={cn(
-                        "px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors",
-                        playbackSpeed === speed
-                          ? "bg-teal-500/15 text-teal-500 font-bold"
-                          : "text-muted-foreground/40 hover:text-foreground"
-                      )}
-                    >
-                      {speed}x
-                    </button>
-                  ))}
-                  <button
-                    onClick={handleInstant}
-                    className="px-1.5 py-0.5 rounded text-[10px] font-mono text-muted-foreground/40 hover:text-foreground transition-colors"
-                  >
-                    ⏭
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Right */}
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        {!isEditMode && (
-          <div className="h-[2px] bg-muted/30 -mt-[2px]">
-            <motion.div
-              className="h-full bg-teal-500/70"
-              initial={false}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-        )}
-      </nav>
-
+    <OSKernelShell
+      title="Universal CPU Schedulers"
+      currentStepIndex={currentTime}
+      totalSteps={simulation?.totalTime ?? 0}
+      isPlaying={isPlaying}
+      playbackSpeed={playbackSpeed}
+      onPlayPause={!isEditMode ? togglePlay : undefined}
+      onNext={!isEditMode ? handleStepForward : undefined}
+      onPrev={!isEditMode ? handleStepBack : undefined}
+      onReset={
+        !isEditMode
+          ? () => {
+              setCurrentTime(0);
+              setIsPlaying(false);
+            }
+          : undefined
+      }
+      onSpeedChange={!isEditMode ? setPlaybackSpeed : undefined}
+      headerExtra={headerActions}
+      showProgress={!isEditMode}
+    >
       {/* ──────────── 2-PANEL BODY ──────────── */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-[380px_1fr] overflow-hidden">
         {/* ──── LEFT PANEL ──── */}
@@ -598,7 +436,7 @@ export default function UniversalSchedulingSimulator() {
             {!isEditMode && (
               <button
                 onClick={handleReset}
-                className="text-[10px] font-medium text-teal-500 hover:text-teal-400 flex items-center gap-1 transition-colors"
+                className="text-[10px] font-medium text-sky-500 hover:text-sky-400 flex items-center gap-1 transition-colors"
               >
                 <svg
                   width="12"
@@ -672,7 +510,7 @@ export default function UniversalSchedulingSimulator() {
                                   : Math.max(0, val),
                               });
                             }}
-                            className="w-14 px-2 py-1 text-center bg-muted/50 border border-border/50 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-shadow"
+                            className="w-14 px-2 py-1 text-center bg-muted/50 border border-border/50 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-shadow"
                           />
                         </td>
                         <td className="px-2 py-2 text-center">
@@ -689,7 +527,7 @@ export default function UniversalSchedulingSimulator() {
                                   : Math.max(1, val),
                               });
                             }}
-                            className="w-14 px-2 py-1 text-center bg-muted/50 border border-border/50 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-shadow"
+                            className="w-14 px-2 py-1 text-center bg-muted/50 border border-border/50 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-shadow"
                           />
                         </td>
                         <td className="px-1 py-2 text-center">
@@ -722,7 +560,7 @@ export default function UniversalSchedulingSimulator() {
                 <button
                   onClick={addProcess}
                   disabled={inputProcesses.length >= 6}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border/60 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:border-teal-500/50 transition-colors disabled:opacity-40"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border/60 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:border-sky-500/50 transition-colors disabled:opacity-40"
                 >
                   <svg
                     width="10"
@@ -739,7 +577,7 @@ export default function UniversalSchedulingSimulator() {
                 <button
                   onClick={handleRun}
                   disabled={inputProcesses.length === 0}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-teal-500 text-white font-medium text-xs hover:bg-teal-600 transition-colors shadow-lg shadow-teal-500/20 disabled:opacity-40"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-sky-500 text-white font-medium text-xs hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20 disabled:opacity-40"
                 >
                   <svg
                     width="12"
@@ -770,7 +608,7 @@ export default function UniversalSchedulingSimulator() {
                       BT
                       <InfoTooltip termKey="bt" />
                     </th>
-                    <th className="text-center text-[10px] font-bold uppercase tracking-wider text-teal-500/70 px-1 py-2">
+                    <th className="text-center text-[10px] font-bold uppercase tracking-wider text-sky-500/70 px-1 py-2">
                       Rem BT
                     </th>
                     <th className="text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 px-1 py-2">
@@ -800,7 +638,7 @@ export default function UniversalSchedulingSimulator() {
                         key={proc.id}
                         className={cn(
                           "border-t border-border/30 transition-colors duration-300",
-                          state === "running" && "bg-teal-500/5"
+                          state === "running" && "bg-sky-500/5"
                         )}
                       >
                         <td className="px-2 py-2">
@@ -822,7 +660,7 @@ export default function UniversalSchedulingSimulator() {
                         <td className="text-center text-[11px] font-mono text-muted-foreground px-1 py-2">
                           {proc.burstTime}
                         </td>
-                        <td className="text-center text-[11px] font-mono font-bold text-teal-400 px-1 py-2">
+                        <td className="text-center text-[11px] font-mono font-bold text-sky-400 px-1 py-2">
                           {(() => {
                             let executed = 0;
                             for (const b of proc.executionBlocks) {
@@ -1022,14 +860,14 @@ export default function UniversalSchedulingSimulator() {
                         max="20"
                         value={timeQuantum}
                         onChange={(e) => setTimeQuantum(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-16 bg-card border border-border/50 rounded-md px-2 py-1 text-sm font-mono text-center text-foreground outline-none focus:border-teal-500 transition-colors"
+                        className="w-16 bg-card border border-border/50 rounded-md px-2 py-1 text-sm font-mono text-center text-foreground outline-none focus:border-sky-500 transition-colors"
                       />
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              <div className="w-16 h-16 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-sky-500/10 flex items-center justify-center mb-6">
                 <svg
                   width="32"
                   height="32"
@@ -1067,7 +905,7 @@ export default function UniversalSchedulingSimulator() {
 
               <div className="text-left space-y-3 w-full">
                 <div className="flex items-start gap-3">
-                  <span className="text-teal-500 mt-0.5 shrink-0">•</span>
+                  <span className="text-sky-500 mt-0.5 shrink-0">•</span>
                   <p className="text-xs text-muted-foreground">
                     {algorithm === "FCFS"
                       ? "Processes are served in order of arrival time"
@@ -1077,7 +915,7 @@ export default function UniversalSchedulingSimulator() {
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-teal-500 mt-0.5 shrink-0">•</span>
+                  <span className="text-sky-500 mt-0.5 shrink-0">•</span>
                   <div className="text-xs text-muted-foreground flex items-center flex-wrap gap-1">
                     {algorithm === "SRTF" || algorithm === "RR" ? (
                       <>
@@ -1090,7 +928,7 @@ export default function UniversalSchedulingSimulator() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-teal-500 mt-0.5 shrink-0">•</span>
+                  <span className="text-sky-500 mt-0.5 shrink-0">•</span>
                   <p className="text-xs text-muted-foreground font-mono">
                     CT = StartTime + BT &nbsp;•&nbsp; TAT = CT − AT &nbsp;•&nbsp; WT = TAT − BT
                   </p>
@@ -1116,7 +954,7 @@ export default function UniversalSchedulingSimulator() {
 
               <div className="mt-10 text-xs text-muted-foreground/40">
                 Configure processes in the table, then click{" "}
-                <strong className="text-teal-500">Run Simulation</strong>
+                <strong className="text-sky-500">Run Simulation</strong>
               </div>
             </div>
           ) : (
@@ -1129,7 +967,7 @@ export default function UniversalSchedulingSimulator() {
                   className={cn(
                     "px-3 py-1.5 rounded-md text-[11px] font-medium transition-all",
                     viewMode === "gantt"
-                      ? "bg-teal-500/15 text-teal-500 shadow-sm"
+                      ? "bg-sky-500/15 text-sky-500 shadow-sm"
                       : "text-muted-foreground/50 hover:text-foreground"
                   )}
                 >
@@ -1140,7 +978,7 @@ export default function UniversalSchedulingSimulator() {
                   className={cn(
                     "px-3 py-1.5 rounded-md text-[11px] font-medium transition-all",
                     viewMode === "visualization"
-                      ? "bg-teal-500/15 text-teal-500 shadow-sm"
+                      ? "bg-sky-500/15 text-sky-500 shadow-sm"
                       : "text-muted-foreground/50 hover:text-foreground"
                   )}
                 >
@@ -1221,7 +1059,7 @@ export default function UniversalSchedulingSimulator() {
 
                     {/* Current time vertical line */}
                     <motion.div
-                      className="absolute top-0 bottom-0 w-0.5 bg-teal-400 z-20"
+                      className="absolute top-0 bottom-0 w-0.5 bg-sky-400 z-20"
                       style={{
                         boxShadow: "0 0 8px rgba(20,184,166,0.6)",
                       }}
@@ -1247,9 +1085,9 @@ export default function UniversalSchedulingSimulator() {
                           setIsPlaying(false);
                         }}
                         className={cn(
-                          "absolute text-[10px] font-mono -translate-x-1/2 transition-colors hover:text-teal-500 cursor-pointer",
+                          "absolute text-[10px] font-mono -translate-x-1/2 transition-colors hover:text-sky-500 cursor-pointer",
                           t === currentTime
-                            ? "text-teal-500 font-bold"
+                            ? "text-sky-500 font-bold"
                             : "text-muted-foreground/40"
                         )}
                         style={{
@@ -1264,7 +1102,7 @@ export default function UniversalSchedulingSimulator() {
                   {/* ▲ Marker */}
                   <div className="relative h-4">
                     <motion.span
-                      className="absolute text-teal-500 text-[10px] font-bold -translate-x-1/2"
+                      className="absolute text-sky-500 text-[10px] font-bold -translate-x-1/2"
                       initial={false}
                       animate={{
                         left: `${(currentTime / simulation.totalTime) * 100}%`,
@@ -1290,7 +1128,7 @@ export default function UniversalSchedulingSimulator() {
                         setCurrentTime(parseInt(e.target.value));
                         setIsPlaying(false);
                       }}
-                      className="w-full h-1.5 bg-muted/40 rounded-full appearance-none cursor-pointer accent-teal-500 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-teal-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-lg"
+                      className="w-full h-1.5 bg-muted/40 rounded-full appearance-none cursor-pointer accent-sky-500 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sky-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-lg"
                     />
                   </div>
 
@@ -1437,7 +1275,7 @@ export default function UniversalSchedulingSimulator() {
                     className={cn(
                       "rounded-xl border-2 p-5 transition-colors duration-500 min-h-[120px]",
                       runningProcess
-                        ? "border-teal-500/60 bg-teal-500/5"
+                        ? "border-sky-500/60 bg-sky-500/5"
                         : isCurrentlyIdle
                           ? "border-amber-500/30 bg-amber-500/5"
                           : "border-border/60 bg-card/20"
@@ -1448,7 +1286,7 @@ export default function UniversalSchedulingSimulator() {
                         className={cn(
                           "flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold",
                           runningProcess
-                            ? "bg-teal-500/20 text-teal-500"
+                            ? "bg-sky-500/20 text-sky-500"
                             : "bg-muted/50 text-muted-foreground"
                         )}
                       >
@@ -1477,7 +1315,7 @@ export default function UniversalSchedulingSimulator() {
                         className={cn(
                           "text-xs font-bold uppercase tracking-widest",
                           runningProcess
-                            ? "text-teal-500"
+                            ? "text-sky-500"
                             : "text-muted-foreground/50"
                         )}
                       >
@@ -1487,7 +1325,7 @@ export default function UniversalSchedulingSimulator() {
                         className={cn(
                           "text-[9px] px-2 py-0.5 rounded-full font-mono font-bold",
                           runningProcess
-                            ? "bg-teal-500/15 text-teal-500"
+                            ? "bg-sky-500/15 text-sky-500"
                             : isCurrentlyIdle
                               ? "bg-amber-500/15 text-amber-500"
                               : "bg-muted/50 text-muted-foreground/40"
@@ -1654,7 +1492,7 @@ export default function UniversalSchedulingSimulator() {
                         setCurrentTime(parseInt(e.target.value));
                         setIsPlaying(false);
                       }}
-                      className="flex-1 max-w-xs h-1.5 bg-muted/40 rounded-full appearance-none cursor-pointer accent-teal-500 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-teal-500 [&::-webkit-slider-thumb]:appearance-none"
+                      className="flex-1 max-w-xs h-1.5 bg-muted/40 rounded-full appearance-none cursor-pointer accent-sky-500 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sky-500 [&::-webkit-slider-thumb]:appearance-none"
                     />
                     <span className="text-muted-foreground/50 font-mono">
                       {simulation.totalTime}
@@ -1687,7 +1525,7 @@ export default function UniversalSchedulingSimulator() {
                             : event.type === "complete"
                               ? "text-emerald-400"
                               : event.type === "sim_end"
-                                ? "text-teal-400"
+                                ? "text-sky-400"
                                 : event.type === "idle_start"
                                   ? "text-slate-500"
                                   : "text-gray-300"
@@ -1709,9 +1547,9 @@ export default function UniversalSchedulingSimulator() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="rounded-xl border-2 border-teal-500/30 bg-teal-500/5 p-6"
+                  className="rounded-xl border-2 border-sky-500/30 bg-sky-500/5 p-6"
                 >
-                  <h3 className="text-sm font-bold text-teal-500 mb-4 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-sky-500 mb-4 flex items-center gap-2">
                     <svg
                       width="16"
                       height="16"
@@ -1790,6 +1628,6 @@ export default function UniversalSchedulingSimulator() {
           )}
         </main>
       </div>
-    </div>
+    </OSKernelShell>
   );
 }

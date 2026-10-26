@@ -34,7 +34,7 @@ export function OSStatsSidebar({
   const radius = 36;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (pct / 100) * circumference;
-  const ringColor = isIdle ? "#374151" : isKernel ? "#f59e0b" : "#14b8a6";
+  const ringColor = isIdle ? "#374151" : isKernel ? "#f59e0b" : "#0ea5e9";
 
   const allProcesses = Object.values(processes ?? {});
 
@@ -57,7 +57,7 @@ export function OSStatsSidebar({
           </span>
           <span className={cn(
             "ml-auto text-[10px] font-bold uppercase px-2 py-0.5 rounded-full",
-            isIdle ? "bg-muted/50 text-muted-foreground/50" : isKernel ? "bg-amber-500/20 text-amber-500" : "bg-teal-500/20 text-teal-500"
+            isIdle ? "bg-muted/50 text-muted-foreground/50" : isKernel ? "bg-amber-500/20 text-amber-500" : "bg-sky-500/20 text-sky-500 dark:text-sky-400"
           )}>
             {cpu.mode}
           </span>
@@ -71,7 +71,7 @@ export function OSStatsSidebar({
               <circle
                 cx="48" cy="48" r={radius}
                 fill="none"
-                stroke="#1f2937"
+                className="stroke-muted/40 dark:stroke-slate-800"
                 strokeWidth="8"
               />
               {/* Animated ring */}
@@ -96,7 +96,7 @@ export function OSStatsSidebar({
                   exit={{ opacity: 0, scale: 0.8 }}
                   className={cn(
                     "text-xl font-bold font-mono",
-                    isIdle ? "text-muted-foreground/40" : isKernel ? "text-amber-500" : "text-teal-500"
+                    isIdle ? "text-muted-foreground/40" : isKernel ? "text-amber-500" : "text-sky-500 dark:text-sky-400"
                   )}
                 >
                   {isIdle ? "—" : `${pct}%`}
