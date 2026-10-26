@@ -1,81 +1,55 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Agent Instructions & Workflow Protocol
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+> [!IMPORTANT]
+> **CRITICAL FIRST STEPS FOR ANY AI AGENT WORKING IN THIS REPOSITORY**:
+> 1. **FIRST, READ THE RULES**: Consult [`Agent Rules/Rules.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/Agent%20Rules/Rules.md) before performing any action.
+> 2. **SECOND, READ ARCHITECTURE DECISIONS**: Consult [`DecisionsAndAnalysis/decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/decisions.md) to understand the system architecture and all historical decisions (Records 001 through 007).
 
-# Antigravity Skills
+---
 
-This repository contains reusable engineering skills located in `/skills`.
+## 🚨 RULE #1: NEVER STAGE OR COMMIT CHANGES (EVER)
+**NEVER run `git add`, `git commit`, `git push`, or any command that stages or commits changes. EVER.**
+- Keep all modifications, newly created files, and edits as unstaged working tree changes.
+- The user will personally inspect git diffs, test the app, and handle git staging/committing.
+- Only read-only git commands are permitted: `git status`, `git diff`, `git log`.
 
-## Mandatory Workflow
+---
 
+## 🧭 RULE #2: ARCHITECTURE & DECISION INTEGRITY
+- Any non-trivial refactoring, feature addition, or UI change must consult [`DecisionsAndAnalysis/decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/decisions.md) before implementation.
+- Every completed architectural or UI change must be documented by appending a new Decision Record to `DecisionsAndAnalysis/decisions.md`.
+
+---
+
+## 🛠️ RULE #3: SKILL WORKFLOW
 Before making ANY code changes:
+1. Determine whether an existing skill applies (`superpowers-plan`, `superpowers-tdd`, `superpowers-debug`, etc.).
+2. Search `/skills` or `.agent/skills/`.
+3. Load ONLY the most relevant skill.
+4. Follow the workflow prescribed by that skill.
 
-1. Determine whether an existing skill applies.
-2. Search the `/skills` directory by capability or task.
-3. Load ONLY the most relevant skill(s).
-4. Follow the workflow described by that skill.
-5. If no skill applies, continue normally.
+---
 
-Never read every skill.
-Only load skills directly relevant to the current task.
+## 🔬 RULE #4: SIMULATION GUIDELINES (7 RULES)
+When creating or editing runtime simulators:
+1. **Data-Driven State Isolation**: Strict `SimulationScenario` discrete step-by-step models.
+2. **Transparency Rendering**: Render complete collections (dim inactive/suspended frames/queues).
+3. **Strict React Key Strategies**: Deterministic composite keys (e.g. `${context.id}-${variable.name}`). Never use array index.
+4. **Explicit Terminal Theming**: Hardcoded readable colors (`text-zinc-200`, `text-zinc-400`, `bg-[#0b0c0f]`).
+5. **Multi-Modal Feedback**: Step badge, explanation banner, line highlight, state pulse.
+6. **Execution Context Lifecycle**: Call stack must start empty at Step 0, and end empty.
+7. **Strict Two-Phase Context Creation**: Creation phase (`var: undefined`, `let: <TDZ>`) must precede execution assignments.
 
-Examples:
+---
 
-- React component → react skill
-- Animation → framer-motion skill
-- Refactoring → refactoring skill
-- Bug fixing → debugging skill
-- Performance → performance skill
-- Next.js routing → nextjs skill
+## 🧪 RULE #5: RIGOROUS VERIFICATION
+Before declaring completion:
+- `npx tsc --noEmit` must pass with 0 errors.
+- `npx eslint <touched_files>` must pass with 0 errors / 0 warnings.
+- `npm test` must pass all Vitest suites.
+- Add unit tests for new components or utilities.
 
-<!-- code-review-graph MCP tools -->
-## MCP Tools: code-review-graph
-
-**IMPORTANT: This project has a knowledge graph. ALWAYS use the
-code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
-the codebase.** The graph is faster, cheaper (fewer tokens), and gives
-you structural context (callers, dependents, test coverage) that file
-scanning cannot.
-
-### When to use graph tools FIRST
-
-- **Exploring code**: `semantic_search_nodes` or `query_graph` instead of Grep
-- **Understanding impact**: `get_impact_radius` instead of manually tracing imports
-- **Code review**: `detect_changes` + `get_review_context` instead of reading entire files
-- **Finding relationships**: `query_graph` with callers_of/callees_of/imports_of/tests_for
-- **Architecture questions**: `get_architecture_overview` + `list_communities`
-
-Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
-
-### Key Tools
-
-| Tool | Use when |
-|------|----------|
-| `detect_changes` | Reviewing code changes — gives risk-scored analysis |
-| `get_review_context` | Need source snippets for review — token-efficient |
-| `get_impact_radius` | Understanding blast radius of a change |
-| `get_affected_flows` | Finding which execution paths are impacted |
-| `query_graph` | Tracing callers, callees, imports, tests, dependencies |
-| `semantic_search_nodes` | Finding functions/classes by name or keyword |
-| `get_architecture_overview` | Understanding high-level codebase structure |
-| `refactor_tool` | Planning renames, finding dead code |
-
-### Workflow
-
-1. The graph auto-updates on file changes (via hooks).
-2. Use `detect_changes` for code review.
-3. Use `get_affected_flows` to understand impact.
-4. Use `query_graph` pattern="tests_for" to check coverage.
-
-## JavaScript Simulation Guidelines
-When creating new "Episodes" or Scenarios (like the Call Stack simulator), abide by these 5 core rules:
-
-1. **Data-Driven State Isolation**: Never hardcode simulation logic into React components. Define a strict, step-by-step `SimulationScenario` JSON/Object model. Every change in the stack, memory, or UI overlay must be represented as a discrete "Step" in the data layer.
-2. **The "Transparency" Rendering Principle**: When rendering arrays/stacks (like Call Stacks, Memory Heaps, or Queues), render the ENTIRE collection. Highlight and expand the active element, but always render inactive/suspended elements in a collapsed or dimmed state. Do not hide background contexts.
-3. **Strict React Key Strategies**: Never use array indices as React `key` props when mapping simulation data. Construct unique, deterministic keys (e.g., `key={\`\${executionContext.id}-\${variable.name}\`}`) to prevent severe state-leakage and animation bugs during context swaps.
-4. **Explicit Theming for "Terminal" UIs**: When building panels with forced backgrounds (like a dark Code Editor or black Console), hardcode the text colors (e.g., `text-gray-200`). Standard adaptive classes like `text-foreground` will invert to black in Light Mode and become invisible.
-5. **Multi-modal Feedback Architecture**: Every simulation step must contain multiple vectors of feedback. The data model should support: a text explanation (Banner), a brief notification (Toast), and a visual spotlight/overlay action (e.g., "Looking for variable...").
-6. **Execution Context Lifecycle**: When creating scenarios that deal with the execution context, ensure that the execution context (call stack) is explicitly empty in the very first step (Engine Initialization), and empty again in the final step (Engine Destruction or Halted state), mirroring the design of Episodes 1 and 2.
-7. **Strict Two-Phase Context Creation**: Every new Execution Context pushed to the Call Stack MUST undergo a discrete "Creation Phase" step before any "Execution Phase" steps. During the "Creation Phase" step, you must highlight the function declaration line. `var` variables must be initialized to `undefined`, and `let`/`const` variables must be explicitly set to `<TDZ>`. You may not "fast-forward" variable assignments. You must transition to the "Execution Phase" in subsequent steps, explicitly highlighting each variable assignment line one-by-one as the engine parses them.
+<!-- BEGIN:nextjs-agent-rules -->
+# Next.js Notice
+This version has breaking changes — APIs, conventions, and file structure may differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing code.
+<!-- END:nextjs-agent-rules -->

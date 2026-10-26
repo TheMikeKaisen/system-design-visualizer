@@ -869,7 +869,7 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`js-line-${idx}`}
-                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l-2 ${
+                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l ${
                       isCurrent
                         ? "bg-amber-500/15 border-amber-400 shadow-[inset_0_1px_0_0_rgba(245,158,11,0.1),0_0_14px_rgba(245,158,11,0.12)] font-medium translate-x-0.5"
                         : "border-transparent hover:bg-zinc-800/40 text-zinc-400"
@@ -895,7 +895,7 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`os-line-${idx}`}
-                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l-2 ${
+                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l ${
                       isCurrent
                         ? "bg-sky-500/15 border-sky-400 shadow-[inset_0_1px_0_0_rgba(14,165,233,0.1),0_0_14px_rgba(14,165,233,0.12)] font-medium translate-x-0.5"
                         : "border-transparent hover:bg-zinc-800/40 text-zinc-400"
@@ -921,7 +921,7 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`java-line-${idx}`}
-                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l-2 ${
+                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l ${
                       isCurrent
                         ? "bg-emerald-500/15 border-emerald-400 shadow-[inset_0_1px_0_0_rgba(16,185,129,0.1),0_0_14px_rgba(16,185,129,0.12)] font-medium translate-x-0.5"
                         : "border-transparent hover:bg-zinc-800/40 text-zinc-400"

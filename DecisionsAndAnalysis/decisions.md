@@ -194,7 +194,7 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - **Final CTA**:
     - Heading: *"Curiosity is the starting point. Understanding is the goal."*
     - Copy: *"Pick a concept, run an experiment, and see what happens beneath the surface."*
-    - CTAs: *"Browse All Modules"* and *"Open Canvas Studio"*.
+    - CTAs: *"Explore Learning Paths"* and *"Open Canvas Studio"*.
   - **Negative Space & Layout Rhythm**:
     - Rebalanced padding (`py-20 sm:py-28`) and alternating subtle ambient backgrounds (`bg-background`, `bg-zinc-950/20`, `bg-zinc-950/40`) to create intentional editorial breathing room without excessive empty darkness.
   - **Automated Verification**:
@@ -597,4 +597,176 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Verified `npx eslint` across all Operating Systems code clean with 0 errors / 0 warnings.
     - All modifications remain unstaged in the working tree in strict compliance with Rule #1.
 - **Blast Radius**: Zero regressions; backwards-compatible across all learning paths and simulators.
+
+---
+
+## Decision Record 021: Hero Section Computational Network — Perimeter Flanking Architecture & Safe Text Corridor Guarantee
+- **Status**: Implemented & Verified
+- **Category**: UI/UX, Design Systems, Information Architecture & Responsive Design
+- **Problem**:
+  - The previous node positions placed `INGRESS` at `(310, 108)` (directly colliding with the "Don't" headline text), `LOAD_BALANCER` at `(574, 78)` (whose bottom label collided with the top of the headline), and `APP_SERVICE_B` at `(900, 168)` (directly colliding with the end of "Understand how it works.").
+  - On tablet and mobile viewports, fixed SVG coordinates squished into multi-line text, impairing WCAG contrast and reading flow.
+- **Decision & Implementation**:
+  - **1. Perimeter Flanking Architecture**:
+    - Re-architected node positioning to frame the hero copy into a clean two-flank distributed system topology:
+      - **Left Ingress & Traffic Tier**: Client `(80, 90)`, Ingress `(100, 260)`, Load Balancer `(120, 430)`.
+      - **Right Backend & Persistence Tier**: App Service A `(1150, 90)`, App Service B `(1180, 230)`, Application Cache `(1120, 380)`, Database `(1180, 520)`.
+    - Established an architectural **Central Text Corridor Exclusion Zone** (`x: 200–1080, y: 120–480`) guaranteed to contain 0 node boxes or text labels.
+  - **2. High Canopy & Basin Bezier Circuit Paths**:
+    - `conn-c03` arcs high over the headline (`y = 20–50` at apex) carrying traffic from Load Balancer across to App Service A.
+    - `conn-c04` sweeps beneath the CTA buttons (`y = 570` at basin) across to Application Cache.
+    - Preserved canonical flow and animated motion packets along all 7 routes with WCAG reduced-motion toggling.
+  - **3. Responsive Multi-Tier Display**:
+    - Switched SVG scaling to `preserveAspectRatio="xMidYMid slice"`.
+    - Node cards adapted for medium/large screens (`hidden md:inline`), text labels for large screens (`hidden lg:inline`), preventing mobile collisions while preserving ambient particles and packet flows across all screen sizes.
+  - **4. Automated Verification**:
+    - Unit tests in [`HeroComputationalGraph.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroComputationalGraph.test.tsx) asserting canonical nodes, connections C01–C07, reduced-motion bypass, absence of framing ellipses, and added an automated assertion confirming every node avoids the central corridor.
+    - 5/5 Vitest tests pass cleanly. `tsc --noEmit` and `eslint` clean with 0 errors.
+    - Strict adherence to Rule #1: all changes remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; confined exclusively to the hero background SVG component, its unit tests, and architecture log.
+
+---
+
+## Decision Record 022: Distributed System Graph Fidelity — Parallel Instance Load Balancing, Application-Managed Data Access & Directional Request Flow
+- **Status**: Implemented & Verified
+- **Category**: Architecture, Distributed Systems Pedagogy & Visual Design
+- **Problem**:
+  - The previous graph topology had subtle architectural inconsistencies that could mislead learners:
+    1. **Sequential Pipe Misconception**: App Service A appeared to connect sequentially to App Service B, which then connected to the cache (`App A -> App B -> Cache`), suggesting a chain rather than two interchangeable application instances.
+    2. **Cache-to-Database Direct Link Misconception**: A direct path connected Application Cache to Database, falsely implying the cache autonomously queries the database rather than adhering to standard application-managed cache-aside patterns.
+    3. **Missing Flow Direction**: Connection lines lacked explicit directional cues, leaving ambiguity about whether information represented ingress requests, dispatches, or data access lookups.
+- **Decision & Implementation**:
+  - **1. Parallel Load Balancing**:
+    - Disconnected App Service A from App Service B completely.
+    - Routed independent load-balancing dispatch paths from Load Balancer to App Service A (`conn-c03`) and App Service B (`conn-c04`), modeling authentic L7 traffic distribution across redundant instances.
+  - **2. Application-Managed Caching & Persistence**:
+    - Removed the direct connection between Application Cache and Database.
+    - Wired each application instance to coordinate data tier interactions independently:
+      - App Service A $\rightarrow$ Application Cache (`conn-c05`) and App Service B $\rightarrow$ Application Cache (`conn-c06`) for in-memory lookups.
+      - App Service A $\rightarrow$ Database (`conn-c07`) and App Service B $\rightarrow$ Database (`conn-c08`) in amber persistence strokes for cache misses / persistent writes.
+  - **3. Explicit Directional Cues (Chevrons & Motion Flow)**:
+    - Added SVG `<marker>` definitions (`#hcg-arrow-teal`, `#hcg-arrow-cyan`, `#hcg-arrow-amber`) providing crisp, directional arrowheads at the destination ends of all 8 connection paths.
+    - Synchronized animated SVG `<animateMotion>` packet dots to travel in strict alignment with the architectural request flow.
+  - **4. Automated Verification**:
+    - Updated [`HeroComputationalGraph.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroComputationalGraph.test.tsx) asserting all 8 connections (`conn-c01` through `conn-c08`), all 3 directional markers, safe corridor clearance, and reduced-motion support.
+    - 5/5 Vitest tests pass cleanly. `tsc --noEmit` and `eslint` clean with 0 errors.
+    - Strict adherence to Rule #1: all changes remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; confined exclusively to the hero background SVG component, its unit tests, and architecture log.
+
+---
+
+## Decision Record 023: Framed Architectural Stage — Upward Intake Flow, Cloud Tier Enclosures & Horizontal Canopy Bus
+- **Status**: Implemented & Verified
+- **Category**: UI/UX, Design Systems, Information Architecture & Responsive Layout
+- **Problem**:
+  - The previous node arrangement stacked nodes in rigid vertical columns along the viewport edges and linked them with a looping oval ellipse that resembled a generic ring rather than authentic cloud infrastructure.
+  - Furthermore, having Load Balancer at the bottom left created awkward, unnatural connection lines across the canvas.
+- **Decision & Implementation**:
+  - **1. Upward Intake Flow (Client $\rightarrow$ Ingress $\rightarrow$ Load Balancer)**:
+    - Positioned `CLIENT` at the bottom left `(106, 440)`.
+    - Positioned `INGRESS` in the middle left `(106, 275)`.
+    - Positioned `LOAD_BALANCER` at the top left `(106, 110)`.
+    - Requests initiate at Client and flow **upward** through Ingress into Load Balancer via vertical bus paths (`conn-c01`, `conn-c02`) with upward-pointing arrowheads.
+  - **2. Horizontal Canopy Bus to Compute Cluster**:
+    - With Load Balancer at the top left `(106, 110)`, level with App Service A `(1148, 115)`, traffic flows naturally across a dedicated horizontal canopy bus (`y = 48–54`) above the headline.
+    - Branches cleanly into App Service A (`conn-c03`) and App Service B (`conn-c04`), modeling realistic L7 round-robin dispatch.
+  - **3. Cloud Architecture Tier Enclosures**:
+    - Framed the 7 nodes within 3 labeled structural tier enclosures:
+      - `EDGE & INGRESS` (Left Flank)
+      - `COMPUTE CLUSTER` (Upper Right Flank)
+      - `PERSISTENCE TIER` (Lower Right Flank)
+    - Preserved clean dark card styling without distracting glassmorphism or active status indicators.
+  - **4. Framed Architectural Stage & Responsiveness**:
+    - Wrapped the SVG within a centered `max-w-7xl` container (`w-full max-w-7xl h-full`), preventing ultra-wide monitor distortion.
+    - Tier enclosures and node cards gracefully collapse for mobile (`hidden md:inline`), preserving ambient particles and circuit flows behind centered copy.
+  - **5. Automated Verification**:
+    - Updated [`HeroComputationalGraph.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroComputationalGraph.test.tsx) asserting all 7 canonical nodes, 3 architectural tiers, 8 connections, directional markers, and central corridor clearance.
+    - All unit tests pass 100%. `tsc --noEmit` and `eslint` clean with 0 errors / 0 warnings.
+    - Strict adherence to Rule #1: all modifications remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; confined exclusively to the hero background SVG component, its unit tests, and architecture log.
+
+---
+
+## Decision Record 024: Mobile-First Landing Page Optimization — Portrait Architecture Topology, Disciplines List View & Mobile Decluttering
+- **Status**: Implemented & Verified
+- **Category**: Mobile UX/UI, Responsive Architecture, Performance & Layout
+- **Problem**:
+  1. On mobile viewports (`< 768px`), hero nodes were completely hidden due to `hidden md:inline` CSS classes. Scaling down the 1280x640 widescreen SVG to fit a 390px mobile screen compressed coordinates by 3.3× (reducing 52px boxes to 15.7px dots with unreadable typography) and squished the circuit into a narrow 195px band behind the mobile headline and CTAs.
+  2. The 6-card disciplines grid (`DisciplineCard`) consumed excessive vertical scroll height on mobile screens with heavy card chrome, multi-line descriptions, and topic tag lists.
+  3. The 4 simulation engine feature cards (*"Explicit state transitions"*, *"Inspectable internals"*, etc.) and the interactive Canvas Studio sandbox (`MiniDistributedCanvas`) added visual clutter and heavy DOM overhead on small screens.
+- **Decision & Implementation**:
+  1. **Dual-Stage Responsive Computational Graph (`src/components/landing/HeroComputationalGraph.tsx`)**:
+     - Decoupled the desktop widescreen stage (`hidden md:block w-full max-w-7xl h-full`, `viewBox="0 0 1280 640"`) from a dedicated portrait-optimized mobile architectural stage (`block md:hidden w-full h-full`, `viewBox="0 0 390 680"`).
+     - **Top Tier (Edge & Ingress, $y=46$)**: Positions `Client`, `Ingress`, and `Load Balancer` in an uncluttered horizontal tier directly above the mobile headline, with glowing teal animated packet flows.
+     - **Lateral Bus Conduits**: Channels requests down the left and right outer margins of the mobile screen ($x \approx 20\text{px}$ and $x \approx 370\text{px}$), gracefully framing the headline, subtitle, and CTA buttons without text collisions.
+     - **Bottom Tier (Compute & Persistence, $y=585$)**: Positions `App Service A`, `App Service B`, `Application Cache`, and `Database` below the CTA buttons, with amber queries into Database and cyan requests into Cache, converging into the Section 2 vertical bus bridge.
+     - Sized mobile node badges at $36 \times 36\text{px}$ with glowing accent rings and native `<title>` accessible tooltips, guaranteeing 100% visibility, crisp ergonomics, and zero text crowding.
+  2. **Mobile Disciplines List View (`src/components/landing/page-sections.tsx`)**:
+     - Retained the 3x2 card grid on tablet and desktop (`hidden md:grid`).
+     - On smaller screens (`block md:hidden`), replaced cards with a high-contrast, touch-optimized list: discipline logo/icon + title on the left (`flex items-center gap-3.5`), and right arrow chevron (`ArrowRight`) on the right.
+     - Included all 5 core disciplines (JavaScript, Operating Systems, Java & JVM, Frontend Architecture, Backend Internals) plus the 6th *"Explore Learning Paths"* directory link.
+  3. **Mobile Decluttering for How It Works & Canvas Studio (`src/components/landing/page-sections.tsx`)**:
+     - Applied `hidden md:grid` to the 4 simulation mechanics feature cards in `SimulationEngineSection`, keeping the explanatory copy and badges uncluttered.
+     - Applied `hidden md:block` to the `MiniDistributedCanvas` sandbox widget in `CanvasStudioSection`, keeping the section heading and primary *"Build a System"* CTA prominent.
+  4. **Automated Verification**:
+     - Updated unit tests in [`LandingPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/LandingPage.test.tsx) and [`HeroComputationalGraph.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroComputationalGraph.test.tsx) asserting responsive visibility classes, mobile node rendering, and mobile list content.
+     - All 47 Vitest test suites (426 tests) pass 100% green.
+     - `npx tsc --noEmit` clean with 0 errors.
+     - `npx eslint` clean with 0 errors and 0 warnings.
+     - Strict adherence to Rule #1: all modifications remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; delivers an award-winning mobile experience with high readability, fast navigation, and dedicated portrait system architecture.
+
+---
+
+## Decision Record 025: Durable Product Context Capture (`PRODUCT.md`) & Design System Initialization
+- **Status**: Implemented & Verified
+- **Category**: Product Architecture, Design Authority & Workflow Configuration
+- **Problem**:
+  - The repository lacked a durable, centralized `PRODUCT.md` specification defining canonical product positioning, target audience, operating contexts, brand commitments, and foundational design principles.
+  - Future UI refactorings and new features risked divergence between the low-level runtime simulators and the distributed system Canvas Studio without an authoritative contract.
+- **Decision & Implementation**:
+  - **1. Durable Product Truth Specification ([`PRODUCT.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/PRODUCT.md))**:
+    - Captured confirmed product truth under `impeccable:product-schema 1`:
+      - **Audience**: Dual-audience focus spanning CS students & engineers building intuition from code execution up to distributed systems (technical interview preparation and deep fundamental mastery).
+      - **Purpose & Positioning**: Tactile, deterministic, inspectable simulation platform with strict two-phase execution, transparent abstractions, and real-time multiplayer capability.
+      - **Dual-Pillar Strategy**: Equilibrium between micro runtime simulators (JavaScript, OS, Java/JVM, Frontend, Backend) and macro Canvas Studio distributed topologies.
+      - **Frictionless Access Boundary**: Free open-access default for all simulation modules and canvas experimentation without sign-in; authentication and database persistence reserved for saving/sharing diagrams and collaborative workspaces.
+      - **Brand Commitments**: Canonical name `System Simulator` (`systemsimulator.vercel.app`), *The Isometric Strata & Core* brand geometry, and tokenized discipline accent palettes.
+  - **2. Workflow Configuration ([`.impeccable/config.json`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/.impeccable/config.json))**:
+    - Recorded `"buildPath": "code"` reflecting that landing pages and runtime surfaces are already established, directing future work to lean, code-first implementation.
+  - **3. Verification**:
+    - Re-ran `impeccable context` confirming clean resolution of `PRODUCT.md` with zero schema violations.
+    - `npx tsc --noEmit` verified with 0 errors.
+    - Strict adherence to Rule #1: all modifications remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; zero changes to production bundle or runtime components.
+
+---
+
+## Decision Record 026: Impeccable Landing Page Polish — Antipattern Elimination, Contrast Hardening & Eyebrow Ban Adherence
+- **Status**: Implemented & Verified
+- **Category**: UI/UX Craft, Design Systems, Typography & Accessibility Polish
+- **Problem**:
+  - Mechanical detector audits flagged `gradient-text` on the hero headline and `side-tab` 2px accent borders on code line containers in the runtime sandbox.
+  - Formulaic SaaS kicker/eyebrow pill badges (`Core Disciplines`, `How It Works`, `Canvas Studio`) cluttered section headers in violation of the Impeccable craft floor ban.
+  - Text selection color was low-contrast in light mode (`selection:text-amber-300` on amber-20), and "No sign-up required" used pseudo-technical monospace with sub-optimal WCAG contrast.
+- **Decision & Implementation**:
+  - **1. Gradient Text Elimination ([`page-sections.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/page-sections.tsx))**:
+    - Replaced the AI-tell gradient text and hue shimmer on "Understand how it works." with solid editorial `text-teal-600 dark:text-teal-400`, perfectly aligned with the teal computational network motif and Isometric Strata mark.
+    - Removed orphaned `.headline-gradient-shimmer` keyframe rules from [`landing.css`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/landing.css).
+  - **2. Eyebrow Ban Adherence ([`page-sections.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/page-sections.tsx))**:
+    - Removed the redundant eyebrow pills above headings in `DisciplinesSection`, `SimulationEngineSection`, and `CanvasStudioSection`, letting the strong editorial headings speak with full authority.
+  - **3. Side-Tab Accent Elimination ([`HeroRuntimeSandbox.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/HeroRuntimeSandbox.tsx))**:
+    - Upgraded active line highlighting from thick `border-l-2` to a refined 1px `border-l` with subtle inner highlight, satisfying the craft floor and eliminating all detector warnings.
+  - **4. Contrast & Accessibility Polish**:
+    - Upgraded text selection to `selection:bg-amber-500/25 selection:text-amber-950 dark:selection:text-amber-200`, delivering AAA contrast in both modes.
+    - Upgraded "No sign-up required" from muted monospace `text-zinc-500 font-mono` to `text-zinc-600 dark:text-zinc-400 font-medium`.
+    - Added responsive abbreviation to navbar CTA (`<span className="hidden sm:inline">Open </span>Canvas Studio`) preventing mobile navbar overcrowding.
+  - **5. Automated Verification**:
+    - Mechanical design detector returns clean `[]` across all landing files.
+    - `npx eslint` on touched files clean (0 errors, 0 warnings).
+    - `npx tsc --noEmit` clean with 0 errors.
+    - Full Vitest test suite passes 100% (47 test files, 426 tests passing).
+    - Strict adherence to Rule #1: all changes remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; strictly elevated typographic craft, contrast, and visual maturity across the landing page.
+
 

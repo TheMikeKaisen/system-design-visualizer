@@ -134,19 +134,6 @@
   animation: hero-drift 10s ease-in-out infinite;
 }
 
-/* ── Subtle Headline Gradient Shimmer ───────────────────── */
-@keyframes subtle-gradient-shimmer {
-  0%, 100% {
-    filter: hue-rotate(0deg);
-  }
-  50% {
-    filter: hue-rotate(18deg);
-  }
-}
-.headline-gradient-shimmer {
-  animation: subtle-gradient-shimmer 7s ease-in-out infinite;
-}
-
 /* ── Packet flow along vertical circuit bus ─────────────── */
 @keyframes vertical-packet-flow {
   0% {
@@ -176,7 +163,6 @@
     transition: none;
   }
   .hero-topology-bg,
-  .headline-gradient-shimmer,
   .packet-dot-vertical {
     animation: none !important;
     transform: none;

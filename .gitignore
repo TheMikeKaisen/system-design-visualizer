@@ -10,13 +10,18 @@
 !.yarn/releases
 !.yarn/versions
 
+# folders
+/agentReports
+
 # testing
 /coverage
 /skills
 
+/designSkills
+/.agents
 AGENTS.md
 /graphify-out
-
+/.impeccable
 .cursorrules
 .mcp.json
 .opencode.json
@@ -32,6 +37,7 @@ CLAUDE.md
 project_understanding.md
 GEMINI.md
 message1.md
+skills-lock.json
 
 # next.js
 /.next/

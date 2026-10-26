@@ -110,7 +110,7 @@ describe("LandingPage", () => {
         name: /Curiosity is the starting point\. Understanding is the goal\./i,
       })
     ).toBeDefined();
-    expect(screen.getAllByRole("link", { name: /Browse All Modules/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("link", { name: /Explore Learning Paths/i }).length).toBeGreaterThanOrEqual(1);
 
     expect(screen.getByText(/Built for deep engineering learning/i)).toBeDefined();
   });
@@ -131,7 +131,7 @@ describe("LandingPage", () => {
     expect(mobileDisciplinesList?.textContent).toContain("Java & JVM Architecture");
     expect(mobileDisciplinesList?.textContent).toContain("Frontend Architecture");
     expect(mobileDisciplinesList?.textContent).toContain("Backend Internals");
-    expect(mobileDisciplinesList?.textContent).toContain("Browse All Modules");
+    expect(mobileDisciplinesList?.textContent).toContain("Explore Learning Paths");
 
     // 3. How It Works feature cards are hidden on smaller screens (hidden md:grid):
     const howItWorksCards = container.querySelector("#how-it-works .hidden.md\\:grid");

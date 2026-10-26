@@ -70,7 +70,7 @@ export function LandingPage() {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-amber-500/20 selection:text-amber-300"
+      className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-amber-500/25 selection:text-amber-950 dark:selection:text-amber-200"
     >
       <Nav />
       <main className="pt-16">
@@ -131,7 +131,7 @@ function Nav() {
             href="/canvas"
             className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-90 shadow-sm transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            <span>Open Canvas Studio</span>
+            <span><span className="hidden sm:inline">Open </span>Canvas Studio</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -154,7 +154,7 @@ function HeroSection() {
         {/* Confident, focal headline */}
         <h1 className="hero-fade-in text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] text-[#0A0A0A] dark:text-zinc-50 max-w-4xl">
           Don&apos;t just use software.{" "}
-          <span className="block mt-1 sm:mt-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 dark:from-teal-400 dark:via-cyan-400 dark:to-blue-400 headline-gradient-shimmer">
+          <span className="block mt-1 sm:mt-2 text-teal-600 dark:text-teal-400">
             Understand how it works.
           </span>
         </h1>
@@ -248,9 +248,6 @@ function DisciplinesSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Section Header */}
         <div className="landing-reveal max-w-2xl mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-zinc-200/90 dark:border-border/60 bg-zinc-100 dark:bg-muted/40 text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-muted-foreground shadow-xs">
-            Core Disciplines
-          </div>
           <h2 id="disciplines-heading" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50">
             Go beyond the abstractions.
           </h2>
@@ -286,7 +283,7 @@ function DisciplinesSection() {
               </div>
 
               <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight">
-                Browse All Modules
+                Explore Learning Paths
               </h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-6 font-normal">
                 Explore the complete interactive curriculum across all disciplines. Filter by track, inspect prerequisites, and launch simulators directly.
@@ -339,7 +336,7 @@ function DisciplinesSection() {
                 <Play className="w-5 h-5 fill-current" />
               </div>
               <span className="font-semibold text-sm sm:text-base text-foreground group-hover:text-primary transition-colors truncate">
-                Browse All Modules
+                Explore Learning Paths
               </span>
             </div>
             <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -360,9 +357,6 @@ function SimulationEngineSection() {
         <div className="grid lg:grid-cols-[1fr_1.3fr] gap-12 lg:gap-16 items-start">
           {/* Left copy */}
           <div className="landing-reveal max-w-md">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-zinc-200/90 dark:border-border/60 bg-zinc-100 dark:bg-muted/40 text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-muted-foreground shadow-xs">
-              How It Works
-            </div>
             <h2 id="engine-heading" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50 leading-tight">
               Every step has a reason.
             </h2>
@@ -444,10 +438,6 @@ function CanvasStudioSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Header copy */}
         <div className="max-w-3xl mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-zinc-200/90 dark:border-border/70 bg-zinc-100 dark:bg-muted/40 text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-muted-foreground shadow-xs">
-            Canvas Studio
-          </div>
-
           <h2 id="canvas-heading" className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50 leading-[1.1]">
             From a single function to a distributed system.
           </h2>
@@ -465,7 +455,7 @@ function CanvasStudioSection() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
 
-            <span className="text-xs text-zinc-500 font-mono">
+            <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">
               No sign-up required
             </span>
           </div>
@@ -506,7 +496,7 @@ function FinalCTASection() {
               href="/learning-paths"
               className="inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-95 shadow-md transition-all group"
             >
-              <span>Browse All Modules</span>
+              <span>Explore Learning Paths</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
 
