@@ -41,11 +41,30 @@ describe("LandingPage", () => {
       })
     ).toBeDefined();
 
-    const exploreLinks = screen.getAllByRole("link", { name: /Explore Simulations/i });
+    const exploreLinks = screen.getAllByRole("link", { name: /Explore Learning Paths/i });
     expect(exploreLinks.length).toBeGreaterThanOrEqual(1);
 
     const canvasLinks = screen.getAllByRole("link", { name: /Open Canvas Studio/i });
     expect(canvasLinks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders dedicated interactive sandbox stage with heading and visualizer", () => {
+    render(<LandingPage />);
+
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: /See what happens beneath the surface\./i,
+      })
+    ).toBeDefined();
+
+    expect(
+      screen.getByText(
+        /Explore how code executes, memory is allocated, processes are scheduled, and systems communicate\./i
+      )
+    ).toBeDefined();
+
+    expect(screen.getByTestId("mock-hero-runtime-sandbox")).toBeDefined();
   });
 
   it("renders all five core disciplines with their links", () => {
@@ -53,7 +72,7 @@ describe("LandingPage", () => {
 
     expect(screen.getByRole("heading", { name: /Go beyond the abstractions\./i })).toBeDefined();
 
-    expect(screen.getAllByText("JavaScript Runtimes").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("JavaScript").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Operating Systems").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Java & JVM Architecture").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Frontend Architecture").length).toBeGreaterThanOrEqual(1);
@@ -67,7 +86,7 @@ describe("LandingPage", () => {
     expect(screen.getByText("Explore Backend Systems")).toBeDefined();
 
     // Verify card navigation links exist
-    expect(screen.getAllByRole("link", { name: /JavaScript Runtimes/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("link", { name: /JavaScript/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole("link", { name: /Operating Systems/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole("link", { name: /Java & JVM Architecture/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole("link", { name: /Frontend Architecture/i }).length).toBeGreaterThanOrEqual(1);

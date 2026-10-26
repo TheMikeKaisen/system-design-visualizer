@@ -1,156 +1,99 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
-import { MonitorSmartphone, ArrowLeft } from "lucide-react";
+import { DisciplineCard, DISCIPLINES } from "@/components/ui/DisciplineCard";
+import { Network, ArrowRight, ArrowLeft } from "lucide-react";
 
 export default function LearningPathsPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col font-sans">
+    <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-amber-500/20 selection:text-amber-300">
       {/* Navigation */}
       <nav className="h-16 border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="h-full px-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <Logo size={24} />
-            <span className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
-              System Design Visualizer
+        <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group" aria-label="System Simulator home">
+            <Logo size={28} />
+            <span className="text-base font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
+              System Simulator
             </span>
           </Link>
-          <ThemeToggle />
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Home</span>
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </nav>
 
-      {/* Mobile Only: Coming Soon Message */}
-      <main className="flex-1 flex md:hidden flex-col items-center justify-center px-6 py-12 text-center">
-        <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center mb-8 relative">
-          <MonitorSmartphone className="w-12 h-12 text-primary" strokeWidth={1.5} />
-          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-background flex items-center justify-center">
-            <span className="relative flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-primary"></span>
-            </span>
+      {/* Main Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-border/60 bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            All Learning Tracks
           </div>
-        </div>
-        
-        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-4">
-          Bigger Screen Required
-        </h1>
-        
-        <p className="text-muted-foreground text-lg leading-relaxed max-w-sm mb-10">
-          Our interactive simulators are packed with complex memory visualizations and CPU states that demand a larger canvas. 
-          <br /><br />
-          Please switch to a desktop or tablet for the full experience. We're crafting a mobile-optimized version!
-        </p>
-        
-        <Link 
-          href="/"
-          className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Link>
-      </main>
-
-      {/* Desktop Only: Main Content */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-20 hidden md:block">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-            Learning Paths
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+            Master Systems from the Inside Out
           </h1>
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            Structured, interactive lessons that walk you through fundamental programming languages and system design concepts.
+          <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-2xl mx-auto">
+            Structured, interactive computational tracks exploring execution contexts, operating system scheduling, virtual machines, and distributed architecture.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Active Route: Java */}
-          <Link href="/java" className="group">
-            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.2)] transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-orange-500/20 transition-all duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">Java</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-                Understand how Java code is compiled, converted to bytecode, and executed by the JVM and CPU.
-              </p>
-              <div className="flex items-center text-sm font-semibold text-primary group-hover:translate-x-1 transition-transform">
-                Explore<svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </div>
-            </div>
-          </Link>
+        {/* 6-Card Unified Disciplines Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {DISCIPLINES.map((disc) => (
+            <DisciplineCard key={disc.id} discipline={disc} />
+          ))}
 
-          {/* Active Route: JavaScript */}
-          <Link href="/javascript" className="group">
-            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-yellow-500/50 hover:shadow-[0_0_30px_-5px_rgba(234,179,8,0.2)] transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-yellow-500/20 transition-all duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-yellow-500 transition-colors">JavaScript</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-                Master the Execution Context, Call Stack, Memory Heap, and Event Loop in real-time.
-              </p>
-              <div className="flex items-center text-sm font-semibold text-yellow-500 group-hover:translate-x-1 transition-transform">
-                Explore <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </div>
-            </div>
-          </Link>
+          {/* 6th Card: Canvas Studio */}
+          <Link
+            href="/canvas"
+            className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-gradient-to-br from-card/90 via-card/70 to-primary/5 hover:border-primary/50 hover:shadow-xl hover:shadow-black/25 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] overflow-hidden"
+          >
+            {/* Top hairline highlight on hover */}
+            <div
+              className="absolute top-0 left-4 right-4 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-primary to-transparent"
+              aria-hidden="true"
+            />
 
-          {/* Active Route: Operating Systems */}
-          <Link href="/operating-systems" className="group">
-            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-teal-500/50 hover:shadow-[0_0_30px_-5px_rgba(6,182,212,0.2)] transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-teal-500/20 transition-all duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="4" y="4" width="16" height="16" rx="2" />
-                  <rect x="9" y="9" width="6" height="6" />
-                  <path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" />
-                  <path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" />
-                </svg>
+            <div>
+              <div className="flex items-center justify-between mb-5">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-105 duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]">
+                  <Network className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  Interactive Studio
+                </span>
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-teal-500 transition-colors">Operating Systems</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-                Visualize process states, CPU scheduling, memory management, and hardware interaction in real-time.
-              </p>
-              <div className="flex items-center text-sm font-semibold text-teal-500 group-hover:translate-x-1 transition-transform">
-                Explore <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </div>
-            </div>
-          </Link>
 
-          {/* Active Route: Frontend */}
-          <Link href="/frontend" className="group">
-            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-blue-500/50 hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.2)] transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-blue-500/20 transition-all duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <ellipse cx="12" cy="12" rx="10" ry="4"></ellipse>
-                  <ellipse cx="12" cy="12" rx="4" ry="10"></ellipse>
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-blue-500 transition-colors">Frontend</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-                Visualize React's rendering pipeline, from JSX compilation down to Virtual DOM diffing and DOM reconciliation.
+              <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight">
+                Canvas Studio
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                Assemble multi-node distributed architectures. Simulate live packet flows, test circuit breakers, and observe rate-limiting dynamics.
               </p>
-              <div className="flex items-center text-sm font-semibold text-blue-500 group-hover:translate-x-1 transition-transform">
-                Explore <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </div>
             </div>
-          </Link>
-        {/* Active Route: Backend */}
-          <Link href="/backend" className="group">
-            <div className="relative h-full p-6 sm:p-8 rounded-2xl border border-border bg-card hover:border-emerald-500/50 hover:shadow-[0_0_30px_-5px_rgba(16,185,129,0.2)] transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                  <line x1="6" y1="6" x2="6.01" y2="6"></line>
-                  <line x1="6" y1="18" x2="6.01" y2="18"></line>
-                </svg>
+
+            <div>
+              <div className="flex flex-wrap gap-1.5 mb-5">
+                {["API Gateway", "Event Streams", "Rate Limiting", "Circuit Breakers"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[11px] font-mono px-2 py-0.5 rounded bg-muted/50 border border-border/40 text-muted-foreground group-hover:border-border/80 transition-colors"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-emerald-500 transition-colors">Backend</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-                Visualize Node.js internals, Thread Pools, non-blocking I/O, and the 5 phases of the Event Loop.
-              </p>
-              <div className="flex items-center text-sm font-semibold text-emerald-500 group-hover:translate-x-1 transition-transform">
-                Explore <svg className="ml-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <span>Launch Canvas Studio</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </Link>

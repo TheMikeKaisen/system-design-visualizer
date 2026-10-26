@@ -119,12 +119,72 @@
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
 }
 
+/* ── Hero subtle breathing drift ────────────────────────── */
+@keyframes hero-drift {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(-50%, -52%) scale(1.03);
+    opacity: 0.72;
+  }
+}
+.hero-topology-bg {
+  animation: hero-drift 10s ease-in-out infinite;
+}
+
+/* ── Subtle Headline Gradient Shimmer ───────────────────── */
+@keyframes subtle-gradient-shimmer {
+  0%, 100% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(18deg);
+  }
+}
+.headline-gradient-shimmer {
+  animation: subtle-gradient-shimmer 7s ease-in-out infinite;
+}
+
+/* ── Packet flow along vertical circuit bus ─────────────── */
+@keyframes vertical-packet-flow {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+.packet-dot-vertical {
+  animation: vertical-packet-flow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 /* ── Respect reduced-motion ─────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .landing-reveal {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  .hero-topology-bg,
+  .headline-gradient-shimmer,
+  .packet-dot-vertical {
+    animation: none !important;
+    transform: none;
+  }
+  .hero-topology-bg {
+    animation: none !important;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
   }
   .packet-dot,
   .packet-dot-alt,

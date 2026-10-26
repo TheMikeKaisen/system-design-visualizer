@@ -4,14 +4,12 @@ import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
+import { DisciplineCard, DISCIPLINES } from "@/components/ui/DisciplineCard";
 import { HeroRuntimeSandbox } from "./HeroRuntimeSandbox";
 import { MiniDistributedCanvas } from "./MiniDistributedCanvas";
+import { HeroComputationalGraph } from "./HeroComputationalGraph";
 import {
-  Terminal,
-  Cpu,
   Database,
-  Layers,
-  Server,
   ArrowRight,
   ExternalLink,
   ShieldCheck,
@@ -19,7 +17,6 @@ import {
   Activity,
   Play,
   GitBranch,
-  Eye,
 } from "lucide-react";
 import "./landing.css";
 
@@ -77,6 +74,7 @@ export function LandingPage() {
       <Nav />
       <main className="pt-16">
         <HeroSection />
+        <InteractiveSandboxSection />
         <DisciplinesSection />
         <SimulationEngineSection />
         <CanvasStudioSection />
@@ -93,47 +91,40 @@ export function LandingPage() {
 function Nav() {
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl transition-all"
+      className="fixed top-0 left-0 right-0 z-50 border-b border-border/60 bg-[#FAFAF9]/85 dark:bg-[#090a0f]/85 backdrop-blur-xl transition-all"
       aria-label="Main navigation"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2.5 group" aria-label="System Simulator home">
           <Logo size={28} />
-          <span className="text-base font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
+          <span className="text-base font-semibold tracking-tight text-[#0A0A0A] dark:text-zinc-50 group-hover:text-primary transition-colors">
             System Simulator
           </span>
         </Link>
 
         {/* Center Nav Links */}
-        <div className="hidden md:flex items-center gap-7 text-xs font-medium text-muted-foreground">
-          <a href="#disciplines" className="hover:text-foreground transition-colors">
+        <div className="hidden md:flex items-center gap-7 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+          <a href="#interactive-sandbox" className="hover:text-[#0A0A0A] dark:hover:text-zinc-100 transition-colors">
+            Simulator
+          </a>
+          <a href="#disciplines" className="hover:text-[#0A0A0A] dark:hover:text-zinc-100 transition-colors">
             Disciplines
           </a>
-          <a href="#how-it-works" className="hover:text-foreground transition-colors">
+          <a href="#how-it-works" className="hover:text-[#0A0A0A] dark:hover:text-zinc-100 transition-colors">
             How It Works
           </a>
-          <a href="#canvas-studio" className="hover:text-foreground transition-colors">
+          <a href="#canvas-studio" className="hover:text-[#0A0A0A] dark:hover:text-zinc-100 transition-colors">
             Canvas Studio
           </a>
-          <Link href="/learning-paths" className="hover:text-foreground transition-colors flex items-center gap-1.5">
+          <Link href="/learning-paths" className="hover:text-[#0A0A0A] dark:hover:text-zinc-100 transition-colors flex items-center gap-1.5">
             <span>All Modules</span>
-            {/* <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 text-[10px] font-semibold">
-              Interactive
-            </span> */}
           </Link>
         </div>
 
         {/* Right Actions */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
-
-          <Link
-            href="/learning-paths"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-foreground border border-border/60 rounded-xl hover:bg-muted/50 transition-colors"
-          >
-            Explore Simulations
-          </Link>
 
           <Link
             href="/canvas"
@@ -149,64 +140,98 @@ function Nav() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   2. Hero Section (Option 1: Centered Viewport-Calibrated Layout)
+   2. Hero Section (Raycast Style Focal Point)
    ═══════════════════════════════════════════════════════════════ */
 function HeroSection() {
   return (
-    <section className="relative pt-6 sm:pt-8 md:pt-10 pb-4 sm:pb-6 overflow-hidden flex flex-col justify-center min-h-[calc(100vh-4rem)]">
-      {/* Editorial ambient light with restrained, calibrated luminescence */}
-      <div
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[860px] h-[480px] rounded-full pointer-events-none opacity-25 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(circle at center, rgba(245, 158, 11, 0.08) 0%, rgba(14, 165, 233, 0.04) 50%, transparent 80%)",
-        }}
-        aria-hidden="true"
-      />
+    <section className="relative min-h-[85vh] sm:min-h-[90vh] flex flex-col justify-between items-center text-center overflow-hidden px-4 sm:px-6 pt-10 sm:pt-14">
+      {/* ── Signature Visual Motif: The Graph of Computation ── */}
+      <HeroComputationalGraph />
 
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 w-full flex flex-col items-center">
-        {/* Centered Editorial Header: Kicker, Headline, Supporting Copy & CTAs */}
-        <div className="max-w-3xl mx-auto text-center shrink-0">
-          {/* Kicker badge with animated active pulse */}
-          <div className="hero-fade-in inline-flex items-center gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 mb-2 sm:mb-2.5 rounded-full border border-border/70 bg-muted/40 text-[11px] sm:text-xs font-medium text-muted-foreground backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            <span>Interactive Runtime Engineering</span>
-          </div>
+      {/* ── Foreground Hero Content ── */}
+      <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center my-auto">
+        {/* Confident, focal headline */}
+        <h1 className="hero-fade-in text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] text-[#0A0A0A] dark:text-zinc-50 max-w-4xl">
+          Don&apos;t just use software.{" "}
+          <span className="block mt-1 sm:mt-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 dark:from-teal-400 dark:via-cyan-400 dark:to-blue-400 headline-gradient-shimmer">
+            Understand how it works.
+          </span>
+        </h1>
 
-          <h1 className="hero-fade-in text-xl sm:text-2xl md:text-3xl lg:text-[36px] xl:text-[40px] font-extrabold tracking-tight leading-[1.14] text-foreground">
-            Don&apos;t just use software.{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-sky-500 to-emerald-500">
-              Understand how it works.
-            </span>
-          </h1>
+        {/* Supporting copy */}
+        <p className="hero-fade-in-delayed mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed font-normal">
+          Explore the inner workings of software through interactive, visual simulations.
+        </p>
 
-          <p className="hero-fade-in-delayed mt-2 sm:mt-2.5 text-xs sm:text-sm md:text-base leading-relaxed text-muted-foreground max-w-2xl mx-auto line-clamp-3 sm:line-clamp-none">
-            Explore what happens beneath the abstractions — from JavaScript execution and memory allocation to operating system scheduling and distributed systems. Run interactive simulations. Inspect internal state. Learn by experimenting.
+        {/* Dual CTAs */}
+        <div className="hero-fade-in-delayed mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4">
+          <Link
+            href="/learning-paths"
+            className="inline-flex items-center gap-2 px-6 py-3 text-sm sm:text-base font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-95 shadow-lg hover:shadow-xl transition-all group active:scale-[0.98]"
+          >
+            <span>Explore Learning Paths</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+
+          <Link
+            href="/canvas"
+            className="inline-flex items-center gap-2 px-5 py-3 text-sm sm:text-base font-medium text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-border/70 bg-white/70 dark:bg-muted/40 hover:bg-white dark:hover:bg-muted/60 transition-colors active:scale-[0.98]"
+          >
+            <span>Open Canvas Studio</span>
+            <ExternalLink className="w-4 h-4 text-muted-foreground" />
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Downward Vertical Circuit Bus Bridge into Section 2 ── */}
+      <div className="w-full flex justify-center -mb-px z-10 pointer-events-none mt-auto pt-6">
+        <div className="w-[1.5px] h-12 sm:h-14 bg-gradient-to-b from-cyan-500/40 via-teal-500/30 to-sky-500/50 relative overflow-hidden">
+          <div className="w-1.5 h-3 rounded-full bg-cyan-500 dark:bg-cyan-300 absolute left-1/2 -translate-x-1/2 packet-dot-vertical shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   2b. Dedicated Interactive Sandbox Stage (Section 2)
+   ═══════════════════════════════════════════════════════════════ */
+function InteractiveSandboxSection() {
+  return (
+    <section
+      id="interactive-sandbox"
+      className="scroll-mt-16 py-16 sm:py-24 border-t border-b border-border/50 relative bg-[#F5F5F4] dark:bg-[#0c0d12]"
+      aria-labelledby="sandbox-heading"
+    >
+      {/* Top Receiving Bus Trace from Hero */}
+      <div className="w-full flex justify-center -mt-16 sm:-mt-24 mb-6 pointer-events-none">
+        <div className="w-[1.5px] h-10 sm:h-12 bg-gradient-to-b from-sky-500/50 via-teal-500/30 to-transparent" />
+      </div>
+
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        {/* Section Heading */}
+        <div className="landing-reveal max-w-3xl mx-auto text-center mb-10 sm:mb-12">
+          <h2
+            id="sandbox-heading"
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50"
+          >
+            See what happens beneath the surface.
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
+            Explore how code executes, memory is allocated, processes are scheduled, and systems communicate.
           </p>
-
-          {/* Action CTAs */}
-          <div className="hero-fade-in-delayed mt-3 sm:mt-3.5 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-            <Link
-              href="/learning-paths"
-              className="inline-flex items-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:opacity-95 shadow-md hover:shadow-lg transition-all group active:scale-[0.98]"
-            >
-              <span>Explore Simulations</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            <Link
-              href="/canvas"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-foreground border border-border/70 rounded-xl hover:bg-muted/40 transition-colors active:scale-[0.98]"
-            >
-              <span>Open Canvas Studio</span>
-              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-            </Link>
-          </div>
         </div>
 
-        {/* Centered HeroRuntimeSandbox Container: Strictly fits in 100vh on initial load */}
-        <div className="hero-fade-in-delayed mt-3 sm:mt-4 w-full max-w-5xl mx-auto">
-          <HeroRuntimeSandbox />
+        {/* Sandbox Stage Embedded with Soft Multi-Layered Atmospheric Shadow */}
+        <div className="landing-reveal relative group max-w-6xl mx-auto">
+          {/* Ambient multi-spectrum atmospheric back-glow */}
+          <div
+            className="absolute -inset-2.5 sm:-inset-3.5 rounded-3xl bg-gradient-to-r from-amber-500/12 via-sky-500/12 to-emerald-500/12 blur-2xl opacity-70 dark:opacity-25 pointer-events-none transition-opacity -z-10"
+            aria-hidden="true"
+          />
+          <div className="shadow-[0_24px_60px_-12px_rgba(15,23,42,0.22),0_12px_24px_-8px_rgba(15,23,42,0.12),0_0_0_1px_rgba(15,23,42,0.08)] rounded-2xl">
+            <HeroRuntimeSandbox />
+          </div>
         </div>
       </div>
     </section>
@@ -216,176 +241,33 @@ function HeroSection() {
 /* ═══════════════════════════════════════════════════════════════
    3. The Discipline Cards (Go beyond the abstractions)
    ═══════════════════════════════════════════════════════════════ */
-interface DisciplineItem {
-  id: string;
-  title: string;
-  badge: string;
-  description: string;
-  topics: string[];
-  icon: React.ComponentType<{ className?: string }>;
-  accentColor: string;
-  accentBg: string;
-  accentBorder: string;
-  accentText: string;
-  ctaText: string;
-  href: string;
-}
-
-const DISCIPLINES: DisciplineItem[] = [
-  {
-    id: "javascript",
-    title: "JavaScript Runtimes",
-    badge: "Runtime Engine",
-    description: "Follow the call stack, scope, closures, and event loop as your code executes, one step at a time.",
-    topics: ["Call Stack", "Scope Chains", "Closures", "Event Loop"],
-    icon: Terminal,
-    accentColor: "#f59e0b",
-    accentBg: "bg-amber-500/10",
-    accentBorder: "border-amber-500/30 group-hover:border-amber-500/70",
-    accentText: "text-amber-500 dark:text-amber-400",
-    ctaText: "Explore JavaScript",
-    href: "/javascript",
-  },
-  {
-    id: "operating-systems",
-    title: "Operating Systems",
-    badge: "Kernel & Hardware",
-    description: "Explore how schedulers allocate CPU time, processes compete for resources, and threads coordinate their work.",
-    topics: ["CPU Schedulers", "Process States", "Mutex Synchronization", "Interrupts"],
-    icon: Cpu,
-    accentColor: "#0ea5e9",
-    accentBg: "bg-sky-500/10",
-    accentBorder: "border-sky-500/30 group-hover:border-sky-500/70",
-    accentText: "text-sky-500 dark:text-sky-400",
-    ctaText: "Explore Operating Systems",
-    href: "/operating-systems",
-  },
-  {
-    id: "java",
-    title: "Java & JVM Architecture",
-    badge: "Virtual Machine",
-    description: "Trace the journey from class loading and bytecode verification to runtime memory and execution.",
-    topics: ["Class Loading", "Stack & Heap", "Bytecode", "Garbage Collection"],
-    icon: Database,
-    accentColor: "#10b981",
-    accentBg: "bg-emerald-500/10",
-    accentBorder: "border-emerald-500/30 group-hover:border-emerald-500/70",
-    accentText: "text-emerald-500 dark:text-emerald-400",
-    ctaText: "Explore Java & JVM",
-    href: "/java",
-  },
-  {
-    id: "frontend",
-    title: "Frontend Architecture",
-    badge: "Browser Internals",
-    description: "Understand reconciliation, rendering, state updates, and the mechanisms behind modern UI frameworks.",
-    topics: ["Reconciliation", "Fiber Trees", "Hydration", "DOM Pipeline"],
-    icon: Layers,
-    accentColor: "#8b5cf6",
-    accentBg: "bg-violet-500/10",
-    accentBorder: "border-violet-500/30 group-hover:border-violet-500/70",
-    accentText: "text-violet-500 dark:text-violet-400",
-    ctaText: "Explore Frontend Systems",
-    href: "/frontend",
-  },
-  {
-    id: "backend",
-    title: "Backend Internals",
-    badge: "Distributed Systems",
-    description: "Investigate database indexing, connection pools, message brokers, and the mechanics behind reliable backend services.",
-    topics: ["B-Tree Indexing", "Connection Pools", "Message Brokers", "Caching"],
-    icon: Server,
-    accentColor: "#3b82f6",
-    accentBg: "bg-blue-500/10",
-    accentBorder: "border-blue-500/30 group-hover:border-blue-500/70",
-    accentText: "text-blue-500 dark:text-blue-400",
-    ctaText: "Explore Backend Systems",
-    href: "/backend",
-  },
-];
-
 function DisciplinesSection() {
   return (
-    <section id="disciplines" className="scroll-mt-16 py-20 sm:py-28 border-t border-border/40 bg-zinc-950/20" aria-labelledby="disciplines-heading">
+    <section id="disciplines" className="scroll-mt-16 py-20 sm:py-28 bg-[#FAFAF9] dark:bg-[#090a0f]" aria-labelledby="disciplines-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Section Header */}
         <div className="landing-reveal max-w-2xl mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-border/60 bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-zinc-200/90 dark:border-border/60 bg-zinc-100 dark:bg-muted/40 text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-muted-foreground shadow-xs">
             Core Disciplines
           </div>
-          <h2 id="disciplines-heading" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+          <h2 id="disciplines-heading" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50">
             Go beyond the abstractions.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
             Every module makes the invisible visible. Step through execution, inspect state transitions, and see how the underlying mechanics shape the software you build.
           </p>
         </div>
 
         {/* Discipline Cards Grid */}
         <div className="landing-reveal-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {DISCIPLINES.map((disc) => {
-            const Icon = disc.icon;
-            return (
-              <Link
-                key={disc.id}
-                href={disc.href}
-                className={`group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-card/90 dark:bg-zinc-900/60 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/25 ${disc.accentBorder} shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] overflow-hidden`}
-              >
-                {/* Subtle top hairline highlight on hover */}
-                <div
-                  className="absolute top-0 left-4 right-4 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: `linear-gradient(90deg, transparent, ${disc.accentColor}, transparent)`,
-                  }}
-                  aria-hidden="true"
-                />
-
-                <div>
-                  {/* Top Row: Icon + Badge */}
-                  <div className="flex items-center justify-between mb-5">
-                    <div className={`w-11 h-11 rounded-xl ${disc.accentBg} ${disc.accentText} flex items-center justify-center transition-transform group-hover:scale-105 duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/40">
-                      {disc.badge}
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight">
-                    {disc.title}
-                  </h3>
-      
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    {disc.description}
-                  </p>
-                </div>
-
-                {/* Bottom Row: Topics & Link */}
-                <div>
-                  <div className="flex flex-wrap gap-1.5 mb-5">
-                    {disc.topics.map((t) => (
-                      <span
-                        key={t}
-                        className="text-[11px] font-mono px-2 py-0.5 rounded bg-muted/50 border border-border/40 text-muted-foreground group-hover:border-border/80 transition-colors"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className={`flex items-center gap-1.5 text-xs font-semibold ${disc.accentText}`}>
-                    <span>{disc.ctaText}</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+          {DISCIPLINES.map((disc) => (
+            <DisciplineCard key={disc.id} discipline={disc} />
+          ))}
 
           {/* 6th Card: All Modules Directory */}
           <Link
             href="/learning-paths"
-            className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border/60 bg-gradient-to-br from-card/95 via-card/80 to-muted/20 dark:from-zinc-900/80 dark:to-zinc-950/40 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl hover:shadow-black/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] overflow-hidden"
+            className="group relative flex flex-col justify-between p-6 rounded-2xl border border-primary/25 hover:border-primary/70 bg-white dark:bg-zinc-900/70 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/10 dark:hover:shadow-black/40 overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.03)]"
           >
             <div
               className="absolute top-0 left-4 right-4 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-primary to-transparent"
@@ -394,7 +276,7 @@ function DisciplinesSection() {
 
             <div>
               <div className="flex items-center justify-between mb-5">
-                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-105 duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-105 duration-300 border border-primary/20 shadow-xs">
                   <Play className="w-5 h-5 fill-current" />
                 </div>
                 <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
@@ -405,7 +287,7 @@ function DisciplinesSection() {
               <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight">
                 Browse All Modules
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-6 font-normal">
                 Explore the complete interactive curriculum across all disciplines. Filter by track, inspect prerequisites, and launch simulators directly.
               </p>
             </div>
@@ -426,76 +308,76 @@ function DisciplinesSection() {
    ═══════════════════════════════════════════════════════════════ */
 function SimulationEngineSection() {
   return (
-    <section id="how-it-works" className="scroll-mt-16 py-20 sm:py-28 border-t border-border/40" aria-labelledby="engine-heading">
+    <section id="how-it-works" className="scroll-mt-16 py-20 sm:py-28 border-t border-b border-border/50 bg-[#F5F5F4] dark:bg-[#0c0d12]" aria-labelledby="engine-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid lg:grid-cols-[1fr_1.3fr] gap-12 lg:gap-16 items-start">
           {/* Left copy */}
           <div className="landing-reveal max-w-md">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-border/60 bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-zinc-200/90 dark:border-border/60 bg-zinc-100 dark:bg-muted/40 text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-muted-foreground shadow-xs">
               How It Works
             </div>
-            <h2 id="engine-heading" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
+            <h2 id="engine-heading" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50 leading-tight">
               Every step has a reason.
             </h2>
-            <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
+            <p className="mt-4 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
               These aren&apos;t prerecorded animations. Explore computational models that expose how state changes, operations execute, and systems respond to each action.
             </p>
-            <div className="mt-8 flex items-center gap-4 text-xs font-mono text-muted-foreground">
+            <div className="mt-8 flex items-center gap-4 text-xs font-mono text-zinc-600 dark:text-zinc-400">
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" /> Transparent rules
+                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Transparent rules
               </span>
               <span className="flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-amber-500" /> Observable state
+                <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" /> Observable state
               </span>
             </div>
           </div>
 
           {/* Right feature cards */}
           <div className="landing-reveal-stagger grid sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-xl border border-border/60 bg-card/90 dark:bg-zinc-900/50 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-border/90 transition-all duration-200">
-              <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
+            <div className="p-5 rounded-2xl border border-zinc-200/90 dark:border-border/60 bg-white dark:bg-zinc-900/60 backdrop-blur-sm shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-zinc-300 dark:hover:border-border/90 transition-all duration-200">
+              <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4 border border-amber-500/20">
                 <GitBranch className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-foreground mb-1.5">
                 Explicit state transitions
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 Inspect what changes at each step. Track mutations, variable assignments, and queue states in real time.
               </p>
             </div>
 
-            <div className="p-5 rounded-xl border border-border/60 bg-card/90 dark:bg-zinc-900/50 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-border/90 transition-all duration-200">
-              <div className="w-9 h-9 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center mb-4">
-                <Eye className="w-4 h-4" />
+            <div className="p-5 rounded-2xl border border-zinc-200/90 dark:border-border/60 bg-white dark:bg-zinc-900/60 backdrop-blur-sm shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-zinc-300 dark:hover:border-border/90 transition-all duration-200">
+              <div className="w-9 h-9 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center mb-4 border border-sky-500/20">
+                <Activity className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-foreground mb-1.5">
                 Inspectable internals
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 Follow the state that drives the simulation. Peek inside call stacks, registers, heap blocks, and PCB records.
               </p>
             </div>
 
-            <div className="p-5 rounded-xl border border-border/60 bg-card/90 dark:bg-zinc-900/50 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-border/90 transition-all duration-200">
-              <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
-                <Activity className="w-4 h-4" />
+            <div className="p-5 rounded-2xl border border-zinc-200/90 dark:border-border/60 bg-white dark:bg-zinc-900/60 backdrop-blur-sm shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-zinc-300 dark:hover:border-border/90 transition-all duration-200">
+              <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4 border border-emerald-500/20">
+                <ShieldCheck className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-foreground mb-1.5">
                 Deterministic execution
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 Reproduce the same sequence under the same initial conditions and inputs, where supported.
               </p>
             </div>
 
-            <div className="p-5 rounded-xl border border-border/60 bg-card/90 dark:bg-zinc-900/50 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-border/90 transition-all duration-200">
-              <div className="w-9 h-9 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center mb-4">
+            <div className="p-5 rounded-2xl border border-zinc-200/90 dark:border-border/60 bg-white dark:bg-zinc-900/60 backdrop-blur-sm shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-zinc-300 dark:hover:border-border/90 transition-all duration-200">
+              <div className="w-9 h-9 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center mb-4 border border-violet-500/20">
                 <Database className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-foreground mb-1.5">
                 Transparent models
               </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
                 Understand the rules behind the output. No magical shortcuts—pure computer science mechanics.
               </p>
             </div>
@@ -511,19 +393,19 @@ function SimulationEngineSection() {
    ═══════════════════════════════════════════════════════════════ */
 function CanvasStudioSection() {
   return (
-    <section id="canvas-studio" className="scroll-mt-16 py-20 sm:py-28 border-t border-border/40 bg-zinc-950/40 relative overflow-hidden" aria-labelledby="canvas-heading">
+    <section id="canvas-studio" className="scroll-mt-16 py-20 sm:py-28 bg-[#FAFAF9] dark:bg-[#090a0f] relative overflow-hidden" aria-labelledby="canvas-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Header copy */}
         <div className="max-w-3xl mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-border/70 bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-zinc-200/90 dark:border-border/70 bg-zinc-100 dark:bg-muted/40 text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-muted-foreground shadow-xs">
             Canvas Studio
           </div>
 
-          <h2 id="canvas-heading" className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.1]">
+          <h2 id="canvas-heading" className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50 leading-[1.1]">
             From a single function to a distributed system.
           </h2>
 
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
             Start with the mechanics of a single execution environment. Then explore how services communicate, requests move through a system, and distributed architectures behave under load.
           </p>
 
@@ -536,15 +418,21 @@ function CanvasStudioSection() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
 
-            <span className="text-xs text-muted-foreground font-mono">
+            <span className="text-xs text-zinc-500 font-mono">
               No sign-up required
             </span>
           </div>
         </div>
 
-        {/* ── Miniature Distributed Architecture Visual Centerpiece ── */}
-        <div className="w-full">
-          <MiniDistributedCanvas />
+        {/* ── Miniature Distributed Architecture Visual Centerpiece with Ambient Shadow ── */}
+        <div className="w-full relative group">
+          <div
+            className="absolute -inset-2.5 sm:-inset-3.5 rounded-3xl bg-gradient-to-r from-sky-500/15 via-blue-500/15 to-violet-500/15 blur-2xl opacity-60 dark:opacity-20 pointer-events-none -z-10"
+            aria-hidden="true"
+          />
+          <div className="shadow-[0_24px_60px_-12px_rgba(15,23,42,0.2),0_12px_24px_-8px_rgba(15,23,42,0.12),0_0_0_1px_rgba(15,23,42,0.08)] rounded-2xl">
+            <MiniDistributedCanvas />
+          </div>
         </div>
       </div>
     </section>
@@ -556,13 +444,13 @@ function CanvasStudioSection() {
    ═══════════════════════════════════════════════════════════════ */
 function FinalCTASection() {
   return (
-    <section className="py-20 sm:py-28 border-t border-border/40">
+    <section className="py-20 sm:py-28 border-t border-b border-border/50 bg-[#F5F5F4] dark:bg-[#0c0d12]">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
         <div className="landing-reveal">
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50">
             Curiosity is the starting point. Understanding is the goal.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
+          <p className="mt-4 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-xl mx-auto font-normal">
             Pick a concept, run an experiment, and see what happens beneath the surface.
           </p>
 
@@ -577,7 +465,7 @@ function FinalCTASection() {
 
             <Link
               href="/canvas"
-              className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-medium text-foreground border border-border/70 rounded-xl hover:bg-muted/40 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-medium text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-border/70 bg-white/70 dark:bg-muted/40 hover:bg-white dark:hover:bg-muted/60 transition-colors"
             >
               <span>Open Canvas Studio</span>
             </Link>
@@ -593,27 +481,24 @@ function FinalCTASection() {
    ═══════════════════════════════════════════════════════════════ */
 function Footer() {
   return (
-    <footer className="border-t border-border/40 py-12 bg-card/20">
+    <footer className="border-t border-border/60 py-12 bg-[#FAFAF9] dark:bg-[#090a0f]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-border/40">
           {/* Brand Col */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2.5">
               <Logo size={24} />
-              <span className="text-sm font-bold tracking-tight text-foreground">
+              <span className="text-sm font-bold tracking-tight text-[#0A0A0A] dark:text-zinc-50">
                 System Simulator
               </span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Interactive runtime engineering and distributed system simulation platform.
-            </p>
           </div>
 
           {/* Disciplines */}
           <div className="flex flex-col gap-2 text-xs">
             <span className="font-semibold text-foreground mb-1">Disciplines</span>
             <Link href="/javascript" className="text-muted-foreground hover:text-foreground transition-colors">
-              JavaScript Runtimes
+              JavaScript
             </Link>
             <Link href="/operating-systems" className="text-muted-foreground hover:text-foreground transition-colors">
               Operating Systems
@@ -644,7 +529,7 @@ function Footer() {
           </div>
 
           {/* External */}
-          <div className="flex flex-col gap-2 text-xs">
+          {/* <div className="flex flex-col gap-2 text-xs">
             <span className="font-semibold text-foreground mb-1">Open Source & Community</span>
             <a
               href="https://github.com"
@@ -652,13 +537,10 @@ function Footer() {
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
             >
-              <span>GitHub Repository</span>
+              <span>GitHub</span>
               <ExternalLink className="w-3 h-3" />
             </a>
-            {/* <span className="text-muted-foreground/60 text-[11px] mt-2">
-              Deployed at systemsimulator.vercel.app
-            </span> */}
-          </div>
+          </div> */}
         </div>
 
         {/* Bottom copyright */}

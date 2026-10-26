@@ -76,22 +76,28 @@ describe("HeroRuntimeSandbox", () => {
   it("toggles pause and play mode", () => {
     render(<HeroRuntimeSandbox />);
 
-    // Starts in auto-running mode, so button offers Pause
-    const pauseBtn = screen.getByTitle("Pause simulation");
-    fireEvent.click(pauseBtn);
-
-    // Now paused, button offers Play
+    // Starts in clean paused state so visitors can read without distraction
     const playBtn = screen.getByTitle("Play simulation");
     expect(playBtn).toBeDefined();
 
+    // User initiates simulation
     fireEvent.click(playBtn);
-    expect(screen.getByTitle("Pause simulation")).toBeDefined();
+    const pauseBtn = screen.getByTitle("Pause simulation");
+    expect(pauseBtn).toBeDefined();
+
+    // Clicking pause returns to paused state
+    fireEvent.click(pauseBtn);
+    expect(screen.getByTitle("Play simulation")).toBeDefined();
   });
 
   it("completes subject visualization then advances to next discipline", () => {
     render(<HeroRuntimeSandbox />);
 
     expect(screen.getByText("counter.js")).toBeDefined();
+
+    // Initiate play mode
+    const playBtn = screen.getByTitle("Play simulation");
+    fireEvent.click(playBtn);
 
     // Step through the chained timer cycles to complete JS scenario and transition to OS
     for (let i = 0; i < 7; i++) {

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Play,
   Pause,
@@ -695,7 +694,7 @@ const SUBJECT_TRANSITION_DELAY_MS = 2200; // Pause at end of scenario before swi
 export function HeroRuntimeSandbox() {
   const [activeTab, setActiveTab] = useState<"javascript" | "os" | "java">("javascript");
   const [stepIndex, setStepIndex] = useState(0);
-  const [isAutoCycling, setIsAutoCycling] = useState(true); // Auto-plays step-by-step then changes subject until user interacts
+  const [isAutoCycling, setIsAutoCycling] = useState(false); // Paused by default — user initiates simulation
   const [isPlayingManual, setIsPlayingManual] = useState(false);
 
   const autoStepTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -767,14 +766,14 @@ export function HeroRuntimeSandbox() {
   };
 
   const togglePlay = () => {
-    if (isAutoCycling) {
+    if (isAutoCycling || isPlayingManual) {
       setIsAutoCycling(false);
       setIsPlayingManual(false);
     } else {
       if (currentStep >= maxSteps - 1) {
         setStepIndex(0);
       }
-      setIsPlayingManual((prev) => !prev);
+      setIsAutoCycling(true);
     }
   };
 
@@ -789,13 +788,18 @@ export function HeroRuntimeSandbox() {
     >
       {/* ── Top Window Bar: Tactile Tab Navigation ── */}
       <div className="border-b border-zinc-800/80 bg-[#14151b] px-3 sm:px-4 py-1.5 sm:py-2 flex flex-wrap items-center justify-between gap-2 select-none">
-        {/* Left: Window Dots & Tabs */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Left: Window Dots, Live Indicator & Tabs */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* OS Window dots */}
-          <div className="hidden sm:flex items-center gap-1.5 mr-1.5">
+          <div className="hidden sm:flex items-center gap-1.5 mr-1">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+          </div>
+
+          <div className="hidden lg:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-900/90 border border-zinc-800/80 text-[10px] text-zinc-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Interactive Sandbox</span>
           </div>
 
           {/* Interactive Tabs */}
@@ -810,10 +814,10 @@ export function HeroRuntimeSandbox() {
                   role="tab"
                   aria-selected={isActive}
                   aria-controls={`panel-${tab.id}`}
-                  className={`relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  className={`relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 border ${
                     isActive
-                      ? "text-zinc-100 bg-zinc-800/90 shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                      ? "text-zinc-100 bg-zinc-800/95 border-zinc-700/80 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)]"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 border-transparent"
                   }`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${isActive ? tab.accentText : "text-zinc-500"}`} />
@@ -833,52 +837,52 @@ export function HeroRuntimeSandbox() {
         <div className="flex items-center gap-3">
           <Link
             href={activeConfig.targetUrl}
-            className="flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white transition-colors group"
+            className="flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white px-2 py-1 rounded-lg border border-transparent hover:border-zinc-800/80 hover:bg-zinc-800/40 transition-all group"
           >
-            <span>Run simulation</span>
+            <span>Run full simulation</span>
             <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>
 
-      {/* ── Center Stage: Code Inspector + Runtime Simulation ── */}
-      <div className="p-2.5 sm:p-3 flex-1 grid grid-cols-1 md:grid-cols-12 gap-2.5 min-h-[210px] sm:min-h-[230px] lg:min-h-[245px]">
+      {/* ── Center Stage: Fixed-Height Zero-Layout-Shift Runtime Simulation ── */}
+      <div className="p-3 sm:p-4 flex-1 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 h-[440px] sm:h-[460px] lg:h-[480px] overflow-hidden">
         {/* Left Column: Synchronized Code Panel (5 cols) */}
-        <div className="md:col-span-5 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl overflow-hidden shadow-inner min-w-0">
-          <div className="px-3 py-1.5 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+        <div className="md:col-span-5 h-full flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl overflow-hidden shadow-inner min-w-0">
+          <div className="px-3.5 py-2 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between text-xs text-zinc-400 font-mono shrink-0">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: activeConfig.accentColor }} />
               {activeTab === "javascript" && "counter.js"}
               {activeTab === "os" && "scheduler.c"}
               {activeTab === "java" && "Main.java"}
             </span>
-            <span className="text-zinc-500 text-[10px]">
+            <span className="text-zinc-500 text-[11px]">
               Step {currentStep + 1} of {maxSteps}
             </span>
           </div>
 
-          {/* Syntax Code Body with Token Beautification */}
-          <div className="p-2 sm:p-2.5 font-mono text-xs leading-snug sm:leading-relaxed overflow-x-auto text-zinc-300 select-none flex-1 flex flex-col justify-center">
+          {/* Syntax Code Body with Fixed Line Framing */}
+          <div className="p-2.5 sm:p-3 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto text-zinc-300 select-none flex-1 flex flex-col justify-start">
             {activeTab === "javascript" &&
               JS_CODE_LINES.map((codeLine, idx) => {
                 const isCurrent = JS_STEPS[currentStep].line === idx + 1;
                 return (
                   <div
                     key={`js-line-${idx}`}
-                    className={`flex items-center px-2 py-[1.5px] sm:py-[2px] rounded transition-all duration-200 border-l-2 ${
+                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l-2 ${
                       isCurrent
                         ? "bg-amber-500/15 border-amber-400 shadow-[inset_0_1px_0_0_rgba(245,158,11,0.1),0_0_14px_rgba(245,158,11,0.12)] font-medium translate-x-0.5"
                         : "border-transparent hover:bg-zinc-800/40 text-zinc-400"
                     }`}
                   >
                     <span
-                      className={`w-6 text-[10px] select-none text-right pr-2 font-mono transition-colors ${
+                      className={`w-6 text-xs select-none text-right pr-2.5 font-mono transition-colors ${
                         isCurrent ? "text-amber-400 font-bold" : "text-zinc-600"
                       }`}
                     >
                       {idx + 1}
                     </span>
-                    <span className="whitespace-pre flex-1">
+                    <span className="whitespace-pre flex-1 truncate">
                       {highlightCodeTokens(codeLine, `js-${idx}`)}
                     </span>
                   </div>
@@ -891,20 +895,20 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`os-line-${idx}`}
-                    className={`flex items-center px-2 py-[1.5px] sm:py-[2px] rounded transition-all duration-200 border-l-2 ${
+                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l-2 ${
                       isCurrent
                         ? "bg-sky-500/15 border-sky-400 shadow-[inset_0_1px_0_0_rgba(14,165,233,0.1),0_0_14px_rgba(14,165,233,0.12)] font-medium translate-x-0.5"
                         : "border-transparent hover:bg-zinc-800/40 text-zinc-400"
                     }`}
                   >
                     <span
-                      className={`w-6 text-[10px] select-none text-right pr-2 font-mono transition-colors ${
+                      className={`w-6 text-xs select-none text-right pr-2.5 font-mono transition-colors ${
                         isCurrent ? "text-sky-400 font-bold" : "text-zinc-600"
                       }`}
                     >
                       {idx + 1}
                     </span>
-                    <span className="whitespace-pre flex-1">
+                    <span className="whitespace-pre flex-1 truncate">
                       {highlightCodeTokens(codeLine, `os-${idx}`)}
                     </span>
                   </div>
@@ -917,20 +921,20 @@ export function HeroRuntimeSandbox() {
                 return (
                   <div
                     key={`java-line-${idx}`}
-                    className={`flex items-center px-2 py-[1.5px] sm:py-[2px] rounded transition-all duration-200 border-l-2 ${
+                    className={`flex items-center h-[26px] sm:h-[28px] px-2 rounded transition-all duration-150 border-l-2 ${
                       isCurrent
                         ? "bg-emerald-500/15 border-emerald-400 shadow-[inset_0_1px_0_0_rgba(16,185,129,0.1),0_0_14px_rgba(16,185,129,0.12)] font-medium translate-x-0.5"
                         : "border-transparent hover:bg-zinc-800/40 text-zinc-400"
                     }`}
                   >
                     <span
-                      className={`w-6 text-[10px] select-none text-right pr-2 font-mono transition-colors ${
+                      className={`w-6 text-xs select-none text-right pr-2.5 font-mono transition-colors ${
                         isCurrent ? "text-emerald-400 font-bold" : "text-zinc-600"
                       }`}
                     >
                       {idx + 1}
                     </span>
-                    <span className="whitespace-pre flex-1">
+                    <span className="whitespace-pre flex-1 truncate">
                       {highlightCodeTokens(codeLine, `java-${idx}`)}
                     </span>
                   </div>
@@ -939,145 +943,140 @@ export function HeroRuntimeSandbox() {
           </div>
         </div>
 
-        {/* Right Column: Architectural Runtime Engine (7 cols) */}
-        <div className="md:col-span-7 flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl p-2.5 sm:p-3 relative overflow-hidden shadow-inner min-w-0">
-          <AnimatePresence>
-            {/* 1. JAVASCRIPT: CALL STACK & SCOPE CHAIN */}
-            {activeTab === "javascript" && (
-              <motion.div
-                key="tab-panel-js"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-2"
-              >
-                {/* Call Stack Section */}
-                <div>
-                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-amber-400/90 mb-1 flex items-center justify-between">
-                    <span>Call Stack (LIFO)</span>
-                    <span className="text-[10px] text-zinc-500 font-normal">
-                      {JS_STEPS[currentStep].callStack.length === 0 ? "Empty" : `${JS_STEPS[currentStep].callStack.length} Frame(s)`}
-                    </span>
-                  </div>
-                  <div className="min-h-[50px] sm:min-h-[56px] bg-zinc-900/60 rounded-lg p-1.5 border border-zinc-800/60 flex flex-col-reverse gap-1 justify-end">
-                    {JS_STEPS[currentStep].callStack.length === 0 ? (
-                      <div className="text-xs text-zinc-500 italic py-1 text-center">
-                        Engine idle — Stack is empty
-                      </div>
-                    ) : (
-                      JS_STEPS[currentStep].callStack.map((frame) => (
-                        <div
-                          key={`cs-${frame.id}`}
-                          className={`flex items-center justify-between px-2.5 py-0.5 rounded text-xs font-mono transition-all ${
-                            frame.active
-                              ? "bg-amber-500/20 border border-amber-500/50 text-amber-200"
-                              : "bg-zinc-800/50 text-zinc-400 opacity-60"
-                          }`}
-                        >
-                          <span className="font-semibold">{frame.name}</span>
-                          <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-900/80 text-zinc-300">
-                            {frame.phase}
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </div>
+        {/* Right Column: Architectural Runtime Engine (7 cols) with Locked Geometry */}
+        <div className="md:col-span-7 h-full flex flex-col bg-[#0b0c0f] border border-zinc-800/80 rounded-xl p-3 sm:p-3.5 relative overflow-hidden shadow-inner min-w-0">
+          {/* 1. JAVASCRIPT: CALL STACK & SCOPE CHAIN */}
+          {activeTab === "javascript" && (
+            <div
+              key="tab-panel-js"
+              className="w-full h-full flex flex-col justify-between overflow-hidden"
+            >
+              {/* Call Stack Section */}
+              <div className="h-[110px] sm:h-[120px] shrink-0 flex flex-col">
+                <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-amber-400/90 mb-1 flex items-center justify-between shrink-0">
+                  <span>Call Stack (LIFO)</span>
+                  <span className="text-[10px] text-zinc-500 font-normal">
+                    {JS_STEPS[currentStep].callStack.length === 0 ? "Empty" : `${JS_STEPS[currentStep].callStack.length} Frame(s)`}
+                  </span>
                 </div>
-
-                {/* Scope & Memory Environment */}
-                <div className="flex-1">
-                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
-                    Scope Environment & Closures
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
-                    {JS_STEPS[currentStep].scopes.map((scope) => (
+                <div className="h-[84px] sm:h-[94px] bg-zinc-900/60 rounded-lg p-2 border border-zinc-800/60 flex flex-col-reverse gap-1.5 justify-end overflow-hidden">
+                  {JS_STEPS[currentStep].callStack.length === 0 ? (
+                    <div className="text-xs text-zinc-500 italic py-3 text-center">
+                      Engine idle — Stack is empty
+                    </div>
+                  ) : (
+                    JS_STEPS[currentStep].callStack.map((frame) => (
                       <div
-                        key={`scope-${scope.id}`}
-                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2 flex flex-col gap-0.5"
+                        key={`cs-${frame.id}`}
+                        className={`flex items-center justify-between px-2.5 py-1 rounded text-xs font-mono transition-all ${
+                          frame.active
+                            ? "bg-amber-500/20 border border-amber-500/50 text-amber-200"
+                            : "bg-zinc-800/50 text-zinc-400 opacity-60"
+                        }`}
                       >
-                        <span className="text-[10px] font-medium text-amber-400/80 uppercase tracking-tight">
-                          {scope.name}
+                        <span className="font-semibold">{frame.name}</span>
+                        <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-900/80 text-zinc-300">
+                          {frame.phase}
                         </span>
-                        <div className="flex flex-col gap-0.5 font-mono text-[11px] sm:text-xs">
-                          {scope.vars.map((v) => (
-                            <div key={`var-${scope.id}-${v.name}`} className="flex items-center justify-between">
-                              <span className="text-zinc-400">{v.name}:</span>
-                              <span className={v.isTDZ ? "text-rose-400 text-[10px] font-semibold" : "text-emerald-400"}>
-                                {v.value}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
                       </div>
-                    ))}
-                  </div>
+                    ))
+                  )}
                 </div>
-              </motion.div>
-            )}
+              </div>
 
-            {/* 2. OPERATING SYSTEMS: CPU SCHEDULER & QUEUES */}
-            {activeTab === "os" && (
-              <motion.div
-                key="tab-panel-os"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-2"
-              >
-                {/* Active CPU Core */}
-                <div>
-                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-sky-400/90 mb-1 flex items-center justify-between">
-                    <span>CPU Core (Hardware Execution)</span>
-                    <span className="text-[10px] text-zinc-500 font-normal">Quantum: 20ms</span>
-                  </div>
-                  <div className="min-h-[46px] sm:min-h-[50px] bg-zinc-900/60 rounded-lg p-2 border border-zinc-800/60 flex items-center justify-between">
-                    {OS_STEPS[currentStep].cpu ? (
-                      <div className="w-full flex items-center justify-between px-1">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                          <div>
-                            <span className="text-xs font-mono font-bold text-sky-200">
-                              {OS_STEPS[currentStep].cpu?.pid}
-                            </span>
-                            <span className="text-xs text-zinc-400 ml-2">
-                              {OS_STEPS[currentStep].cpu?.name}
+              {/* Scope & Memory Environment */}
+              <div className="flex-1 min-h-0 flex flex-col pt-2 overflow-hidden">
+                <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 shrink-0">
+                  Scope Environment & Closures
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1 min-h-0 overflow-hidden">
+                  {JS_STEPS[currentStep].scopes.map((scope) => (
+                    <div
+                      key={`scope-${scope.id}`}
+                      className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2.5 flex flex-col justify-between overflow-hidden"
+                    >
+                      <span className="text-[10px] font-medium text-amber-400/80 uppercase tracking-tight shrink-0">
+                        {scope.name}
+                      </span>
+                      <div className="flex flex-col gap-1 font-mono text-[11px] sm:text-xs">
+                        {scope.vars.map((v) => (
+                          <div key={`var-${scope.id}-${v.name}`} className="flex items-center justify-between">
+                            <span className="text-zinc-400">{v.name}:</span>
+                            <span className={v.isTDZ ? "text-rose-400 text-[10px] font-semibold" : "text-emerald-400 font-semibold"}>
+                              {v.value}
                             </span>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2 font-mono text-xs">
-                          <span className="text-zinc-500 text-[10px] sm:text-[11px]">
-                            PC: <strong className="text-zinc-300">{OS_STEPS[currentStep].cpu?.pc}</strong>
-                          </span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">
-                            {OS_STEPS[currentStep].cpu?.quantumRemaining}ms
-                          </span>
-                        </div>
+                        ))}
                       </div>
-                    ) : (
-                      <div className="w-full text-center text-xs text-zinc-500 italic py-1">
-                        Context Switch in progress... CPU pipeline flushing
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
                 </div>
+              </div>
+            </div>
+          )}
 
-                {/* Ready & Waiting Queues */}
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
+          {/* 2. OPERATING SYSTEMS: CPU SCHEDULER & QUEUES */}
+          {activeTab === "os" && (
+            <div
+              key="tab-panel-os"
+              className="w-full h-full flex flex-col justify-between overflow-hidden"
+            >
+              {/* Active CPU Core */}
+              <div className="h-[96px] sm:h-[104px] shrink-0 flex flex-col">
+                <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-sky-400/90 mb-1 flex items-center justify-between shrink-0">
+                  <span>CPU Core (Hardware Execution)</span>
+                  <span className="text-[10px] text-zinc-500 font-normal">Quantum: 20ms</span>
+                </div>
+                <div className="h-[70px] sm:h-[78px] bg-zinc-900/60 rounded-lg p-2.5 border border-zinc-800/60 flex items-center justify-between overflow-hidden">
+                  {OS_STEPS[currentStep].cpu ? (
+                    <div className="w-full flex items-center justify-between px-1">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <div>
+                          <span className="text-sm font-mono font-bold text-sky-200">
+                            {OS_STEPS[currentStep].cpu?.pid}
+                          </span>
+                          <span className="text-xs text-zinc-300 ml-2">
+                            {OS_STEPS[currentStep].cpu?.name}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5 font-mono text-xs">
+                        <span className="text-zinc-400 text-xs">
+                          PC: <strong className="text-zinc-100">{OS_STEPS[currentStep].cpu?.pc}</strong>
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">
+                          {OS_STEPS[currentStep].cpu?.quantumRemaining}ms
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full text-center text-xs text-zinc-500 italic py-2">
+                      Context Switch in progress... CPU pipeline flushing
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Ready & Waiting Queues */}
+              <div className="flex-1 min-h-0 flex flex-col pt-2 overflow-hidden">
+                <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 shrink-0">
+                  Scheduling Queues
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1 min-h-0 overflow-hidden">
                   {/* Ready Queue */}
-                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2 flex flex-col gap-0.5">
-                    <span className="text-[10px] font-medium text-sky-400/80 uppercase tracking-tight">
+                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2.5 flex flex-col justify-between overflow-hidden">
+                    <span className="text-[10px] font-medium text-sky-400/80 uppercase tracking-tight shrink-0">
                       Ready Queue (FIFO)
                     </span>
-                    <div className="flex flex-col gap-0.5 font-mono text-[11px] sm:text-xs">
+                    <div className="flex flex-col gap-1 font-mono text-[11px] sm:text-xs">
                       {OS_STEPS[currentStep].readyQueue.length === 0 ? (
                         <span className="text-zinc-600 text-xs italic">Queue empty</span>
                       ) : (
                         OS_STEPS[currentStep].readyQueue.map((proc) => (
-                          <div key={proc.id} className="flex items-center justify-between px-1.5 py-0.5 bg-zinc-800/40 rounded">
-                            <span className="text-zinc-300 font-semibold">{proc.pid}: {proc.name}</span>
-                            <span className="text-[10px] text-zinc-500">{proc.state}</span>
+                          <div key={proc.id} className="flex items-center justify-between px-2 py-1 bg-zinc-800/40 rounded">
+                            <span className="text-zinc-200 font-semibold">{proc.pid}: {proc.name}</span>
+                            <span className="text-[10px] text-zinc-400">{proc.state}</span>
                           </div>
                         ))
                       )}
@@ -1085,16 +1084,16 @@ export function HeroRuntimeSandbox() {
                   </div>
 
                   {/* Blocked / I/O Queue */}
-                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2 flex flex-col gap-0.5">
-                    <span className="text-[10px] font-medium text-rose-400/80 uppercase tracking-tight">
+                  <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2.5 flex flex-col justify-between overflow-hidden">
+                    <span className="text-[10px] font-medium text-rose-400/80 uppercase tracking-tight shrink-0">
                       I/O Wait Queue (Blocked)
                     </span>
-                    <div className="flex flex-col gap-0.5 font-mono text-[11px] sm:text-xs">
+                    <div className="flex flex-col gap-1 font-mono text-[11px] sm:text-xs">
                       {OS_STEPS[currentStep].waitingQueue.length === 0 ? (
                         <span className="text-zinc-600 text-xs italic">No blocked processes</span>
                       ) : (
                         OS_STEPS[currentStep].waitingQueue.map((proc) => (
-                          <div key={proc.id} className="flex items-center justify-between px-1.5 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded">
+                          <div key={proc.id} className="flex items-center justify-between px-2 py-1 bg-rose-500/10 border border-rose-500/20 rounded">
                             <span className="text-rose-200 font-semibold">{proc.pid}</span>
                             <span className="text-[10px] text-rose-300/80">{proc.reason}</span>
                           </div>
@@ -1103,147 +1102,176 @@ export function HeroRuntimeSandbox() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
-            )}
+              </div>
+            </div>
+          )}
 
-            {/* 3. JAVA: JVM STACK FRAMES & HEAP MEMORY */}
-            {activeTab === "java" && (
-              <motion.div
-                key="tab-panel-java"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col gap-2"
-              >
-                {/* JVM Stack Frames */}
-                <div>
-                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-emerald-400/90 mb-1 flex items-center justify-between">
-                    <span>JVM Thread Stack</span>
-                    <span className="text-[10px] text-zinc-500 font-normal">LIFO Frames</span>
-                  </div>
-                  <div className="min-h-[50px] sm:min-h-[56px] bg-zinc-900/60 rounded-lg p-1.5 border border-zinc-800/60 flex flex-col-reverse gap-1 justify-end">
-                    {JAVA_STEPS[currentStep].stackFrames.map((frame, fIdx) => (
-                      <div
-                        key={frame.id}
-                        className={`px-2 py-0.5 rounded text-xs font-mono ${
-                          fIdx === JAVA_STEPS[currentStep].stackFrames.length - 1
-                            ? "bg-emerald-500/15 border border-emerald-500/40 text-emerald-200"
-                            : "bg-zinc-800/40 text-zinc-400"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between font-semibold mb-0.5">
-                          <span>{frame.name}</span>
-                          <span className="text-[10px] text-zinc-500">Frame</span>
-                        </div>
-                        <div className="flex flex-wrap gap-x-2.5 text-[10px] sm:text-[11px]">
-                          {frame.vars.map((v) => (
-                            <span key={`${frame.id}-${v.name}`} className="text-zinc-400">
-                              {v.name}:{" "}
-                              <strong className={v.isRef ? "text-emerald-300 font-semibold underline decoration-dotted" : "text-zinc-200"}>
-                                {v.value}
-                              </strong>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+          {/* 3. JAVA: JVM STACK FRAMES & HEAP MEMORY */}
+          {activeTab === "java" && (
+            <div
+              key="tab-panel-java"
+              className="w-full h-full flex flex-col justify-between overflow-hidden"
+            >
+              {/* JVM Stack Frames */}
+              <div className="h-[110px] sm:h-[120px] shrink-0 flex flex-col">
+                <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-emerald-400/90 mb-1 flex items-center justify-between shrink-0">
+                  <span>JVM Thread Stack</span>
+                  <span className="text-[10px] text-zinc-500 font-normal">LIFO Frames</span>
                 </div>
+                <div className="h-[84px] sm:h-[94px] bg-zinc-900/60 rounded-lg p-2 border border-zinc-800/60 flex flex-col-reverse gap-1.5 justify-end overflow-hidden">
+                  {JAVA_STEPS[currentStep].stackFrames.map((frame, fIdx) => (
+                    <div
+                      key={frame.id}
+                      className={`px-2.5 py-1 rounded text-xs font-mono ${
+                        fIdx === JAVA_STEPS[currentStep].stackFrames.length - 1
+                          ? "bg-emerald-500/15 border border-emerald-500/40 text-emerald-200"
+                          : "bg-zinc-800/40 text-zinc-400"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-semibold mb-0.5">
+                        <span>{frame.name}</span>
+                        <span className="text-[10px] text-zinc-500">Frame</span>
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 text-[10px] sm:text-[11px]">
+                        {frame.vars.map((v) => (
+                          <span key={`${frame.id}-${v.name}`} className="text-zinc-400">
+                            {v.name}:{" "}
+                            <strong className={v.isRef ? "text-emerald-300 font-semibold underline decoration-dotted" : "text-zinc-200"}>
+                              {v.value}
+                            </strong>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                {/* JVM Heap Space */}
-                <div className="flex-1">
-                  <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
-                    Heap Space (Eden Generation)
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
-                    {JAVA_STEPS[currentStep].heapObjects.map((obj) => (
-                      <div
-                        key={obj.id}
-                        className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2 flex flex-col gap-0.5 font-mono text-xs"
-                      >
-                        <div className="flex items-center justify-between pb-0.5 border-b border-zinc-800/60">
-                          <span className="text-emerald-400 font-semibold">{obj.className}</span>
-                          <span className="text-[10px] text-zinc-500">{obj.address}</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          {obj.fields.map((f) => (
-                            <div key={`${obj.id}-${f.name}`} className="flex items-center justify-between text-[10px] sm:text-[11px]">
-                              <span className="text-zinc-400">{f.name}:</span>
-                              <span className="text-zinc-200 font-medium">{f.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              {/* JVM Heap Space */}
+              <div className="flex-1 min-h-0 flex flex-col pt-2 overflow-hidden">
+                <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 shrink-0">
+                  Heap Space (Eden Generation)
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1 min-h-0 overflow-hidden">
+                  {JAVA_STEPS[currentStep].heapObjects.map((obj) => (
+                    <div
+                      key={obj.id}
+                      className="bg-zinc-900/60 border border-zinc-800/60 rounded-lg p-2.5 flex flex-col justify-between overflow-hidden font-mono text-xs"
+                    >
+                      <div className="flex items-center justify-between pb-1 border-b border-zinc-800/60 shrink-0">
+                        <span className="text-emerald-400 font-semibold">{obj.className}</span>
+                        <span className="text-[10px] text-zinc-500">{obj.address}</span>
+                      </div>
+                      <div className="flex flex-col gap-1 pt-1">
+                        {obj.fields.map((f) => (
+                          <div key={`${obj.id}-${f.name}`} className="flex items-center justify-between text-[11px] sm:text-xs">
+                            <span className="text-zinc-400">{f.name}:</span>
+                            <span className="text-zinc-200 font-medium">{f.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* ── Bottom Bar: Multi-Modal Step Explanation & Controls ── */}
-      <div className="border-t border-zinc-800/80 bg-[#14151b] px-3 sm:px-4 py-1.5 sm:py-2 flex flex-wrap items-center justify-between gap-2">
+      <div className="border-t border-zinc-800/80 bg-[#14151b] px-3 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-2.5">
         {/* Step Explanation Banner */}
-        <div className="flex items-center gap-2 flex-1 min-w-[220px]">
+        <div className="flex items-center gap-2.5 flex-1 min-w-[240px]">
           <span
-            className="w-2 h-2 rounded-full shrink-0 animate-pulse"
+            className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse"
             style={{ backgroundColor: activeConfig.accentColor }}
           />
-          <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 sm:px-2 py-0.5 rounded bg-zinc-800/90 text-zinc-300 shrink-0">
-            {activeTab === "javascript" && JS_STEPS[currentStep].badge}
-            {activeTab === "os" && OS_STEPS[currentStep].badge}
-            {activeTab === "java" && JAVA_STEPS[currentStep].badge}
-          </span>
-          <p className="text-[11px] sm:text-xs text-zinc-300 line-clamp-1">
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-800/90 border border-zinc-700/60 text-zinc-200 shrink-0">
+            <span className="text-[10px] uppercase font-bold tracking-wider">
+              {activeTab === "javascript" && JS_STEPS[currentStep].badge}
+              {activeTab === "os" && OS_STEPS[currentStep].badge}
+              {activeTab === "java" && JAVA_STEPS[currentStep].badge}
+            </span>
+            <span className="text-[10px] text-zinc-400 font-mono">
+              ({currentStep + 1}/{maxSteps})
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-zinc-300 line-clamp-1">
             {activeTab === "javascript" && JS_STEPS[currentStep].explanation}
             {activeTab === "os" && OS_STEPS[currentStep].explanation}
             {activeTab === "java" && JAVA_STEPS[currentStep].explanation}
           </p>
         </div>
 
-        {/* Micro-Step Controls */}
-        <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-900/90 border border-zinc-800/80 rounded-xl p-0.5 sm:p-1 shrink-0">
+        {/* Micro-Step Controls with High-Affordance Highlighting */}
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-zinc-900/95 border border-zinc-700/70 shadow-lg rounded-xl p-1 shrink-0">
+          {/* Reset button */}
           <button
             onClick={handleReset}
             title="Reset simulation to step 1"
-            className="p-1 sm:p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors"
+            className="p-1.5 sm:px-2 sm:py-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/60 transition-all flex items-center gap-1"
           >
             <RotateCcw className="w-3.5 h-3.5" />
+            <span className="hidden xl:inline text-xs">Reset</span>
           </button>
+
+          {/* Previous step button */}
           <button
             onClick={handlePrev}
             disabled={currentStep === 0}
             title="Previous step"
-            className="p-1 sm:p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+            className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/70 border border-zinc-800/80 hover:border-zinc-700/70 disabled:opacity-30 disabled:hover:bg-transparent disabled:border-transparent transition-all flex items-center gap-1 text-xs"
           >
             <SkipBack className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Prev</span>
           </button>
+
+          {/* Glowing Subject-Themed Primary Action Button */}
           <button
             onClick={togglePlay}
             title={isPlayingActive ? "Pause simulation" : "Play simulation"}
-            className="px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-100 transition-colors flex items-center gap-1.5"
+            className={`relative px-3.5 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-2 shadow-sm ${
+              isPlayingActive
+                ? "bg-amber-500/20 border border-amber-500/60 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.25)] hover:bg-amber-500/30"
+                : activeTab === "javascript"
+                ? "bg-amber-500/20 border border-amber-500/60 text-amber-200 shadow-[0_0_18px_rgba(245,158,11,0.3)] hover:bg-amber-500/30 hover:border-amber-400 active:scale-[0.98]"
+                : activeTab === "os"
+                ? "bg-sky-500/20 border border-sky-500/60 text-sky-200 shadow-[0_0_18px_rgba(14,165,233,0.3)] hover:bg-sky-500/30 hover:border-sky-400 active:scale-[0.98]"
+                : "bg-emerald-500/20 border border-emerald-500/60 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,0.3)] hover:bg-emerald-500/30 hover:border-emerald-400 active:scale-[0.98]"
+            }`}
           >
             {isPlayingActive ? (
               <>
-                <Pause className="w-3 h-3 text-amber-400" />
+                <Pause className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
                 <span>Pause</span>
               </>
             ) : (
               <>
-                <Play className="w-3 h-3 text-emerald-400" />
-                <span>Step Run</span>
+                <span className="relative flex h-2 w-2">
+                  <span
+                    className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                    style={{ backgroundColor: activeConfig.accentColor }}
+                  />
+                  <span
+                    className="relative inline-flex rounded-full h-2 w-2"
+                    style={{ backgroundColor: activeConfig.accentColor }}
+                  />
+                </span>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Run</span>
               </>
             )}
           </button>
+
+          {/* Labeled Next Step button */}
           <button
             onClick={handleNext}
             disabled={currentStep === maxSteps - 1}
             title="Next step"
-            className="p-1 sm:p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+            className="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-100 bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700/80 hover:border-zinc-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:border-transparent transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]"
           >
+            <span>Next</span>
             <SkipForward className="w-3.5 h-3.5" />
           </button>
         </div>

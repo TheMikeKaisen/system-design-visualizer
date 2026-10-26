@@ -217,7 +217,7 @@ console.log(c);`,
     },
     {
       currentLine: null,
-      explanation: "Execution halts due to the error.",
+      explanation: "Execution halts immediately due to the uncaught ReferenceError. Lines 8 and 9 (console.log(b) and console.log(c)) are never reached, demonstrating that uncaught runtime exceptions terminate script execution.",
       toastMessage: "Execution Halted",
       consoleOutput: ["ReferenceError: a is not defined"],
       callStack: []
