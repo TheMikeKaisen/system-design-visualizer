@@ -25,6 +25,14 @@ describe("Subject Path Pages (Design System Consistency)", () => {
         "href",
         "/operating-systems/simulator/process-states"
       );
+      expect(screen.getByRole("link", { name: /CPU Scheduling Deep-Dive/i })).toHaveAttribute(
+        "href",
+        "/operating-systems/simulator/cpu-scheduling-deep-dive"
+      );
+      expect(screen.getByRole("link", { name: /CPU Schedulers/i })).toHaveAttribute(
+        "href",
+        "/operating-systems/simulator/cpu-scheduling"
+      );
       expect(screen.getByRole("link", { name: /Lock Variables/i })).toHaveAttribute(
         "href",
         "/operating-systems/simulator/lock-variables"

@@ -47,7 +47,7 @@ export const OPERATING_SYSTEMS_EPISODES: EpisodeMetadata[] = [
     description:
       "Compare FCFS and Round Robin with real-time queues. See how time quantums affect context switching and fairness.",
     date: "20 July 2026",
-    href: "/operating-systems/simulator/cpu-scheduling",
+    href: "/operating-systems/simulator/cpu-scheduling-deep-dive",
     accent: "sky",
     icon: (
       <svg

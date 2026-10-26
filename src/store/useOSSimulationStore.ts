@@ -2,7 +2,6 @@ import { create } from "zustand";
 import type { OSSimulationScenario, SchedulingMode, ChapterMeta } from "@/lib/os-simulator/engine";
 import { PROCESS_STATES_SCENARIO } from "@/lib/os-simulator/process-states-scenario";
 import {
-  CPU_SCHEDULING_SCENARIO,
   createCpuSchedulingScenario,
 } from "@/lib/os-simulator/cpu-scheduling-scenario";
 
@@ -17,6 +16,8 @@ interface OSSimulationState {
   nextStep: () => void;
   prevStep: () => void;
   reset: () => void;
+  pause: () => void;
+  resetEpisode: (defaultScenario?: OSSimulationScenario) => void;
   togglePlay: () => void;
   setStep: (index: number) => void;
   setScenario: (scenario: OSSimulationScenario) => void;
@@ -53,6 +54,18 @@ export const useOSSimulationStore = create<OSSimulationState>((set, get) => ({
 
   reset: () => {
     set({ currentStepIndex: 0, isPlaying: false });
+  },
+
+  pause: () => {
+    set({ isPlaying: false });
+  },
+
+  resetEpisode: (defaultScenario?: OSSimulationScenario) => {
+    set({
+      scenario: defaultScenario ?? PROCESS_STATES_SCENARIO,
+      currentStepIndex: 0,
+      isPlaying: false,
+    });
   },
 
   togglePlay: () => {
