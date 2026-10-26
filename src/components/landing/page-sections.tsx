@@ -18,6 +18,7 @@ import {
   Play,
   GitBranch,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import "./landing.css";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -258,8 +259,8 @@ function DisciplinesSection() {
           </p>
         </div>
 
-        {/* Discipline Cards Grid */}
-        <div className="landing-reveal-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Discipline Cards Grid (desktop and tablets) */}
+        <div className="landing-reveal-stagger hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {DISCIPLINES.map((disc) => (
             <DisciplineCard key={disc.id} discipline={disc} />
           ))}
@@ -298,6 +299,52 @@ function DisciplinesSection() {
             </div>
           </Link>
         </div>
+
+        {/* Mobile Discipline List (smaller screens only: logo + title on left, right arrow on right) */}
+        <div className="landing-reveal-stagger flex flex-col divide-y divide-zinc-200/80 dark:divide-border/60 rounded-2xl border border-zinc-200/90 dark:border-border/70 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs md:hidden">
+          {DISCIPLINES.map((disc) => {
+            const Icon = disc.icon;
+            return (
+              <Link
+                key={disc.id}
+                href={disc.href}
+                className="flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border",
+                      disc.accentBg,
+                      disc.accentBorder
+                    )}
+                  >
+                    <Icon className={cn("w-5 h-5", disc.accentText)} />
+                  </div>
+                  <span className="font-semibold text-sm sm:text-base text-foreground group-hover:text-primary transition-colors truncate">
+                    {disc.title}
+                  </span>
+                </div>
+                <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+              </Link>
+            );
+          })}
+
+          {/* 6th item in mobile list: All Modules */}
+          <Link
+            href="/learning-paths"
+            className="flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors group bg-primary/5 dark:bg-primary/10"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-primary/25 bg-primary/10 text-primary">
+                <Play className="w-5 h-5 fill-current" />
+              </div>
+              <span className="font-semibold text-sm sm:text-base text-foreground group-hover:text-primary transition-colors truncate">
+                Browse All Modules
+              </span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+          </Link>
+        </div>
       </div>
     </section>
   );
@@ -332,8 +379,8 @@ function SimulationEngineSection() {
             </div>
           </div>
 
-          {/* Right feature cards */}
-          <div className="landing-reveal-stagger grid sm:grid-cols-2 gap-4">
+          {/* Right feature cards (hidden on smaller screens) */}
+          <div className="landing-reveal-stagger hidden md:grid sm:grid-cols-2 gap-4">
             <div className="p-5 rounded-2xl border border-zinc-200/90 dark:border-border/60 bg-white dark:bg-zinc-900/60 backdrop-blur-sm shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-zinc-300 dark:hover:border-border/90 transition-all duration-200">
               <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4 border border-amber-500/20">
                 <GitBranch className="w-4 h-4" />
@@ -424,8 +471,8 @@ function CanvasStudioSection() {
           </div>
         </div>
 
-        {/* ── Miniature Distributed Architecture Visual Centerpiece with Ambient Shadow ── */}
-        <div className="w-full relative group">
+        {/* ── Miniature Distributed Architecture Visual Centerpiece with Ambient Shadow (hidden on smaller screens) ── */}
+        <div className="w-full relative group hidden md:block">
           <div
             className="absolute -inset-2.5 sm:-inset-3.5 rounded-3xl bg-gradient-to-r from-sky-500/15 via-blue-500/15 to-violet-500/15 blur-2xl opacity-60 dark:opacity-20 pointer-events-none -z-10"
             aria-hidden="true"

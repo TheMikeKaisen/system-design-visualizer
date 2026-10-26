@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render } from "@testing-library/react";
-import { HeroComputationalGraph, CANONICAL_NODES } from "../HeroComputationalGraph";
+import {
+  HeroComputationalGraph,
+  CANONICAL_NODES,
+  ARCHITECTURAL_TIERS,
+} from "../HeroComputationalGraph";
 
 beforeEach(() => {
   window.matchMedia = vi.fn().mockImplementation((query) => ({
@@ -44,9 +48,11 @@ describe("HeroComputationalGraph", () => {
     expect(serviceA?.iconType).toBe("server");
     const database = CANONICAL_NODES.find((n) => n.id === "DATABASE");
     expect(database?.iconType).toBe("database");
+
+    expect(ARCHITECTURAL_TIERS).toHaveLength(3);
   });
 
-  it("renders computational network SVG with all canonical nodes and connections", () => {
+  it("renders computational network SVG with all canonical nodes, tier enclosures, and connections", () => {
     const { container } = render(<HeroComputationalGraph />);
 
     const svg = container.querySelector("svg");
@@ -73,8 +79,9 @@ describe("HeroComputationalGraph", () => {
       expect(container.querySelector(`[data-node-id="${nodeId}"]`)).not.toBeNull();
     }
 
+    // 7 node names + 3 tier enclosure titles = 10 text elements
     const textElements = container.querySelectorAll("text");
-    expect(textElements.length).toBe(7);
+    expect(textElements.length).toBe(10);
 
     const packets = container.querySelectorAll("animateMotion");
     expect(packets.length).toBeGreaterThanOrEqual(16);
@@ -113,6 +120,31 @@ describe("HeroComputationalGraph", () => {
       const inCorridorY = node.cy >= 120 && node.cy <= 480;
       const overlapsTextCorridor = inCorridorX && inCorridorY;
       expect(overlapsTextCorridor).toBe(false);
+    }
+  });
+
+  it("provides responsive architecture stages for desktop (hidden md:block) and mobile (block md:hidden) with all 7 mobile node badges", () => {
+    const { container } = render(<HeroComputationalGraph />);
+
+    // Verify desktop stage container
+    const desktopStage = container.querySelector(".hidden.md\\:block");
+    expect(desktopStage).not.toBeNull();
+    const desktopSvg = desktopStage?.querySelector("svg");
+    expect(desktopSvg?.getAttribute("viewBox")).toBe("0 0 1280 640");
+
+    // Verify mobile stage container
+    const mobileStage = container.querySelector(".block.md\\:hidden");
+    expect(mobileStage).not.toBeNull();
+    const mobileSvg = mobileStage?.querySelector("svg");
+    expect(mobileSvg?.getAttribute("viewBox")).toBe("0 0 390 680");
+
+    // Verify all 7 canonical nodes are rendered in mobile stage
+    const canonicalIds = [
+      "CLIENT", "INGRESS", "LOAD_BALANCER",
+      "APP_SERVICE_A", "APP_SERVICE_B", "APP_CACHE", "DATABASE",
+    ];
+    for (const nodeId of canonicalIds) {
+      expect(mobileStage?.querySelector(`[data-mobile-node-id="${nodeId}"]`)).not.toBeNull();
     }
   });
 });

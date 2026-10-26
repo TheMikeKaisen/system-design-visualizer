@@ -114,4 +114,31 @@ describe("LandingPage", () => {
 
     expect(screen.getByText(/Built for deep engineering learning/i)).toBeDefined();
   });
+
+  it("applies responsive mobile layout rules: mobile list view, hidden cards on small screens, and hidden canvas studio on small screens", () => {
+    const { container } = render(<LandingPage />);
+
+    // 1. Disciplines desktop card grid is hidden on mobile:
+    const desktopDisciplinesGrid = container.querySelector(".landing-reveal-stagger.hidden.md\\:grid");
+    expect(desktopDisciplinesGrid).not.toBeNull();
+
+    // 2. Mobile disciplines list is visible on small screens (md:hidden):
+    const mobileDisciplinesList = container.querySelector(".landing-reveal-stagger.flex.flex-col.md\\:hidden");
+    expect(mobileDisciplinesList).not.toBeNull();
+    // Verify each discipline title is inside the mobile list
+    expect(mobileDisciplinesList?.textContent).toContain("JavaScript");
+    expect(mobileDisciplinesList?.textContent).toContain("Operating Systems");
+    expect(mobileDisciplinesList?.textContent).toContain("Java & JVM Architecture");
+    expect(mobileDisciplinesList?.textContent).toContain("Frontend Architecture");
+    expect(mobileDisciplinesList?.textContent).toContain("Backend Internals");
+    expect(mobileDisciplinesList?.textContent).toContain("Browse All Modules");
+
+    // 3. How It Works feature cards are hidden on smaller screens (hidden md:grid):
+    const howItWorksCards = container.querySelector("#how-it-works .hidden.md\\:grid");
+    expect(howItWorksCards).not.toBeNull();
+
+    // 4. Canvas Studio visualizer is hidden on smaller screens (hidden md:block):
+    const canvasContainer = container.querySelector("#canvas-studio .hidden.md\\:block");
+    expect(canvasContainer).not.toBeNull();
+  });
 });
