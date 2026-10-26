@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useSyncExternalStore } from "react";
+import React, { useSyncExternalStore, useState, useEffect, useRef } from "react";
 
 type IconType =
   | "client"
@@ -26,7 +26,6 @@ interface ConnectionDef {
   packetClass: string;
   dur: string;
   delay: string;
-  delay2: string;
   markerId?: string;
 }
 
@@ -49,14 +48,17 @@ const BR = 10;
  * 1. Edge & Ingress (Left Flank, flows DOWN from Client to Load Balancer)
  * 2. Compute Cluster (Lower Right Flank, receives load-balanced dispatches)
  * 3. Persistence Tier (Upper Right Flank, data access flows UPWARD from compute instances)
+ *
+ * Flank coordinates calibrated outward (x: 20 and x: 1105) to maintain an expansive,
+ * clear central corridor for hero copy across tablet and desktop viewports.
  */
 export const ARCHITECTURAL_TIERS: TierEnclosure[] = [
   {
     id: "tier-edge",
     name: "Edge & Ingress",
-    x: 42,
+    x: 20,
     y: 35,
-    width: 130,
+    width: 120,
     height: 540,
     strokeClass: "stroke-zinc-800/80 dark:stroke-zinc-800/60",
     labelClass: "fill-zinc-400 dark:fill-zinc-500",
@@ -64,35 +66,35 @@ export const ARCHITECTURAL_TIERS: TierEnclosure[] = [
   {
     id: "tier-compute",
     name: "Compute Cluster",
-    x: 1060,
+    x: 1105,
     y: 330,
-    width: 175,
+    width: 155,
     height: 275,
-    strokeClass: "stroke-teal-500/25 dark:stroke-teal-500/20",
-    labelClass: "fill-teal-500/80 dark:fill-teal-400/70",
+    strokeClass: "stroke-teal-500/22 dark:stroke-teal-500/16",
+    labelClass: "fill-teal-500/70 dark:fill-teal-400/60",
   },
   {
     id: "tier-storage",
     name: "Persistence Tier",
-    x: 1060,
+    x: 1105,
     y: 35,
-    width: 175,
+    width: 155,
     height: 275,
-    strokeClass: "stroke-amber-500/25 dark:stroke-amber-500/20",
-    labelClass: "fill-amber-500/80 dark:fill-amber-400/70",
+    strokeClass: "stroke-amber-500/22 dark:stroke-amber-500/16",
+    labelClass: "fill-amber-500/70 dark:fill-amber-400/60",
   },
 ];
 
 /**
  * Canonical 7-node distributed system topology.
- * Left Flank: Client (top) -> Ingress (mid) -> Load Balancer (bottom)
- * Right Flank: Compute Cluster (bottom) -> Persistence Tier (top)
+ * Left Flank: Client (top) -> Ingress (mid) -> Load Balancer (bottom) at cx: 80
+ * Right Flank: Compute Cluster (bottom) -> Persistence Tier (top) at cx: 1180
  */
 export const CANONICAL_NODES: ComputationalNode[] = [
   {
     id: "CLIENT",
     name: "Client",
-    cx: 106,
+    cx: 80,
     cy: 110,
     iconType: "client",
     colorClass: "text-sky-400 dark:text-sky-300",
@@ -100,7 +102,7 @@ export const CANONICAL_NODES: ComputationalNode[] = [
   {
     id: "INGRESS",
     name: "Ingress",
-    cx: 106,
+    cx: 80,
     cy: 275,
     iconType: "ingress",
     colorClass: "text-teal-400 dark:text-teal-300",
@@ -108,7 +110,7 @@ export const CANONICAL_NODES: ComputationalNode[] = [
   {
     id: "LOAD_BALANCER",
     name: "Load Balancer",
-    cx: 106,
+    cx: 80,
     cy: 440,
     iconType: "loadbalancer",
     colorClass: "text-blue-400 dark:text-blue-300",
@@ -116,7 +118,7 @@ export const CANONICAL_NODES: ComputationalNode[] = [
   {
     id: "APP_SERVICE_A",
     name: "App Service A",
-    cx: 1148,
+    cx: 1180,
     cy: 405,
     iconType: "server",
     colorClass: "text-teal-400 dark:text-teal-300",
@@ -124,7 +126,7 @@ export const CANONICAL_NODES: ComputationalNode[] = [
   {
     id: "APP_SERVICE_B",
     name: "App Service B",
-    cx: 1148,
+    cx: 1180,
     cy: 525,
     iconType: "server",
     colorClass: "text-teal-400 dark:text-teal-300",
@@ -132,7 +134,7 @@ export const CANONICAL_NODES: ComputationalNode[] = [
   {
     id: "APP_CACHE",
     name: "Application Cache",
-    cx: 1148,
+    cx: 1180,
     cy: 235,
     iconType: "cache",
     colorClass: "text-sky-400 dark:text-sky-300",
@@ -140,7 +142,7 @@ export const CANONICAL_NODES: ComputationalNode[] = [
   {
     id: "DATABASE",
     name: "Database",
-    cx: 1148,
+    cx: 1180,
     cy: 110,
     iconType: "database",
     colorClass: "text-amber-400 dark:text-amber-300",
@@ -149,114 +151,103 @@ export const CANONICAL_NODES: ComputationalNode[] = [
 
 /**
  * Circuit Bus Connections:
- * Flow sequence:
- * 1. Client (top left) -> flows DOWN -> Ingress (mid left)
- * 2. Ingress (mid left) -> flows DOWN -> Load Balancer (bottom left)
- * 3. Load Balancer (bottom left) -> lower basin bus -> App Service A & B (bottom right)
- * 4. App Services -> data access flow UPWARD -> Cache (RAM) & Database (Disk)
+ * Refined pacing: 4.5s – 6.5s travel intervals for calm, fluid motion.
+ * Subdued stroke contrast with zero cognitive distraction behind hero copy.
  */
 const CONNECTIONS: ConnectionDef[] = [
   {
     id: "conn-c01",
-    // 1. Client (106, 110) -> flows DOWN -> Ingress (106, 275)
-    d: "M106,136 L106,245",
-    strokeClass: "stroke-teal-500/35 dark:stroke-teal-400/25",
+    // 1. Client (80, 110) -> flows DOWN -> Ingress (80, 275)
+    d: "M80,136 L80,245",
+    strokeClass: "stroke-teal-500/22 dark:stroke-teal-400/16",
     packetClass: "fill-teal-400 dark:fill-teal-300",
-    dur: "2.4s",
+    dur: "4.8s",
     delay: "0.0s",
-    delay2: "1.2s",
     markerId: "hcg-arrow-teal",
   },
   {
     id: "conn-c02",
-    // 2. Ingress (106, 275) -> flows DOWN -> Load Balancer (106, 440)
-    d: "M106,301 L106,410",
-    strokeClass: "stroke-teal-500/35 dark:stroke-teal-400/25",
+    // 2. Ingress (80, 275) -> flows DOWN -> Load Balancer (80, 440)
+    d: "M80,301 L80,410",
+    strokeClass: "stroke-teal-500/22 dark:stroke-teal-400/16",
     packetClass: "fill-teal-400 dark:fill-teal-300",
-    dur: "2.4s",
-    delay: "0.5s",
-    delay2: "1.7s",
+    dur: "4.8s",
+    delay: "0.8s",
     markerId: "hcg-arrow-teal",
   },
   {
     id: "conn-c03",
-    // 3. Load Balancer (106, 440) -> Lower Basin Bus -> App Service A (1148, 405)
-    d: "M132,436 C320,560 900,560 1118,405",
-    strokeClass: "stroke-cyan-500/35 dark:stroke-cyan-400/25",
+    // 3. Load Balancer (80, 440) -> Lower Basin Bus -> App Service A (1180, 405)
+    d: "M106,436 C320,560 900,560 1150,405",
+    strokeClass: "stroke-cyan-500/22 dark:stroke-cyan-400/16",
     packetClass: "fill-cyan-400 dark:fill-cyan-300",
-    dur: "3.6s",
-    delay: "1.0s",
-    delay2: "2.8s",
+    dur: "6.5s",
+    delay: "1.6s",
     markerId: "hcg-arrow-cyan",
   },
   {
     id: "conn-c04",
-    // 4. Load Balancer (106, 440) -> Parallel Basin Bus -> App Service B (1148, 525)
-    d: "M132,444 C340,580 940,580 1118,525",
-    strokeClass: "stroke-cyan-500/35 dark:stroke-cyan-400/25",
+    // 4. Load Balancer (80, 440) -> Parallel Basin Bus -> App Service B (1180, 525)
+    d: "M106,444 C340,580 940,580 1150,525",
+    strokeClass: "stroke-cyan-500/22 dark:stroke-cyan-400/16",
     packetClass: "fill-cyan-400 dark:fill-cyan-300",
-    dur: "3.6s",
-    delay: "1.8s",
-    delay2: "3.6s",
+    dur: "6.5s",
+    delay: "2.4s",
     markerId: "hcg-arrow-cyan",
   },
   {
     id: "conn-c05",
-    // 5. App Service A (1148, 405) -> flows UP -> Application Cache (1148, 235) (cache lookup)
-    d: "M1148,379 L1148,265",
-    strokeClass: "stroke-teal-500/35 dark:stroke-teal-400/25",
+    // 5. App Service A (1180, 405) -> flows UP -> Application Cache (1180, 235) (cache lookup)
+    d: "M1180,379 L1180,265",
+    strokeClass: "stroke-teal-500/22 dark:stroke-teal-400/16",
     packetClass: "fill-teal-400 dark:fill-teal-300",
-    dur: "2.2s",
-    delay: "1.6s",
-    delay2: "2.7s",
+    dur: "4.5s",
+    delay: "2.2s",
     markerId: "hcg-arrow-teal",
   },
   {
     id: "conn-c06",
-    // 6. App Service B (1148, 525) -> flows UP -> Application Cache (1148, 235) (cache lookup)
-    d: "M1122,510 C1090,440 1090,320 1135,265",
-    strokeClass: "stroke-teal-500/35 dark:stroke-teal-400/25",
+    // 6. App Service B (1180, 525) -> flows UP -> Application Cache (1180, 235) (cache lookup)
+    d: "M1154,510 C1122,440 1122,320 1167,265",
+    strokeClass: "stroke-teal-500/22 dark:stroke-teal-400/16",
     packetClass: "fill-teal-400 dark:fill-teal-300",
-    dur: "2.4s",
-    delay: "2.4s",
-    delay2: "3.5s",
+    dur: "5.0s",
+    delay: "3.0s",
     markerId: "hcg-arrow-teal",
   },
   {
     id: "conn-c07",
-    // 7. App Service A (1148, 405) -> flows UP -> Database (1148, 110) (amber persistence query)
-    d: "M1174,395 C1210,310 1210,180 1178,135",
-    strokeClass: "stroke-amber-400/35 dark:stroke-amber-300/25",
+    // 7. App Service A (1180, 405) -> flows UP -> Database (1180, 110) (amber persistence query)
+    d: "M1206,395 C1242,310 1242,180 1210,135",
+    strokeClass: "stroke-amber-400/22 dark:stroke-amber-300/16",
     packetClass: "fill-amber-400 dark:fill-amber-300",
-    dur: "3.0s",
-    delay: "2.2s",
-    delay2: "3.7s",
+    dur: "5.8s",
+    delay: "2.8s",
     markerId: "hcg-arrow-amber",
   },
   {
     id: "conn-c08",
-    // 8. App Service B (1148, 525) -> flows UP -> Database (1148, 110) (amber persistence query)
-    d: "M1174,515 C1225,410 1225,200 1165,138",
-    strokeClass: "stroke-amber-400/35 dark:stroke-amber-300/25",
+    // 8. App Service B (1180, 525) -> flows UP -> Database (1180, 110) (amber persistence query)
+    d: "M1206,515 C1257,410 1257,200 1197,138",
+    strokeClass: "stroke-amber-400/22 dark:stroke-amber-300/16",
     packetClass: "fill-amber-400 dark:fill-amber-300",
-    dur: "2.8s",
-    delay: "3.0s",
-    delay2: "4.3s",
+    dur: "5.6s",
+    delay: "3.6s",
     markerId: "hcg-arrow-amber",
   },
 ];
 
 const AMBIENT = [
-  { id: "a01", cx: 60, cy: 360, r: 2.0, op: 0.25 },
-  { id: "a02", cx: 160, cy: 180, r: 1.5, op: 0.2 },
-  { id: "a03", cx: 190, cy: 520, r: 2.5, op: 0.18 },
-  { id: "a04", cx: 640, cy: 48, r: 1.5, op: 0.22 },
-  { id: "a05", cx: 580, cy: 590, r: 2.0, op: 0.2 },
-  { id: "a06", cx: 720, cy: 580, r: 1.5, op: 0.16 },
-  { id: "a07", cx: 1040, cy: 190, r: 1.8, op: 0.18 },
-  { id: "a08", cx: 1220, cy: 340, r: 2.0, op: 0.2 },
-  { id: "a09", cx: 1040, cy: 500, r: 1.5, op: 0.15 },
-  { id: "a10", cx: 1240, cy: 120, r: 2.0, op: 0.18 },
+  { id: "a01", cx: 60, cy: 360, r: 1.8, op: 0.18 },
+  { id: "a02", cx: 160, cy: 180, r: 1.4, op: 0.15 },
+  { id: "a03", cx: 190, cy: 520, r: 2.0, op: 0.14 },
+  { id: "a04", cx: 640, cy: 48, r: 1.4, op: 0.16 },
+  { id: "a05", cx: 580, cy: 590, r: 1.8, op: 0.15 },
+  { id: "a06", cx: 720, cy: 580, r: 1.4, op: 0.12 },
+  { id: "a07", cx: 1040, cy: 190, r: 1.6, op: 0.14 },
+  { id: "a08", cx: 1220, cy: 340, r: 1.8, op: 0.16 },
+  { id: "a09", cx: 1040, cy: 500, r: 1.4, op: 0.12 },
+  { id: "a10", cx: 1240, cy: 120, r: 1.8, op: 0.14 },
 ];
 
 function IconClient() {
@@ -359,8 +350,8 @@ function getReducedMotionServerSnapshot() {
   return false;
 }
 
-const MOBILE_BOX = 36;
-const MOBILE_BR = 8;
+const MOBILE_BOX = 32;
+const MOBILE_BR = 7;
 
 interface MobileConnectionDef {
   id: string;
@@ -369,7 +360,6 @@ interface MobileConnectionDef {
   packetClass: string;
   dur: string;
   delay: string;
-  delay2: string;
   markerId?: string;
 }
 
@@ -377,75 +367,69 @@ const MOBILE_NODE_COORDS: Record<string, { cx: number; cy: number }> = {
   CLIENT: { cx: 62, cy: 46 },
   INGRESS: { cx: 195, cy: 46 },
   LOAD_BALANCER: { cx: 328, cy: 46 },
-  APP_SERVICE_A: { cx: 62, cy: 585 },
-  APP_SERVICE_B: { cx: 152, cy: 585 },
-  APP_CACHE: { cx: 242, cy: 585 },
-  DATABASE: { cx: 328, cy: 585 },
+  APP_SERVICE_A: { cx: 62, cy: 620 },
+  APP_SERVICE_B: { cx: 152, cy: 620 },
+  APP_CACHE: { cx: 242, cy: 620 },
+  DATABASE: { cx: 328, cy: 620 },
 };
 
 const MOBILE_CONNECTIONS: MobileConnectionDef[] = [
   {
     id: "m-conn-01",
     // Client (62, 46) -> Ingress (195, 46)
-    d: "M82,46 L175,46",
-    strokeClass: "stroke-teal-500/40 dark:stroke-teal-400/30",
+    d: "M80,46 L175,46",
+    strokeClass: "stroke-teal-500/25 dark:stroke-teal-400/18",
     packetClass: "fill-teal-400 dark:fill-teal-300",
-    dur: "2.0s",
+    dur: "4.0s",
     delay: "0.0s",
-    delay2: "1.0s",
     markerId: "hcg-arrow-teal-m",
   },
   {
     id: "m-conn-02",
     // Ingress (195, 46) -> Load Balancer (328, 46)
-    d: "M215,46 L308,46",
-    strokeClass: "stroke-teal-500/40 dark:stroke-teal-400/30",
+    d: "M215,46 L310,46",
+    strokeClass: "stroke-teal-500/25 dark:stroke-teal-400/18",
     packetClass: "fill-teal-400 dark:fill-teal-300",
-    dur: "2.0s",
-    delay: "0.5s",
-    delay2: "1.5s",
+    dur: "4.0s",
+    delay: "0.8s",
     markerId: "hcg-arrow-teal-m",
   },
   {
     id: "m-conn-03",
-    // Load Balancer (328, 46) -> curves down right margin to App Services
-    d: "M336,66 C378,130 378,490 172,575",
-    strokeClass: "stroke-cyan-500/35 dark:stroke-cyan-400/25",
+    // Load Balancer (328, 46) -> curves down right margin to App Services (cy: 620)
+    d: "M334,66 C378,130 378,520 172,610",
+    strokeClass: "stroke-cyan-500/22 dark:stroke-cyan-400/16",
     packetClass: "fill-cyan-400 dark:fill-cyan-300",
-    dur: "3.2s",
-    delay: "1.0s",
-    delay2: "2.6s",
+    dur: "5.5s",
+    delay: "1.5s",
   },
   {
     id: "m-conn-04",
-    // Client (62, 46) -> traces down left margin to App Service A
-    d: "M54,66 C14,130 14,490 54,565",
-    strokeClass: "stroke-sky-500/30 dark:stroke-sky-400/20",
+    // Client (62, 46) -> traces down left margin to App Service A (cy: 620)
+    d: "M56,66 C14,130 14,520 56,600",
+    strokeClass: "stroke-sky-500/22 dark:stroke-sky-400/16",
     packetClass: "fill-sky-400 dark:fill-sky-300",
-    dur: "3.2s",
-    delay: "0.8s",
-    delay2: "2.4s",
+    dur: "5.5s",
+    delay: "1.2s",
   },
   {
     id: "m-conn-05",
-    // App Service B (152, 585) -> Cache (242, 585)
-    d: "M172,585 L222,585",
-    strokeClass: "stroke-teal-500/40 dark:stroke-teal-400/30",
+    // App Service B (152, 620) -> Cache (242, 620)
+    d: "M170,620 L224,620",
+    strokeClass: "stroke-teal-500/25 dark:stroke-teal-400/18",
     packetClass: "fill-teal-400 dark:fill-teal-300",
-    dur: "1.8s",
-    delay: "1.5s",
-    delay2: "2.4s",
+    dur: "4.2s",
+    delay: "2.2s",
     markerId: "hcg-arrow-teal-m",
   },
   {
     id: "m-conn-06",
-    // App Service B (152, 585) -> Database (328, 585) amber query
-    d: "M160,567 C200,535 285,535 316,570",
-    strokeClass: "stroke-amber-400/40 dark:stroke-amber-300/30",
+    // App Service B (152, 620) -> Database (328, 620) amber query
+    d: "M160,604 C200,572 285,572 316,607",
+    strokeClass: "stroke-amber-400/25 dark:stroke-amber-300/18",
     packetClass: "fill-amber-400 dark:fill-amber-300",
-    dur: "2.4s",
-    delay: "2.0s",
-    delay2: "3.2s",
+    dur: "4.8s",
+    delay: "2.8s",
     markerId: "hcg-arrow-amber-m",
   },
 ];
@@ -457,9 +441,31 @@ export function HeroComputationalGraph() {
     getReducedMotionServerSnapshot
   );
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Performance lifecycle: pause SMIL animations when off-screen
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry?.isIntersecting ?? true);
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const shouldAnimatePackets = !prefersReducedMotion && isVisible;
+
   return (
     <div
-      className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 flex items-center justify-center"
+      ref={containerRef}
+      className="hero-graph-entrance absolute inset-0 pointer-events-none select-none overflow-hidden z-0 flex items-center justify-center"
       aria-hidden="true"
     >
       {/* ── Desktop Architecture Stage (hidden on mobile, centered max-w-7xl) ── */}
@@ -471,20 +477,25 @@ export function HeroComputationalGraph() {
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
+            {/* Subtle resting glow on node chassis */}
             <filter id="hcg-node-glow" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feGaussianBlur stdDeviation="4" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            <filter id="hcg-packet-glow" x="-150%" y="-150%" width="400%" height="400%">
-              <feGaussianBlur stdDeviation="2.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
+
+            {/* Central corridor feathering mask: gently fades background lines behind headline */}
+            <radialGradient id="hcg-mask-gradient">
+              <stop offset="0%" stopColor="black" />
+              <stop offset="65%" stopColor="black" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="white" />
+            </radialGradient>
+            <mask id="hcg-corridor-mask">
+              <rect x="0" y="0" width="1280" height="640" fill="white" />
+              <ellipse cx="640" cy="300" rx="380" ry="190" fill="url(#hcg-mask-gradient)" />
+            </mask>
 
             {/* Directional arrow markers showing request and data routing */}
             <marker
@@ -503,7 +514,7 @@ export function HeroComputationalGraph() {
                 strokeWidth="1.6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.75"
+                opacity="0.65"
               />
             </marker>
 
@@ -523,7 +534,7 @@ export function HeroComputationalGraph() {
                 strokeWidth="1.6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.75"
+                opacity="0.65"
               />
             </marker>
 
@@ -543,7 +554,7 @@ export function HeroComputationalGraph() {
                 strokeWidth="1.6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.75"
+                opacity="0.65"
               />
             </marker>
           </defs>
@@ -588,37 +599,37 @@ export function HeroComputationalGraph() {
             </g>
           ))}
 
-          {/* Connections & Animated Packets */}
-          {CONNECTIONS.map((c) => (
-            <g key={c.id}>
-              <path
-                id={c.id}
-                d={c.d}
-                fill="none"
-                className={c.strokeClass}
-                strokeWidth="1.2"
-                markerEnd={c.markerId ? `url(#${c.markerId})` : undefined}
-              />
-              {!prefersReducedMotion && (
-                <>
-                  <circle
-                    r="3"
-                    className={c.packetClass}
-                    filter="url(#hcg-packet-glow)"
-                  >
-                    <animateMotion dur={c.dur} begin={c.delay} repeatCount="indefinite">
-                      <mpath href={`#${c.id}`} />
-                    </animateMotion>
-                  </circle>
-                  <circle r="1.8" className={c.packetClass} opacity={0.45}>
-                    <animateMotion dur={c.dur} begin={c.delay2} repeatCount="indefinite">
-                      <mpath href={`#${c.id}`} />
-                    </animateMotion>
-                  </circle>
-                </>
-              )}
-            </g>
-          ))}
+          {/* Connections & Animated Packets (masked to clear central hero copy) */}
+          <g id="hcg-connections" mask="url(#hcg-corridor-mask)">
+            {CONNECTIONS.map((c) => (
+              <g key={c.id}>
+                <path
+                  id={c.id}
+                  d={c.d}
+                  fill="none"
+                  className={c.strokeClass}
+                  strokeWidth="1.2"
+                  markerEnd={c.markerId ? `url(#${c.markerId})` : undefined}
+                />
+                {shouldAnimatePackets && (
+                  <g opacity={0.65}>
+                    {/* Zero-rasterization concentric vector aura */}
+                    <circle r="4.5" className={c.packetClass} opacity={0.25}>
+                      <animateMotion dur={c.dur} begin={c.delay} repeatCount="indefinite">
+                        <mpath href={`#${c.id}`} />
+                      </animateMotion>
+                    </circle>
+                    {/* Crisp core packet */}
+                    <circle r="2.2" className={c.packetClass} opacity={0.85}>
+                      <animateMotion dur={c.dur} begin={c.delay} repeatCount="indefinite">
+                        <mpath href={`#${c.id}`} />
+                      </animateMotion>
+                    </circle>
+                  </g>
+                )}
+              </g>
+            ))}
+          </g>
 
           {/* Canonical 7 Node Cards */}
           {CANONICAL_NODES.map((node) => (
@@ -637,7 +648,7 @@ export function HeroComputationalGraph() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1"
-                opacity={0.18}
+                opacity={0.14}
                 filter="url(#hcg-node-glow)"
               />
               <rect
@@ -649,7 +660,7 @@ export function HeroComputationalGraph() {
                 className="fill-white dark:fill-zinc-950"
                 stroke="currentColor"
                 strokeWidth="0.8"
-                strokeOpacity={0.35}
+                strokeOpacity={0.25}
               />
               <NodeIcon type={node.iconType} />
               <text
@@ -677,14 +688,7 @@ export function HeroComputationalGraph() {
         >
           <defs>
             <filter id="hcg-node-glow-m" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="3.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            <filter id="hcg-packet-glow-m" x="-150%" y="-150%" width="400%" height="400%">
-              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feGaussianBlur stdDeviation="3" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
@@ -706,7 +710,7 @@ export function HeroComputationalGraph() {
                 strokeWidth="1.6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.8"
+                opacity="0.7"
               />
             </marker>
             <marker
@@ -725,16 +729,16 @@ export function HeroComputationalGraph() {
                 strokeWidth="1.6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.8"
+                opacity="0.7"
               />
             </marker>
           </defs>
 
           {/* Mobile Ambient Dust */}
-          <circle cx={40} cy={160} r={1.5} className="fill-cyan-400 dark:fill-cyan-300" opacity={0.2} />
-          <circle cx={350} cy={200} r={1.8} className="fill-cyan-400 dark:fill-cyan-300" opacity={0.18} />
-          <circle cx={30} cy={450} r={1.5} className="fill-teal-400 dark:fill-teal-300" opacity={0.2} />
-          <circle cx={360} cy={430} r={1.8} className="fill-amber-400 dark:fill-amber-300" opacity={0.16} />
+          <circle cx={40} cy={160} r={1.5} className="fill-cyan-400 dark:fill-cyan-300" opacity={0.16} />
+          <circle cx={350} cy={200} r={1.8} className="fill-cyan-400 dark:fill-cyan-300" opacity={0.14} />
+          <circle cx={30} cy={450} r={1.5} className="fill-teal-400 dark:fill-teal-300" opacity={0.16} />
+          <circle cx={360} cy={430} r={1.8} className="fill-amber-400 dark:fill-amber-300" opacity={0.12} />
 
           {/* Mobile Connections & Data Packets */}
           {MOBILE_CONNECTIONS.map((c) => (
@@ -747,28 +751,24 @@ export function HeroComputationalGraph() {
                 strokeWidth="1.2"
                 markerEnd={c.markerId ? `url(#${c.markerId})` : undefined}
               />
-              {!prefersReducedMotion && (
-                <>
-                  <circle
-                    r="2.5"
-                    className={c.packetClass}
-                    filter="url(#hcg-packet-glow-m)"
-                  >
+              {shouldAnimatePackets && (
+                <g opacity={0.65}>
+                  <circle r="3.5" className={c.packetClass} opacity={0.25}>
                     <animateMotion dur={c.dur} begin={c.delay} repeatCount="indefinite">
                       <mpath href={`#${c.id}`} />
                     </animateMotion>
                   </circle>
-                  <circle r="1.5" className={c.packetClass} opacity={0.4}>
-                    <animateMotion dur={c.dur} begin={c.delay2} repeatCount="indefinite">
+                  <circle r="1.8" className={c.packetClass} opacity={0.85}>
+                    <animateMotion dur={c.dur} begin={c.delay} repeatCount="indefinite">
                       <mpath href={`#${c.id}`} />
                     </animateMotion>
                   </circle>
-                </>
+                </g>
               )}
             </g>
           ))}
 
-          {/* Mobile Canonical 7 Node Badges */}
+          {/* Mobile Canonical 7 Node Badges (calibrated bottom tier at cy: 620) */}
           {CANONICAL_NODES.map((node) => {
             const coords = MOBILE_NODE_COORDS[node.id];
             if (!coords) return null;
@@ -789,7 +789,7 @@ export function HeroComputationalGraph() {
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1"
-                  opacity={0.2}
+                  opacity={0.16}
                   filter="url(#hcg-node-glow-m)"
                 />
                 <rect
@@ -801,9 +801,9 @@ export function HeroComputationalGraph() {
                   className="fill-white dark:fill-zinc-950"
                   stroke="currentColor"
                   strokeWidth="0.8"
-                  strokeOpacity={0.35}
+                  strokeOpacity={0.25}
                 />
-                <g transform="scale(0.85)">
+                <g transform="scale(0.8)">
                   <NodeIcon type={node.iconType} />
                 </g>
               </g>

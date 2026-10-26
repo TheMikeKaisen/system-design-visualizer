@@ -12,6 +12,7 @@
 
 # folders
 /agentReports
+/plans
 
 # testing
 /coverage

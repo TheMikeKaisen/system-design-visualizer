@@ -798,7 +798,7 @@ export function HeroRuntimeSandbox() {
           </div>
 
           <div className="hidden lg:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-900/90 border border-zinc-800/80 text-[10px] text-zinc-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse motion-reduce:animate-none" />
             <span>Interactive Sandbox</span>
           </div>
 
@@ -825,7 +825,7 @@ export function HeroRuntimeSandbox() {
 
                   {/* Active running pulse indicator */}
                   {isActive && isPlayingActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse motion-reduce:animate-none ml-0.5" />
                   )}
                 </button>
               );
@@ -1031,7 +1031,7 @@ export function HeroRuntimeSandbox() {
                   {OS_STEPS[currentStep].cpu ? (
                     <div className="w-full flex items-center justify-between px-1">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse motion-reduce:animate-none" />
                         <div>
                           <span className="text-sm font-mono font-bold text-sky-200">
                             {OS_STEPS[currentStep].cpu?.pid}
@@ -1184,7 +1184,7 @@ export function HeroRuntimeSandbox() {
         {/* Step Explanation Banner */}
         <div className="flex items-center gap-2.5 flex-1 min-w-[240px]">
           <span
-            className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse"
+            className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse motion-reduce:animate-none"
             style={{ backgroundColor: activeConfig.accentColor }}
           />
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-800/90 border border-zinc-700/60 text-zinc-200 shrink-0">
@@ -1243,14 +1243,14 @@ export function HeroRuntimeSandbox() {
           >
             {isPlayingActive ? (
               <>
-                <Pause className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                <Pause className="w-3.5 h-3.5 text-amber-300 animate-pulse motion-reduce:animate-none" />
                 <span>Pause</span>
               </>
             ) : (
               <>
                 <span className="relative flex h-2 w-2">
                   <span
-                    className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                    className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full opacity-75"
                     style={{ backgroundColor: activeConfig.accentColor }}
                   />
                   <span

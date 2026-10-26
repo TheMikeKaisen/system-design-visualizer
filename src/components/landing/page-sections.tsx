@@ -150,7 +150,7 @@ function HeroSection() {
       <HeroComputationalGraph />
 
       {/* ── Foreground Hero Content ── */}
-      <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center my-auto">
+      <div className="relative z-10 max-w-3xl lg:max-w-4xl mx-auto flex flex-col items-center my-auto">
         {/* Confident, focal headline */}
         <h1 className="hero-fade-in text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] text-[#0A0A0A] dark:text-zinc-50 max-w-4xl">
           Don&apos;t just use software.{" "}
@@ -187,7 +187,7 @@ function HeroSection() {
       {/* ── Downward Vertical Circuit Bus Bridge into Section 2 ── */}
       <div className="w-full flex justify-center -mb-px z-10 pointer-events-none mt-auto pt-6">
         <div className="w-[1.5px] h-12 sm:h-14 bg-gradient-to-b from-cyan-500/40 via-teal-500/30 to-sky-500/50 relative overflow-hidden">
-          <div className="w-1.5 h-3 rounded-full bg-cyan-500 dark:bg-cyan-300 absolute left-1/2 -translate-x-1/2 packet-dot-vertical shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+          <div className="w-1.5 h-3 rounded-full bg-cyan-500 dark:bg-cyan-300 absolute packet-dot-vertical shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
         </div>
       </div>
     </section>

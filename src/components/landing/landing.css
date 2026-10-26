@@ -1,14 +1,20 @@
 /* ═══════════════════════════════════════════════════════════
    Landing Page — Scoped Styles & Animations
-   CSS-only. No JS animation libraries.
+   CSS-only. High-performance GPU-composited motion.
    ═══════════════════════════════════════════════════════════ */
+
+/* ── Motion Design Tokens (Emil Kowalski / Linear Standards) ─ */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
 
 /* ── Scroll-reveal ──────────────────────────────────────── */
 .landing-reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.7s var(--ease-out),
+              transform 0.7s var(--ease-out);
 }
 .landing-reveal.visible {
   opacity: 1;
@@ -22,122 +28,47 @@
 .landing-reveal-stagger > .landing-reveal:nth-child(4) { transition-delay: 300ms; }
 .landing-reveal-stagger > .landing-reveal:nth-child(5) { transition-delay: 400ms; }
 
-/* ── Packet flow along SVG path ─────────────────────────── */
-@keyframes packet-flow {
-  0%   { offset-distance: 0%; opacity: 0; }
-  5%   { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { offset-distance: 100%; opacity: 0; }
-}
-
-.packet-dot {
-  offset-rotate: 0deg;
-  animation: packet-flow 3s linear infinite;
-}
-.packet-dot-alt {
-  offset-rotate: 0deg;
-  animation: packet-flow 3.5s linear infinite;
-  animation-delay: 1.2s;
-}
-.packet-dot-slow {
-  offset-rotate: 0deg;
-  animation: packet-flow 4s linear infinite;
-  animation-delay: 0.6s;
-}
-
-/* ── Stroke draw animation ──────────────────────────────── */
-@keyframes stroke-draw {
-  from { stroke-dashoffset: 1000; }
-  to   { stroke-dashoffset: 0; }
-}
-.stroke-animate {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: stroke-draw 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* ── Gentle floating ────────────────────────────────────── */
-@keyframes gentle-float {
-  0%, 100% { transform: translateY(0px); }
-  50%      { transform: translateY(-8px); }
-}
-.float-gentle {
-  animation: gentle-float 6s ease-in-out infinite;
-}
-.float-gentle-delayed {
-  animation: gentle-float 6s ease-in-out infinite;
-  animation-delay: -2s;
-}
-.float-gentle-slow {
-  animation: gentle-float 8s ease-in-out infinite;
-  animation-delay: -4s;
-}
-
-/* ── Pulse ring on hero visual nodes ────────────────────── */
-@keyframes pulse-ring {
-  0%   { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(1.8); opacity: 0; }
-}
-.pulse-ring {
-  animation: pulse-ring 2.5s ease-out infinite;
-}
-.pulse-ring-delayed {
-  animation: pulse-ring 2.5s ease-out infinite;
-  animation-delay: 1.25s;
-}
-
-/* ── Fade-in for hero on page load ──────────────────────── */
+/* ── Hero Foreground Content Entrance ───────────────────── */
 @keyframes hero-fade-in {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .hero-fade-in {
-  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: hero-fade-in 450ms var(--ease-out) forwards;
 }
 .hero-fade-in-delayed {
   opacity: 0;
-  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+  animation: hero-fade-in 450ms var(--ease-out) 140ms forwards;
 }
 .hero-fade-in-delayed-2 {
   opacity: 0;
-  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  animation: hero-fade-in 450ms var(--ease-out) 240ms forwards;
 }
 .hero-fade-in-delayed-3 {
   opacity: 0;
-  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  animation: hero-fade-in 450ms var(--ease-out) 340ms forwards;
 }
 
-/* ── Subtle shimmer on CTA ──────────────────────────────── */
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-/* ── Nav blur backdrop ──────────────────────────────────── */
-.landing-nav {
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
-}
-
-/* ── Hero subtle breathing drift ────────────────────────── */
-@keyframes hero-drift {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.55;
+/* ── Hero Background Computational Graph Entrance ───────── */
+@keyframes hero-graph-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
   }
-  50% {
-    transform: translate(-50%, -52%) scale(1.03);
-    opacity: 0.72;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
-.hero-topology-bg {
-  animation: hero-drift 10s ease-in-out infinite;
+.hero-graph-entrance {
+  animation: hero-graph-fade 700ms var(--ease-out) 180ms forwards;
 }
 
-/* ── Packet flow along vertical circuit bus ─────────────── */
+/* ── Downward Vertical Circuit Bus Packet ──────────────────
+   Pure GPU-composited transform animation (0 layout reflows) */
 @keyframes vertical-packet-flow {
   0% {
-    top: 0%;
+    transform: translate3d(-50%, 0, 0);
     opacity: 0;
   }
   15% {
@@ -147,12 +78,21 @@
     opacity: 1;
   }
   100% {
-    top: 100%;
+    transform: translate3d(-50%, 48px, 0);
     opacity: 0;
   }
 }
 .packet-dot-vertical {
-  animation: vertical-packet-flow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  top: 0;
+  left: 50%;
+  animation: vertical-packet-flow 4s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
+
+/* ── Nav blur backdrop ──────────────────────────────────── */
+.landing-nav {
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
 }
 
 /* ── Respect reduced-motion ─────────────────────────────── */
@@ -162,32 +102,18 @@
     transform: none;
     transition: none;
   }
-  .hero-topology-bg,
   .packet-dot-vertical {
     animation: none !important;
-    transform: none;
+    transform: translate3d(-50%, 0, 0) !important;
+    opacity: 0 !important;
   }
-  .hero-topology-bg {
-    animation: none !important;
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.6;
-  }
-  .packet-dot,
-  .packet-dot-alt,
-  .packet-dot-slow,
-  .float-gentle,
-  .float-gentle-delayed,
-  .float-gentle-slow,
-  .pulse-ring,
-  .pulse-ring-delayed,
   .hero-fade-in,
   .hero-fade-in-delayed,
   .hero-fade-in-delayed-2,
   .hero-fade-in-delayed-3,
-  .stroke-animate {
+  .hero-graph-entrance {
     animation: none !important;
-    opacity: 1;
-    transform: none;
-    stroke-dashoffset: 0;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

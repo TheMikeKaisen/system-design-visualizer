@@ -106,11 +106,22 @@ describe("HeroComputationalGraph", () => {
 
   it("does not render any large framing ellipse around the headline", () => {
     const { container } = render(<HeroComputationalGraph />);
-    const ellipses = Array.from(container.querySelectorAll("ellipse"));
-    for (const el of ellipses) {
+    // Ensure no visible decorative framing ellipses are rendered in the scene outside <defs>
+    const visibleEllipses = Array.from(container.querySelectorAll("ellipse")).filter(
+      (el) => !el.closest("defs")
+    );
+    for (const el of visibleEllipses) {
       const ry = parseFloat(el.getAttribute("ry") ?? "0");
       expect(ry).toBeLessThanOrEqual(10);
     }
+  });
+
+  it("renders a text corridor mask to softly feather connections behind hero copy", () => {
+    const { container } = render(<HeroComputationalGraph />);
+    expect(container.querySelector("#hcg-corridor-mask")).not.toBeNull();
+    expect(container.querySelector("#hcg-connections")?.getAttribute("mask")).toBe(
+      "url(#hcg-corridor-mask)"
+    );
   });
 
   it("ensures all canonical nodes strictly avoid the central hero text corridor", () => {
