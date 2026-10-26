@@ -4,10 +4,11 @@ import { useOSSimulationStore } from "@/store/useOSSimulationStore";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PROCESS_STATES_SCENARIO } from "@/lib/os-simulator/process-states-scenario";
+import type { OSStepState } from "@/lib/os-simulator/engine";
 
 import { ZoneContainer } from "@/components/os-simulator/ZoneContainer";
 import { CPUBlock } from "@/components/os-simulator/CPUBlock";
@@ -16,6 +17,20 @@ import { OSStatsSidebar } from "@/components/os-simulator/OSStatsSidebar";
 import { OSExplanationPanel } from "@/components/os-simulator/OSExplanationPanel";
 import { OSToast } from "@/components/os-simulator/OSToast";
 import { InterruptOverlay } from "@/components/os-simulator/InterruptOverlay";
+
+const FALLBACK_STEP: OSStepState = {
+  processes: {},
+  newQueue: [],
+  readyQueue: [],
+  waitQueue: [],
+  suspendedQueue: [],
+  terminatedList: [],
+  cpu: { currentProcess: null, mode: "idle", utilizationPct: 0 },
+  memory: { totalMB: 8192, usedMB: 0, usedPct: 0 },
+  explanation: "Initializing simulation...",
+  chapter: "Initialization",
+  logEntries: [],
+};
 
 export default function OSProcessStatesSimulator() {
   const {
@@ -33,6 +48,13 @@ export default function OSProcessStatesSimulator() {
     getCurrentChapter,
   } = useOSSimulationStore();
 
+  // Fresh-start navigation & unmount pause (Decision Record 002)
+  useEffect(() => {
+    return () => {
+      useOSSimulationStore.getState().pause();
+    };
+  }, []);
+
   // Initialize with process states scenario on mount
   useEffect(() => {
     if (scenario.id !== PROCESS_STATES_SCENARIO.id) {
@@ -49,22 +71,30 @@ export default function OSProcessStatesSimulator() {
     return () => clearTimeout(timer);
   }, [isPlaying, currentStepIndex, nextStep, playbackSpeed]);
 
-  // Toast
-  const [activeToast, setActiveToast] = useState<string | null>(null);
+  // Defensive step bounds clamp (Decision Record 001)
+  const safeIndex =
+    scenario.steps.length > 0
+      ? Math.max(0, Math.min(currentStepIndex, scenario.steps.length - 1))
+      : 0;
+  const step = scenario.steps[safeIndex] ?? FALLBACK_STEP;
+
+  // Toast (Pure derived state without synchronous setState in effect body)
+  const [dismissedStep, setDismissedStep] = useState<number | null>(null);
+  const activeToast =
+    dismissedStep !== safeIndex && step.toastMessage ? step.toastMessage : null;
+
   useEffect(() => {
-    const step = scenario.steps[currentStepIndex];
-    if (step?.toastMessage) {
-      setActiveToast(step.toastMessage);
-      const t = setTimeout(() => setActiveToast(null), 2500);
+    if (step.toastMessage) {
+      const t = setTimeout(() => setDismissedStep(safeIndex), 2500);
       return () => clearTimeout(t);
     }
-  }, [currentStepIndex, scenario.steps]);
+  }, [safeIndex, step.toastMessage]);
 
   // Context switch counter — derived deterministically up to current step
   const contextSwitchCount = useMemo(() => {
     let count = 0;
     let prevProcess: string | null = null;
-    for (let i = 0; i <= currentStepIndex; i++) {
+    for (let i = 0; i <= safeIndex; i++) {
       const current = scenario.steps[i]?.cpu.currentProcess;
       if (prevProcess !== null && current !== prevProcess) {
         count++;
@@ -72,9 +102,7 @@ export default function OSProcessStatesSimulator() {
       prevProcess = current ?? null;
     }
     return count;
-  }, [currentStepIndex, scenario.steps]);
-
-  const step = scenario.steps[currentStepIndex];
+  }, [safeIndex, scenario.steps]);
   const progress = ((currentStepIndex + 1) / scenario.steps.length) * 100;
   const currentChapter = getCurrentChapter();
 

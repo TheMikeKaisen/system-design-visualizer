@@ -7,7 +7,6 @@ import type {
   OSProcess,
   OSStepState,
   OSSimulationScenario,
-  OSLogEntry,
 } from "./engine";
 
 // ───────────────────────────────────────────────────────

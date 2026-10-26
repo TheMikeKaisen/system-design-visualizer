@@ -22,20 +22,25 @@ export default function ProducerConsumerSimulator() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeCodeDialog, setActiveCodeDialog] = useState<'producer' | 'consumer' | null>(null);
 
-  const step = scenario.steps[currentStepIndex];
+  const safeIndex =
+    scenario.steps.length > 0
+      ? Math.max(0, Math.min(currentStepIndex, scenario.steps.length - 1))
+      : 0;
+  const step = scenario.steps[safeIndex];
 
   // Auto-play
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying) {
-      if (currentStepIndex < scenario.steps.length - 1) {
+      if (safeIndex < scenario.steps.length - 1) {
         timer = setTimeout(() => setCurrentStepIndex((i) => i + 1), 2500);
       } else {
-        setIsPlaying(false);
+        const stopTimer = setTimeout(() => setIsPlaying(false), 0);
+        return () => clearTimeout(stopTimer);
       }
     }
     return () => clearTimeout(timer);
-  }, [isPlaying, currentStepIndex, scenario]);
+  }, [isPlaying, safeIndex, scenario]);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
   const nextStep = () => setCurrentStepIndex((i) => Math.min(i + 1, scenario.steps.length - 1));
@@ -80,7 +85,7 @@ export default function ProducerConsumerSimulator() {
             <div className="absolute top-2 left-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Shared Buffer</div>
             <div className="flex gap-2 p-3 bg-background/50 rounded-2xl border border-border/50 shadow-inner">
               {step.buffer.map((slot, i) => (
-                <div key={i} className={cn(
+                <div key={`buffer-slot-${i}`} className={cn(
                   "w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-500",
                   slot ? "bg-teal-500/20 border-teal-500/30 shadow-[0_0_15px_-3px_rgba(20,184,166,0.3)]" : "bg-muted/30 border-transparent border-dashed"
                 )}>
@@ -459,11 +464,11 @@ export default function ProducerConsumerSimulator() {
                 {activeCodeDialog === 'producer' ? (
                   <>
                     {"    "}
-                    <span className="text-[#6A9955]">/* produce an item */</span>
+                    <span className="text-[#6A9955]">{"/* produce an item */"}</span>
                     {"\n    "}
                     <span className="text-[#569CD6]">while</span> (count == BUFFER_SIZE) {"{\n"}
                     {"        "}
-                    <span className="text-[#6A9955]">/* do nothing - buffer is full */</span>
+                    <span className="text-[#6A9955]">{"/* do nothing - buffer is full */"}</span>
                     {"\n    }\n\n"}
                     {"    "}buffer[in] = item;{"\n"}
                     {"    "}in = (in + 1) % BUFFER_SIZE;{"\n\n"}
@@ -472,7 +477,7 @@ export default function ProducerConsumerSimulator() {
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-widest text-amber-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
                         Critical Section (Lost Update)
                       </div>
-                      <span className="text-[#6A9955] block -mt-1 mb-1">// CRITICAL SECTION (The 3 Assembly Instructions)</span>
+                      <span className="text-[#6A9955] block -mt-1 mb-1">{"// CRITICAL SECTION (The 3 Assembly Instructions)"}</span>
                       count++;
                     </div>
                   </>
@@ -481,7 +486,7 @@ export default function ProducerConsumerSimulator() {
                     {"    "}
                     <span className="text-[#569CD6]">while</span> (count == 0) {"{\n"}
                     {"        "}
-                    <span className="text-[#6A9955]">/* do nothing - buffer is empty */</span>
+                    <span className="text-[#6A9955]">{"/* do nothing - buffer is empty */"}</span>
                     {"\n    }\n\n"}
                     {"    "}item = buffer[out];{"\n"}
                     {"    "}out = (out + 1) % BUFFER_SIZE;{"\n\n"}
@@ -490,12 +495,12 @@ export default function ProducerConsumerSimulator() {
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-widest text-violet-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
                         Critical Section (Lost Update)
                       </div>
-                      <span className="text-[#6A9955] block -mt-1 mb-1">// CRITICAL SECTION (The 3 Assembly Instructions)</span>
+                      <span className="text-[#6A9955] block -mt-1 mb-1">{"// CRITICAL SECTION (The 3 Assembly Instructions)"}</span>
                       count--;
                     </div>
                     
                     {"\n    "}
-                    <span className="text-[#6A9955]">/* consume the item */</span>
+                    <span className="text-[#6A9955]">{"/* consume the item */"}</span>
                     {"\n"}
                   </>
                 )}

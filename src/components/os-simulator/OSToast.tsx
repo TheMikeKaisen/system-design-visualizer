@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface OSToastProps {
@@ -18,6 +17,7 @@ export function getToastStyle(message: string) {
       bg: "bg-amber-500/10",
       bar: "bg-amber-500",
       text: "text-amber-400",
+      borderHex: "#f59e0b",
       icon: "⏰",
     };
   }
@@ -27,6 +27,7 @@ export function getToastStyle(message: string) {
       bg: "bg-emerald-500/10",
       bar: "bg-emerald-500",
       text: "text-emerald-400",
+      borderHex: "#10b981",
       icon: "💾",
     };
   }
@@ -36,6 +37,7 @@ export function getToastStyle(message: string) {
       bg: "bg-rose-500/10",
       bar: "bg-rose-500",
       text: "text-rose-400",
+      borderHex: "#f43f5e",
       icon: "🏁",
     };
   }
@@ -45,29 +47,12 @@ export function getToastStyle(message: string) {
     bg: "bg-teal-500/10",
     bar: "bg-teal-500",
     text: "text-teal-400",
+    borderHex: "#14b8a6",
     icon: "⚡",
   };
 }
 
 export function OSToast({ message, durationMs = 2500, variant = "floating" }: OSToastProps) {
-  const [progress, setProgress] = useState(100);
-
-  useEffect(() => {
-    if (!message) {
-      setProgress(100);
-      return;
-    }
-    setProgress(100);
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, 100 - (elapsed / durationMs) * 100);
-      setProgress(remaining);
-      if (remaining === 0) clearInterval(interval);
-    }, 30);
-    return () => clearInterval(interval);
-  }, [message, durationMs]);
-
   const style = message ? getToastStyle(message) : null;
 
   return (
@@ -86,7 +71,7 @@ export function OSToast({ message, durationMs = 2500, variant = "floating" }: OS
             style.bg,
             "border border-l-4"
           )}
-          style={{ borderLeftWidth: "4px", borderLeftColor: style.bar.replace("bg-", "") }}
+          style={{ borderLeftWidth: "4px", borderLeftColor: style.borderHex }}
         >
           <div className="px-4 py-3 flex items-start gap-3">
             <span className="text-lg shrink-0 mt-0.5">{style.icon}</span>
@@ -97,12 +82,14 @@ export function OSToast({ message, durationMs = 2500, variant = "floating" }: OS
             </div>
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar (Declarative animation: 0 re-renders) */}
           <div className="h-0.5 bg-border/20">
             <motion.div
+              key={message}
+              initial={{ width: "100%" }}
+              animate={{ width: "0%" }}
+              transition={{ duration: durationMs / 1000, ease: "linear" }}
               className={cn("h-full", style.bar)}
-              style={{ width: `${progress}%` }}
-              transition={{ duration: 0 }}
             />
           </div>
         </motion.div>

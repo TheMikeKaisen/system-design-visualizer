@@ -22,20 +22,25 @@ export default function PrinterSpoolerSimulator() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeCodeDialog, setActiveCodeDialog] = useState<'processA' | 'processB' | null>(null);
 
-  const step = scenario.steps[currentStepIndex];
+  const safeIndex =
+    scenario.steps.length > 0
+      ? Math.max(0, Math.min(currentStepIndex, scenario.steps.length - 1))
+      : 0;
+  const step = scenario.steps[safeIndex];
 
   // Auto-play
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying) {
-      if (currentStepIndex < scenario.steps.length - 1) {
+      if (safeIndex < scenario.steps.length - 1) {
         timer = setTimeout(() => setCurrentStepIndex((i) => i + 1), 2500);
       } else {
-        setIsPlaying(false);
+        const stopTimer = setTimeout(() => setIsPlaying(false), 0);
+        return () => clearTimeout(stopTimer);
       }
     }
     return () => clearTimeout(timer);
-  }, [isPlaying, currentStepIndex, scenario]);
+  }, [isPlaying, safeIndex, scenario]);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
   const nextStep = () => setCurrentStepIndex((i) => Math.min(i + 1, scenario.steps.length - 1));
@@ -92,7 +97,7 @@ export default function PrinterSpoolerSimulator() {
               </motion.div>
 
               {step.spoolerSlots.map((slot, i) => (
-                <div key={i} className={cn(
+                <div key={`spooler-slot-${i}`} className={cn(
                   "w-14 h-16 rounded-xl flex flex-col items-center justify-center border transition-all duration-500 relative",
                   i === step.corruptedSlot ? "bg-rose-500/20 border-rose-500 text-rose-500 shadow-[0_0_20px_-3px_rgba(244,63,94,0.4)]" :
                   slot ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-500" : "bg-muted/30 border-transparent border-dashed text-muted-foreground/30"
@@ -150,7 +155,7 @@ export default function PrinterSpoolerSimulator() {
                         <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity shadow-lg z-50">View C Code</span>
                       </button>
                     </div>
-                    <div className="text-xs font-mono text-cyan-500/70 uppercase">Code: enqueue("photo.jpg")</div>
+                    <div className="text-xs font-mono text-cyan-500/70 uppercase">Code: enqueue(&quot;photo.jpg&quot;)</div>
                   </div>
                 </div>
                 <div className={cn(
@@ -229,7 +234,7 @@ export default function PrinterSpoolerSimulator() {
                         <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity shadow-lg z-50">View C Code</span>
                       </button>
                     </div>
-                    <div className="text-xs font-mono text-orange-500/70 uppercase">Code: enqueue("report.pdf")</div>
+                    <div className="text-xs font-mono text-orange-500/70 uppercase">Code: enqueue(&quot;report.pdf&quot;)</div>
                   </div>
                 </div>
                 <div className={cn(
@@ -515,7 +520,7 @@ export default function PrinterSpoolerSimulator() {
                 {activeCodeDialog === 'processA' ? (
                   <>
                     {"    "}
-                    <span className="text-[#6A9955]">/* read the shared pointer */</span>
+                    <span className="text-[#6A9955]">{"/* read the shared pointer */"}</span>
                     {"\n    "}
                     <span className="text-[#569CD6]">int</span> next_free_slot = IN;{"\n\n"}
                     
@@ -523,7 +528,7 @@ export default function PrinterSpoolerSimulator() {
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-widest text-cyan-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
                         Critical Section (Lost Update)
                       </div>
-                      <span className="text-[#6A9955] block -mt-1 mb-1">// CRITICAL SECTION (The 3 Assembly Instructions)</span>
+                      <span className="text-[#6A9955] block -mt-1 mb-1">{"// CRITICAL SECTION (The 3 Assembly Instructions)"}</span>
                       spooler_directory[next_free_slot] = filename;{"\n"}
                       IN = next_free_slot + 1;
                     </div>
@@ -531,7 +536,7 @@ export default function PrinterSpoolerSimulator() {
                 ) : (
                   <>
                     {"    "}
-                    <span className="text-[#6A9955]">/* read the shared pointer */</span>
+                    <span className="text-[#6A9955]">{"/* read the shared pointer */"}</span>
                     {"\n    "}
                     <span className="text-[#569CD6]">int</span> next_free_slot = IN;{"\n\n"}
                     
@@ -539,7 +544,7 @@ export default function PrinterSpoolerSimulator() {
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-widest text-orange-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
                         Critical Section (Lost Update)
                       </div>
-                      <span className="text-[#6A9955] block -mt-1 mb-1">// CRITICAL SECTION (The 3 Assembly Instructions)</span>
+                      <span className="text-[#6A9955] block -mt-1 mb-1">{"// CRITICAL SECTION (The 3 Assembly Instructions)"}</span>
                       spooler_directory[next_free_slot] = filename;{"\n"}
                       IN = next_free_slot + 1;
                     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { OSProcess } from "@/lib/os-simulator/engine";
@@ -12,11 +12,16 @@ interface PCBViewerProps {
 }
 
 export function PCBViewer({ process, className }: PCBViewerProps) {
-  const [isExpanded, setIsExpanded] = useState(process.state === "running" || process.pcb?.forceExpand === true);
-  
-  useEffect(() => {
-    setIsExpanded(process.state === "running" || process.pcb?.forceExpand === true);
-  }, [process.state, process.pcb?.forceExpand]);
+  const autoExpand = process.state === "running" || process.pcb?.forceExpand === true;
+  const [userOverride, setUserOverride] = useState<boolean | null>(null);
+  const [prevAuto, setPrevAuto] = useState(autoExpand);
+
+  if (prevAuto !== autoExpand) {
+    setPrevAuto(autoExpand);
+    setUserOverride(null);
+  }
+
+  const isExpanded = userOverride !== null ? userOverride : autoExpand;
 
   const pcb = process.pcb;
 
@@ -72,7 +77,7 @@ export function PCBViewer({ process, className }: PCBViewerProps) {
     <div className={cn("bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl overflow-hidden", className)}>
       {/* Header (Clickable for collapsing) */}
       <button 
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => setUserOverride(!isExpanded)}
         className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors text-left"
       >
         <div className="flex items-center gap-3">

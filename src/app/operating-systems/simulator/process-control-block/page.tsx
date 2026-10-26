@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { PCB_SCENARIO } from "@/lib/os-simulator/pcb-scenario";
+import type { OSStepState } from "@/lib/os-simulator/engine";
 import { OSExplanationPanel } from "@/components/os-simulator/OSExplanationPanel";
 import { OSStatsSidebar } from "@/components/os-simulator/OSStatsSidebar";
 import { ZoneContainer } from "@/components/os-simulator/ZoneContainer";
@@ -10,20 +12,40 @@ import { InterruptOverlay } from "@/components/os-simulator/InterruptOverlay";
 import { PCBViewer } from "@/components/os-simulator/PCBViewer";
 import { AnimatePresence, motion } from "framer-motion";
 
+const FALLBACK_PCB_STEP: OSStepState = {
+  processes: {},
+  newQueue: [],
+  readyQueue: [],
+  waitQueue: [],
+  suspendedQueue: [],
+  terminatedList: [],
+  cpu: { currentProcess: null, mode: "idle", utilizationPct: 0 },
+  memory: { totalMB: 8192, usedMB: 0, usedPct: 0 },
+  explanation: "Initializing PCB simulation...",
+  chapter: "Initialization",
+  logEntries: [],
+};
+
 export default function ProcessControlBlockSimulator() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const step = PCB_SCENARIO.steps[currentStepIndex];
+
+  // Defensive step bounds clamp (Decision Record 001)
+  const safeIndex =
+    PCB_SCENARIO.steps.length > 0
+      ? Math.max(0, Math.min(currentStepIndex, PCB_SCENARIO.steps.length - 1))
+      : 0;
+  const step = PCB_SCENARIO.steps[safeIndex] ?? FALLBACK_PCB_STEP;
 
   // Derive chapter metadata
   const currentChapter = useMemo(() => {
     return PCB_SCENARIO.chapters.find(
-      (ch) => currentStepIndex >= ch.startStep && currentStepIndex <= ch.endStep
+      (ch) => safeIndex >= ch.startStep && safeIndex <= ch.endStep
     );
-  }, [currentStepIndex]);
+  }, [safeIndex]);
 
   const chapterStep = currentChapter
-    ? currentStepIndex - currentChapter.startStep + 1
-    : currentStepIndex + 1;
+    ? safeIndex - currentChapter.startStep + 1
+    : safeIndex + 1;
   const chapterTotal = currentChapter
     ? currentChapter.endStep - currentChapter.startStep + 1
     : PCB_SCENARIO.steps.length;
@@ -31,20 +53,20 @@ export default function ProcessControlBlockSimulator() {
   // Context Switch Count
   const contextSwitches = useMemo(() => {
     let switches = 0;
-    for (let i = 1; i <= currentStepIndex; i++) {
+    for (let i = 1; i <= safeIndex; i++) {
       const prevStep = PCB_SCENARIO.steps[i - 1];
       const currStep = PCB_SCENARIO.steps[i];
       if (
-        currStep.cpu.currentProcess &&
-        currStep.cpu.currentProcess !== prevStep.cpu.currentProcess
+        currStep?.cpu.currentProcess &&
+        currStep.cpu.currentProcess !== prevStep?.cpu.currentProcess
       ) {
         switches++;
       }
     }
     return switches;
-  }, [currentStepIndex]);
+  }, [safeIndex]);
 
-  const activeProcess = step.cpu.currentProcess ? step.processes[step.cpu.currentProcess] : null;
+  const activeProcess = step.cpu.currentProcess ? step.processes[step.cpu.currentProcess] ?? null : null;
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background overflow-hidden selection:bg-teal-500/30">
@@ -52,9 +74,9 @@ export default function ProcessControlBlockSimulator() {
       {/* ──────────── NAVBAR ──────────── */}
       <nav className="h-14 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0 z-30">
         <div className="h-full px-4 flex items-center gap-3">
-          <a href="/operating-systems" className="flex items-center gap-2 group shrink-0 text-sm font-semibold text-foreground hover:text-amber-500 transition-colors">
+          <Link href="/operating-systems" className="flex items-center gap-2 group shrink-0 text-sm font-semibold text-foreground hover:text-amber-500 transition-colors">
             Back to OS
-          </a>
+          </Link>
 
           <div className="h-4 w-px bg-border/50 hidden sm:block" />
 
@@ -112,7 +134,7 @@ export default function ProcessControlBlockSimulator() {
               {/* Ready Queue */}
               <ZoneContainer
                 title="Ready Queue"
-                processes={step.readyQueue.map((id) => step.processes[id])}
+                processes={step.readyQueue.map((id) => step.processes[id]).filter(Boolean)}
                 accentClass="text-amber-500"
                 icon="🏃"
               />

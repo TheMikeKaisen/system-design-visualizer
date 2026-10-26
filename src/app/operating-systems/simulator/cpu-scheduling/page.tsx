@@ -279,7 +279,8 @@ export default function UniversalSchedulingSimulator() {
     
     // Map process IDs to UniversalProcessResult for rendering
     return snapshot.queue.map(
-      id => simulation.processResults.find(p => p.id === id)!
+      (id) => simulation.processResults.find((p) => p.id === id)
+    ).filter((p): p is UniversalProcessResult => p !== undefined
     );
   }, [simulation, currentTime]);
 
@@ -373,7 +374,8 @@ export default function UniversalSchedulingSimulator() {
   useEffect(() => {
     if (!isPlaying || !simulation || currentTime >= simulation.totalTime) {
       if (isPlaying && simulation && currentTime >= simulation.totalTime) {
-        setIsPlaying(false);
+        const stopTimer = setTimeout(() => setIsPlaying(false), 0);
+        return () => clearTimeout(stopTimer);
       }
       return;
     }

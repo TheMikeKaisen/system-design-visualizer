@@ -36,9 +36,7 @@ export function OSStatsSidebar({
   const offset = circumference - (pct / 100) * circumference;
   const ringColor = isIdle ? "#374151" : isKernel ? "#f59e0b" : "#14b8a6";
 
-  // Active processes list
-  const allProcesses = Object.values(processes);
-  const activeProcs = allProcesses.filter((p) => p.state !== "terminated");
+  const allProcesses = Object.values(processes ?? {});
 
   return (
     <div className="flex flex-col gap-4 h-full overflow-y-auto">
@@ -156,7 +154,7 @@ export function OSStatsSidebar({
           State Legend
         </span>
         <div className="space-y-2">
-          {STATE_LEGEND.map(({ label, color, dot }) => (
+          {STATE_LEGEND.map(({ label, dot }) => (
             <div key={label} className="flex items-center gap-2.5">
               <div className={cn("w-2.5 h-2.5 rounded-full shrink-0", dot)} />
               <span className="text-xs text-muted-foreground/70">{label}</span>

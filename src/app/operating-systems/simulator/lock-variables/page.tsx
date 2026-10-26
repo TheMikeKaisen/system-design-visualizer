@@ -81,21 +81,26 @@ export default function LockVariablesSimulator() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeAsmDialog, setActiveAsmDialog] = useState<{ process: "processA" | "processB", type: AsmDialogType } | null>(null);
 
-  const step = scenario.steps[currentStepIndex];
+  const safeIndex =
+    scenario.steps.length > 0
+      ? Math.max(0, Math.min(currentStepIndex, scenario.steps.length - 1))
+      : 0;
+  const step = scenario.steps[safeIndex];
   const isTSL = scenario.id === LOCK_VARIABLE_SCENARIO_B.id;
   const cCode = isTSL ? TSL_C_LINES : NAIVE_C_LINES;
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying) {
-      if (currentStepIndex < scenario.steps.length - 1) {
+      if (safeIndex < scenario.steps.length - 1) {
         timer = setTimeout(() => setCurrentStepIndex((i) => i + 1), 2500);
       } else {
-        setIsPlaying(false);
+        const stopTimer = setTimeout(() => setIsPlaying(false), 0);
+        return () => clearTimeout(stopTimer);
       }
     }
     return () => clearTimeout(timer);
-  }, [isPlaying, currentStepIndex, scenario]);
+  }, [isPlaying, safeIndex, scenario]);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
   const nextStep = () => setCurrentStepIndex((i) => Math.min(i + 1, scenario.steps.length - 1));
@@ -559,14 +564,14 @@ function ProcessPanel({
           <span className="ml-2 text-xs text-zinc-400">{process === "processA" ? "process_a.c" : "process_b.c"}</span>
         </div>
         <div className="p-4 relative flex-1 overflow-y-auto min-h-[140px]">
-          {cCode.map((line, i) => {
+          {cCode.map((line, idx) => {
             const isLineActive = codeLine !== null && line.asmIdxs.includes(codeLine);
             const isBusyLine = isLineActive && codeLine === 2; // JNE line
             const isKeyword = /\b(void|int|do|while|return)\b/.test(line.text);
             
             return (
               <div
-                key={i}
+                key={`code-line-${process}-${idx}-${line.text.slice(0, 10)}`}
                 className={cn(
                   "flex items-center gap-2 py-1 px-2 rounded-md transition-colors relative",
                   isLineActive
