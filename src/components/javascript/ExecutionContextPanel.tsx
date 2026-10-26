@@ -107,7 +107,7 @@ function ContextCard({ node }: { node: TreeNode }) {
         "flex flex-col rounded-xl border shadow-sm overflow-hidden flex-shrink-0 transition-colors",
         cardStyle,
         isBlock ? "mt-4 border-l-4 border-l-indigo-500/50 ml-4 shadow-inner bg-card/80" : "",
-        isClosure ? "mt-4 ml-4" : ""
+        isClosure ? "mt-4 border-l-4 border-l-fuchsia-500/60 ml-4 shadow-inner bg-card/90" : ""
       )}
     >
       {/* Header */}
@@ -141,8 +141,14 @@ function ContextCard({ node }: { node: TreeNode }) {
         </h2>
         
         {isClosure ? (
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-fuchsia-400/70">
-            Memory Preserved
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30">
+              Lexical Parent ➔ {ec.outerEnvironment || "Global"}
+            </span>
+            <span className="px-2 py-0.5 rounded bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20">
+              Closure Memory
+            </span>
+
           </div>
         ) : isStackActive ? (
           <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
@@ -211,6 +217,22 @@ function ContextCard({ node }: { node: TreeNode }) {
                 )}
               </div>
             </div>
+
+            {/* Closure Retained Scope */}
+            {isClosure && (
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-fuchsia-400 mb-2 border-b border-fuchsia-500/20 pb-1 flex items-center justify-between">
+                  <span>Retained Lexical Scope</span>
+                  <span className="text-[10px] normal-case text-muted-foreground">Preserved in Heap</span>
+                </h3>
+                <div className="flex flex-col gap-2 font-mono text-xs">
+                  <div className="flex items-center justify-between bg-fuchsia-500/10 p-2.5 rounded border border-fuchsia-500/30">
+                    <span className="text-muted-foreground">Outer Environment:</span>
+                    <span className="text-fuchsia-300 font-bold">{ec.outerEnvironment || "Global Scope"}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Scope Chain */}
             {!isClosure && (

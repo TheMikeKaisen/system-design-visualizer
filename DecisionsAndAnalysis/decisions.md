@@ -121,7 +121,7 @@ This document serves as the single source of truth for architectural, UI/UX, rel
       - Rule 7: Two-phase context creation (TDZ creation before assignment).
   - **Idle Auto-Cycling**:
     - Automatically advances through tabs every 8 seconds when idle, showing an animated hairline progress indicator.
-    - Seamlessly pauses when hovered or interacted with, and supports manual step scrubbing (`Prev`, `Next`, `Reset`) and continuous internal playback (`Step Run / Pause`).
+    - Seamlessly pauses when hovered or interacted with, and supports manual step scrubbing (`Prev`, `Next`, `Reset`) and continuous internal playback (`Run / Pause`).
   - **Automated Verification**:
     - Created unit test suite [`src/components/landing/__tests__/HeroRuntimeSandbox.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/landing/__tests__/HeroRuntimeSandbox.test.tsx) testing default JS state, tab switching, step navigation, reset, internal play/pause, idle auto-cycle, and hover pause.
     - Verified all 36 test files (274 tests) pass; `tsc` and `eslint` clean (0 errors, 0 warnings).
@@ -352,9 +352,9 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Expanded sandbox height from cramped 255px to generous IDE proportions (`h-[440px] sm:h-[460px] lg:h-[480px]`).
     - Increased code line height to `h-[26px] sm:h-[28px]` and text size to `text-xs sm:text-sm` with relaxed leading.
     - Expanded Call Stack from 48px to `h-[84px] sm:h-[94px]` (allowing 3–4 frames to display cleanly), expanded CPU Core and JVM stack/heap panels.
-    - Set initial playback to paused (`isAutoCycling: false, isPlayingManual: false`), allowing visitors to read idle state peacefully. Clicking "Step Run" initiates simulation and full tour across disciplines.
+    - Set initial playback to paused (`isAutoCycling: false, isPlayingManual: false`), allowing visitors to read idle state peacefully. Clicking "Run" initiates simulation and full tour across disciplines.
     - **High-Affordance Interactive Control Highlighting (Option 4)**:
-      - The primary **"Step Run"** button features subject-themed luminescence (amber glow for JS, sky glow for OS, emerald glow for Java) with a live pulsing beacon (`animate-ping`) when idle.
+      - The primary **"Run"** button features subject-themed luminescence (amber glow for JS, sky glow for OS, emerald glow for Java) with a live pulsing beacon (`animate-ping`) when idle.
       - Stepping forward is highlighted via a distinct, labeled **"Next"** button (`<span>Next</span> <SkipForward />`) with tactile border and elevation.
       - The top window bar features an explicit **"Live Interactive Sandbox"** indicator, and the active discipline tab features enhanced tactile elevation with hairline border contrast.
       - The bottom explanation banner includes a dynamic step counter badge `(currentStep + 1 / maxSteps)`.
@@ -394,6 +394,33 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Created unit test suite `QueuePanel.test.tsx` verifying both variants, empty states, and event loop phase styling.
     - Updated `DefensivePanels.test.tsx` verifying out-of-bounds safety across both `QueuePanel` variants.
 - **Blast Radius**: Zero regressions; eliminated duplicate code, decoupled component logic from scenario naming, and standardized queue architecture. All changes remain unstaged per Rule #1.
+
+---
+
+## Decision Record 015: Automated Curriculum Scenario Integrity Inspector & Closure Memory Lexical Scope Hierarchy
+- **Status**: Implemented & Verified
+- **Category**: Data Integrity, Automated Guardrails & Educational UI/UX
+- **Problem**:
+  - Across 7 JavaScript episodes with 42+ scenarios (~400 simulation steps), any formatting or code edits carried a risk of line drift (e.g. step `currentLine` highlighting a blank line or comment). Previously, catching such drift required clicking through every scenario manually.
+  - In `ExecutionContextPanel.tsx`, closure memory was rendered as an isolated floating card without an explicit lexical parent pointer or visual scope retention indicator, making it difficult for beginners to understand which outer scope birthed the closure.
+- **Decision & Implementation**:
+  - **Automated Scenario Integrity Inspector (`src/lib/js-simulator/__tests__/scenarioIntegrity.test.ts`)**:
+    - Created an automated validation suite with 109 continuous assertions covering all scenarios across all 7 episodes:
+      1. **Line Bounds & Non-Empty Check**: Verifies that every step with a non-null `currentLine` points to a real, non-empty code line within the scenario's code boundaries.
+      2. **Step 0 Clean Initialization**: Verifies that Step 0 contains an empty or clean stack and zero premature console or queue items.
+      3. **Content Completeness**: Verifies non-empty explanation copy across every single step.
+      4. **Context Schema Verification**: Ensures all execution contexts conform strictly to `ExecutionContext` contracts (`id`, `name`, `phase`, `variables`).
+  - **Closure Memory Lexical Hierarchy (`src/components/javascript/ExecutionContextPanel.tsx`)**:
+    - Added high-contrast lexical parent badge in the card header: `Lexical Parent ➔ {ec.outerEnvironment || "Global"}` (`bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30`).
+    - Added cohesive `border-l-4 border-l-fuchsia-500/60` and `bg-card/90` styling to visually differentiate closure memory cards from standard stack frames.
+    - Added a dedicated `Retained Lexical Scope` section inside the card body showing the outer environment preserved in heap memory.
+  - **Automated Verification**:
+    - Created unit test suite `ExecutionContextPanel.test.tsx` verifying empty stack, global context, nested block scopes, and closure memory parent badges.
+    - Full Vitest suite passes 100% (45 test suites, 415 unit tests).
+    - `npx tsc --noEmit` and `npx eslint` pass with 0 errors and 0 warnings.
+    - Full Next.js production build (`npm run build`) succeeded across all 49 routes.
+- **Blast Radius**: Zero regressions; introduces permanent regression guardrails and clarifies JavaScript scope retention. All modifications remain unstaged in accordance with Rule #1.
+
 
 
 
