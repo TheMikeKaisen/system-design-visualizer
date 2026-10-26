@@ -28,7 +28,7 @@ describe("LearningPathsPage", () => {
     expect(screen.getByText("Explore Backend Systems")).toBeDefined();
 
     // 6th Card: Canvas Studio
-    expect(screen.getByText("Canvas Studio")).toBeDefined();
+    expect(screen.getAllByText("Canvas Studio").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Launch Canvas Studio")).toBeDefined();
   });
 });

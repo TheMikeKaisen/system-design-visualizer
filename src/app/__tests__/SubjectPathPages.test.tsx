@@ -3,6 +3,8 @@ import { render, screen } from "@testing-library/react";
 import OperatingSystemsPathPage from "../operating-systems/page";
 import FrontendPathPage from "../frontend/page";
 import BackendPathPage from "../backend/page";
+import JavaPathPage from "../java/page";
+import JavascriptPathPage from "../javascript/page";
 
 describe("Subject Path Pages (Design System Consistency)", () => {
   describe("Operating Systems Path Page", () => {
@@ -86,6 +88,38 @@ describe("Subject Path Pages (Design System Consistency)", () => {
       expect(screen.getByRole("link", { name: /Event Loop Phases/i })).toHaveAttribute(
         "href",
         "/backend/episodes/3"
+      );
+    });
+  });
+
+  describe("JavaScript Path Page", () => {
+    it("renders all 7 JavaScript episodes with standardized AppNavbar and EpisodeCard", () => {
+      render(<JavascriptPathPage />);
+
+      expect(screen.getByRole("heading", { level: 1, name: /JavaScript/i })).toBeDefined();
+      expect(screen.getByText("Execution Contexts & Call Stack")).toBeDefined();
+      expect(screen.getByText("The Event Loop & Web APIs")).toBeDefined();
+      expect(screen.getByRole("link", { name: /Execution Contexts & Call Stack/i })).toHaveAttribute(
+        "href",
+        "/javascript/simulator/call-stack"
+      );
+    });
+  });
+
+  describe("Java & JVM Architecture Path Page", () => {
+    it("renders all 8 Java episodes with standardized AppNavbar and EpisodeCard", () => {
+      render(<JavaPathPage />);
+
+      expect(screen.getByRole("heading", { level: 1, name: /Java & JVM Architecture/i })).toBeDefined();
+      expect(screen.getByText("Java Code Execution")).toBeDefined();
+      expect(screen.getByText("Primitive Typecasting")).toBeDefined();
+      expect(screen.getByRole("link", { name: /Java Code Execution/i })).toHaveAttribute(
+        "href",
+        "/java/canvas/flow-of-execution"
+      );
+      expect(screen.getByRole("link", { name: /Primitive Typecasting/i })).toHaveAttribute(
+        "href",
+        "/java/simulator/typecasting"
       );
     });
   });

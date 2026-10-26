@@ -27,6 +27,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/learning-path",
+        destination: "/learning-paths",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
