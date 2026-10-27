@@ -10,9 +10,11 @@
 !.yarn/releases
 !.yarn/versions
 
+/Screenshots
 # folders
 /agentReports
 /plans
+/simulationIdeas
 
 # testing
 /coverage

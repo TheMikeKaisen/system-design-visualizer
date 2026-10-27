@@ -33,8 +33,8 @@ export const COMPUTER_NETWORKS_EPISODES: EpisodeMetadata[] = [
     title: "DNS Resolution & Caching",
     description:
       "Trace recursive vs iterative queries from local resolver cache down through Root, TLD, and Authoritative nameservers.",
-    date: "Coming Soon",
-    href: "/computer-networks/simulator/ip-port-sockets",
+    date: "27 October 2026",
+    href: "/computer-networks/simulator/dns-resolution",
     accent: "teal",
     icon: <Globe className="w-5 h-5" />,
   },

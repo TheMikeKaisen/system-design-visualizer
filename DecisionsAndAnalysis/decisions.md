@@ -1252,6 +1252,47 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
 - **Blast Radius**: Scoped to the explanation bar popover trigger behavior and project documentation. Prevents unwanted dialog popups on touch screens without impairing desktop hover experiences.
 
+---
+
+## Decision Record 042: Computer Networks Episode 2 — DNS Resolution & Hierarchical Caching Implementation
+
+- **Status**: Implemented & Verified
+- **Category**: Subject Expansion, Component Reuse & Protocol Simulation Fidelity
+- **Problem**:
+  - The repository needed Episode 2 for Computer Networks ("DNS Resolution & Hierarchical Caching") following the pedagogical model of Episode 1.
+  - Previous simulation proposals in `simulationIdeas/Networking/dns.md` relied on wall-clock countdown timers (breaking deterministic step replay), proposed incorrect browser-driven iterative traversal, omitted critical Glue records in referral packets, and lacked authentic RFC 1035 wire header registers.
+  - Furthermore, building Episode 2 without duplicating existing episode infrastructure (navbar, scenario dropdown, playback bar, explanation bar with interactive concept dialogues) required backward-compatible slot parameterization.
+- **Decision & Implementation**:
+  - **1. Strict Architectural & Style Freeze Codification**:
+    - Added mandatory directives to `AGENTS.md` and `Agent Rules/Rules.md` under Rule #2: AI agents are strictly forbidden from modifying existing styles, component architectures, or visual themes across shared episodes without explicit user approval.
+  - **2. Backward-Compatible Slot Parameterization in `NetworkEpisodeShell`**:
+    - Refactored [`src/components/network-simulator/NetworkEpisodeShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkEpisodeShell.tsx) with optional `canvasSlot`, `telemetrySlot`, `scenarios`, `accentColor`, `customGlossary`, and `customTermPatterns` props.
+    - Retained 100% of Episode 1's top navbar, breadcrumbs, episode badges, `<ScenarioDropdown>`, `<InteractiveExplanationBar>`, `<NetworkPlaybackBar>` (both desktop footer and mobile bottom dock), and keyboard navigation (<kbd>Space</kbd>, <kbd>→</kbd>, <kbd>←</kbd>, <kbd>R</kbd>).
+  - **3. Glossary Extension in `InteractiveExplanationBar`**:
+    - Extended [`src/components/network-simulator/InteractiveExplanationBar.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/InteractiveExplanationBar.tsx) to merge `customGlossary` and `customTermPatterns`, allowing DNS terms (`Glue Record`, `Root Nameserver`, `TLD Server`, `Authoritative Server`, `CNAME`, `NXDOMAIN`, `Stub Resolver`) to be highlighted in narrative text and opened in pinned concept dialogs.
+  - **4. RFC 1035 Domain Engine & 4 Curated Scenarios**:
+    - Created [`src/lib/network-simulator/dns-engine.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/dns-engine.ts) modeling 16-bit header flags (`QR`, `Opcode`, `AA`, `TC`, `RD`, `RA`, `RCODE`), Question, Answer, Authority, and Additional (Glue) sections, and 3-tier cache entries.
+    - Created [`src/lib/network-simulator/dns-scenarios.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/dns-scenarios.ts) defining 4 deterministic scenarios:
+      1. `SCENARIO_DNS_COLD_CACHE`: Full hierarchy traversal with Root referral, Glue records, .com TLD referral, and authoritative resolution for `amazon.com -> 203.0.113.10`.
+      2. `SCENARIO_DNS_WARM_CACHE`: Multi-tier cache comparison (Tier 1 Browser hit <1ms -> Tier 2 OS hit 1ms -> Tier 3 Resolver referral hit 15ms).
+      3. `SCENARIO_DNS_CNAME_CHAIN`: Canonical alias routing to CDN (`www.amazon.com` -> `d123.cloudfront.net` -> `203.0.113.10`).
+      4. `SCENARIO_DNS_NXDOMAIN`: Negative caching (RFC 2308) on mistyped domains with SOA Negative TTL 900s.
+  - **5. Canonical UI Workbench Components**:
+    - Created [`src/components/network-simulator/DnsTopologyCanvas.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/DnsTopologyCanvas.tsx) rendering Zone A (Client Host), Zone B (Recursive Resolver 1.1.1.1), and Zone C (DNS Hierarchy) with in-flight packet status and responsive mobile stacking.
+    - Created [`src/components/network-simulator/DnsTelemetryPanel.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/DnsTelemetryPanel.tsx) with tabbed WAI-ARIA navigation: Tab 1 (`DNS Caches` across Browser, OS, and Resolver) and Tab 2 (`Wire Packet Inspector` with 16-bit RFC 1035 flag register and 4 message sections).
+  - **6. Route & Catalog Registration**:
+    - Mounted Episode 2 at [`src/app/computer-networks/simulator/dns-resolution/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/simulator/dns-resolution/page.tsx).
+    - Linked Episode 2 in [`src/app/computer-networks/episodes.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/episodes.tsx).
+  - **7. Automated Verification**:
+    - Unit tests in [`dnsScenarioIntegrity.test.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/__tests__/dnsScenarioIntegrity.test.ts) (7 tests passed).
+    - Unit tests in [`dnsPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/simulator/dns-resolution/__tests__/dnsPage.test.tsx) (3 tests passed).
+    - Full Vitest suite: 64 test suites (546 tests) passing green.
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings.
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Episode 2 addition with zero regressions on Episode 1 or existing discipline episodes.
+
+
 
 
 

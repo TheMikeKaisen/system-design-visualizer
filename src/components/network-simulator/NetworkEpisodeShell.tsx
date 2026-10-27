@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, ReactNode } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -13,16 +13,32 @@ import { ALL_NETWORK_SCENARIOS } from "@/lib/network-simulator/scenarios";
 import { NetworkTopologyCanvas } from "./NetworkTopologyCanvas";
 import { SocketTablePanel } from "./SocketTablePanel";
 import { PacketInspectorPanel } from "./PacketInspectorPanel";
-import { InteractiveExplanationBar } from "./InteractiveExplanationBar";
+import { InteractiveExplanationBar, type ConceptDefinition } from "./InteractiveExplanationBar";
 import { ScenarioDropdown } from "@/components/ui/ScenarioDropdown";
 import { NetworkPlaybackBar } from "./NetworkPlaybackBar";
+import type { NetworkSimulationScenario, NetworkScenarioStep } from "@/lib/network-simulator/engine";
 
-interface NetworkEpisodeShellProps {
+export interface NetworkEpisodeShellProps {
   episodeNumber: number | string;
   title: string;
+  scenarios?: NetworkSimulationScenario[];
+  accentColor?: "teal" | "amber" | "sky" | "emerald" | "violet" | "blue";
+  customGlossary?: Record<string, ConceptDefinition>;
+  customTermPatterns?: string[];
+  canvasSlot?: (step: NetworkScenarioStep | null, safeIndex: number) => ReactNode;
+  telemetrySlot?: (step: NetworkScenarioStep | null, safeIndex: number) => ReactNode;
 }
 
-export function NetworkEpisodeShell({ episodeNumber, title }: NetworkEpisodeShellProps) {
+export function NetworkEpisodeShell({
+  episodeNumber,
+  title,
+  scenarios = ALL_NETWORK_SCENARIOS,
+  accentColor = "teal",
+  customGlossary,
+  customTermPatterns,
+  canvasSlot,
+  telemetrySlot,
+}: NetworkEpisodeShellProps) {
   const {
     scenario,
     currentStepIndex,
@@ -114,10 +130,10 @@ export function NetworkEpisodeShell({ episodeNumber, title }: NetworkEpisodeShel
 
         {/* Reusable Scenario Dropdown Component */}
         <ScenarioDropdown
-          scenarios={ALL_NETWORK_SCENARIOS}
+          scenarios={scenarios}
           activeScenarioId={scenario.id}
           onSelect={setScenario}
-          accentColor="teal"
+          accentColor={accentColor}
         />
       </nav>
 
@@ -131,6 +147,8 @@ export function NetworkEpisodeShell({ episodeNumber, title }: NetworkEpisodeShel
           title={currentStep.title}
           explanation={currentStep.explanation}
           detailedNotes={currentStep.detailedNotes}
+          customGlossary={customGlossary}
+          customTermPatterns={customTermPatterns}
         />
       )}
 
@@ -138,94 +156,104 @@ export function NetworkEpisodeShell({ episodeNumber, title }: NetworkEpisodeShel
       <main className="flex-1 min-h-0 p-3 sm:p-4 pb-20 sm:pb-4 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 overflow-visible lg:overflow-hidden">
         {/* Left/Center: Network Topology Canvas */}
         <section className="lg:col-span-7 h-auto lg:h-full min-h-[380px] sm:min-h-[420px]" aria-label="Network Topology View">
-          <NetworkTopologyCanvas
-            hosts={currentStep?.hosts ?? []}
-            activePacket={currentStep?.activePacket ?? null}
-            activeSockets={currentStep?.activeSockets ?? []}
-            onSelectPacket={(pkt) => {
-              setSelectedPacket(pkt);
-              setActiveInspectorTab("packet");
-            }}
-          />
+          {canvasSlot ? (
+            canvasSlot(currentStep, safeIndex)
+          ) : (
+            <NetworkTopologyCanvas
+              hosts={currentStep?.hosts ?? []}
+              activePacket={currentStep?.activePacket ?? null}
+              activeSockets={currentStep?.activeSockets ?? []}
+              onSelectPacket={(pkt) => {
+                setSelectedPacket(pkt);
+                setActiveInspectorTab("packet");
+              }}
+            />
+          )}
         </section>
 
         {/* Right: Contextual Telemetry (Sockets vs Packet Inspector) */}
         <section className="lg:col-span-5 h-auto lg:h-full flex flex-col min-h-[400px] lg:min-h-0 mt-3 lg:mt-0" aria-label="Network Context Panels">
-          {/* Header Controls: Clean WAI-ARIA Tablist */}
-          <div
-            role="tablist"
-            aria-label="Inspector navigation tabs"
-            className="flex items-center gap-1 mb-2 bg-zinc-900/60 p-1 rounded-lg border border-border/60 shrink-0 font-mono text-xs"
-          >
-            <button
-              type="button"
-              role="tab"
-              id="tab-sockets"
-              aria-selected={activeInspectorTab === "sockets"}
-              aria-controls="panel-sockets"
-              onClick={() => setActiveInspectorTab("sockets")}
-              className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
-                activeInspectorTab === "sockets"
-                  ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
-              }`}
-            >
-              <Network className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-              <span className="truncate">Sockets ({currentStep?.activeSockets.length ?? 0})</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              id="tab-packet"
-              aria-selected={activeInspectorTab === "packet"}
-              aria-controls="panel-packet"
-              onClick={() => setActiveInspectorTab("packet")}
-              className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
-                activeInspectorTab === "packet"
-                  ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
-              }`}
-            >
-              <FileCode className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-              <span className="truncate">Packet {currentStep?.activePacket ? "•" : ""}</span>
-            </button>
-          </div>
+          {telemetrySlot ? (
+            telemetrySlot(currentStep, safeIndex)
+          ) : (
+            <>
+              {/* Header Controls: Clean WAI-ARIA Tablist */}
+              <div
+                role="tablist"
+                aria-label="Inspector navigation tabs"
+                className="flex items-center gap-1 mb-2 bg-zinc-900/60 p-1 rounded-lg border border-border/60 shrink-0 font-mono text-xs"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  id="tab-sockets"
+                  aria-selected={activeInspectorTab === "sockets"}
+                  aria-controls="panel-sockets"
+                  onClick={() => setActiveInspectorTab("sockets")}
+                  className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
+                    activeInspectorTab === "sockets"
+                      ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                  }`}
+                >
+                  <Network className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                  <span className="truncate">Sockets ({currentStep?.activeSockets.length ?? 0})</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  id="tab-packet"
+                  aria-selected={activeInspectorTab === "packet"}
+                  aria-controls="panel-packet"
+                  onClick={() => setActiveInspectorTab("packet")}
+                  className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
+                    activeInspectorTab === "packet"
+                      ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                  }`}
+                >
+                  <FileCode className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                  <span className="truncate">Packet {currentStep?.activePacket ? "•" : ""}</span>
+                </button>
+              </div>
 
-          {/* Panels Area */}
-          <div className="flex-1 min-h-0">
-            {activeInspectorTab === "sockets" ? (
-              <div
-                id="panel-sockets"
-                role="tabpanel"
-                aria-labelledby="tab-sockets"
-                tabIndex={0}
-                className="h-full focus:outline-none"
-              >
-                <SocketTablePanel
-                  sockets={currentStep?.activeSockets ?? []}
-                  selectedSocket={selectedSocket}
-                  onSelectSocket={setSelectedSocket}
-                />
+              {/* Panels Area */}
+              <div className="flex-1 min-h-0">
+                {activeInspectorTab === "sockets" ? (
+                  <div
+                    id="panel-sockets"
+                    role="tabpanel"
+                    aria-labelledby="tab-sockets"
+                    tabIndex={0}
+                    className="h-full focus:outline-none"
+                  >
+                    <SocketTablePanel
+                      sockets={currentStep?.activeSockets ?? []}
+                      selectedSocket={selectedSocket}
+                      onSelectSocket={setSelectedSocket}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    id="panel-packet"
+                    role="tabpanel"
+                    aria-labelledby="tab-packet"
+                    tabIndex={0}
+                    className="h-full focus:outline-none"
+                  >
+                    <PacketInspectorPanel
+                      packet={selectedPacket ?? currentStep?.activePacket ?? null}
+                      scenarioId={scenario.id}
+                      stepBadge={currentStep?.badge}
+                      stepIndex={safeIndex}
+                      selectedSocket={selectedSocket}
+                      highlightedElement={currentStep?.highlightedElement}
+                    />
+                  </div>
+                )}
               </div>
-            ) : (
-              <div
-                id="panel-packet"
-                role="tabpanel"
-                aria-labelledby="tab-packet"
-                tabIndex={0}
-                className="h-full focus:outline-none"
-              >
-                <PacketInspectorPanel
-                  packet={selectedPacket ?? currentStep?.activePacket ?? null}
-                  scenarioId={scenario.id}
-                  stepBadge={currentStep?.badge}
-                  stepIndex={safeIndex}
-                  selectedSocket={selectedSocket}
-                  highlightedElement={currentStep?.highlightedElement}
-                />
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </section>
       </main>
 

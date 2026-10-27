@@ -248,13 +248,15 @@ const BUILTIN_GLOSSARY: Record<string, ConceptDefinition> = {
   },
 };
 
-interface InteractiveExplanationBarProps {
+export interface InteractiveExplanationBarProps {
   safeIndex: number;
   totalSteps: number;
   badge: string;
   title: string;
   explanation: string;
   detailedNotes?: NetworkStepNote[];
+  customGlossary?: Record<string, ConceptDefinition>;
+  customTermPatterns?: string[];
 }
 
 export function InteractiveExplanationBar({
@@ -264,11 +266,17 @@ export function InteractiveExplanationBar({
   title,
   explanation,
   detailedNotes,
+  customGlossary,
+  customTermPatterns,
 }: InteractiveExplanationBarProps) {
   const [activeConcept, setActiveConcept] = useState<ConceptDefinition | null>(null);
   const [isPinned, setIsPinned] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
+
+  const effectiveGlossary = React.useMemo(() => {
+    return customGlossary ? { ...BUILTIN_GLOSSARY, ...customGlossary } : BUILTIN_GLOSSARY;
+  }, [customGlossary]);
 
   // Clear pending timeout on unmount
   useEffect(() => {
@@ -368,23 +376,23 @@ export function InteractiveExplanationBar({
     return detailedNotes.map((note) => {
       // Check if built-in definition has extra commands
       const lower = note.title.toLowerCase();
-      const matchedKey = Object.keys(BUILTIN_GLOSSARY).find((k) => lower.includes(k));
-      const builtin = matchedKey ? BUILTIN_GLOSSARY[matchedKey] : undefined;
+      const matchedKey = Object.keys(effectiveGlossary).find((k) => lower.includes(k));
+      const builtin = matchedKey ? effectiveGlossary[matchedKey] : undefined;
 
       return {
         term: note.title,
-        category: builtin?.category ?? "Kernel Telemetry",
+        category: builtin?.category ?? "Network Telemetry",
         title: note.title,
         explanation: note.body,
         commandExample: note.commandExample ?? builtin?.commandExample,
       };
     });
-  }, [detailedNotes]);
+  }, [detailedNotes, effectiveGlossary]);
 
   // Function to highlight recognized technical terms inside the narrative sentence
   const renderHighlightedExplanation = () => {
     // Regex keywords to match in the text
-    const termPatterns = [
+    const baseTermPatterns = [
       "0.0.0.0:80",
       "0.0.0.0:8080",
       "0.0.0.0:443",
@@ -420,6 +428,10 @@ export function InteractiveExplanationBar({
       "Destination MAC",
     ];
 
+    const termPatterns = customTermPatterns
+      ? [...customTermPatterns, ...baseTermPatterns]
+      : baseTermPatterns;
+
     // Build regex with word boundaries
     const escaped = termPatterns.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
     const regex = new RegExp(`(${escaped.join("|")})`, "gi");
@@ -428,14 +440,14 @@ export function InteractiveExplanationBar({
 
     return parts.map((part, index) => {
       const lower = part.toLowerCase();
-      const matchedKey = Object.keys(BUILTIN_GLOSSARY).find((k) => lower.includes(k));
+      const matchedKey = Object.keys(effectiveGlossary).find((k) => lower.includes(k));
 
       // Also check if matches any note in current step
       const noteMatch = stepConceptNotes.find(
         (n) => n.title.toLowerCase().includes(lower) || lower.includes(n.title.toLowerCase())
       );
 
-      const concept = noteMatch ?? (matchedKey ? BUILTIN_GLOSSARY[matchedKey] : null);
+      const concept = noteMatch ?? (matchedKey ? effectiveGlossary[matchedKey] : null);
 
       if (concept && part.trim().length > 1) {
         return (
@@ -585,7 +597,7 @@ export function InteractiveExplanationBar({
           </div>
 
           {/* Explanation Body */}
-          <p className="text-xs text-zinc-300 leading-relaxed font-sans mb-3">
+          <p className="text-xs text-zinc-300 leading-relaxed font-sans mb-3 whitespace-pre-line">
             {activeConcept.explanation}
           </p>
 
