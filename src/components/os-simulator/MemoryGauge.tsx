@@ -13,8 +13,8 @@ interface MemoryGaugeProps {
 export function MemoryGauge({ memory, processes }: MemoryGaugeProps) {
   const pct = memory.usedPct;
   const barColor =
-    pct > 80 ? "from-red-500 to-rose-400" : pct > 50 ? "from-amber-500 to-orange-400" : "from-teal-500 to-emerald-400";
-  const textColor = pct > 80 ? "text-red-500" : pct > 50 ? "text-amber-500" : "text-teal-500";
+    pct > 80 ? "from-red-500 to-rose-400" : pct > 50 ? "from-amber-500 to-orange-400" : "from-sky-500 to-emerald-400";
+  const textColor = pct > 80 ? "text-red-500" : pct > 50 ? "text-amber-500" : "text-sky-500";
 
   const activeProcesses = processes?.filter((p) => p.state !== "terminated") ?? [];
 

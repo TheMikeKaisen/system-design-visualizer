@@ -108,7 +108,7 @@ export function PCBViewer({ process, className }: PCBViewerProps) {
             className="overflow-hidden"
           >
             <div className="px-5 pb-5">
-              <div className="flex flex-col rounded-xl border-2 border-amber-500/40 overflow-hidden shadow-[0_0_20px_-5px_rgba(245,158,11,0.2)]">
+              <div className="flex flex-col rounded-xl border-2 border-sky-500/40 overflow-hidden shadow-[0_0_20px_-5px_rgba(14,165,233,0.2)]">
                 {blocks.map((block, i) => {
                   const isHighlighted = pcb.highlightFields?.includes(block.id);
                   return (
@@ -116,13 +116,13 @@ export function PCBViewer({ process, className }: PCBViewerProps) {
                       key={block.id} 
                       className={cn(
                         "flex flex-col py-2.5 px-4 transition-all duration-500",
-                        i !== blocks.length - 1 && "border-b border-amber-500/20",
+                        i !== blocks.length - 1 && "border-b border-sky-500/20",
                         isHighlighted 
-                          ? "bg-amber-500/30 ring-2 ring-inset ring-amber-500/50" 
-                          : "bg-amber-500/5 hover:bg-amber-500/10"
+                          ? "bg-sky-500/30 ring-2 ring-inset ring-sky-500/50" 
+                          : "bg-sky-500/5 hover:bg-sky-500/10"
                       )}
                     >
-                      <span className="text-[10px] uppercase tracking-wider text-amber-500/70 font-bold mb-0.5">{block.label}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-sky-500/80 dark:text-sky-400 font-bold mb-0.5">{block.label}</span>
                       <span className="text-xs font-mono font-semibold text-foreground/90">{block.value}</span>
                       <span className="text-[10px] text-muted-foreground/70 mt-1 italic leading-tight">{block.explanation}</span>
                     </div>

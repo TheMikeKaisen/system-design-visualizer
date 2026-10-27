@@ -73,12 +73,12 @@ export default function PrinterSpoolerSimulator() {
       </div>
 
       <div className="flex gap-2.5 p-3 bg-background/60 rounded-2xl border border-border/50 shadow-inner mt-2 relative">
-        {/* Dynamic pointer */}
+        {/* Dynamic pointer precisely centered above current slot (56px width + 10px gap = 66px pitch) */}
         <motion.div
-          className="absolute -top-6 flex flex-col items-center justify-center text-[10px] font-bold text-rose-500"
-          animate={{ x: step.sharedIN * 64 }}
+          className="absolute -top-6 w-14 flex flex-col items-center justify-center text-[10px] font-bold text-rose-500"
+          animate={{ x: step.sharedIN * 66 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          style={{ left: "16px" }}
+          style={{ left: "12px" }}
         >
           <div className="bg-rose-500 text-white px-2 py-0.5 rounded-full shadow-md text-[9px] font-mono">
             IN={step.sharedIN}

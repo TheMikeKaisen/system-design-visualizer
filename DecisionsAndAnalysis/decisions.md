@@ -873,6 +873,65 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Strict adherence to Rule #1: All changes remain unstaged in the working tree.
 - **Blast Radius**: Zero regressions; establishes clean separation of concerns, eliminates massive duplication, and standardizes design and accessibility across all Operating Systems simulators.
 
+---
+
+## Decision Record 030: Learning Paths Route Navigation Consistency & Resting Subject Card Border Restraint
+- **Status**: Implemented & Verified
+- **Category**: UI/UX Consistency, Design Systems, Information Architecture & Craft Polish
+- **Problem**:
+  - The `/learning-paths` route previously passed `backLink={{ href: "/", label: "Home" }}` into `AppNavbar`, placing a redundant "Home" breadcrumb inside the fixed navigation bar, whereas all subject pages (`/javascript`, `/operating-systems`, `/java`, `/frontend`, `/backend`) kept the navbar clean and positioned their breadcrumbs directly inside `<main>` above the header block.
+  - Across the curriculum catalog, subject cards rendered persistent colored borders (`border-amber-500/30`, `border-sky-500/30`, `border-emerald-500/30`, `border-violet-500/30`, `border-blue-500/30`, `border-primary/25`) in their resting state. This created premature visual noise and conflicted with the quiet, restrained house style prescribed in `design-taste-frontend`.
+- **Decision & Implementation**:
+  - **1. Navigation Parity & Navbar Cleanup ([`learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx))**:
+    - Removed `backLink` from `<AppNavbar />` on `/learning-paths`, standardizing the top navbar to brand, theme toggle, and Canvas Studio action button.
+  - **2. In-Page "Back to Home" Breadcrumb ([`learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx))**:
+    - Added `<Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-foreground mb-8 transition-colors group">` with Lucide `ArrowLeft` at the top of `<main>`, mirroring the exact position, typography, and micro-interaction of the `Back to Learning Paths` button on all 5 subject routes.
+  - **3. Resting Subject Card Border Restraint ([`DisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/DisciplineCard.tsx), [`learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx))**:
+    - Updated `accentBorder` in `DISCIPLINES` to use neutral `border-border/60` in resting state across JavaScript, Operating Systems, Java & JVM, Frontend Architecture, and Backend Internals, with signature colors illuminating dynamically on hover (`hover:border-amber-500/70`, `hover:border-sky-500/70`, etc.).
+    - Aligned the 6th card (Canvas Studio) to neutral `border-border/60 hover:border-primary/70`.
+  - **4. Automated Verification**:
+    - Updated [`LearningPathsPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/__tests__/LearningPathsPage.test.tsx) asserting presence and target of `Back to Home`.
+    - Verified all 4 core test files pass 100% green (`LearningPathsPage.test.tsx`, `DisciplineCard.test.tsx`, `LandingPage.test.tsx`, `SubjectPathPages.test.tsx`).
+    - `npx tsc --noEmit` and `npx eslint` pass with 0 errors and 0 warnings.
+    - Rule #1 honored: all modifications remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; establishes seamless navigation continuity across all curriculum routes and refines subject card presentation to an understated, award-caliber aesthetic.
+
+---
+
+## Decision Record 031: Operating Systems Phase 3 — Component Token Alignment, Scenario Schema Integrity & Comprehensive Automated Verification Suite
+- **Status**: Implemented & Verified
+- **Category**: Testing, Reliability, Design System Consistency, WCAG Accessibility & Code Quality
+- **Problem**:
+  - Following the Phase 1 & 2 refactoring, several visualizer sub-components still retained legacy color tokens (`teal-500` in `OSToast`, `CPUBlock`, `SchedulerBadge`, `MemoryGauge`; `amber-500` in `PCBViewer`), conflicting with the canonical `sky` subject theme (Decision 011).
+  - `CPUBlock.tsx:131` violated Simulation Guideline Rule #4 by using raw array index `key={i}` for the running indicator dots.
+  - `CPUBlock.tsx` lacked defensive fallback for undefined `cpu` states, risking runtime crashes during uninitialized transitions.
+  - `printer-spooler/page.tsx` used brittle magic number offsets (`animate={{ x: step.sharedIN * 64 }}`, `left: "16px"`), resulting in pointer drift on dynamic viewport sizes.
+  - `ChapterMeta` was duplicated in multiple scenario files rather than imported from `src/lib/os-simulator/engine.ts`.
+  - Critical test coverage deficit (`OS-TEST-01`): Zero test suites existed for scenario schema integrity, store state transitions, defensive bounds handling, and episode page smoke tests.
+- **Decision & Implementation**:
+  - **1. Visualizer Sub-Component Token Alignment**:
+    - Standardized [`OSToast.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/OSToast.tsx), [`CPUBlock.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/CPUBlock.tsx), [`SchedulerBadge.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/SchedulerBadge.tsx), [`MemoryGauge.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/MemoryGauge.tsx), and [`PCBViewer.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/PCBViewer.tsx) to canonical `sky` tokens (`#0ea5e9`, `border-sky-500/40`, `bg-sky-500/10`, `text-sky-400`).
+  - **2. Rule #4 Composite Keys & Defensive Fallbacks**:
+    - Replaced `key={i}` in `CPUBlock.tsx` with deterministic composite key `key={`cpu-dot-${process.id}-${i}`}`.
+    - Added defensive `safeCpu` fallback in `CPUBlock.tsx` preventing `TypeError` on missing `cpu` objects.
+  - **3. Mathematical Spooler Pointer Alignment**:
+    - In [`printer-spooler/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/printer-spooler/page.tsx), set pointer container to `w-14` (56px) with `left: "12px"`, and animated `x: step.sharedIN * 66` (56px slot width + 10px gap), ensuring 1-to-1 exact centering above each spooler slot across all viewport sizes.
+  - **4. Scenario Interface Deduplication**:
+    - Refactored [`printer-spooler-scenario.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/os-simulator/printer-spooler-scenario.ts) and [`producer-consumer-scenario.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/os-simulator/producer-consumer-scenario.ts) to import `ChapterMeta` from `./engine`.
+  - **5. Comprehensive Automated Vitest Verification Suite**:
+    - **[`osScenarioIntegrity.test.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/os-simulator/__tests__/osScenarioIntegrity.test.ts) (27 tests)**: Validates schema integrity, step continuity, queue references, memory metrics, and hazard detection across all 7 scenarios and the universal scheduling engine.
+    - **[`useOSSimulationStore.test.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/store/__tests__/useOSSimulationStore.test.ts) (8 tests)**: Tests step clamping, chapter jumping, playback speed updates, scheduling mode switching, and clean `resetEpisode` unmount lifecycle.
+    - **[`osDefensivePanels.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/os-simulator/__tests__/osDefensivePanels.test.tsx) (12 tests)**: Tests edge-case rendering across `CPUBlock`, `ZoneContainer`, `SchedulerBadge`, `OSToast`, `MemoryGauge`, and `PCBViewer`.
+    - **[`osPages.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/operating-systems/simulator/__tests__/osPages.test.tsx) (5 tests)**: Integration smoke tests verifying mounting, navigation shells, and scenario switcher tabs across Episodes 1, 3, 5, 6, and 7.
+- **Verification Results**:
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx eslint`: 0 errors, 0 warnings across all touched files.
+  - `npm test`: 55 test suites passed, 503 unit tests passed (100% green).
+  - Strict Rule #1 compliance: Zero git commits or staging operations performed.
+- **Blast Radius**: Zero regressions; brings the Operating Systems discipline to full architectural parity, theme consistency, and 100% automated test coverage matching the JavaScript module.
+
+
+
 
 
 

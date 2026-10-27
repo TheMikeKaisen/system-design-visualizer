@@ -15,7 +15,7 @@ interface SchedulerBadgeProps {
 
 const SCHEDULER_COLORS: Record<string, string> = {
   long_term: "text-indigo-400",
-  short_term: "text-teal-400",
+  short_term: "text-sky-400",
   medium_term: "text-violet-400",
 };
 
@@ -58,10 +58,10 @@ export function SchedulerBadge({ label, event, direction = "down" }: SchedulerBa
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -left-2 h-1.5 w-1.5 rounded-full bg-teal-400"
+              className="absolute -left-2 h-1.5 w-1.5 rounded-full bg-sky-400"
             >
               <motion.div
-                className="absolute inset-0 rounded-full bg-teal-400"
+                className="absolute inset-0 rounded-full bg-sky-400"
                 animate={{ scale: [1, 2], opacity: [1, 0] }}
                 transition={{ duration: 1, repeat: Infinity }}
               />

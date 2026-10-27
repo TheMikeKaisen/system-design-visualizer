@@ -1,8 +1,5 @@
-export interface ChapterMeta {
-  title: string;
-  startStep: number;
-  endStep: number;
-}
+import type { ChapterMeta } from "./engine";
+export type { ChapterMeta };
 
 export interface SpoolerStepState {
   activeProcess: "processA" | "processB" | "none";

@@ -41,13 +41,13 @@ export function getToastStyle(message: string) {
       icon: "🏁",
     };
   }
-  // default: teal (scheduler / dispatch events)
+  // default: sky (scheduler / dispatch events)
   return {
-    border: "border-teal-500/40",
-    bg: "bg-teal-500/10",
-    bar: "bg-teal-500",
-    text: "text-teal-400",
-    borderHex: "#14b8a6",
+    border: "border-sky-500/40",
+    bg: "bg-sky-500/10",
+    bar: "bg-sky-500",
+    text: "text-sky-400",
+    borderHex: "#0ea5e9",
     icon: "⚡",
   };
 }

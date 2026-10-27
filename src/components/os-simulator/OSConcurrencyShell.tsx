@@ -295,11 +295,13 @@ export function OSConcurrencyShell({
 
               {/* Scenario Toggles */}
               {scenarios && scenarios.length > 0 && (
-                <div className="bg-background rounded-xl p-1 flex border border-border/60">
+                <div role="tablist" aria-label="Simulation Scenarios" className="bg-background rounded-xl p-1 flex border border-border/60">
                   {scenarios.map((sc) => (
                     <button
                       key={`scenario-tab-${sc.id}`}
                       type="button"
+                      role="tab"
+                      aria-selected={sc.isActive}
                       onClick={() => onScenarioSelect?.(sc.id)}
                       className={cn(
                         "flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
