@@ -67,13 +67,14 @@ describe("LandingPage", () => {
     expect(screen.getByTestId("mock-hero-runtime-sandbox")).toBeDefined();
   });
 
-  it("renders all five core disciplines with their links", () => {
+  it("renders all core disciplines with their links", () => {
     render(<LandingPage />);
 
     expect(screen.getByRole("heading", { name: /Go beyond the abstractions\./i })).toBeDefined();
 
     expect(screen.getAllByText("JavaScript").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Operating Systems").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Computer Networks").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Java & JVM Architecture").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Frontend Architecture").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Backend Internals").length).toBeGreaterThanOrEqual(1);
@@ -81,6 +82,7 @@ describe("LandingPage", () => {
     // Verify explicit CTA text inside the cards
     expect(screen.getByText("Explore JavaScript")).toBeDefined();
     expect(screen.getByText("Explore Operating Systems")).toBeDefined();
+    expect(screen.getByText("Explore Computer Networks")).toBeDefined();
     expect(screen.getByText("Explore Java & JVM")).toBeDefined();
     expect(screen.getByText("Explore Frontend Systems")).toBeDefined();
     expect(screen.getByText("Explore Backend Systems")).toBeDefined();
@@ -88,6 +90,7 @@ describe("LandingPage", () => {
     // Verify card navigation links exist
     expect(screen.getAllByRole("link", { name: /JavaScript/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole("link", { name: /Operating Systems/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("link", { name: /Computer Networks/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole("link", { name: /Java & JVM Architecture/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole("link", { name: /Frontend Architecture/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole("link", { name: /Backend Internals/i }).length).toBeGreaterThanOrEqual(1);
@@ -128,6 +131,7 @@ describe("LandingPage", () => {
     // Verify each discipline title is inside the mobile list
     expect(mobileDisciplinesList?.textContent).toContain("JavaScript");
     expect(mobileDisciplinesList?.textContent).toContain("Operating Systems");
+    expect(mobileDisciplinesList?.textContent).toContain("Computer Networks");
     expect(mobileDisciplinesList?.textContent).toContain("Java & JVM Architecture");
     expect(mobileDisciplinesList?.textContent).toContain("Frontend Architecture");
     expect(mobileDisciplinesList?.textContent).toContain("Backend Internals");

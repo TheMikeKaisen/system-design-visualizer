@@ -31,11 +31,12 @@ describe("DisciplineCard", () => {
 
     expect(screen.getByText("JavaScript")).toBeDefined();
     expect(screen.getByText("Operating Systems")).toBeDefined();
+    expect(screen.getByText("Computer Networks")).toBeDefined();
     expect(screen.getByText("Java & JVM Architecture")).toBeDefined();
     expect(screen.getByText("Frontend Architecture")).toBeDefined();
     expect(screen.getByText("Backend Internals")).toBeDefined();
 
     const links = container.querySelectorAll("a");
-    expect(links.length).toBe(5);
+    expect(links.length).toBe(6);
   });
 });

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Terminal, Cpu, Database, Layers, Server, ArrowRight } from "lucide-react";
+import { Terminal, Cpu, Database, Layers, Server, Network, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface DisciplineItem {
@@ -28,7 +28,7 @@ export const DISCIPLINES: DisciplineItem[] = [
     icon: Terminal,
     accentColor: "#f59e0b",
     accentBg: "bg-amber-500/10",
-    accentBorder: "border-amber-500/30 group-hover:border-amber-500/70",
+    accentBorder: "border-border/60 hover:border-amber-500/70 dark:hover:border-amber-500/60",
     accentText: "text-amber-500 dark:text-amber-400",
     ctaText: "Explore JavaScript",
     href: "/javascript",
@@ -42,7 +42,7 @@ export const DISCIPLINES: DisciplineItem[] = [
     icon: Cpu,
     accentColor: "#0ea5e9",
     accentBg: "bg-sky-500/10",
-    accentBorder: "border-sky-500/30 group-hover:border-sky-500/70",
+    accentBorder: "border-border/60 hover:border-sky-500/70 dark:hover:border-sky-500/60",
     accentText: "text-sky-500 dark:text-sky-400",
     ctaText: "Explore Operating Systems",
     href: "/operating-systems",
@@ -56,7 +56,7 @@ export const DISCIPLINES: DisciplineItem[] = [
     icon: Database,
     accentColor: "#10b981",
     accentBg: "bg-emerald-500/10",
-    accentBorder: "border-emerald-500/30 group-hover:border-emerald-500/70",
+    accentBorder: "border-border/60 hover:border-emerald-500/70 dark:hover:border-emerald-500/60",
     accentText: "text-emerald-500 dark:text-emerald-400",
     ctaText: "Explore Java & JVM",
     href: "/java",
@@ -70,7 +70,7 @@ export const DISCIPLINES: DisciplineItem[] = [
     icon: Layers,
     accentColor: "#8b5cf6",
     accentBg: "bg-violet-500/10",
-    accentBorder: "border-violet-500/30 group-hover:border-violet-500/70",
+    accentBorder: "border-border/60 hover:border-violet-500/70 dark:hover:border-violet-500/60",
     accentText: "text-violet-500 dark:text-violet-400",
     ctaText: "Explore Frontend Systems",
     href: "/frontend",
@@ -84,10 +84,24 @@ export const DISCIPLINES: DisciplineItem[] = [
     icon: Server,
     accentColor: "#3b82f6",
     accentBg: "bg-blue-500/10",
-    accentBorder: "border-blue-500/30 group-hover:border-blue-500/70",
+    accentBorder: "border-border/60 hover:border-blue-500/70 dark:hover:border-blue-500/60",
     accentText: "text-blue-500 dark:text-blue-400",
     ctaText: "Explore Backend Systems",
     href: "/backend",
+  },
+  {
+    id: "computer-networks",
+    title: "Computer Networks",
+    badge: "Protocols & Wire",
+    description: "Trace how IP addressing, transport ports, and kernel socket 4-tuples route packets between client apps and server endpoints.",
+    topics: ["IP Addressing", "Port Demux", "TCP Handshake", "Socket 4-Tuples"],
+    icon: Network,
+    accentColor: "#14b8a6",
+    accentBg: "bg-teal-500/10",
+    accentBorder: "border-border/60 hover:border-teal-500/70 dark:hover:border-teal-500/60",
+    accentText: "text-teal-500 dark:text-teal-400",
+    ctaText: "Explore Computer Networks",
+    href: "/computer-networks",
   },
 ];
 

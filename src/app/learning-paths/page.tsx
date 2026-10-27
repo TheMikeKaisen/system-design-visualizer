@@ -38,12 +38,6 @@ export default function LearningPathsPage() {
 
         {/* Editorial Header */}
         <div className="max-w-3xl mb-14 sm:mb-16">
-          <div className="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase mb-3">
-            <span>SYSTEM SIMULATOR</span>
-            <span className="text-zinc-400 dark:text-zinc-600">/</span>
-            <span>LEARNING PATHS</span>
-          </div>
-
           <h1
             className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50 leading-[1.12]"
             style={{ textWrap: "balance" }}
@@ -95,7 +89,6 @@ export default function LearningPathsPage() {
             <EditorialDisciplineCard
               id="operating-systems"
               title="Operating Systems"
-              eyebrow="Foundations // Kernel Architecture"
               badge={`${osCount}`}
               description="Explore how schedulers allocate CPU time, processes compete for memory, and threads synchronize without data corruption."
               topics={["CPU Scheduling", "Process Control Blocks", "Mutex Synchronization", "Race Conditions"]}
@@ -112,7 +105,6 @@ export default function LearningPathsPage() {
             <EditorialDisciplineCard
               id="computer-networks"
               title="Computer Networks"
-              eyebrow="Foundations // Network Substrate"
               badge={`${networkCount}`}
               description="Watch how network interfaces, transport ports, and kernel socket 4-tuples route packets between client applications and server endpoints."
               topics={["Socket 4-Tuples", "TCP 3-Way Handshake", "Port Multiplexing", "Packet Encapsulation"]}
@@ -149,7 +141,6 @@ export default function LearningPathsPage() {
             <EditorialDisciplineCard
               id="javascript"
               title="JavaScript"
-              eyebrow="Runtime // V8 Engine"
               badge={`${jsCount}`}
               description="Follow the call stack, lexical scope chains, closures, and the event loop as code executes one discrete step at a time."
               topics={["Call Stack", "Scope Chains", "Closures", "Event Loop"]}
@@ -166,7 +157,6 @@ export default function LearningPathsPage() {
             <EditorialDisciplineCard
               id="java"
               title="Java & JVM Architecture"
-              eyebrow="Runtime // Virtual Machine"
               badge={`${javaCount}`}
               description="Trace the journey from source code and bytecode verification down to JVM runtime memory and CPU instruction execution."
               topics={["Bytecode Execution", "Class Loading", "Stack vs Heap", "Typecasting"]}
@@ -203,7 +193,6 @@ export default function LearningPathsPage() {
             <EditorialDisciplineCard
               id="frontend"
               title="Frontend Architecture"
-              eyebrow="Application // Browser Internals"
               badge={`${frontendCount}`}
               description="Understand reconciliation, state update batching, effect lifecycles, and the mechanics behind modern UI frameworks."
               topics={["Virtual DOM Diffing", "useState Batching", "useEffect Pipeline", "Render Timing"]}
@@ -220,7 +209,6 @@ export default function LearningPathsPage() {
             <EditorialDisciplineCard
               id="backend"
               title="Backend Internals"
-              eyebrow="Application // Server Runtimes"
               badge={`${backendCount}`}
               description="Investigate Node.js architecture, non-blocking I/O handoffs, and the multi-phase libuv event loop handling server requests."
               topics={["Node.js Architecture", "Non-Blocking I/O", "libuv Event Loop", "Thread Pools"]}

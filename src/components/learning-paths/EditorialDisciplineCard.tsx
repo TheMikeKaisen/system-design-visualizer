@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 export interface EditorialDisciplineProps {
   id: string;
   title: string;
-  eyebrow: string;
   badge: string;
   description: string;
   topics: string[];
@@ -22,7 +21,6 @@ export interface EditorialDisciplineProps {
 
 export function EditorialDisciplineCard({
   title,
-  eyebrow,
   badge,
   description,
   topics,
@@ -54,7 +52,7 @@ export function EditorialDisciplineCard({
       />
 
       <div>
-        {/* Top Row: Icon + Eyebrow + Badge */}
+        {/* Top Row: Icon + Title + Badge */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
             <div
@@ -66,14 +64,9 @@ export function EditorialDisciplineCard({
             >
               <Icon className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block font-semibold">
-                {eyebrow}
-              </span>
-              <h3 className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors tracking-tight">
-                {title}
-              </h3>
-            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors tracking-tight">
+              {title}
+            </h3>
           </div>
 
           <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-muted/60 text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-border/40 shrink-0">

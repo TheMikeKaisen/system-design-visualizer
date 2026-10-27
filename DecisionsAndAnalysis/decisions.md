@@ -930,6 +930,327 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - Strict Rule #1 compliance: Zero git commits or staging operations performed.
 - **Blast Radius**: Zero regressions; brings the Operating Systems discipline to full architectural parity, theme consistency, and 100% automated test coverage matching the JavaScript module.
 
+---
+
+## Decision Record 032: Editorial Computational Strata Architecture & Authentic Simulation Previews for `/learning-paths`
+- **Status**: Implemented & Verified
+- **Category**: Information Architecture, Editorial Design, Interactive Visualizer, Design System & Telemetry Integrity
+- **Problem**:
+  - The `/learning-paths` catalog previously rendered an undifferentiated 3×2 grid of identical card primitives, flattening the conceptual relationships between low-level hardware abstraction, language execution runtimes, application frameworks, and distributed systems.
+  - The page lacked authentic curriculum telemetry, forcing visitors to navigate away before discovering what simulation scenarios or interaction capabilities (e.g. step-by-step CPU execution, TDZ tracking, microtask queue resolution) were supported.
+  - No interactive previews existed to demonstrate the platform's core educational differentiator: stepping through discrete execution states.
+- **Decision & Implementation**:
+  - **1. Asymmetric Editorial Grid & Computational Strata ([`src/app/learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx))**:
+    - Replaced the uniform 3×2 grid with three conceptual computational tiers plus an overarching distributed studio tier:
+      - **Foundations**: Operating Systems given featured prominence across desktop viewports, highlighting CPU scheduling, PCB memory structures, and hardware synchronization.
+      - **Runtimes**: Paired complementary execution engine tracks (JavaScript V8 Engine and Java & JVM Virtual Machine).
+      - **Application Architecture**: Paired client and server tier tracks (Frontend Architecture browser internals and Backend Internals asynchronous server runtimes).
+      - **Distributed Systems Studio**: Full-width interactive workshop tier launching the multi-node Canvas Studio sandbox (`/canvas`).
+  - **2. Editorial Typographic Hierarchy & Confidence**:
+    - Refined the page header with monospace taxonomy eyebrow (`SYSTEM SIMULATOR / LEARNING PATHS`), confident editorial headline (*"Understand systems. Explore them from the inside."*), and factual supporting copy explaining the 32 verified simulation episodes.
+  - **3. Factual Simulation Telemetry Derived from Single Sources of Truth**:
+    - Imported `OPERATING_SYSTEMS_EPISODES`, `JAVASCRIPT_EPISODES`, `JAVA_EPISODES`, `FRONTEND_EPISODES`, and `BACKEND_EPISODES` directly.
+    - Derived simulation counts (`7`, `7`, `8`, `7`, `3` = 32 episodes) and representative scenario tags dynamically from verified episode registries, eliminating stale hardcoding and fabricated metrics.
+  - **4. Authentic Lightweight Simulation Previews ([`src/components/learning-paths/SimulationPreviews.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/SimulationPreviews.tsx))**:
+    - **Operating Systems (`ProcessStatePreview`)**: Implemented a discrete process state transition model (`READY` ➔ `RUNNING` ➔ `WAITING (I/O)` ➔ `READY`) with active state badges, program counter telemetry, and step/reset controls.
+    - **JavaScript (`CallStackPreview`)**: Implemented a bottom-up call stack frame visualizer tracing execution contexts (`Global()`, `makeCounter()`, `increment()`) with phase indicators, top-of-stack telemetry, and step controls.
+    - All preview buttons isolate event propagation (`e.preventDefault()`, `e.stopPropagation()`) so interacting with preview controls does not accidentally trigger navigation.
+  - **5. Polished Editorial Card Primitive ([`src/components/learning-paths/EditorialDisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/EditorialDisciplineCard.tsx))**:
+    - Engineered with restrained neutral resting borders (`border-border/60`), subtle upward translation (`hover:-translate-y-0.5`), signature accent color illumination on hover, top hairline glow, verified capabilities chips, and explicit accessible focus states.
+  - **6. Automated Verification**:
+    - Created unit tests in [`SimulationPreviews.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/__tests__/SimulationPreviews.test.tsx) (2 tests).
+    - Updated [`LearningPathsPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/__tests__/LearningPathsPage.test.tsx) (4 tests).
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings across all touched files.
+    - `npx vitest run`: All suites pass 100% green.
+    - Rule #1 honored: All changes remain unstaged in the working tree.
+- **Blast Radius**: Zero regressions; transforms `/learning-paths` into an award-caliber editorial and interactive map of computational disciplines without disturbing existing subject routes or the landing page.
+
+---
+
+## Decision Record 033: React Server Component Boundary Resolution for `EditorialDisciplineCard` & Icon Props
+- **Status**: Implemented & Verified
+- **Category**: Architecture, Runtime Reliability & Next.js RSC Boundary Compliance
+- **Problem**:
+  - The Next.js dev server crashed with a 500 error on `GET /learning-paths`: `Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server"`.
+  - The newly created [`EditorialDisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/EditorialDisciplineCard.tsx) had an unnecessary `"use client"` directive on line 1 despite being completely stateless and free of client hooks, browser APIs, or event handlers.
+  - As a result, when Server Component [`src/app/learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx) passed Lucide icon components (`icon={Cpu}`, `icon={Terminal}`, `icon={Database}`, `icon={Layers}`, `icon={Server}`) as props, Next.js attempted to serialize component functions across the RSC boundary, throwing fatal serialization errors.
+- **Decision & Implementation**:
+  - **1. Server Component Demarcation**:
+    - Removed `"use client"` directive from [`EditorialDisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/EditorialDisciplineCard.tsx).
+    - Preserved client isolation for authentic interactive previews ([`ProcessStatePreview`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/SimulationPreviews.tsx) and [`CallStackPreview`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/SimulationPreviews.tsx)) which are passed as JSX elements through the `preview` prop, following idiomatic React Server Component composition.
+  - **2. Polymorphic Icon Rendering**:
+    - Broadened `icon` prop type to `React.ComponentType<{ className?: string }> | React.ReactNode`.
+    - Added safe `renderedIcon` resolution supporting both component types and pre-rendered ReactNode JSX elements.
+  - **3. Unit Testing & Verification**:
+    - Created comprehensive unit test suite [`EditorialDisciplineCard.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/__tests__/EditorialDisciplineCard.test.tsx) testing standard and featured layouts with both component and element icons.
+    - Verified `GET /learning-paths` returns HTTP 200 with 0 server-side errors.
+    - Executed real browser testing via `browser_subagent` confirming full interactive preview functionality (stepping through Process State transitions and Call Stack frames) without console errors.
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings.
+    - `npm test`: 57 test files passed, 509 tests passed (100% green).
+    - Rule #1 honored: All changes remain unstaged in working tree.
+- **Blast Radius**: Zero regressions; completely resolves RSC serialization crash while preserving full visual hierarchy and client interactivity.## Decision Record 034: Computer Networks Curriculum Integration & Deterministic TCP Sockets Simulation
+- **Status**: Implemented & Verified
+- **Category**: Architecture, Curriculum Expansion, Protocol Simulation & Design System Parity
+- **Problem**:
+  - The System Simulator platform lacked a Computer Networks track, leaving learners without an intuitive, operational mental model of how network interfaces, transport ports, and OS kernel socket abstractions interconnect.
+  - Beginners frequently conflate ports with sockets, misunderstand how a single listening server port (e.g. 443) can service thousands of concurrent clients without collision, and struggle to visualize packet encapsulation (Layer 2 through Layer 7).
+  - Adding a new subject must strictly adhere to the project's zero-duplication principle, reusing the `EditorialDisciplineCard` and `EpisodeCard` primitives, respecting Decision 001–003 safety standards, and matching the editorial dark-mode aesthetic.
+- **Decision & Implementation**:
+  - **1. Zero-Duplication Curriculum Strata Rebalance ([`src/app/learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx))**:
+    - Rebalanced **Stratum 1** from "Foundations (Kernel & Hardware Arbitration)" to *"Foundations (Kernel, Hardware & Network Substrate)"*.
+    - Reused `<EditorialDisciplineCard>` to position Operating Systems (`/operating-systems`, Sky `#0ea5e9`) and Computer Networks (`/computer-networks`, Teal `#14b8a6`) side-by-side in a responsive 2-column grid.
+    - Added [`SocketHandshakePreview`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/SimulationPreviews.tsx) embedding a tactile 4-step interactive handshake preview directly within the catalog card.
+  - **2. Tokenized Subject Hub ([`src/app/computer-networks/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/page.tsx))**:
+    - Reused the standard `<EpisodeCard>` primitive configured with the built-in `teal` accent preset.
+    - Sourced metadata from [`src/app/computer-networks/episodes.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/episodes.tsx) containing Episode 1 (*"IP Addresses, Ports & Sockets"*) and planned roadmap modules (*"DNS Resolution"*, *"TLS 1.3"*, *"TCP Flow Control"*).
+    - Integrated Computer Networks into `DISCIPLINES` in [`src/components/ui/DisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/DisciplineCard.tsx) for automatic catalog synchronization on the landing page.
+  - **3. Deterministic Simulation Engine & Scenarios ([`src/lib/network-simulator/`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/))**:
+    - Adhered strictly to **Rule #4 (The 7 Simulation Rules)**:
+      - Rule 1 (State Isolation): Defined strict, typed `NetworkSimulationScenario` step models.
+      - Rule 2 (Transparency): Rendered complete socket collections with listening vs established states clearly distinguished.
+      - Rule 3 (Keys): Constructed deterministic composite keys (`${host.id}-${port}`, `${sock.id}`).
+      - Rule 4 (Theming): Hardcoded dark terminal tokens (`text-zinc-200`, `text-zinc-400`, `bg-[#0a0c10]`).
+      - Rule 5 (Multi-Modal Feedback): Step badge, docked `StepExplanationBar`, in-flight wire packet highlight, and socket table telemetry.
+      - Rule 6 (Lifecycle): Step 0 initializes in idle/listen, teardown terminates cleanly.
+      - Rule 7 (Two-Phase Binding): Modeled socket creation $\rightarrow$ binding $\rightarrow$ handshake $\rightarrow$ established connection.
+    - Implemented 4 comprehensive scenarios:
+      1. `SCENARIO_HANDSHAKE`: Canonical 3-way handshake (`SYN`, `SYN-ACK`, `ACK`), `GET /` request, and `200 OK` response.
+      2. `SCENARIO_MULTI_CLIENT`: Demonstrates how two clients (both using ephemeral port 51524) connect to server port 443, disambiguated by their 4-tuple.
+      3. `SCENARIO_PORT_CONFLICT`: Models `EADDRINUSE` collision and subsequent rebinding to port 8081 with `SO_REUSEPORT` notes.
+      4. `SCENARIO_WIRE_DISSECTION`: Layer-by-layer packet encapsulation (L2 Ethernet Frame, L3 IP Packet, L4 TCP Segment, L7 HTTP Payload).
+  - **4. State Management & Lifecycle ([`src/store/useNetworkSimulationStore.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/store/useNetworkSimulationStore.ts) & [`src/hooks/useNetworkKeyboardShortcuts.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/hooks/useNetworkKeyboardShortcuts.ts))**:
+    - Implemented defensive clamp bounds preventing out-of-range crashes (Decision 001).
+    - Implemented fresh-start unmount cleanup preventing state leakage across navigation (Decision 002).
+    - Integrated standard keyboard navigation (`Space`, `ArrowRight`, `ArrowLeft`, `R`) with form-input suppression.
+  - **5. Automated Verification**:
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings across all touched files.
+    - `npm test`: 60 Vitest test suites (526 tests) passed with 100% green status.
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Zero regressions; expands the platform to 6 computational disciplines with complete design system fidelity.
+
+---
+
+## Decision Record 035: Full Distillation of `/learning-paths` to High-Signal, Symmetrical Catalog Architecture
+- **Status**: Implemented & Verified
+- **Category**: UI/UX Distillation, Cognitive Ergonomics, Design Quality & Layout Symmetry
+- **Problem**:
+  - The `/learning-paths` route suffered from extreme information overload. Each discipline card stacked 7 layers of information: eyebrow, title, badge, description, embedded interactive simulation widgets with buttons, "Core Understanding" callout box, 4 capability checkmarks, 7–9 unclickable scenario tags, and a CTA link.
+  - Cards reached 800–900px in height, demanding over 4,800px of vertical scrolling on mobile.
+  - Embedding interactive `<button>` tags (`Next State`, `Reset`) inside an outer `<Link>` (`<a>`) element violated W3C HTML5 specifications and caused high click collision risk and accidental navigation on mobile devices.
+  - Half the cards contained 300px preview widgets while the others did not, resulting in severe visual asymmetry.
+- **Decision & Implementation**:
+  - **1. Full Card Distillation ([`EditorialDisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/EditorialDisciplineCard.tsx))**:
+    - Stripped each card to its essential navigation anatomy:
+      1. Icon + Title + Discipline Eyebrow + Dynamic Episode Badge
+      2. Concise, active 2-sentence description (eliminating triple copy redundancy)
+      3. 4 curated high-signal domain topic tags
+      4. Single, clear CTA link (`Explore Track →`)
+    - Removed nested interactive preview widgets, eliminating invalid `<button>` in `<Link>` nesting.
+    - Standardized all cards to uniform, balanced heights with smooth hover lift (`hover:-translate-y-0.5`) and hairline glow highlights.
+  - **2. Symmetrical 6-Discipline Computational Strata ([`src/app/learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx))**:
+    - Structured the catalog into 3 balanced 2-column strata (6 disciplines total) plus the Canvas Studio workshop banner:
+      - **Stratum 1 (Foundations)**: Operating Systems & Computer Networks
+      - **Stratum 2 (Runtimes)**: JavaScript & Java & JVM Architecture
+      - **Stratum 3 (Application Architecture)**: Frontend Architecture & Backend Internals
+      - **Stratum 4 (Distributed Studio)**: Canvas Studio full-width sandbox banner
+    - Added `text-wrap: balance` to the page heading and `max-w-2xl` to body paragraphs.
+  - **3. Accessibility & Contrast Polish**:
+    - Upgraded muted badge and topic text to `text-zinc-600 dark:text-zinc-300`, exceeding WCAG AA 4.5:1 contrast across all themes.
+  - **4. Automated Verification**:
+    - Updated [`LearningPathsPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/__tests__/LearningPathsPage.test.tsx) (4 tests) and [`EditorialDisciplineCard.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/__tests__/EditorialDisciplineCard.test.tsx) (2 tests).
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings.
+    - `npm test`: 60 Vitest test suites (526 tests) passed with 100% green status.
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Zero regressions; reduces vertical page height by over 60%, eliminates cognitive fatigue, and makes track selection fast, effortless, and intuitive.
+
+---
+
+## Decision Record 036: Educational Polish, 8-Bit TCP Register & Deep Dive Architecture for Network Simulator
+- **Status**: Implemented & Verified
+- **Category**: Educational Architecture, Simulation Integrity & Accessibility
+- **Problem**:
+  - The Impeccable critique of `/computer-networks/simulator/ip-port-sockets` identified critical gaps between the rich data model and the presentation layer:
+    1. Rich `detailedNotes` across all 4 scenarios remained completely unrendered, locking away high-value technical context.
+    2. Step titles and categorical badges (e.g. `"Handshake 1/3"`, `"Error: EADDRINUSE"`) were discarded in favor of hardcoded `"Step X"`.
+    3. The Packet Inspector rendered all four protocol layers identically on every step, failing to visually convey layer encapsulation during wire dissection.
+    4. TCP control flags were rendered only as text tokens rather than authentic 8-bit registers (`RFC 793`).
+    5. Advancing or reversing timeline steps clobbered user-selected socket inspection, resetting focus to index 0 on every step transition.
+    6. Non-semantic `div` click handlers lacked keyboard accessibility, WAI-ARIA tab semantics, and ARIA state indicators.
+    7. Client host applications were truncated to index 0 (`applications[0]`), violating Simulation Rule #2 (Transparency Rendering Principle).
+- **Decision & Implementation**:
+  - **1. Educational Content & Kernel Deep Dive Section ([`NetworkEpisodeShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkEpisodeShell.tsx))**:
+    - Enhanced the docked `StepExplanationBar` to render the active step's contextual badge (`Engine Init`, `Handshake 1/3`, `Error: EADDRINUSE`), title, and explanation.
+    - Integrated a compact, accessible, collapsible Kernel Deep Dive micro-drawer (`aria-expanded`, `aria-controls`) surfacing `detailedNotes`.
+    - Enriched all scenario steps with contextual terminal command examples (`ss -tulpn`, `sysctl net.ipv4.ip_local_port_range`, `tcpdump -nn -vv`, `lsof -iTCP`) clearly labeled with platform (`Linux / POSIX`, `macOS`, `Universal`) and technical purpose.
+  - **2. Wire Packet Inspector Layer Highlighting & 8-Bit Register ([`PacketInspectorPanel.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/PacketInspectorPanel.tsx))**:
+    - Implemented contextual active layer illumination (`border-2 border-teal-500/80 bg-teal-950/25 ring-2 ring-teal-500/40`) during `SCENARIO_WIRE_DISSECTION`.
+    - Distinguished active layers from pending unencapsulated layers (`[Pending Encapsulation]`, dashed border, `opacity-40`) without misrepresenting full packets in normal scenarios.
+    - Added an authentic 8-bit TCP control flags register (`CWR`, `ECE`, `URG`, `ACK`, `PSH`, `RST`, `SYN`, `FIN`), displaying active bits illuminated in teal while retaining the beginner-friendly token summary.
+    - Added a 4-tuple demultiplexing key banner in multi-client scenarios correlating packet source and destination with the appropriate socket and client host.
+  - **3. State Preservation & Bug Fixes ([`useNetworkSimulationStore.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/store/useNetworkSimulationStore.ts) & [`NetworkTopologyCanvas.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkTopologyCanvas.tsx))**:
+    - Created `resolveSelectedSocket` preserving user-selected sockets across `nextStep`, `prevStep`, and `goToStep` navigation by matching exact socket ID or endpoint 4-tuple, gracefully falling back to index 0 only when destroyed.
+    - Mapped all client applications transparently (`client.applications.map(...)`) adhering to Simulation Rule #2.
+    - Fixed non-standard Tailwind `py-0.2` classes to `py-0.5`.
+    - Added active peer highlight in multi-client topology when a packet is in flight.
+    - Implemented restrained CSS transform transitions on packets respecting `motion-reduce:transform-none` without coupling motion to simulation state.
+  - **4. WAI-ARIA & Keyboard Accessibility**:
+    - Converted clickable socket divs into native `<button role="option" aria-selected={isSelected}>` inside a `role="listbox"`.
+    - Converted in-flight packet badges into native `<button aria-label="...">` with visible focus rings.
+    - Applied WAI-ARIA `role="tablist"` / `role="tab"` / `role="tabpanel"` structures to the inspector tabs and layer filter pills.
+    - Added `aria-pressed` and accessible names to playback speed selectors.
+    - Added wide-screen simultaneous Dual-Pane toggle (`2xl:flex`) allowing learners on large displays to observe Kernel Sockets and Wire Packet Inspector concurrently.
+  - **5. Automated Verification**:
+    - Added comprehensive unit tests in [`PacketInspectorPanel.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/__tests__/PacketInspectorPanel.test.tsx) and updated [`NetworkEpisodeShell.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/__tests__/NetworkEpisodeShell.test.tsx) and [`useNetworkSimulationStore.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/store/__tests__/useNetworkSimulationStore.test.ts) (22 tests passing green).
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings across all touched files.
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Scoped strictly to `/computer-networks/simulator/ip-port-sockets` and associated network simulator components. Elevates educational clarity, technical fidelity, and interactive accessibility to award-winning standards.
+
+---
+
+## Decision Record 037: In-Situ Interactive Concept Dialogue Architecture & Interface Streamlining
+- **Status**: Implemented & Verified
+- **Category**: UI Ergonomics, Educational Interaction & Design Simplification
+- **Problem**:
+  - The collapsible "Kernel Deep Dive" drawer below the explanation bar added vertical layout crowding, competing with the network topology canvas and socket/packet inspector.
+  - The "Split View" dual-pane button created visual clutter in the episode header while splitting attention across simultaneous panels on smaller viewports.
+  - Users reading complex networking concepts (e.g. `0.0.0.0`, `ephemeral port`, `ISN`, `SYN_SENT`, `4-tuple`, `EADDRINUSE`, `SO_REUSEPORT`) had to manually toggle and expand a separate drawer rather than understanding unfamiliar terms in the immediate narrative context where they appear.
+- **Decision & Implementation**:
+  - **1. Split View Removal**:
+    - Completely removed the Split View button, `dualPaneMode` state, and multi-column overlay from [`NetworkEpisodeShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkEpisodeShell.tsx).
+    - Preserved the clean, accessible, single-panel WAI-ARIA tabbed sidebar (`Sockets` vs `Packet Inspector`) with seamless keyboard navigation and tab shortcuts.
+  - **2. In-Situ Interactive Term Highlighting ([`InteractiveExplanationBar.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/InteractiveExplanationBar.tsx))**:
+    - Replaced the bulky collapsible drawer with an inline interactive narrative parser.
+    - Automatically identifies and highlights 25+ networking keywords (e.g., `0.0.0.0`, `LISTEN`, `ephemeral port`, `ISN`, `SYN`, `SYN-ACK`, `4-tuple`, `PSH flag`, `EADDRINUSE`, `SO_REUSEPORT`, `TTL`, `MAC address`) with subtle dotted underline styling and badge pills.
+    - Renders an "Inspect Concepts" chip bar for the scenario step's detailed notes, allowing immediate zero-friction exploration.
+  - **3. Accessible Hover/Focus Concept Dialogue**:
+    - Displays a floating popover card on hover or keyboard focus, complete with concept categorization (`Socket Lifecycle`, `Transport Protocol`, `Kernel Telemetry`), plain-English educational explanation, and contextual platform terminal commands (`ss`, `tcpdump`, `lsof`, `sysctl`).
+    - Engineered with safe hover ergonomics (140ms entry delay, 180ms leave buffer) allowing users to mouse directly into the dialogue to inspect or copy terminal commands without accidental dismissal.
+    - Fully accessible via keyboard (<kbd>Tab</kbd>, <kbd>Space</kbd>, <kbd>Enter</kbd>, <kbd>Escape</kbd>) with proper `aria-haspopup="dialog"`.
+  - **4. Automated Verification**:
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings across all network simulation files.
+    - `npm test`: 22 unit tests passing green across [`NetworkEpisodeShell.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/__tests__/NetworkEpisodeShell.test.tsx), [`PacketInspectorPanel.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/__tests__/PacketInspectorPanel.test.tsx), [`useNetworkSimulationStore.test.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/store/__tests__/useNetworkSimulationStore.test.ts), and [`networkScenarioIntegrity.test.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/__tests__/networkScenarioIntegrity.test.ts).
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Zero breaking changes; eliminates UI clutter while elevating educational immediacy and interactive polish to an award-winning level.
+
+---
+
+## Decision Record 038: Removal of Eyebrows from `/learning-paths` & Editorial Discipline Cards
+- **Status**: Implemented & Verified
+- **Category**: UI Polish, Typography & Craft Floor Alignment
+- **Problem**:
+  - The `/learning-paths` route and its `<EditorialDisciplineCard>` cards contained redundant uppercase tracking-wide eyebrow kickers (`Foundations // Kernel Architecture`, `Runtime // V8 Engine`, `SYSTEM SIMULATOR / LEARNING PATHS`).
+  - These eyebrows introduced visual noise and duplicated the section stratum headers (`Foundations`, `Runtimes`, `Application Architecture`) placed directly above each card grid.
+  - The eyebrow block above each card's title pushed the `<h3>` headline down, misaligning the icon and card title.
+- **Decision & Implementation**:
+  - **1. Eyebrow Removal from Cards ([`EditorialDisciplineCard.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/EditorialDisciplineCard.tsx))**:
+    - Removed `eyebrow` prop from `EditorialDisciplineProps` and the rendered markup.
+    - Simplified the card top row: `Icon` and `<h3>{title}</h3>` now sit directly side-by-side vertically centered with `flex items-center gap-3`, creating a clean, balanced presentation.
+  - **2. Eyebrow Removal from Page Header ([`src/app/learning-paths/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/learning-paths/page.tsx))**:
+    - Removed `SYSTEM SIMULATOR / LEARNING PATHS` kicker from the page header, allowing the headline (*"Understand systems. From the inside out."*) to lead with clear visual authority.
+    - Removed `eyebrow="..."` props from all 6 discipline cards.
+  - **3. Test Updates**:
+    - Updated [`EditorialDisciplineCard.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/learning-paths/__tests__/EditorialDisciplineCard.test.tsx) to verify clean rendering without eyebrows.
+    - Updated [`LearningPathsPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/__tests__/LearningPathsPage.test.tsx) asserting no card eyebrows or header kicker render.
+  - **4. Verification**:
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings across all touched files.
+    - `npm test`: 60 test suites (530 tests) passed with 100% green status.
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Zero regressions; reduces visual clutter and strengthens typographic hierarchy across the learning path directory.
+
+---
+
+## Decision Record 039: Reusable ScenarioDropdown, Mobile Viewport Overhaul & Touch-Persistent Dialogues
+- **Status**: Implemented & Verified
+- **Category**: Mobile Responsiveness, Reusable UI Components & Network Standards
+- **Problem**:
+  - Small screen analysis (`Screenshots/image.png`) revealed critical mobile usability issues:
+    1. The simulator container locked the page in `h-screen overflow-hidden`, preventing users on phones and tablets from scrolling to view the topology server host, socket table, or packet inspector.
+    2. The episode navigation header suffered from awkward wrapping (`EPISODE` over `1`), and used a raw, unstyled native `<select>` dropdown.
+    3. Contextual concept dialogues dismissed immediately on touch due to premature `blur`/`mouseleave` event fires, preventing mobile learners from reading explanations or copying terminal commands.
+    4. The bottom playback controls were obscured or collided with content on small screens.
+- **Decision & Implementation**:
+  - **1. Reusable `ScenarioDropdown` Primitive ([`src/components/ui/ScenarioDropdown.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/ScenarioDropdown.tsx))**:
+    - Created a unified, accessible Framer Motion scenario dropdown featuring customizable color accents (`teal`, `amber`, `sky`, etc.), WAI-ARIA `role="combobox"` / `role="listbox"`, keyboard navigation (<kbd>↑</kbd>/<kbd>↓</kbd>/<kbd>Esc</kbd>), touch-friendly item padding, and mobile screen containment.
+    - Integrated `<ScenarioDropdown>` into [`NetworkEpisodeShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkEpisodeShell.tsx).
+  - **2. Mobile Viewport & Natural Scroll Flow ([`NetworkEpisodeShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkEpisodeShell.tsx))**:
+    - Maintained desktop fixed stage (`lg:h-screen lg:overflow-hidden`) while granting mobile viewports natural vertical scrolling (`min-h-screen overflow-y-auto`).
+    - Staged the Topology Canvas (`min-h-[380px] sm:min-h-[420px]`) and Telemetry Context Panels (`min-h-[400px]`) in vertical document flow on smaller screens.
+    - Turned the bottom playback bar into a `sticky bottom-0 z-40 bg-zinc-950/95 backdrop-blur-md` controller with compact step counting (`Step 1/6`), `touch-manipulation`, and tactile active press transitions (`active:scale-95`).
+  - **3. Touch-Persistent Concept Dialogues ([`InteractiveExplanationBar.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/InteractiveExplanationBar.tsx))**:
+    - Added an `isPinned` state that pins the dialogue open upon tap/click or on touch devices, ignoring `blur` and `mouseleave` events.
+    - Rendered a mobile backdrop (`fixed inset-0 bg-black/60 sm:hidden`) allowing intuitive tap-to-dismiss.
+    - Centered dialogue positioning on mobile (`fixed left-3 right-3 top-20 max-h-[80vh] overflow-y-auto`) with a dedicated `<X>` close button.
+  - **4. Network Architecture Decisions Document ([`DecisionsAndAnalysis/Network decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/Network%20decisions.md))**:
+    - Authored an authoritative guide for all future Computer Networks episodes establishing the zero-duplication principle, anatomical standards, and mandatory component reuse.
+  - **5. Automated Verification**:
+    - Added comprehensive unit tests in [`ScenarioDropdown.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/ui/__tests__/ScenarioDropdown.test.tsx) and updated [`NetworkEpisodeShell.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/__tests__/NetworkEpisodeShell.test.tsx).
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings across touched files.
+    - `npm test`: 61 test suites (533 tests) passing with 100% green status.
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Scoped to simulation shells and dropdown components; eliminates mobile traps without affecting desktop viewport layouts.
+
+---
+
+## Decision Record 040: Dedicated Network Playback Controller Primitive with Responsive Viewport Adaptation
+- **Status**: Implemented & Verified
+- **Category**: Component Architecture & Mobile Viewport Ergonomics
+- **Problem**:
+  - Learners viewing Computer Networks episodes on smaller screens needed the playback controls to be persistently pinned at the bottom of the viewport so they never have to hunt for play/step buttons while viewing content.
+  - On smaller screens, keyboard shortcut labels (`Space Play`, `← / → Step`, `R Reset`), timeline step counts, and auxiliary speed buttons caused horizontal crowding and took attention away from core playback.
+  - Replicating inline playback bars in every future episode risked inconsistent behaviors across viewport breakpoints.
+- **Decision & Implementation**:
+  - **1. Reusable `NetworkPlaybackBar` Primitive ([`src/components/network-simulator/NetworkPlaybackBar.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkPlaybackBar.tsx))**:
+    - Created a shared playback controller with dual responsive behaviors:
+      - **Smaller Screens (`< sm`)**: Attached fixed at the bottom (`fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-md border-t border-border/60 shadow-[0_-8px_24px_rgba(0,0,0,0.6)]`).
+        - Renders **only** the 3 core navigation buttons: `Previous`, `Play / Pause`, and `Next`.
+        - Completely hides keyboard shortcut text, step count, speed options, and reset button to maximize thumb ergonomics and eliminate clutter.
+        - Includes iOS safe area inset padding (`pb-[max(0.5rem,env(safe-area-inset-bottom))]`).
+      - **Desktop / Largest Screens (`sm:` and above)**: Preserves the exact desktop style and layout **100% undisturbed**.
+        - Left: Step indicator (`Timeline Step X of Y`).
+        - Center: Reset, Previous, Play / Pause, Next.
+        - Right: Speed selector buttons (0.5x, 1.0x, 2.0x) and keyboard shortcut badges.
+        - Functions as a static layout footer (`sm:static sm:z-40 sm:shadow-lg sm:shrink-0`).
+    - Staged main content with bottom padding on mobile (`pb-20 sm:pb-4`) in [`NetworkEpisodeShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkEpisodeShell.tsx) ensuring the fixed bar never covers content when scrolled to the end.
+  - **2. Automated Verification**:
+    - Created comprehensive unit tests in [`NetworkPlaybackBar.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/__tests__/NetworkPlaybackBar.test.tsx).
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings.
+    - `npm test`: 62 test suites (536 tests) passing green.
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Scoped to network simulator playback controls; completely streamlines mobile thumb control while keeping desktop aesthetics completely intact.
+
+---
+
+## Decision Record 041: Cross-Breakpoint Component Standardization, Agent Rules Codification & Mobile Concept Auto-Open Fix
+- **Status**: Implemented & Verified
+- **Category**: Component Architecture, Accessibility & Mobile Viewport Ergonomics
+- **Problem**:
+  - On mobile touch screens, navigating steps or scrolling through Episode 1 in Computer Networks caused the "Inspect Concept" popover dialog to automatically open without the learner touching the button.
+  - This occurred because `onFocus` was triggering intent-delayed concept opening, touch scroll synthesized `mouseenter` events over buttons under the user's thumb, and `activeConcept` state was never reset upon simulation step changes.
+  - Furthermore, architectural guidelines needed to explicitly mandate that all future episodes across all subjects reuse canonical components across both larger (desktop) and shorter (mobile) screens to prevent divergent or duplicated implementations.
+- **Decision & Implementation**:
+  - **1. Auto-Open Elimination in `InteractiveExplanationBar` ([`src/components/network-simulator/InteractiveExplanationBar.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/InteractiveExplanationBar.tsx))**:
+    - **Step Navigation Reset Effect**: Added an effect watching `[safeIndex]` that resets `activeConcept` to `null`, `isPinned` to `false`, and clears any pending hover timers whenever the learner steps forward or backward.
+    - **Coarse Pointer / Touch Device Guard**: In `handleTriggerEnter`, added a check for `(hover: none), (pointer: coarse)`. If true (mobile phone, tablet, touch screen), synthetic mouse hover events generated by touch scrolling are completely ignored.
+    - **Removed `onFocus` Auto-Trigger**: Removed `onFocus={() => handleTriggerEnter(concept)}` from keyword buttons and concept chips. Focus solely provides accessible focus indicators; opening requires explicit activation (tap/click for touch users; Enter/Space for keyboard navigators; fine mouse hover for desktop).
+  - **2. Documentation & Agent Rules Codification**:
+    - **[`DecisionsAndAnalysis/Network decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/Network%20decisions.md)**: Updated to strictly mandate the zero-duplication principle and canonical component reuse across larger and shorter screens for all future episodes.
+    - **[`AGENTS.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/AGENTS.md) & [`Agent Rules/Rules.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/Agent%20Rules/Rules.md)**: Added Rules #6 (Zero-Duplication & Component Reuse), #7 (Responsive Fidelity for Larger & Shorter Screens), and #8 (Clean Code, Accessibility & State Hygiene).
+  - **3. Automated Verification**:
+    - Updated [`NetworkEpisodeShell.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/__tests__/NetworkEpisodeShell.test.tsx) asserting that concept dialogues close automatically on step transition.
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings across touched files.
+    - `npm test`: All Vitest suites passing green.
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
+- **Blast Radius**: Scoped to the explanation bar popover trigger behavior and project documentation. Prevents unwanted dialog popups on touch screens without impairing desktop hover experiences.
 
 
 

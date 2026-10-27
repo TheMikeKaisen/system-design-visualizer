@@ -5,6 +5,7 @@ import FrontendPathPage from "../frontend/page";
 import BackendPathPage from "../backend/page";
 import JavaPathPage from "../java/page";
 import JavascriptPathPage from "../javascript/page";
+import ComputerNetworksPathPage from "../computer-networks/page";
 
 describe("Subject Path Pages (Design System Consistency)", () => {
   describe("Operating Systems Path Page", () => {
@@ -120,6 +121,23 @@ describe("Subject Path Pages (Design System Consistency)", () => {
       expect(screen.getByRole("link", { name: /Primitive Typecasting/i })).toHaveAttribute(
         "href",
         "/java/simulator/typecasting"
+      );
+    });
+  });
+
+  describe("Computer Networks Path Page", () => {
+    it("renders all Computer Networks episodes with standardized AppNavbar and EpisodeCard", () => {
+      render(<ComputerNetworksPathPage />);
+
+      expect(screen.getByRole("heading", { level: 1, name: /Computer Networks/i })).toBeDefined();
+      expect(screen.getByText("IP Addresses, Ports & Sockets")).toBeDefined();
+      expect(screen.getByText("DNS Resolution & Caching")).toBeDefined();
+      expect(screen.getByText("TLS 1.3 Encryption & Handshake")).toBeDefined();
+      expect(screen.getByText("TCP Flow Control & Sliding Window")).toBeDefined();
+
+      expect(screen.getByRole("link", { name: /IP Addresses, Ports & Sockets/i })).toHaveAttribute(
+        "href",
+        "/computer-networks/simulator/ip-port-sockets"
       );
     });
   });

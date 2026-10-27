@@ -4,12 +4,11 @@ import { Cpu, Terminal } from "lucide-react";
 import { EditorialDisciplineCard } from "../EditorialDisciplineCard";
 
 describe("EditorialDisciplineCard", () => {
-  it("renders a distilled card correctly with topics and metadata", () => {
+  it("renders a distilled card correctly with topics and metadata without eyebrows", () => {
     render(
       <EditorialDisciplineCard
         id="test-card"
         title="Test Discipline"
-        eyebrow="Category // Subcategory"
         badge="5 Episodes"
         description="A concise test description of this discipline."
         topics={["Topic Alpha", "Topic Beta"]}
@@ -24,7 +23,7 @@ describe("EditorialDisciplineCard", () => {
     );
 
     expect(screen.getByText("Test Discipline")).toBeDefined();
-    expect(screen.getByText("Category // Subcategory")).toBeDefined();
+    expect(screen.queryByText("Category // Subcategory")).toBeNull();
     expect(screen.getByText("5 Episodes")).toBeDefined();
     expect(screen.getByText("A concise test description of this discipline.")).toBeDefined();
     expect(screen.getByText("Topic Alpha")).toBeDefined();
@@ -40,7 +39,6 @@ describe("EditorialDisciplineCard", () => {
       <EditorialDisciplineCard
         id="runtime-card"
         title="JavaScript Engine"
-        eyebrow="Runtime // V8"
         badge="7 Episodes"
         description="Execute code one discrete step at a time."
         topics={["Call Stack", "Event Loop"]}
