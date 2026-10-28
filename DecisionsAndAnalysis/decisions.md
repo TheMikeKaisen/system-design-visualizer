@@ -1292,9 +1292,64 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain as unstaged working tree modifications.
 - **Blast Radius**: Episode 2 addition with zero regressions on Episode 1 or existing discipline episodes.
 
+---
 
+## Decision Record 043: Computer Networks Episode 3 — TCP Connection Establishment & Lifecycle Implementation
 
-
-
+- **Status**: Implemented & Verified
+- **Category**: Subject Expansion, Transport Layer Protocol Fidelity & Canonical Component Reuse
+- **Problem**:
+  - The platform required Episode 3 of Computer Networks ("TCP Connection Establishment & Lifecycle"), bringing to life the 3-Way Handshake, sequence number arithmetic, packet loss recovery, reset aborts, graceful 4-way teardown, and DDoS defense mechanisms (RFC 793, 2018, 4987, 6298, 7323).
+  - Common learner misconceptions needed direct pedagogical refutation:
+    1. Confusing packet loss (silent drop requiring RTO timer expiration and exponential backoff) with closed ports (active, immediate RST packet resulting in `ECONNREFUSED`).
+    2. Believing that all packets consume sequence numbers, whereas pure ACKs consume exactly 0 bytes while `SYN` and `FIN` consume 1 phantom byte.
+    3. Conflating `CLOSE_WAIT` (local app has not called `close()`) with `TIME_WAIT` (active close initiator waits 2*MSL to safely absorb wandering delayed packets).
+    4. Believing that SYN floods cannot be stopped without dropping legitimate traffic, when stateless SYN cookies (RFC 4987) cryptographically encode state into the ISN without RAM allocation.
+- **Decision & Implementation**:
+  - **1. Zero-Duplication Canonical Shell & Primitives**:
+    - Reused `NetworkEpisodeShell` mounted at `/computer-networks/simulator/tcp-connections` with standard navigation, `ScenarioDropdown`, `NetworkPlaybackBar` (responsive fixed bottom dock on mobile, expanded footer on desktop), and `InteractiveExplanationBar`.
+  - **2. Full-Fidelity TCP Engine & Educational Glossary**:
+    - Created [`src/lib/network-simulator/tcp-engine.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/tcp-engine.ts) with protocol models for `TcpSocketState`, `TcpFlags`, `TcpSegment`, `TcpOptions`, `TcpBacklogTelemetry`, and `TcpSequenceArithmetic`.
+    - Authored rich `TCP_GLOSSARY` dictionary (25+ highlighted concepts: `SYN`, `SYN-ACK`, `ACK`, `ISN`, `MSS`, `Receive Window`, `Window Scale`, `SACK`, `TIME_WAIT`, `CLOSE_WAIT`, `FIN`, `RST`, `SYN Backlog`, `Accept Queue`, `SYN Cookie`, `RTO`, `2*MSL`, `Half-Closed Socket`, `TCP_NODELAY`, `Simultaneous Open`, `ECONNREFUSED`, etc.) with intuitive analogies and verified terminal commands (`ss`, `tcpdump`, `sysctl`, `nc`, `curl`).
+  - **3. Curated 6 Deterministic Scenarios**:
+    - Created [`src/lib/network-simulator/tcp-scenarios.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/tcp-scenarios.ts):
+      1. `SCENARIO_TCP_HANDSHAKE`: Canonical 3-way handshake, ISN synchronization, pure ACK 0-byte verification, and first 50-byte HTTP request.
+      2. `SCENARIO_TCP_SYN_LOSS`: Packet drop, RTO timer countdown, exponential backoff (1s -> 2s), and clean retransmission.
+      3. `SCENARIO_TCP_CONNECTION_REFUSED`: Unbound port 8080 triggering immediate RST, ACK and fast `ECONNREFUSED` abort.
+      4. `SCENARIO_TCP_TEARDOWN`: Graceful 4-way teardown, `FIN_WAIT_1`, `CLOSE_WAIT`, `FIN_WAIT_2`, `LAST_ACK`, and `TIME_WAIT` with 2*MSL timer.
+      5. `SCENARIO_TCP_SYN_FLOOD`: 100% backlog saturation (128/128), stateless SYN cookie activation, cryptographic ISN reply, and instant validation.
+      6. `SCENARIO_TCP_SIMULTANEOUS_OPEN`: P2P NAT hole punching with symmetric crossing SYNs, `SYN_SENT -> SYN_RCVD` transition, and simultaneous establishment.
+  - **4. Dual-Horizon Topology Canvas**:
+    - Created [`src/components/network-simulator/TcpTopologyCanvas.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/TcpTopologyCanvas.tsx) rendering Client Machine (ephemeral port `:51000`, active syscall, RTO timer, sequence arithmetic, buffers), Center Wire Substrate (in-flight segment pill, flags badge, drop indicator), and Server Host (`0.0.0.0:80 [LISTEN]`, dual capacity meters for SYN Backlog and Accept Queue, spawned child socket).
+  - **5. WAI-ARIA Tabbed Telemetry Panel**:
+    - Created [`src/components/network-simulator/TcpTelemetryPanel.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/TcpTelemetryPanel.tsx):
+      - Tab 1 (`Wire Segment Header & Options Inspector`): RFC 793 8-bit flag register (`[CWR|ECE|URG|ACK|PSH|RST|SYN|FIN]`) with illuminated active bits, 32-bit sequence/ack fields, data offset, urgent pointer, receive window, checksum with 12-byte IPv4 Pseudo-Header verification note, and full TCP options (MSS, Window Scale, SACK, TSopt Timestamps, SYN Cookies).
+      - Tab 2 (`Kernel Sockets Table (ss -tan)`): Live socket listing displaying 4-tuples, queue lengths, process names, and TCP states, with auto-clamping index selection.
+      - Tab 3 (`Responsive Dual-View TCP Finite State Machine`): Full interactive SVG directed graph on desktop (`hidden sm:block`) with all 11 RFC 793 states, directed transition arcs, active client/server glow rings, and click inspection; paired with an accessible linear stepper on mobile (`block sm:hidden`).
+  - **6. Enhanced Wire Substrate & Micro-Motion**:
+    - Created [`src/components/network-simulator/TcpTopologyCanvas.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/TcpTopologyCanvas.tsx) featuring a dynamic directional travel rail along the wire substrate with pulsing data waves, prominent drop breakdown indicator (`AlertOctagon`), server sequence arithmetic counters, and persistent `*:80 [LISTEN]` parent socket.
+  - **7. Robust Concept Resolution Algorithm**:
+    - Upgraded [`src/components/network-simulator/InteractiveExplanationBar.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/InteractiveExplanationBar.tsx) to use separator normalization (`-`, `_`, space), exact matching against glossary/terms, and longest-key-first sorting. This eliminates term shadowing where substring matches like `"SYN"` clobbered `"SYN-ACK"`, `"SYN Backlog"`, `"SYN Cookies"`, or `"FIN_WAIT_1"`.
+  - **8. Route Lifecycle Hygiene & Derived State**:
+    - Configured [`src/app/computer-networks/simulator/tcp-connections/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/simulator/tcp-connections/page.tsx) with derived `currentStepKey` state to reset packet selection on step/scenario transition without triggering cascading render warnings (`react-hooks/set-state-in-effect`), alongside clean unmount store reset (Decision 002).
+  - **9. Route & Catalog Integration**:
+    - Route created at [`src/app/computer-networks/simulator/tcp-connections/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/simulator/tcp-connections/page.tsx).
+    - Updated catalog in [`src/app/computer-networks/episodes.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/episodes.tsx) promoting Episode 3 from roadmap to live simulator.
+  - **10. Defensive Retention, Accessibility & Review Hardening**:
+    - Replaced numeric socket index in `TcpTelemetryPanel` with stable `selectedSocketId` (Rule #8 item 3), preserving active socket row selection across step and scenario navigation.
+    - Fixed Client host state badge in `TcpTopologyCanvas` to style directly from `client.state` rather than mistakenly rendering `LISTEN` styles when the server is listening.
+    - Fixed wire wave pulse animation positioning using exact percentage `left` styling on relative substrate container, enabling the pulse wave to travel the full distance between endpoints without stopping at 50%.
+    - Implemented `isArcActive` helper in `TcpTelemetryPanel` SVG directed graph, lighting up only the specific arc traversed on that step based on `fsmTransition` telemetry, eliminating confusing simultaneous illumination on converging states (`ESTABLISHED`, `TIME_WAIT`).
+    - Added keyboard accessibility (`onKeyDown` for Enter / Space) and visible focus rings to SVG state nodes (Rule #8 item 2).
+    - Upgraded telemetry tabs and mobile FSM stepper buttons to 44px minimum touch targets with tactile active feedback (Rule #7).
+    - Hardened `InteractiveExplanationBar` regex compiler to sort term patterns length-descending with Set deduplication, eliminating compound prefix clashes.
+  - **11. Automated Verification**:
+    - Scenario integrity test in [`tcpScenarioIntegrity.test.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/__tests__/tcpScenarioIntegrity.test.ts) (28 tests verifying step progression, sequence arithmetic, backlog meters, and all 11 FSM state definitions).
+    - Smoke and accessibility tests in [`tcpPage.test.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/simulator/tcp-connections/__tests__/tcpPage.test.tsx) (9 tests verifying shell mounting, 8-bit flag register, desktop SVG graph, canvas packet pill auto-tab switch, non-shadowed concept popovers, client CLOSED badge styling, defensive socket selection retention across steps, and SVG FSM keyboard activation).
+    - `npx tsc --noEmit`: 0 errors.
+    - `npx eslint`: 0 errors, 0 warnings.
+    - `npm test`: All 66 test suites green (584 tests).
+    - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain in the unstaged working tree.
+- **Blast Radius**: Comprehensive Episode 3 delivery with zero regressions on existing episodes.
 
 

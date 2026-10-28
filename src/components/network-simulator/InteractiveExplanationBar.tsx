@@ -373,10 +373,16 @@ export function InteractiveExplanationBar({
   // Map step detailedNotes to custom concept definitions
   const stepConceptNotes: ConceptDefinition[] = React.useMemo(() => {
     if (!detailedNotes || detailedNotes.length === 0) return [];
+    const normalize = (s: string) => s.toLowerCase().replace(/[-_\s]+/g, " ").trim();
+    const sortedKeys = Object.keys(effectiveGlossary).sort((a, b) => b.length - a.length);
+
     return detailedNotes.map((note) => {
       // Check if built-in definition has extra commands
-      const lower = note.title.toLowerCase();
-      const matchedKey = Object.keys(effectiveGlossary).find((k) => lower.includes(k));
+      const norm = normalize(note.title);
+      const exactKey = Object.keys(effectiveGlossary).find(
+        (k) => normalize(k) === norm || normalize(effectiveGlossary[k].term) === norm
+      );
+      const matchedKey = exactKey ?? sortedKeys.find((k) => norm.includes(normalize(k)));
       const builtin = matchedKey ? effectiveGlossary[matchedKey] : undefined;
 
       return {
@@ -428,26 +434,52 @@ export function InteractiveExplanationBar({
       "Destination MAC",
     ];
 
-    const termPatterns = customTermPatterns
+    const combinedPatterns = customTermPatterns
       ? [...customTermPatterns, ...baseTermPatterns]
       : baseTermPatterns;
+    // Sort patterns by length descending so longer compound terms match before shorter substrings
+    const termPatterns = Array.from(new Set(combinedPatterns)).sort((a, b) => b.length - a.length);
 
     // Build regex with word boundaries
     const escaped = termPatterns.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
     const regex = new RegExp(`(${escaped.join("|")})`, "gi");
 
     const parts = explanation.split(regex);
+    const normalize = (s: string) => s.toLowerCase().replace(/[-_\s]+/g, " ").trim();
+    const sortedGlossaryKeys = Object.keys(effectiveGlossary).sort((a, b) => b.length - a.length);
 
     return parts.map((part, index) => {
-      const lower = part.toLowerCase();
-      const matchedKey = Object.keys(effectiveGlossary).find((k) => lower.includes(k));
+      const normPart = normalize(part);
+      if (!normPart) {
+        return <span key={index}>{part}</span>;
+      }
 
-      // Also check if matches any note in current step
-      const noteMatch = stepConceptNotes.find(
-        (n) => n.title.toLowerCase().includes(lower) || lower.includes(n.title.toLowerCase())
+      // 1. Exact match against effectiveGlossary keys or term titles (normalized)
+      const exactGlossaryKey = Object.keys(effectiveGlossary).find((k) => {
+        const normKey = normalize(k);
+        const normTerm = normalize(effectiveGlossary[k].term);
+        return normKey === normPart || normTerm === normPart;
+      });
+
+      // 2. Exact match against step detailedNotes (normalized)
+      const exactNote = stepConceptNotes.find(
+        (n) => normalize(n.title) === normPart || normalize(n.term) === normPart
       );
 
-      const concept = noteMatch ?? (matchedKey ? effectiveGlossary[matchedKey] : null);
+      // 3. Fallback to longest matching glossary key (so "syn cookies" matches before "syn")
+      const longestGlossaryKey = sortedGlossaryKeys.find((k) => {
+        const normKey = normalize(k);
+        return normPart === normKey || (normKey.length >= 3 && normPart.includes(normKey));
+      });
+
+      // 4. Fallback to step detailedNotes if matching phrase
+      const noteMatch = stepConceptNotes.find((n) => {
+        const normTitle = normalize(n.title);
+        return normTitle === normPart || (normPart.length >= 4 && normTitle.includes(normPart));
+      });
+
+      const matchedKey = exactGlossaryKey ?? longestGlossaryKey;
+      const concept = exactNote ?? (matchedKey ? effectiveGlossary[matchedKey] : noteMatch ?? null);
 
       if (concept && part.trim().length > 1) {
         return (
@@ -606,7 +638,7 @@ export function InteractiveExplanationBar({
             <div className="bg-[#050608] rounded-lg p-2.5 border border-zinc-800/90 font-mono text-[11px]">
               <div className="flex items-center justify-between text-[10px] text-zinc-400 mb-1 font-sans">
                 <span>Purpose: {activeConcept.commandExample.purpose}</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 shrink-0">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 shrink-0">
                   {activeConcept.commandExample.platform}
                 </span>
               </div>

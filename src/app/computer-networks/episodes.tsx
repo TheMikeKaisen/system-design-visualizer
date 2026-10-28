@@ -39,8 +39,19 @@ export const COMPUTER_NETWORKS_EPISODES: EpisodeMetadata[] = [
     icon: <Globe className="w-5 h-5" />,
   },
   {
-    id: "tls-handshake",
+    id: "tcp-connections",
     episodeNumber: 3,
+    title: "TCP Connection Establishment & Lifecycle",
+    description:
+      "Explore the 3-way handshake, SYN queues, stateless SYN cookies, exponential backoff, reset packets, and graceful 4-way teardown.",
+    date: "28 October 2026",
+    href: "/computer-networks/simulator/tcp-connections",
+    accent: "teal",
+    icon: <Cpu className="w-5 h-5" />,
+  },
+  {
+    id: "tls-handshake",
+    episodeNumber: 4,
     title: "TLS 1.3 Encryption & Handshake",
     description:
       "Inspect Diffie-Hellman ephemeral key exchanges, certificate validation, and cipher negotiation securing HTTPS packets.",
@@ -51,13 +62,13 @@ export const COMPUTER_NETWORKS_EPISODES: EpisodeMetadata[] = [
   },
   {
     id: "tcp-flow-control",
-    episodeNumber: 4,
+    episodeNumber: 5,
     title: "TCP Flow Control & Sliding Window",
     description:
       "Observe receive window advertisements, ACK pacing, and congestion control (Slow Start & Congestion Avoidance).",
     date: "Coming Soon",
     href: "/computer-networks/simulator/ip-port-sockets",
     accent: "teal",
-    icon: <Cpu className="w-5 h-5" />,
+    icon: <Network className="w-5 h-5" />,
   },
 ];

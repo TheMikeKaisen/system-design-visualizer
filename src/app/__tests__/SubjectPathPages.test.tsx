@@ -132,12 +132,17 @@ describe("Subject Path Pages (Design System Consistency)", () => {
       expect(screen.getByRole("heading", { level: 1, name: /Computer Networks/i })).toBeDefined();
       expect(screen.getByText("IP Addresses, Ports & Sockets")).toBeDefined();
       expect(screen.getByText("DNS Resolution & Caching")).toBeDefined();
+      expect(screen.getByText("TCP Connection Establishment & Lifecycle")).toBeDefined();
       expect(screen.getByText("TLS 1.3 Encryption & Handshake")).toBeDefined();
       expect(screen.getByText("TCP Flow Control & Sliding Window")).toBeDefined();
 
       expect(screen.getByRole("link", { name: /IP Addresses, Ports & Sockets/i })).toHaveAttribute(
         "href",
         "/computer-networks/simulator/ip-port-sockets"
+      );
+      expect(screen.getByRole("link", { name: /TCP Connection Establishment & Lifecycle/i })).toHaveAttribute(
+        "href",
+        "/computer-networks/simulator/tcp-connections"
       );
     });
   });

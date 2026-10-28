@@ -107,7 +107,40 @@ Future agents must directly import and reuse these verified primitives:
 
 ---
 
-## 4. Verification Protocol for Future Episodes
+## 5. Episode 3: TCP Connection Establishment & Lifecycle Standards
+
+Episode 3 (*TCP Connection Establishment & Lifecycle*) solidifies the transport layer foundations:
+
+1. **Dual-Horizon Host Visualization**:
+   - Client and Server machines render independent TCP finite-state machines, active POSIX syscalls (`socket()`, `connect()`, `listen()`, `accept()`, `write()`, `close()`), and buffer meters.
+   - Server renders explicit kernel queues:
+     - **SYN Backlog** (half-open sockets in `SYN_RCVD` state with max capacity limits and saturation alarms).
+     - **Accept Queue** (completed handshakes waiting for user-space `accept()` dequeue).
+     - **Spawned Child Sockets** demonstrating the creation of a new connected socket descriptor (`203.0.113.20:80 <-> 192.168.1.10:51000 [ESTABLISHED]`) while the parent socket remains in `LISTEN`.
+
+2. **Full-Duplex Sequence Number Arithmetic**:
+   - Explicitly demystifies the rules of TCP sequence arithmetic:
+     - `SYN` and `FIN` flags consume 1 phantom sequence number each (`NextSeq = ISN + 1`).
+     - Pure `ACK` packets carry 0 payload and NO SYN/FIN flags, consuming exactly **0 sequence numbers**.
+     - Data packets advance sequence numbers by the exact payload byte length (`NextSeq = Seq + PayloadLength`).
+     - Initial Sequence Numbers (ISNs) are randomized 32-bit offsets, preventing sequence-number spoofing.
+
+3. **Curated Scenarios Catalog (RFC 793, 2018, 4987, 6298, 7323)**:
+   - Scenario 1: Canonical 3-Way Handshake & First Data Segment.
+   - Scenario 2: SYN Packet Loss, RTO Expiration & Exponential Backoff (1s -> 2s RTO).
+   - Scenario 3: Connection Refused: Unbound Port & The RST Flag (instant `ECONNREFUSED`).
+   - Scenario 4: Graceful 4-Way Teardown & The TIME_WAIT / CLOSE_WAIT Lifecycle (2*MSL safety delay).
+   - Scenario 5: SYN Flood Attack, Backlog Saturation & Stateless SYN Cookies Defense (RFC 4987).
+   - Scenario 6: Simultaneous Active Open (P2P NAT Hole Punching).
+
+4. **WAI-ARIA Tabbed Telemetry Context**:
+   - **Tab 1: Wire Segment Header Inspector**: RFC 793 8-bit flag register (`[CWR|ECE|URG|ACK|PSH|RST|SYN|FIN]`) with illuminated active bits, 32-bit sequence/ack fields, data offset, receive window, checksum verification, and TCP options (MSS, Window Scale, SACK, Timestamps, SYN Cookies).
+   - **Tab 2: Kernel Sockets Table (`ss -tan`)**: Live socket listing displaying 4-tuples, queue lengths, process names, and TCP states.
+   - **Tab 3: Responsive Dual-View TCP Finite State Machine**: Directed graph on desktop and compact stepper on mobile highlighting real-time state transitions and RFC 793 event triggers.
+
+---
+
+## 6. Verification Protocol for Future Episodes
 
 Before declaring completion of any new Computer Networks episode or scenario:
 1. **Scenario Integrity Test**: Add unit tests in `src/lib/network-simulator/__tests__/` asserting step progression, packet presence, socket state transitions, and step note completeness.
@@ -115,3 +148,4 @@ Before declaring completion of any new Computer Networks episode or scenario:
 3. **ESLint Verification**: `npx eslint <touched_files>` must pass with **0 errors and 0 warnings**.
 4. **Vitest Suite**: `npm test` must pass all test suites green.
 5. **Mandatory Rule #1**: **NEVER run `git add`, `git commit`, or `git push`**. All changes must remain unstaged in the working tree for user inspection.
+
