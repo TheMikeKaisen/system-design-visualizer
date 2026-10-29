@@ -9,6 +9,8 @@ import {
   ArrowRight,
   Info,
   Terminal,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 interface TcpTelemetryPanelProps {
@@ -23,6 +25,7 @@ export function TcpTelemetryPanel({
   const [activeTab, setActiveTab] = useState<"wire" | "sockets" | "fsm">("wire");
   const [selectedSocketId, setSelectedSocketId] = useState<string | null>(null);
   const [selectedFsmState, setSelectedFsmState] = useState<TcpSocketState | null>(null);
+  const [showAdvancedHeaders, setShowAdvancedHeaders] = useState(false);
   const [prevOverride, setPrevOverride] = useState<TcpSegment | null | undefined>(activeSegmentOverride);
 
   // Auto-switch to wire tab during render when user clicks a packet on canvas
@@ -35,6 +38,30 @@ export function TcpTelemetryPanel({
 
   const segment = activeSegmentOverride ?? tcpData.wire.activeSegment;
   const { client, server, fsmTransition } = tcpData;
+
+  const handleTabKeyDown = (e: React.KeyboardEvent, currentTab: "wire" | "sockets" | "fsm") => {
+    const tabs: Array<"wire" | "sockets" | "fsm"> = ["wire", "sockets", "fsm"];
+    const currentIndex = tabs.indexOf(currentTab);
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      const nextTab = tabs[(currentIndex + 1) % tabs.length];
+      setActiveTab(nextTab);
+      document.getElementById(`tab-tcp-${nextTab}`)?.focus();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      const prevTab = tabs[(currentIndex - 1 + tabs.length) % tabs.length];
+      setActiveTab(prevTab);
+      document.getElementById(`tab-tcp-${prevTab}`)?.focus();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setActiveTab("wire");
+      document.getElementById("tab-tcp-wire")?.focus();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setActiveTab("fsm");
+      document.getElementById("tab-tcp-fsm")?.focus();
+    }
+  };
 
   // Build unified kernel socket rows for `ss -tan`
   const socketRows: Array<{
@@ -179,7 +206,7 @@ export function TcpTelemetryPanel({
 
   return (
     <div className="h-full flex flex-col min-h-0 select-none font-sans">
-      {/* ── Top WAI-ARIA Tablist ── */}
+      {/* ── Top WAI-ARIA Tablist with Roving Arrow Navigation ── */}
       <div
         role="tablist"
         aria-label="TCP Telemetry Navigation"
@@ -191,7 +218,9 @@ export function TcpTelemetryPanel({
           id="tab-tcp-wire"
           aria-selected={activeTab === "wire"}
           aria-controls="panel-tcp-wire"
+          tabIndex={activeTab === "wire" ? 0 : -1}
           onClick={() => setActiveTab("wire")}
+          onKeyDown={(e) => handleTabKeyDown(e, "wire")}
           className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
             activeTab === "wire"
               ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
@@ -208,7 +237,9 @@ export function TcpTelemetryPanel({
           id="tab-tcp-sockets"
           aria-selected={activeTab === "sockets"}
           aria-controls="panel-tcp-sockets"
+          tabIndex={activeTab === "sockets" ? 0 : -1}
           onClick={() => setActiveTab("sockets")}
+          onKeyDown={(e) => handleTabKeyDown(e, "sockets")}
           className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
             activeTab === "sockets"
               ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
@@ -225,7 +256,9 @@ export function TcpTelemetryPanel({
           id="tab-tcp-fsm"
           aria-selected={activeTab === "fsm"}
           aria-controls="panel-tcp-fsm"
+          tabIndex={activeTab === "fsm" ? 0 : -1}
           onClick={() => setActiveTab("fsm")}
+          onKeyDown={(e) => handleTabKeyDown(e, "fsm")}
           className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
             activeTab === "fsm"
               ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
@@ -255,17 +288,17 @@ export function TcpTelemetryPanel({
                 {/* Segment Meta Banner */}
                 <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-lg bg-zinc-950/70 border border-border/40 font-mono text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="text-zinc-300 font-bold">
+                    <span className="text-zinc-200 font-bold">
                       {segment.explanationTitle || "RFC 793 Segment Header"}
                     </span>
-                    <span className="text-zinc-600">|</span>
-                    <span className="text-teal-300 text-[11px]">
+                    <span className="text-zinc-500">|</span>
+                    <span className="text-teal-300 text-xs">
                       {segment.direction === "client-to-server"
                         ? "Client → Server"
                         : "Server → Client"}
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-400">
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-zinc-900 border border-zinc-700/80 text-zinc-300">
                     Offset: {segment.dataOffset} words ({segment.dataOffset * 4}B)
                   </span>
                 </div>
@@ -273,11 +306,11 @@ export function TcpTelemetryPanel({
                 {/* RFC 793 8-Bit Flags Register */}
                 <div className="rounded-lg border border-border/40 bg-zinc-950/60 p-2.5">
                   <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-border/40 font-mono text-xs">
-                    <span className="text-zinc-300 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                    <span className="text-zinc-200 font-semibold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
                       RFC 793 8-Bit Control Flags Register
                     </span>
-                    <span className="text-zinc-500 text-[10px]">Active bit illumination</span>
+                    <span className="text-zinc-400 text-[11px]">Active bit illumination</span>
                   </div>
 
                   <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 font-mono text-center">
@@ -302,11 +335,11 @@ export function TcpTelemetryPanel({
                               : flag.key === "fin"
                               ? "bg-cyan-950/80 border-cyan-500/60 text-cyan-200"
                               : "bg-teal-950/80 border-teal-500/60 text-teal-300 shadow-[0_0_8px_rgba(20,184,166,0.3)]"
-                            : "bg-zinc-900/50 border-zinc-800 text-zinc-600"
+                            : "bg-zinc-900/60 border-zinc-800 text-zinc-400"
                         }`}
                       >
                         <div className="text-[11px] font-bold">{flag.name}</div>
-                        <div className="text-xs font-mono font-bold mt-0.5">
+                        <div className={`text-xs font-mono font-bold mt-0.5 ${flag.active ? "" : "text-zinc-500"}`}>
                           {flag.active ? "1" : "0"}
                         </div>
                       </div>
@@ -316,91 +349,104 @@ export function TcpTelemetryPanel({
 
                 {/* Core Header Fields Grid */}
                 <div className="rounded-lg border border-border/40 bg-zinc-950/60 p-2.5 font-mono text-xs">
-                  <div className="text-zinc-300 font-semibold pb-1.5 mb-2 border-b border-border/40">
-                    Header Fields
+                  <div className="flex justify-between items-center pb-1.5 mb-2 border-b border-border/40">
+                    <span className="text-zinc-200 font-semibold">Header Fields</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvancedHeaders(!showAdvancedHeaders)}
+                      className="text-[11px] text-zinc-400 hover:text-teal-300 flex items-center gap-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 rounded px-1 py-0.5"
+                      aria-expanded={showAdvancedHeaders}
+                      aria-label="Toggle extended header fields (Checksum, Urgent Pointer)"
+                    >
+                      <span>{showAdvancedHeaders ? "Hide Extended Fields" : "Show Extended Fields"}</span>
+                      {showAdvancedHeaders ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800">
-                      <span className="text-zinc-500 text-[10px] block">Source Port</span>
+                      <span className="text-zinc-400 text-[11px] block">Source Port</span>
                       <span className="text-teal-300 font-semibold">{segment.srcPort}</span>
                     </div>
 
                     <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800">
-                      <span className="text-zinc-500 text-[10px] block">Destination Port</span>
+                      <span className="text-zinc-400 text-[11px] block">Destination Port</span>
                       <span className="text-teal-300 font-semibold">{segment.dstPort}</span>
                     </div>
 
                     <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800 col-span-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-zinc-500 text-[10px]">Sequence Number (Raw)</span>
-                        <span className="text-zinc-400 text-[10px]">32-Bit Offset</span>
+                        <span className="text-zinc-400 text-[11px]">Sequence Number (Raw)</span>
+                        <span className="text-zinc-400 text-[11px]">32-Bit Offset</span>
                       </div>
-                      <span className="text-zinc-200 font-bold text-sm block mt-0.5">
+                      <span className="text-zinc-100 font-bold text-sm block mt-0.5">
                         {segment.seqNumber}
                       </span>
                     </div>
 
                     <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800 col-span-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-zinc-500 text-[10px]">Acknowledgment Number</span>
-                        <span className="text-zinc-400 text-[10px]">
+                        <span className="text-zinc-400 text-[11px]">Acknowledgment Number</span>
+                        <span className="text-zinc-400 text-[11px]">
                           {segment.ackNumber !== null ? "Valid (ACK=1)" : "Invalid (ACK=0)"}
                         </span>
                       </div>
-                      <span className="text-zinc-200 font-bold text-sm block mt-0.5">
+                      <span className="text-zinc-100 font-bold text-sm block mt-0.5">
                         {segment.ackNumber !== null ? segment.ackNumber : "— (ACK bit not set)"}
                       </span>
                     </div>
 
-                    <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800">
-                      <span className="text-zinc-500 text-[10px] block">Receive Window (rwnd)</span>
+                    <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800 col-span-2 sm:col-span-1">
+                      <span className="text-zinc-400 text-[11px] block">Receive Window (rwnd)</span>
                       <span className="text-zinc-200 font-semibold">
                         {segment.windowSize.toLocaleString()} bytes
                       </span>
                     </div>
 
-                    <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800">
-                      <span className="text-zinc-500 text-[10px] block">Checksum</span>
+                    <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800 col-span-2 sm:col-span-1">
+                      <span className="text-zinc-400 text-[11px] block">Checksum</span>
                       <span className="text-emerald-400 font-semibold">
                         {segment.checksum ?? "0xa4c1 [Verified]"}
                       </span>
-                      <span className="text-[9px] text-zinc-500 block mt-0.5">
-                        Covers TCP segment + 12B IPv4 Pseudo-Header
-                      </span>
                     </div>
 
-                    <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800 col-span-2">
-                      <div className="flex justify-between items-center text-[10px]">
-                        <span className="text-zinc-500">Urgent Pointer & Data Offset</span>
-                        <span className="text-zinc-400">Offset: {segment.dataOffset} words ({segment.dataOffset * 4}B)</span>
+                    {/* Extended Header Fields via Progressive Disclosure */}
+                    {showAdvancedHeaders && (
+                      <div className="p-2 rounded bg-zinc-900/70 border border-zinc-800 col-span-2 flex flex-col gap-1.5 animate-in fade-in duration-150">
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="text-zinc-400">Urgent Pointer & Data Offset</span>
+                          <span className="text-zinc-300">Offset: {segment.dataOffset} words ({segment.dataOffset * 4}B)</span>
+                        </div>
+                        <span className="text-zinc-200 text-xs block font-mono">
+                          Urgent Pointer: {segment.urgentPointer ?? 0} (URG bit {segment.flags.urg ? "SET" : "NOT SET"})
+                        </span>
+                        <span className="text-[10px] text-zinc-400 block pt-1 border-t border-zinc-800">
+                          RFC 793 Checksum covers TCP segment + 12B IPv4 Pseudo-Header.
+                        </span>
                       </div>
-                      <span className="text-zinc-300 text-xs mt-0.5 block font-mono">
-                        Urgent Pointer: {segment.urgentPointer ?? 0} (URG bit {segment.flags.urg ? "SET" : "NOT SET"})
-                      </span>
-                    </div>
+                    )}
                   </div>
                 </div>
 
                 {/* TCP Options Block */}
                 {segment.options && (
                   <div className="rounded-lg border border-border/40 bg-zinc-950/60 p-2.5 font-mono text-xs">
-                    <div className="text-zinc-300 font-semibold pb-1.5 mb-2 border-b border-border/40 flex justify-between">
+                    <div className="text-zinc-200 font-semibold pb-1.5 mb-2 border-b border-border/40 flex justify-between items-center">
                       <span>TCP Options (Negotiated During SYN)</span>
-                      <span className="text-zinc-500 text-[10px]">RFC 7323 / 2018</span>
+                      <span className="text-zinc-400 text-[11px]">RFC 7323 / 2018</span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
                       {segment.options.mss !== undefined && (
-                        <div className="p-1.5 rounded bg-zinc-900/80 border border-zinc-800">
-                          <span className="text-zinc-500 text-[10px] block">Maximum Segment Size (MSS)</span>
+                        <div className="p-2 rounded bg-zinc-900/80 border border-zinc-800">
+                          <span className="text-zinc-400 text-[11px] block">Maximum Segment Size (MSS)</span>
                           <span className="text-teal-300 font-bold">{segment.options.mss} bytes</span>
                         </div>
                       )}
 
                       {segment.options.windowScale !== undefined && (
-                        <div className="p-1.5 rounded bg-zinc-900/80 border border-zinc-800">
-                          <span className="text-zinc-500 text-[10px] block">Window Scale Factor (WS)</span>
+                        <div className="p-2 rounded bg-zinc-900/80 border border-zinc-800">
+                          <span className="text-zinc-400 text-[11px] block">Window Scale Factor (WS)</span>
                           <span className="text-teal-300 font-bold">
                             Shift {segment.options.windowScale} (&times;{1 << segment.options.windowScale})
                           </span>
@@ -408,15 +454,15 @@ export function TcpTelemetryPanel({
                       )}
 
                       {segment.options.sackPermitted && (
-                        <div className="p-1.5 rounded bg-zinc-900/80 border border-zinc-800">
-                          <span className="text-zinc-500 text-[10px] block">SACK Permitted</span>
+                        <div className="p-2 rounded bg-zinc-900/80 border border-zinc-800">
+                          <span className="text-zinc-400 text-[11px] block">SACK Permitted</span>
                           <span className="text-emerald-400 font-bold">Enabled (RFC 2018)</span>
                         </div>
                       )}
 
                       {segment.options.timestamps && (
-                        <div className="p-1.5 rounded bg-zinc-900/80 border border-zinc-800 col-span-2">
-                          <span className="text-zinc-500 text-[10px] block">TCP Timestamps Option (TSopt / RFC 7323)</span>
+                        <div className="p-2 rounded bg-zinc-900/80 border border-zinc-800 col-span-2">
+                          <span className="text-zinc-400 text-[11px] block">TCP Timestamps Option (TSopt / RFC 7323)</span>
                           <span className="text-teal-300 font-bold">
                             TSval: {segment.options.timestamps.tsVal} | TSecr: {segment.options.timestamps.tsEcho}
                           </span>
@@ -424,8 +470,8 @@ export function TcpTelemetryPanel({
                       )}
 
                       {segment.options.synCookie && (
-                        <div className="p-1.5 rounded bg-amber-950/30 border border-amber-500/40 col-span-2">
-                          <span className="text-amber-400 text-[10px] block">Stateless SYN Cookie</span>
+                        <div className="p-2 rounded bg-amber-950/30 border border-amber-500/40 col-span-2">
+                          <span className="text-amber-300 text-[11px] block font-semibold">Stateless SYN Cookie</span>
                           <span className="text-amber-200 font-bold">Encoded in ISN (Cryptographic Hash)</span>
                         </div>
                       )}
@@ -437,20 +483,20 @@ export function TcpTelemetryPanel({
                 {segment.payloadLength > 0 && (
                   <div className="rounded-lg border border-border/40 bg-zinc-950/60 p-2.5 font-mono text-xs">
                     <div className="flex justify-between items-center pb-1.5 mb-2 border-b border-border/40">
-                      <span className="text-zinc-300 font-semibold">Application Payload</span>
+                      <span className="text-zinc-200 font-semibold">Application Payload</span>
                       <span className="text-teal-400 font-bold">{segment.payloadLength} Bytes</span>
                     </div>
-                    <pre className="p-2 rounded bg-black/80 border border-zinc-800 text-teal-300/90 text-[11px] whitespace-pre-wrap break-all font-mono">
+                    <pre className="p-2 rounded bg-black/80 border border-zinc-800 text-teal-300/90 text-xs whitespace-pre-wrap break-all font-mono">
                       {segment.payloadPreview ?? "Payload bytes transmitted"}
                     </pre>
                   </div>
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center p-8 text-center text-zinc-500">
-                <FileCode className="w-8 h-8 mb-2 text-zinc-600" />
-                <p className="text-xs font-mono">Wire Idle in this step</p>
-                <p className="text-[11px] text-zinc-400 mt-1 max-w-xs font-sans">
+              <div className="flex flex-col items-center justify-center p-8 text-center text-zinc-400">
+                <FileCode className="w-8 h-8 mb-2 text-zinc-500" />
+                <p className="text-xs font-mono font-medium">Wire Idle in this step</p>
+                <p className="text-xs text-zinc-300 mt-1 max-w-xs font-sans">
                   No active packet in flight. Advance to a handshake or data step to inspect RFC 793 header fields.
                 </p>
               </div>
@@ -470,24 +516,24 @@ export function TcpTelemetryPanel({
             className="flex flex-col gap-3 focus:outline-none"
           >
             {/* Terminal Command Header */}
-            <div className="flex items-center justify-between p-2 rounded-lg bg-zinc-950/80 border border-border/40 font-mono text-xs">
+            <div className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-950/80 border border-border/40 font-mono text-xs">
               <div className="flex items-center gap-2">
-                <Terminal className="w-3.5 h-3.5 text-teal-400" />
+                <Terminal className="w-4 h-4 text-teal-400" />
                 <code className="text-teal-300 font-semibold">ss -tan</code>
               </div>
-              <span className="text-zinc-500 text-[11px]">{socketRows.length} active sockets</span>
+              <span className="text-zinc-400 text-xs">{socketRows.length} active sockets</span>
             </div>
 
             {/* Socket Table */}
             <div className="rounded-lg border border-border/40 overflow-hidden bg-zinc-950/50">
-              <table className="w-full text-left font-mono text-[11px] border-collapse">
+              <table className="w-full text-left font-mono text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-zinc-800 bg-zinc-900/80 text-zinc-400 text-[10px] uppercase">
-                    <th className="py-2 px-2.5">State</th>
-                    <th className="py-2 px-2">Recv-Q</th>
-                    <th className="py-2 px-2">Send-Q</th>
-                    <th className="py-2 px-2.5">Local Address:Port</th>
-                    <th className="py-2 px-2.5">Peer Address:Port</th>
+                  <tr className="border-b border-zinc-800 bg-zinc-900/80 text-zinc-300 text-[11px] uppercase">
+                    <th className="py-2.5 px-3">State</th>
+                    <th className="py-2.5 px-2.5">Recv-Q</th>
+                    <th className="py-2.5 px-2.5">Send-Q</th>
+                    <th className="py-2.5 px-3">Local Address:Port</th>
+                    <th className="py-2.5 px-3">Peer Address:Port</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800/60">
@@ -496,16 +542,25 @@ export function TcpTelemetryPanel({
                     return (
                       <tr
                         key={sock.id}
+                        tabIndex={0}
+                        aria-selected={isSelected}
+                        aria-label={`Socket ${sock.local} ${sock.state}, Recv-Q ${sock.recvQ}, Send-Q ${sock.sendQ}`}
                         onClick={() => setSelectedSocketId(sock.id)}
-                        className={`cursor-pointer transition-colors min-h-[44px] touch-manipulation active:bg-zinc-800/60 ${
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedSocketId(sock.id);
+                          }
+                        }}
+                        className={`cursor-pointer transition-colors min-h-[44px] touch-manipulation focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 ${
                           isSelected
                             ? "bg-teal-500/15 text-teal-200"
-                            : "hover:bg-zinc-900/60 text-zinc-300"
+                            : "hover:bg-zinc-900/60 text-zinc-200"
                         }`}
                       >
-                        <td className="py-2.5 px-2.5 font-bold">
+                        <td className="py-2.5 px-3 font-bold">
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] ${
+                            className={`px-2 py-0.5 rounded text-[11px] ${
                               sock.state === "ESTABLISHED"
                                 ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
                                 : sock.state === "LISTEN"
@@ -514,18 +569,18 @@ export function TcpTelemetryPanel({
                                 ? "text-amber-400 bg-amber-500/10 border border-amber-500/20"
                                 : sock.state === "TIME_WAIT"
                                 ? "text-yellow-400 bg-yellow-500/10 border border-yellow-500/20"
-                                : "text-zinc-400 bg-zinc-800"
+                                : "text-zinc-300 bg-zinc-800/90 border border-zinc-700/80"
                             }`}
                           >
                             {sock.state}
                           </span>
                         </td>
-                        <td className="py-2 px-2 text-zinc-400">{sock.recvQ}</td>
-                        <td className="py-2 px-2 text-zinc-400">{sock.sendQ}</td>
-                        <td className="py-2 px-2.5 text-zinc-200 truncate max-w-[110px]" title={sock.local}>
+                        <td className="py-2.5 px-2.5 text-zinc-300">{sock.recvQ}</td>
+                        <td className="py-2.5 px-2.5 text-zinc-300">{sock.sendQ}</td>
+                        <td className="py-2.5 px-3 text-zinc-200 truncate max-w-[120px]" title={sock.local}>
                           {sock.local}
                         </td>
-                        <td className="py-2 px-2.5 text-zinc-400 truncate max-w-[110px]" title={sock.peer}>
+                        <td className="py-2.5 px-3 text-zinc-300 truncate max-w-[120px]" title={sock.peer}>
                           {sock.peer}
                         </td>
                       </tr>
@@ -538,30 +593,30 @@ export function TcpTelemetryPanel({
             {/* Selected Socket Detail Box */}
             {selectedSocket && (
               <div className="p-3 rounded-lg border border-border/40 bg-zinc-950/70 font-mono text-xs flex flex-col gap-2">
-                <div className="flex justify-between items-center text-zinc-300 font-semibold border-b border-zinc-800 pb-1.5">
+                <div className="flex justify-between items-center text-zinc-200 font-semibold border-b border-zinc-800 pb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-teal-400" />
+                    <span className="w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
                     Selected Socket Detail ({selectedSocket.endpoint})
                   </span>
-                  <span className="text-teal-300 text-[11px] font-bold">
+                  <span className="text-teal-300 text-xs font-bold">
                     {selectedSocket.state}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-zinc-500 text-[10px] block">Process / PID</span>
-                    <span className="text-zinc-200">{selectedSocket.process}</span>
+                    <span className="text-zinc-400 text-[11px] block">Process / PID</span>
+                    <span className="text-zinc-200 font-medium">{selectedSocket.process}</span>
                   </div>
                   <div>
-                    <span className="text-zinc-500 text-[10px] block">Queue Status</span>
-                    <span className="text-zinc-300">
+                    <span className="text-zinc-400 text-[11px] block">Queue Status</span>
+                    <span className="text-zinc-200">
                       Recv-Q: {selectedSocket.recvQ}B | Send-Q: {selectedSocket.sendQ}B
                     </span>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-zinc-500 text-[10px] block">4-Tuple Connection</span>
-                    <code className="text-teal-300 text-[11px]">
+                    <span className="text-zinc-400 text-[11px] block">4-Tuple Connection</span>
+                    <code className="text-teal-300 text-xs">
                       {selectedSocket.local} &harr; {selectedSocket.peer}
                     </code>
                   </div>
@@ -587,20 +642,20 @@ export function TcpTelemetryPanel({
               <div className="p-2.5 rounded-lg bg-teal-950/30 border border-teal-500/30 font-mono text-xs">
                 <div className="flex items-center justify-between text-teal-300 font-bold mb-1">
                   <span>Current FSM Transition</span>
-                  <span className="uppercase text-[10px] px-1.5 py-0.5 rounded bg-teal-500/20">
+                  <span className="uppercase text-[11px] px-1.5 py-0.5 rounded bg-teal-500/20 font-bold">
                     {fsmTransition.endpoint}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-zinc-200 text-xs">
-                  <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold">
+                  <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold">
                     {fsmTransition.from}
                   </span>
                   <ArrowRight className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                  <span className="px-1.5 py-0.5 rounded bg-teal-500/20 border border-teal-500/40 text-teal-300 font-bold">
+                  <span className="px-2 py-0.5 rounded bg-teal-500/20 border border-teal-500/40 text-teal-300 font-bold">
                     {fsmTransition.to}
                   </span>
                 </div>
-                <p className="text-[11px] font-sans text-zinc-400 mt-1.5">
+                <p className="text-xs font-sans text-zinc-300 mt-1.5">
                   Trigger: {fsmTransition.trigger}
                 </p>
               </div>
@@ -610,15 +665,15 @@ export function TcpTelemetryPanel({
             <div className="hidden sm:block rounded-lg border border-border/40 bg-zinc-950/70 p-3">
               <div className="flex justify-between items-center pb-2 border-b border-border/40 font-mono text-xs mb-2">
                 <span className="text-zinc-200 font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
                   RFC 793 TCP Finite State Machine (Interactive Graph)
                 </span>
-                <div className="flex items-center gap-3 text-[10px]">
-                  <span className="flex items-center gap-1 text-teal-300">
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="flex items-center gap-1 text-teal-300 font-semibold">
                     <span className="w-2 h-2 rounded-full bg-teal-400" />
                     Client: {client.state}
                   </span>
-                  <span className="flex items-center gap-1 text-sky-300">
+                  <span className="flex items-center gap-1 text-sky-300 font-semibold">
                     <span className="w-2 h-2 rounded-full bg-sky-400" />
                     Server: {server.childSockets.length > 0 ? server.childSockets[0].state : server.listenState}
                   </span>
@@ -628,7 +683,7 @@ export function TcpTelemetryPanel({
               <div className="w-full overflow-x-auto flex justify-center py-1">
                 <svg
                   viewBox="0 0 540 370"
-                  className="w-full max-w-[540px] h-auto select-none font-mono text-[11px]"
+                  className="w-full max-w-[540px] h-auto select-none font-mono text-xs"
                   role="img"
                   aria-label="TCP Finite State Machine Directed Graph"
                 >
@@ -824,7 +879,9 @@ export function TcpTelemetryPanel({
                         }}
                         tabIndex={0}
                         role="button"
-                        aria-label={`TCP State ${node.state}`}
+                        aria-pressed={isSelected}
+                        aria-current={isClient || isServer ? "true" : undefined}
+                        aria-label={`TCP State ${node.state}${isClient ? ", Active Client" : ""}${isServer ? ", Active Server" : ""}`}
                         className="cursor-pointer transition-all hover:opacity-90 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400"
                       >
                         <rect
@@ -849,14 +906,14 @@ export function TcpTelemetryPanel({
                           x={node.x + node.w / 2}
                           y={node.y + (isClient || isServer ? 16 : 19)}
                           textAnchor="middle"
-                          className={`font-mono font-bold text-[10px] ${
+                          className={`font-mono font-bold text-[11px] ${
                             isClient
                               ? "fill-teal-200"
                               : isServer
                               ? "fill-sky-200"
                               : isSelected
                               ? "fill-zinc-100"
-                              : "fill-zinc-400"
+                              : "fill-zinc-300"
                           }`}
                         >
                           {node.state}
@@ -869,7 +926,7 @@ export function TcpTelemetryPanel({
                               x={node.x + node.w / 2}
                               y={node.y + 26}
                               textAnchor="middle"
-                              className="font-mono text-[8px] font-semibold tracking-wider uppercase fill-zinc-300"
+                              className="font-mono text-[9px] font-semibold tracking-wider uppercase fill-zinc-200"
                             >
                               {isClient && isServer
                                 ? "● Client & Server"
@@ -895,7 +952,7 @@ export function TcpTelemetryPanel({
                     <span className="w-2 h-2 rounded-full bg-teal-400" />
                     Client Machine Lifecycle
                   </span>
-                  <span className="text-teal-400 text-[11px] font-semibold">
+                  <span className="text-teal-400 text-xs font-semibold">
                     Active: {client.state}
                   </span>
                 </div>
@@ -911,14 +968,14 @@ export function TcpTelemetryPanel({
                           onClick={() => setSelectedFsmState(st)}
                           className={`min-h-[44px] px-3 py-1.5 rounded text-[11px] font-bold border transition-transform active:scale-95 touch-manipulation cursor-pointer ${
                             isActive
-                              ? "bg-teal-500/20 text-teal-200 border-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.3)] animate-pulse"
-                              : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700"
+                              ? "bg-teal-500/20 text-teal-200 border-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.3)]"
+                              : "bg-zinc-900/60 text-zinc-300 border-zinc-800 hover:text-zinc-100 hover:border-zinc-700"
                           }`}
                         >
                           {st}
                         </button>
                         {idx < CLIENT_FSM_PATH.length - 1 && (
-                          <ArrowRight className="w-3 h-3 text-zinc-600 shrink-0" />
+                          <ArrowRight className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
                         )}
                       </React.Fragment>
                     );
@@ -933,7 +990,7 @@ export function TcpTelemetryPanel({
                     <span className="w-2 h-2 rounded-full bg-sky-400" />
                     Server Machine Lifecycle
                   </span>
-                  <span className="text-sky-400 text-[11px] font-semibold">
+                  <span className="text-sky-400 text-xs font-semibold">
                     Active:{" "}
                     {server.childSockets.length > 0
                       ? server.childSockets[0].state
@@ -956,14 +1013,14 @@ export function TcpTelemetryPanel({
                           onClick={() => setSelectedFsmState(st)}
                           className={`min-h-[44px] px-3 py-1.5 rounded text-[11px] font-bold border transition-transform active:scale-95 touch-manipulation cursor-pointer ${
                             isActive
-                              ? "bg-sky-500/20 text-sky-200 border-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.3)] animate-pulse"
-                              : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700"
+                              ? "bg-sky-500/20 text-sky-200 border-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+                              : "bg-zinc-900/60 text-zinc-300 border-zinc-800 hover:text-zinc-100 hover:border-zinc-700"
                           }`}
                         >
                           {st}
                         </button>
                         {idx < SERVER_FSM_PATH.length - 1 && (
-                          <ArrowRight className="w-3 h-3 text-zinc-600 shrink-0" />
+                          <ArrowRight className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
                         )}
                       </React.Fragment>
                     );
@@ -974,15 +1031,15 @@ export function TcpTelemetryPanel({
 
             {/* FSM State Explainer Drawer */}
             <div className="p-3 rounded-lg border border-border/40 bg-zinc-950/70 font-mono text-xs">
-              <div className="flex items-center gap-1.5 text-zinc-300 font-semibold mb-1">
-                <Info className="w-3.5 h-3.5 text-teal-400" />
+              <div className="flex items-center gap-1.5 text-zinc-200 font-semibold mb-1">
+                <Info className="w-4 h-4 text-teal-400" />
                 <span>
                   {selectedFsmState
                     ? `RFC 793 State: ${selectedFsmState}`
                     : `Active State: ${client.state}`}
                 </span>
               </div>
-              <p className="font-sans text-[11px] text-zinc-400 leading-relaxed">
+              <p className="font-sans text-xs text-zinc-300 leading-relaxed">
                 {getFsmStateExplanation(selectedFsmState ?? client.state)}
               </p>
             </div>

@@ -188,7 +188,7 @@ describe("TcpConnectionsEpisodePage (Episode 3 Smoke Test)", () => {
     const clientBadge = screen.getByText("Client: CLOSED");
     expect(clientBadge).toBeDefined();
     // Verify it has the zinc (closed) classes, NOT sky-400 (LISTEN)
-    expect(clientBadge.className).toContain("text-zinc-500");
+    expect(clientBadge.className).toContain("text-zinc-400");
     expect(clientBadge.className).not.toContain("text-sky-400");
   });
 
