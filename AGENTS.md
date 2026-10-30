@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > **CRITICAL FIRST STEPS FOR ANY AI AGENT WORKING IN THIS REPOSITORY**:
 > 1. **FIRST, READ THE RULES**: Consult [`Agent Rules/Rules.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/Agent%20Rules/Rules.md) before performing any action.
-> 2. **SECOND, READ ARCHITECTURE DECISIONS**: Consult [`DecisionsAndAnalysis/decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/decisions.md) to understand the system architecture and all historical decisions (Records 001 through 007).
+> 2. **SECOND, READ ARCHITECTURE DECISIONS**: Consult [`DecisionsAndAnalysis/decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/decisions.md) and [`DecisionsAndAnalysis/Network decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/Network%20decisions.md) to understand system architecture, episode standards, and historical decisions.
 
 ---
 
@@ -16,8 +16,10 @@
 ---
 
 ## 🧭 RULE #2: ARCHITECTURE & DECISION INTEGRITY
+- **STRICT ARCHITECTURAL & STYLE FREEZE**: Agents MUST NOT change the existing style, visual design, or component architecture in any way unless explicitly approved by the user. Because most episodes share similar canonical components (e.g. shells, playback bars, explanation bars, dropdowns), any change to an existing component or style risks breaking the UI across other episodes. Always preserve existing styles, parameterize via backward-compatible props/slots, and never tamper with established visual themes.
 - Any non-trivial refactoring, feature addition, or UI change must consult [`DecisionsAndAnalysis/decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/decisions.md) before implementation.
 - Every completed architectural or UI change must be documented by appending a new Decision Record to `DecisionsAndAnalysis/decisions.md`.
+- For Computer Networks episodes, strictly adhere to [`DecisionsAndAnalysis/Network decisions.md`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/DecisionsAndAnalysis/Network%20decisions.md).
 
 ---
 
@@ -39,6 +41,41 @@ When creating or editing runtime simulators:
 5. **Multi-Modal Feedback**: Step badge, explanation banner, line highlight, state pulse.
 6. **Execution Context Lifecycle**: Call stack must start empty at Step 0, and end empty.
 7. **Strict Two-Phase Context Creation**: Creation phase (`var: undefined`, `let: <TDZ>`) must precede execution assignments.
+
+---
+
+## 🧩 RULE #6: ZERO-DUPLICATION & COMPONENT REUSE (MANDATORY)
+**NEVER create a new component if an existing component or primitive already exists.**
+1. **Search Before Building**: Inspect `src/components/ui/`, `src/components/network-simulator/`, `src/components/os-simulator/`, and `src/components/javascript/` before authoring any new component.
+2. **Reuse Canonical Primitives**:
+   - Navigation & Shell: `NetworkEpisodeShell`, `OSKernelShell`, `OSConcurrencyShell`, `AppNavbar`.
+   - Selectors: `ScenarioDropdown` (never write ad-hoc inline `<select>` or custom dropdown buttons for scenarios).
+   - Playback & Controls: `NetworkPlaybackBar` (handles both desktop footer and mobile bottom dock).
+   - Explanations & Notes: `InteractiveExplanationBar` (keyword highlighting, concept chips, persistent dialogues).
+   - Catalog Cards: `EpisodeCard` (subject routes), `DisciplineCard` & `EditorialDisciplineCard` (`/learning-paths`).
+3. **Extend, Do Not Fork**: If an existing component lacks an accent color or option, parameterize it with props rather than cloning it into a new file.
+
+---
+
+## 📱 RULE #7: RESPONSIVE FIDELITY FOR LARGER & SHORTER SCREENS
+Every simulator, episode, and learning path MUST look and feel world-class on **both larger screens (desktop `lg:`) and shorter screens (mobile `< sm`)**:
+1. **Mobile Scrollability**: NEVER lock mobile viewports in `h-screen overflow-hidden`. Use `min-h-screen overflow-y-auto lg:h-screen lg:overflow-hidden` so users can scroll through all panels naturally on mobile.
+2. **Docked Mobile Playback Bar**: On smaller screens (`< sm`), playback controls must be fixed to the viewport bottom (`fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]`), rendering only the 3 core buttons (`Prev`, `Play/Pause`, `Next`). Hide keyboard shortcut legends, step counters, and speed controls on mobile to prevent clutter.
+3. **Content Clearance**: Content containers (`<main>`) must declare bottom clearance (`pb-20 sm:pb-4`) so bottommost table rows or inspector fields are never occluded behind the mobile playback bar.
+4. **Touch Ergonomics & Auto-Open Prevention**:
+   - Minimum 44px × 44px touch targets with `touch-manipulation` and tactile `:active:scale-95` feedback.
+   - Popovers and dialogues must **NEVER** automatically open from hover, scroll, or focus events on touch devices. Popovers require an explicit user tap (`onClick`), must be pinned open with a backdrop, and must auto-dismiss on step navigation (`safeIndex` change).
+
+---
+
+## 🧹 RULE #8: CLEAN CODE, ACCESSIBILITY & STATE HYGIENE
+1. **Zero Dead Code**: No unused imports, orphaned styles, lingering `console.log` statements, or commented-out code blocks.
+2. **WAI-ARIA Accessibility**:
+   - Interactive triggers must be native `<button>` or semantic elements with visible focus rings (`focus-visible:ring-1` or `focus-visible:ring-2`).
+   - Use correct ARIA roles (`role="dialog"`, `role="tab"`, `role="tablist"`, `role="combobox"`), with matching `aria-controls`, `aria-expanded`, and `aria-selected` attributes.
+   - Never auto-trigger popovers or modals on `onFocus` (WCAG 3.2.1 On Focus). Focus indicates target location; activation requires explicit action (Enter, Space, or tap).
+3. **Defensive State Retention**: When stepping forward or backward, retain active user selections (e.g. selected socket, selected process) across steps using stable identifiers or tuples. Do not blindly reset selections to index 0 on every step transition.
+4. **Clean Route Teardown**: When navigating away from a simulator, clear state in the store's cleanup hook (Decision 002) to prevent ghost states or race conditions when reopening.
 
 ---
 

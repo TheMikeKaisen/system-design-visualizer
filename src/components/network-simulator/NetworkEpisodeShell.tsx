@@ -23,6 +23,7 @@ export interface NetworkEpisodeShellProps {
   title: string;
   scenarios?: NetworkSimulationScenario[];
   accentColor?: "teal" | "amber" | "sky" | "emerald" | "violet" | "blue";
+  canvasSpan?: "7" | "8";
   customGlossary?: Record<string, ConceptDefinition>;
   customTermPatterns?: string[];
   canvasSlot?: (step: NetworkScenarioStep | null, safeIndex: number) => ReactNode;
@@ -34,6 +35,7 @@ export function NetworkEpisodeShell({
   title,
   scenarios = ALL_NETWORK_SCENARIOS,
   accentColor = "teal",
+  canvasSpan = "7",
   customGlossary,
   customTermPatterns,
   canvasSlot,
@@ -155,7 +157,12 @@ export function NetworkEpisodeShell({
       {/* ── 3. Main Stage: Topology Canvas & Tabbed Inspectors ── */}
       <main className="flex-1 min-h-0 p-3 sm:p-4 pb-20 sm:pb-4 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 overflow-visible lg:overflow-hidden">
         {/* Left/Center: Network Topology Canvas */}
-        <section className="lg:col-span-7 h-auto lg:h-full min-h-[380px] sm:min-h-[420px]" aria-label="Network Topology View">
+        <section
+          className={`${
+            canvasSpan === "8" ? "lg:col-span-8" : "lg:col-span-7"
+          } h-auto lg:h-full min-h-[380px] sm:min-h-[420px]`}
+          aria-label="Network Topology View"
+        >
           {canvasSlot ? (
             canvasSlot(currentStep, safeIndex)
           ) : (
@@ -172,7 +179,12 @@ export function NetworkEpisodeShell({
         </section>
 
         {/* Right: Contextual Telemetry (Sockets vs Packet Inspector) */}
-        <section className="lg:col-span-5 h-auto lg:h-full flex flex-col min-h-[400px] lg:min-h-0 mt-3 lg:mt-0" aria-label="Network Context Panels">
+        <section
+          className={`${
+            canvasSpan === "8" ? "lg:col-span-4" : "lg:col-span-5"
+          } h-auto lg:h-full flex flex-col min-h-[400px] lg:min-h-0 mt-3 lg:mt-0`}
+          aria-label="Network Context Panels"
+        >
           {telemetrySlot ? (
             telemetrySlot(currentStep, safeIndex)
           ) : (

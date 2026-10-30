@@ -285,6 +285,14 @@ export function InteractiveExplanationBar({
     };
   }, []);
 
+  // Auto-dismiss concept popover on step navigation during render (Rule #7.4 & React 19 safe)
+  const [prevSafeIndex, setPrevSafeIndex] = useState(safeIndex);
+  if (prevSafeIndex !== safeIndex) {
+    setPrevSafeIndex(safeIndex);
+    setActiveConcept(null);
+    setIsPinned(false);
+  }
+
   // Safe hover handlers with 140ms intent delay (only active when not pinned by tap/click)
   const handleTriggerEnter = useCallback((concept: ConceptDefinition) => {
     if (isPinned) return;
@@ -382,7 +390,19 @@ export function InteractiveExplanationBar({
       const exactKey = Object.keys(effectiveGlossary).find(
         (k) => normalize(k) === norm || normalize(effectiveGlossary[k].term) === norm
       );
-      const matchedKey = exactKey ?? sortedKeys.find((k) => norm.includes(normalize(k)));
+      const matchedKey =
+        exactKey ??
+        sortedKeys.find((k) => {
+          const normK = normalize(k);
+          if (!normK) return false;
+          const prefix = /^\w/.test(normK) ? "\\b" : "";
+          const suffix = /\w$/.test(normK) ? "\\b" : "";
+          const pattern = new RegExp(
+            `${prefix}${normK.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${suffix}`,
+            "i"
+          );
+          return pattern.test(norm);
+        });
       const builtin = matchedKey ? effectiveGlossary[matchedKey] : undefined;
 
       return {
@@ -438,10 +458,20 @@ export function InteractiveExplanationBar({
       ? [...customTermPatterns, ...baseTermPatterns]
       : baseTermPatterns;
     // Sort patterns by length descending so longer compound terms match before shorter substrings
-    const termPatterns = Array.from(new Set(combinedPatterns)).sort((a, b) => b.length - a.length);
+    const termPatterns = Array.from(new Set(combinedPatterns))
+      .filter((p) => Boolean(p && p.trim()))
+      .sort((a, b) => b.length - a.length);
 
-    // Build regex with word boundaries
-    const escaped = termPatterns.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    if (termPatterns.length === 0) {
+      return <span>{explanation}</span>;
+    }
+
+    // Build regex with authentic word boundaries
+    const escaped = termPatterns.map((p) => {
+      const prefix = /^\w/.test(p) ? "\\b" : "";
+      const suffix = /\w$/.test(p) ? "\\b" : "";
+      return `${prefix}${p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${suffix}`;
+    });
     const regex = new RegExp(`(${escaped.join("|")})`, "gi");
 
     const parts = explanation.split(regex);
@@ -449,6 +479,13 @@ export function InteractiveExplanationBar({
     const sortedGlossaryKeys = Object.keys(effectiveGlossary).sort((a, b) => b.length - a.length);
 
     return parts.map((part, index) => {
+      // By mathematical property of split with capturing groups:
+      // Even indices (0, 2, 4...) are plain text outside captured tokens.
+      // Odd indices (1, 3, 5...) are captured matched terms.
+      if (index % 2 === 0) {
+        return <span key={index}>{part}</span>;
+      }
+
       const normPart = normalize(part);
       if (!normPart) {
         return <span key={index}>{part}</span>;
@@ -466,16 +503,32 @@ export function InteractiveExplanationBar({
         (n) => normalize(n.title) === normPart || normalize(n.term) === normPart
       );
 
-      // 3. Fallback to longest matching glossary key (so "syn cookies" matches before "syn")
+      // 3. Fallback to longest matching glossary key with word boundaries (so "syn cookies" matches before "syn")
       const longestGlossaryKey = sortedGlossaryKeys.find((k) => {
         const normKey = normalize(k);
-        return normPart === normKey || (normKey.length >= 3 && normPart.includes(normKey));
+        if (normPart === normKey) return true;
+        if (normKey.length < 3) return false;
+        const prefix = /^\w/.test(normKey) ? "\\b" : "";
+        const suffix = /\w$/.test(normKey) ? "\\b" : "";
+        const pattern = new RegExp(
+          `${prefix}${normKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${suffix}`,
+          "i"
+        );
+        return pattern.test(normPart);
       });
 
-      // 4. Fallback to step detailedNotes if matching phrase
+      // 4. Fallback to step detailedNotes if matching phrase with word boundaries
       const noteMatch = stepConceptNotes.find((n) => {
         const normTitle = normalize(n.title);
-        return normTitle === normPart || (normPart.length >= 4 && normTitle.includes(normPart));
+        if (normTitle === normPart) return true;
+        if (normPart.length < 3) return false;
+        const prefix = /^\w/.test(normPart) ? "\\b" : "";
+        const suffix = /\w$/.test(normPart) ? "\\b" : "";
+        const pattern = new RegExp(
+          `${prefix}${normPart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${suffix}`,
+          "i"
+        );
+        return pattern.test(normTitle);
       });
 
       const matchedKey = exactGlossaryKey ?? longestGlossaryKey;
@@ -499,7 +552,11 @@ export function InteractiveExplanationBar({
         );
       }
 
-      return <span key={index}>{part}</span>;
+      return (
+        <span key={index} className="font-semibold text-zinc-200">
+          {part}
+        </span>
+      );
     });
   };
 

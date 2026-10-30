@@ -140,7 +140,32 @@ Episode 3 (*TCP Connection Establishment & Lifecycle*) solidifies the transport 
 
 ---
 
-## 6. Verification Protocol for Future Episodes
+## 6. Episode 4: HTTP Request & Response Lifecycle Standards
+
+Episode 4 (*HTTP Request & Response Lifecycle*) connects transport channels to the application layer:
+
+1. **Tripartite Glass-Box Horizon**:
+   - **Client Browser Runtime**: Mock URL bar with TLS 1.3 lock and HTTP method badge, 2-phase `fetch()` state badge (Phase 1 Headers vs Phase 2 Body Streaming), Code Spotlight with line highlight, and live React component preview (`<UserProfile />`, `<UserPosts />`, `<CreateUserForm />`).
+   - **Wire Substrate**: Protocol encapsulation pill (`TLS 1.3 Record > HTTP/1.1`), in-flight animated packets with direction, payload preview, and Keep-Alive indicator.
+   - **Backend Stack**: Edge Nginx Reverse Proxy card (`proxy_pass`, SSL termination), Express app server middleware gate pipeline (`cors`, `auth`, `body_parser`, `router`, `handler`), and PostgreSQL database execution card (`SELECT`, status, latency).
+
+2. **WAI-ARIA Tabbed Telemetry Panel**:
+   - **Tab 1: Chrome DevTools HTTP Inspector**: General metadata, formatted request/response headers table, parsed JSON payload viewer, and Raw Wire ASCII toggle highlighting RFC CRLF delimiters (`\r\n` and double `\r\n\r\n`).
+   - **Tab 2: Request Lifecycle Waterfall Gantt**: Real-time visual timeline bars (DNS, TCP, TLS, Request Sent, TTFB, Content Download) with persistent Keep-Alive latency reduction callout.
+   - **Tab 3: Backend Trace**: Express middleware pipeline execution order, duration, status, and database execution trace.
+
+3. **7 Curated Scenarios Catalog (RFC 7230, 9110, 9111, W3C Fetch)**:
+   - Scenario 1: Canonical GET /api/users/42 (200 OK) — Cold start, DNS, TCP, TLS 1.3, Nginx, Express, DB query, 2-phase fetch().
+   - Scenario 2: Connection Reuse & Keep-Alive (GET /api/users/42/posts) — Socket pool reuse, 0ms handshake bypass, 18ms roundtrip.
+   - Scenario 3: Resource Creation (POST /api/users, 201 Created) — Request body framing, Content-Length, `express.json()` stream buffering, Location header.
+   - Scenario 4: Auth & Routing (401 Unauthorized vs 403 Forbidden vs 404 Not Found) — Middleware auth rejection vs route permission guard vs DB miss; proof that fetch() resolves on 4xx.
+   - Scenario 5: Conditional GET & Caching (ETag, If-None-Match, 304 Not Modified) — Zero body bytes, local disk cache rehydration.
+   - Scenario 6: Gateway & Upstream Failures (502 Bad Gateway vs 504 Gateway Timeout) — Upstream Node.js process crash (TCP RST) vs slow query timeout (`proxy_read_timeout`).
+   - Scenario 7: Failure Boundaries (Transport Error vs Server 500 vs CORS Block vs Preflight OPTIONS Failure).
+
+---
+
+## 7. Verification Protocol for Future Episodes
 
 Before declaring completion of any new Computer Networks episode or scenario:
 1. **Scenario Integrity Test**: Add unit tests in `src/lib/network-simulator/__tests__/` asserting step progression, packet presence, socket state transitions, and step note completeness.
@@ -148,4 +173,30 @@ Before declaring completion of any new Computer Networks episode or scenario:
 3. **ESLint Verification**: `npx eslint <touched_files>` must pass with **0 errors and 0 warnings**.
 4. **Vitest Suite**: `npm test` must pass all test suites green.
 5. **Mandatory Rule #1**: **NEVER run `git add`, `git commit`, or `git push`**. All changes must remain unstaged in the working tree for user inspection.
+
+---
+
+## 8. Episode 4: Dynamic Proportional Flex Weighting, Centered Modals & UI Polish
+
+Following design confirmation, Episode 4 implements:
+1. **Dynamic Proportional Flex Weighting (Option A)**:
+   - Dynamic proportional allocation based on `activeRegion`:
+     - Client Active: 58% / 16% / 26%
+     - Wire Active: 30% / 40% / 30%
+     - Backend/Proxy Active: 24% / 18% / 58%
+     - All: 44% / 16% / 40%
+   - Header Maximize/Restore button supporting 100% full-width view and Esc dismissal.
+2. **Centered Floating Modal Dialogs**:
+   - React Live Preview Modal: Complete un-truncated JSON formatted with syntax highlighting and DOM state render.
+   - Wire Substrate Modal: 4-layer encapsulation breakdown (TCP, TLS 1.3, HTTP/1.1) and raw wire ASCII inspection.
+   - Modals auto-dismiss on step navigation (Rule #7).
+3. **Token-Based Syntax Highlighting in `UserProfile.tsx`**:
+   - Tokenized keywords, functions, strings, comments, numbers, and active line indicator.
+4. **Telemetry Panel 2-Line Tabs & WAI-ARIA Fixes**:
+   - 2-line vertically stacked, centrally aligned tab buttons.
+   - Removed `ArrowLeft`/`ArrowRight` interception from telemetry tabs to preserve global step keyboard shortcuts.
+   - Placed "Show Raw CRLF" button outside of `role="tablist"` container.
+   - Progressively dimmed/ghosted future Waterfall Gantt bars.
+   - Transformed wire progress line to GPU-composited `transform: scaleX(...)`.
+
 

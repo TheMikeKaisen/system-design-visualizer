@@ -1352,4 +1352,104 @@ This document serves as the single source of truth for architectural, UI/UX, rel
     - Mandatory Rule #1 strictly honored: 0 git commits or staging operations performed; all changes remain in the unstaged working tree.
 - **Blast Radius**: Comprehensive Episode 3 delivery with zero regressions on existing episodes.
 
+---
+
+## Decision Record 018: Episode 4 — HTTP Request & Response Lifecycle & Tokenization Boundary Hardening
+- **Status**: Approved & Implemented
+- **Category**: Subject Expansion, Application Layer Protocol Fidelity & Parser Hardening
+- **Problem**:
+  1. **Tokenization / Substring Highlighting Defect in `InteractiveExplanationBar.tsx`**:
+     - Substring terms like `"ACK"` matched inside English words like `"Packet"` (`p-ack-et`) or `"acknowledge"`, fragmenting words into broken text fragments and spurious clickable buttons.
+     - In line 385, unanchored `norm.includes(normalize(k))` caused step notes with titles like `"Packet Structure"` to be hijacked by `"ACK"` glossary definitions.
+  2. **Episode 4 Pedagogical Demand**:
+     - Learners needed an interactive, glass-box exploration of the HTTP Request & Response lifecycle (RFC 7230, 9110, 9111, W3C Fetch specification).
+     - Need to demystify core developer confusion points:
+       - The JavaScript `fetch()` 2-phase lifecycle: headers arrival (`res.ok`, status code, TTFB) vs asynchronous body streaming (`await res.json()`).
+       - Proof that `fetch()` does NOT reject on 4xx/5xx responses; it only rejects on network/transport drops or browser CORS sandbox blocks.
+       - Performance benefits of Keep-Alive persistent connection reuse (bypassing DNS, TCP 3-way handshake, and TLS 1.3 key exchange).
+       - Bandwidth savings of Conditional GET requests (`ETag`, `If-None-Match`, `304 Not Modified` with 0 body bytes).
+       - Reverse proxy error boundaries: `502 Bad Gateway` (upstream TCP RST / crash) vs `504 Gateway Timeout` (`proxy_read_timeout` exceeded).
+- **Decision & Implementation**:
+  1. **Authentic Word-Boundary Tokenizer & Title Matcher**:
+     - Hardened `InteractiveExplanationBar.tsx`:
+       - Escaped all keyword regex patterns with word boundaries (`\b`) conditioned on leading/trailing word characters (`/^\w/` and `/\w$/`), ensuring acronyms like `ACK` never match inside `Packet` or `acknowledge`.
+       - Leveraged the mathematical guarantee of `String.prototype.split(new RegExp('(' + ... + ')'))` where even indices are strictly plain text and odd indices are captured tokens.
+       - Fixed `detailedNotes` title matching to use word-boundary regex testing (`pattern.test(norm)`) rather than unanchored substring matching, preventing notes like `"Packet Structure"` from matching `"ACK"`.
+       - Added regression test suite `src/components/network-simulator/__tests__/InteractiveExplanationBar.test.tsx`.
+  2. **Domain Engine & Educational Glossary**:
+     - Authored [`src/lib/network-simulator/http-engine.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/http-engine.ts) with types (`HttpSimulationStep`, `HttpRequestData`, `HttpResponseData`, `HttpWaterfallTiming`, `HttpClientState`, `HttpBackendState`, `HttpWireState`).
+     - Created `HTTP_GLOSSARY` containing 30+ RFC definitions with production terminal command examples (`curl -i`, `curl -sI`, `curl -w`, `curl -X POST`, `journalctl`, `nginx -T`).
+     - Created raw HTTP/1.1 serialization utilities (`formatRawHttpRequest`, `formatRawHttpResponse`) with CRLF line delimiters.
+  3. **7 Curated Scenarios**:
+     - Authored [`src/lib/network-simulator/http-scenarios.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/network-simulator/http-scenarios.ts):
+       1. `SCENARIO_HTTP_CANONICAL_GET`: Cold-start journey, DNS, TCP, TLS 1.3, Nginx proxy, Express middleware, DB query, headers arrival (fetch phase 1), res.json() streaming (fetch phase 2), React UI render.
+       2. `SCENARIO_HTTP_CONNECTION_REUSE`: Keep-Alive socket pool reuse, 0ms handshake bypass, 18ms roundtrip.
+       3. `SCENARIO_HTTP_RESOURCE_CREATION`: POST request body, Content-Length, `express.json()` stream buffering, SQL INSERT, `Location: /api/users/43`.
+       4. `SCENARIO_HTTP_AUTH_ROUTING`: 401 Unauthorized vs 403 Forbidden vs 404 Not Found, proving fetch() resolves on 4xx.
+       5. `SCENARIO_HTTP_CONDITIONAL_CACHING`: Conditional GET, ETag, If-None-Match, 304 Not Modified with zero body bytes.
+       6. `SCENARIO_HTTP_GATEWAY_FAILURES`: 502 Bad Gateway (upstream Node.js crash / TCP RST) vs 504 Gateway Timeout (`proxy_read_timeout` expiration).
+       7. `SCENARIO_HTTP_FAILURE_BOUNDARIES`: Triad of failure modes (Transport Error vs Server 500 vs CORS Block vs Preflight OPTIONS Failure).
+  4. **Tripartite Glass-Box Topology Canvas**:
+     - Created [`src/components/network-simulator/HttpTopologyCanvas.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/HttpTopologyCanvas.tsx) rendering:
+       - Client Horizon: Mock browser URL bar with lock icon and method badge, 2-phase fetch lifecycle badge, React component live preview (`<UserProfile />`, `<UserPosts />`, `<CreateUserForm />`), code spotlight with line highlighting.
+       - Wire Substrate: Encapsulation badges, animated in-flight packet traversal, TLS 1.3 lock envelope, Keep-Alive indicators.
+       - Backend Stack: Edge Nginx proxy card (`proxy_pass`, SSL termination), Express middleware checklist pipeline (`cors`, `auth`, `body_parser`, `router`, `handler`), database query card (`SELECT`, status, latency).
+  5. **WAI-ARIA Tabbed Telemetry Panel**:
+     - Created [`src/components/network-simulator/HttpTelemetryPanel.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/HttpTelemetryPanel.tsx):
+       - Tab 1: Chrome DevTools HTTP Inspector with General, Response Headers, Request Headers, JSON Body, and Raw Wire ASCII toggle highlighting CRLF (`\r\n` and `\r\n\r\n`).
+       - Tab 2: Request Lifecycle Waterfall Gantt chart (DNS, TCP, TLS, Request Sent, TTFB, Download) with Keep-Alive latency savings callout.
+       - Tab 3: Backend Middleware Pipeline trace and PostgreSQL execution logs.
+  6. **Route Registration & Strict Quality Verification**:
+     - Created page at [`src/app/computer-networks/simulator/http-lifecycle/page.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/simulator/http-lifecycle/page.tsx) with canonical shell, playback bar, and scenario dropdown.
+     - Registered Episode 4 in [`src/app/computer-networks/episodes.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/app/computer-networks/episodes.tsx).
+     - Automated test verification:
+       - `src/lib/network-simulator/__tests__/httpScenarioIntegrity.test.ts` (13 tests passed).
+       - `src/app/computer-networks/simulator/http-lifecycle/__tests__/httpPage.test.tsx` (6 tests passed).
+       - `src/components/network-simulator/__tests__/InteractiveExplanationBar.test.tsx` (2 tests passed).
+       - `npx tsc --noEmit`: 0 errors.
+       - `npx eslint <touched_files>`: 0 errors, 0 warnings.
+       - Rule #1 honored: 0 git commits or staging operations.
+- **Blast Radius**: Zero regressions. Seamlessly extends Computer Networks suite.
+
+---
+
+## Decision Record 063: Episode 4 HTTP Lifecycle — Dynamic Proportional Flex Weighting, Centered Modals, Token Syntax Highlighting & ARIA Polish
+- **Status**: Implemented & Verified
+- **Category**: Computer Networks Simulator, UI/UX Layout, Motion & Accessibility
+- **Context & Decisions**:
+  1. **Option A (Dynamic Proportional Flex Weighting)**:
+     - Implemented dynamic proportional flex column widths across the 3 horizons (`Client`, `Wire Substrate`, `Backend Stack`) based on `httpData.activeRegion`:
+       - `client`: 58% Client, 16% Wire, 26% Backend.
+       - `wire`: 30% Client, 40% Wire, 30% Backend.
+       - `backend` / `proxy`: 24% Client, 18% Wire, 58% Backend.
+       - `all`: 44% Client, 16% Wire, 40% Backend.
+     - Smooth 300ms transitions (`transition-all duration-300 ease-out`).
+     - Added manual maximize button (`Maximize2` / `Minimize2`) to each horizon header allowing 100% full-width expansion with Escape key and restore button support.
+  2. **Centered Floating Modal Dialogs**:
+     - **React Live Preview Modal**: Triggered from preview header, renders complete un-truncated JSON with color token highlighting, live DOM preview, connection telemetry, backdrop blur, and dismiss via close button, backdrop tap, or `Escape` key.
+     - **Wire Substrate Modal**: Triggered from Wire header and in-flight packet card, displays complete 4-layer encapsulation hierarchy (TCP, TLS 1.3, HTTP/1.1), direction, encryption status, byte sizes, and raw ASCII wire stream.
+     - Auto-dismisses modals on step transitions (enforcing Rule #7).
+  3. **Token-Based Syntax Highlighting in `UserProfile.tsx`**:
+     - Tokenized code snippet into keywords (`text-purple-400 font-semibold`), functions (`text-blue-400 font-medium`), strings (`text-emerald-400`), comments (`text-zinc-500 italic`), and active line highlight (`bg-teal-500/20 text-teal-200 border-l-2 border-teal-400`).
+  4. **Right Panel Tabs 2-Line Centered Formatting**:
+     - Replaced inline text with 2-line vertically stacked, centrally aligned tab buttons:
+       - Tab 1: `DevTools` <br/> `Inspector [status]`
+       - Tab 2: `Waterfall` <br/> `Gantt [ms]`
+       - Tab 3: `Backend` <br/> `Trace [gates]`
+  5. **Keyboard Shortcuts Integrity**:
+     - Removed `ArrowLeft` / `ArrowRight` capture from telemetry tabs in `HttpTelemetryPanel.tsx` so global step navigation is never hijacked.
+  6. **Critique Polish & ARIA Standards**:
+     - Moved "Show Raw CRLF" button outside of `role="tablist"` to strictly comply with W3C WAI-ARIA APG rules.
+     - Progressively ghosted/dimmed future Waterfall Gantt bars (`opacity-35`, dashed border, `Pending` badge) while highlighting active phases with glowing pulse and `Active` badge.
+     - Replaced layout `width` property on the wire conduit line with GPU-composited `transform: scaleX(...)` and `transformOrigin: "left"`.
+     - Elevated micro-text to `text-[11px] font-mono` and low-contrast text to `text-zinc-400`.
+- **Verification**:
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx eslint <touched_files>`: 0 errors / 0 warnings.
+  - Vitest: All 12 unit tests in `src/app/computer-networks/simulator/http-lifecycle/__tests__/httpPage.test.tsx` pass.
+  - All 13 scenario integrity tests in `src/lib/network-simulator/__tests__/httpScenarioIntegrity.test.ts` pass.
+- **Blast Radius**: Zero regressions; Rule #1 strictly honored (all changes unstaged).
+
+
+
 
