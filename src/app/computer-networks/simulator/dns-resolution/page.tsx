@@ -167,7 +167,11 @@ const DNS_TERM_PATTERNS = [
   "205.251.192.1",
 ];
 
-export default function DnsResolutionEpisodePage() {
+export default function DnsResolutionEpisodePage({
+  defaultTelemetryCollapsed = true,
+}: {
+  defaultTelemetryCollapsed?: boolean;
+} = {}) {
   const { setScenario } = useNetworkSimulationStore();
   const [selectedPacketOverride, setSelectedPacketOverride] = useState<DnsWirePacket | null>(null);
 
@@ -181,25 +185,31 @@ export default function DnsResolutionEpisodePage() {
       title="DNS Resolution & Hierarchical Caching — How the Internet Finds IP Addresses"
       scenarios={ALL_DNS_SCENARIOS}
       accentColor="teal"
+      defaultTelemetryCollapsed={defaultTelemetryCollapsed}
       customGlossary={DNS_GLOSSARY}
       customTermPatterns={DNS_TERM_PATTERNS}
-      canvasSlot={(step) => {
+      canvasSlot={(step, _idx, telemetryControls) => {
         const dnsStep = step as DnsScenarioStep | null;
         if (!dnsStep?.dnsData) return null;
         return (
           <DnsTopologyCanvas
             dnsData={dnsStep.dnsData}
-            onSelectPacket={(pkt) => setSelectedPacketOverride(pkt)}
+            onSelectPacket={(pkt) => {
+              setSelectedPacketOverride(pkt);
+              telemetryControls?.expandTelemetry();
+            }}
           />
         );
       }}
-      telemetrySlot={(step) => {
+      telemetrySlot={(step, _idx, telemetryControls) => {
         const dnsStep = step as DnsScenarioStep | null;
         if (!dnsStep?.dnsData) return null;
         return (
           <DnsTelemetryPanel
             dnsData={dnsStep.dnsData}
             activePacketOverride={selectedPacketOverride}
+            onToggleCollapse={telemetryControls?.toggleCollapse}
+            isCollapsed={telemetryControls?.isCollapsed}
           />
         );
       }}

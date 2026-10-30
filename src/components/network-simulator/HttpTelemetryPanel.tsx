@@ -14,12 +14,16 @@ import {
   CheckCircle2,
   XCircle,
   Code,
+  PanelRightClose,
+  PanelRightOpen,
 } from "lucide-react";
 
 interface HttpTelemetryPanelProps {
   httpData: HttpStepData;
   activeTabOverride?: "devtools" | "waterfall" | "backend";
   onTabChange?: (tab: "devtools" | "waterfall" | "backend") => void;
+  onToggleCollapse?: () => void;
+  isCollapsed?: boolean;
 }
 
 type WaterfallPhase = "dns" | "tcp" | "tls" | "req" | "ttfb" | "download";
@@ -123,6 +127,8 @@ export function HttpTelemetryPanel({
   httpData,
   activeTabOverride,
   onTabChange,
+  onToggleCollapse,
+  isCollapsed = false,
 }: HttpTelemetryPanelProps) {
   const [activeTab, setActiveTab] = useState<"devtools" | "waterfall" | "backend">(
     activeTabOverride ?? "devtools"
@@ -187,6 +193,98 @@ export function HttpTelemetryPanel({
       return <span key={i}>{part}</span>;
     });
   };
+
+  /* ──────────────── PATTERN A: Sleek Docked Micro-Rail with Status Badges ──────────────── */
+  if (isCollapsed) {
+    return (
+      <aside
+        aria-label="Telemetry Docked Rail"
+        className="h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex flex-row lg:flex-col items-center justify-between lg:justify-start p-1.5 sm:p-2 gap-2 select-none font-mono shadow-sm transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]"
+      >
+        {/* Top: Expand Toggle Button */}
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            aria-label="Expand Telemetry Panel"
+            title="Expand Telemetry Panel (T)"
+            className="p-2 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 active:scale-95 text-teal-400 border border-teal-500/30 hover:border-teal-500/60 transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation shrink-0"
+          >
+            <PanelRightOpen className="w-4 h-4" />
+          </button>
+        )}
+
+        <div className="w-px h-6 lg:w-8 lg:h-px bg-zinc-800 shrink-0" />
+
+        {/* Tab 1: DevTools */}
+        <button
+          type="button"
+          onClick={() => {
+            handleSelectTab("devtools");
+            onToggleCollapse?.();
+          }}
+          aria-label="Expand DevTools Inspector"
+          title={`DevTools Inspector (${response ? `${response.statusCode} OK` : "Pending"}) — Click to expand`}
+          className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation group ${
+            activeTab === "devtools"
+              ? "bg-zinc-800/90 text-teal-300 border border-teal-500/40 shadow-xs"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+          }`}
+        >
+          <FileText className="w-4 h-4 text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span
+            className={`text-[9px] font-bold mt-1 px-1 py-0.5 rounded border leading-none ${getStatusColor(
+              response?.statusCode
+            )}`}
+          >
+            {response ? response.statusCode : "REQ"}
+          </span>
+        </button>
+
+        {/* Tab 2: Waterfall */}
+        <button
+          type="button"
+          onClick={() => {
+            handleSelectTab("waterfall");
+            onToggleCollapse?.();
+          }}
+          aria-label="Expand Waterfall Gantt"
+          title={`Waterfall Gantt (${waterfall.totalMs}ms) — Click to expand`}
+          className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-400 touch-manipulation group ${
+            activeTab === "waterfall"
+              ? "bg-zinc-800/90 text-sky-300 border border-sky-500/40 shadow-xs"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+          }`}
+        >
+          <BarChart3 className="w-4 h-4 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="text-[9px] font-mono mt-1 px-1 py-0.5 rounded bg-zinc-900 text-sky-300 border border-sky-500/30 leading-none">
+            {waterfall.totalMs}ms
+          </span>
+        </button>
+
+        {/* Tab 3: Backend */}
+        <button
+          type="button"
+          onClick={() => {
+            handleSelectTab("backend");
+            onToggleCollapse?.();
+          }}
+          aria-label="Expand Backend Trace"
+          title={`Backend Trace (${backend.middlewarePipeline.length} gates) — Click to expand`}
+          className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 touch-manipulation group ${
+            activeTab === "backend"
+              ? "bg-zinc-800/90 text-emerald-300 border border-emerald-500/40 shadow-xs"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+          }`}
+        >
+          <Server className="w-4 h-4 text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="text-[9px] font-mono mt-1 px-1 py-0.5 rounded bg-zinc-900 text-emerald-300 border border-emerald-500/30 leading-none">
+            {backend.middlewarePipeline.length}gt
+          </span>
+        </button>
+      </aside>
+    );
+  }
 
   return (
     <div className="h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex flex-col overflow-hidden select-none font-sans shadow-sm">
@@ -313,9 +411,9 @@ export function HttpTelemetryPanel({
           </button>
         </div>
 
-        {/* Show Raw CRLF button is outside role="tablist" to comply with WAI-ARIA APG */}
-        {activeTab === "devtools" && (
-          <div className="flex items-center gap-1 pb-1 shrink-0">
+        {/* Actions outside role="tablist" to comply with WAI-ARIA APG */}
+        <div className="flex items-center gap-1.5 pb-1 shrink-0">
+          {activeTab === "devtools" && (
             <button
               type="button"
               onClick={() =>
@@ -336,8 +434,20 @@ export function HttpTelemetryPanel({
                 {viewMode === "formatted" ? "Show Raw CRLF" : "Show Formatted"}
               </span>
             </button>
-          </div>
-        )}
+          )}
+
+          {onToggleCollapse && (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              aria-label="Collapse Telemetry Panel"
+              title="Collapse Telemetry Panel (T)"
+              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 active:scale-95 text-zinc-400 hover:text-teal-300 border border-border/60 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation shrink-0"
+            >
+              <PanelRightClose className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Tab Content Panels ── */}

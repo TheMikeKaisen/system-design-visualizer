@@ -2,14 +2,21 @@
 
 import React, { useState } from "react";
 import type { DnsStepData, DnsWirePacket, DnsCacheEntry } from "@/lib/network-simulator/dns-engine";
-import { Database, FileCode } from "lucide-react";
+import { Database, FileCode, PanelRightClose, PanelRightOpen } from "lucide-react";
 
 interface DnsTelemetryPanelProps {
   dnsData: DnsStepData;
   activePacketOverride?: DnsWirePacket | null;
+  onToggleCollapse?: () => void;
+  isCollapsed?: boolean;
 }
 
-export function DnsTelemetryPanel({ dnsData, activePacketOverride }: DnsTelemetryPanelProps) {
+export function DnsTelemetryPanel({
+  dnsData,
+  activePacketOverride,
+  onToggleCollapse,
+  isCollapsed = false,
+}: DnsTelemetryPanelProps) {
   const [activeTab, setActiveTab] = useState<"caches" | "wire">("caches");
 
   const packet = activePacketOverride ?? dnsData.activeDnsPacket;
@@ -21,47 +28,127 @@ export function DnsTelemetryPanel({ dnsData, activePacketOverride }: DnsTelemetr
 
   const flags = packet?.message.flags;
 
-  return (
-    <div className="h-full flex flex-col min-h-0 select-none font-sans">
-      {/* ── Top Tabs (WAI-ARIA compliant) ── */}
-      <div
-        role="tablist"
-        aria-label="DNS Telemetry Navigation"
-        className="flex items-center gap-1 mb-2 bg-zinc-900/60 p-1 rounded-lg border border-border/60 shrink-0 font-mono text-xs"
+  /* ──────────────── PATTERN A: Sleek Docked Micro-Rail with Status Badges ──────────────── */
+  if (isCollapsed) {
+    return (
+      <aside
+        aria-label="Telemetry Docked Rail"
+        className="h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex flex-row lg:flex-col items-center justify-between lg:justify-start p-1.5 sm:p-2 gap-2 select-none font-mono shadow-sm transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]"
       >
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            aria-label="Expand Telemetry Panel"
+            title="Expand Telemetry Panel (T)"
+            className="p-2 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 active:scale-95 text-teal-400 border border-teal-500/30 hover:border-teal-500/60 transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation shrink-0"
+          >
+            <PanelRightOpen className="w-4 h-4" />
+          </button>
+        )}
+
+        <div className="w-px h-6 lg:w-8 lg:h-px bg-zinc-800 shrink-0" />
+
+        {/* Tab 1: DNS Caches */}
         <button
           type="button"
-          role="tab"
-          id="tab-dns-caches"
-          aria-selected={activeTab === "caches"}
-          aria-controls="panel-dns-caches"
-          onClick={() => setActiveTab("caches")}
-          className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
+          onClick={() => {
+            setActiveTab("caches");
+            onToggleCollapse?.();
+          }}
+          aria-label="Expand DNS Caches"
+          title={`DNS Caches (${caches.length} cached records) — Click to expand`}
+          className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation group ${
             activeTab === "caches"
-              ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+              ? "bg-zinc-800/90 text-teal-300 border border-teal-500/40 shadow-xs"
               : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
           }`}
         >
-          <Database className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-          <span className="truncate">DNS Caches ({caches.length})</span>
+          <Database className="w-4 h-4 text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="text-[9px] font-bold mt-1 text-teal-300 leading-none">
+            {caches.length}
+          </span>
         </button>
 
+        {/* Tab 2: Wire Packet */}
         <button
           type="button"
-          role="tab"
-          id="tab-dns-wire"
-          aria-selected={activeTab === "wire"}
-          aria-controls="panel-dns-wire"
-          onClick={() => setActiveTab("wire")}
-          className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
+          onClick={() => {
+            setActiveTab("wire");
+            onToggleCollapse?.();
+          }}
+          aria-label="Expand Wire Packet"
+          title={`DNS Wire Packet ${packet ? "(Active UDP/53)" : "(Idle)"} — Click to expand`}
+          className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation group ${
             activeTab === "wire"
-              ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+              ? "bg-zinc-800/90 text-teal-300 border border-teal-500/40 shadow-xs"
               : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
           }`}
         >
-          <FileCode className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-          <span className="truncate">Wire Packet {packet ? "•" : ""}</span>
+          <FileCode className="w-4 h-4 text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="text-[9px] font-mono mt-1 text-teal-300 leading-none">
+            {packet ? "DNS" : "idle"}
+          </span>
         </button>
+      </aside>
+    );
+  }
+
+  return (
+    <div className="h-full flex flex-col min-h-0 select-none font-sans">
+      {/* ── Top Tabs (WAI-ARIA compliant) + Collapse Button ── */}
+      <div className="flex items-center justify-between gap-1 mb-2 shrink-0">
+        <div
+          role="tablist"
+          aria-label="DNS Telemetry Navigation"
+          className="flex items-center gap-1 bg-zinc-900/60 p-1 rounded-lg border border-border/60 flex-1 font-mono text-xs"
+        >
+          <button
+            type="button"
+            role="tab"
+            id="tab-dns-caches"
+            aria-selected={activeTab === "caches"}
+            aria-controls="panel-dns-caches"
+            onClick={() => setActiveTab("caches")}
+            className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
+              activeTab === "caches"
+                ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+            }`}
+          >
+            <Database className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span className="truncate">DNS Caches ({caches.length})</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            id="tab-dns-wire"
+            aria-selected={activeTab === "wire"}
+            aria-controls="panel-dns-wire"
+            onClick={() => setActiveTab("wire")}
+            className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
+              activeTab === "wire"
+                ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+            }`}
+          >
+            <FileCode className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span className="truncate">Wire Packet {packet ? "•" : ""}</span>
+          </button>
+        </div>
+
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            aria-label="Collapse Telemetry Panel"
+            title="Collapse Telemetry Panel (T)"
+            className="p-1.5 rounded-lg bg-zinc-900/60 hover:bg-zinc-800 active:scale-95 text-zinc-400 hover:text-teal-300 border border-border/60 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation shrink-0"
+          >
+            <PanelRightClose className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* ── Tab Content ── */}

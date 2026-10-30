@@ -102,6 +102,7 @@ describe("NetworkEpisodeShell", () => {
       <NetworkEpisodeShell
         episodeNumber={1}
         title="IP Addresses, Ports & Sockets"
+        defaultTelemetryCollapsed={false}
       />
     );
 
@@ -124,5 +125,63 @@ describe("NetworkEpisodeShell", () => {
     expect(screen.getByText("Wire Packet Inspector")).toBeDefined();
     expect(screen.getByText(/Layer 3 · Network/i)).toBeDefined();
     expect(screen.getByText(/8-Bit TCP Flag Register/i)).toBeDefined();
+  });
+
+  it("is collapsed by default into docked rail and expands via docked rail button and nav toggle", () => {
+    render(
+      <NetworkEpisodeShell
+        episodeNumber={1}
+        title="IP Addresses, Ports & Sockets"
+      />
+    );
+
+    // By default it starts collapsed as docked rail (Pattern A)
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
+    expect(screen.queryByLabelText("Inspector navigation tabs")).toBeNull();
+    expect(screen.getByRole("button", { name: /Expand Sockets Table/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Expand Packet Inspector/i })).toBeDefined();
+
+    // Click docked rail expand button
+    const railExpandBtn = screen.getByRole("button", { name: "Expand Telemetry Panel" });
+    fireEvent.click(railExpandBtn);
+
+    // Full telemetry panel is restored
+    expect(screen.queryByLabelText("Telemetry Docked Rail")).toBeNull();
+    expect(screen.getByLabelText("Inspector navigation tabs")).toBeDefined();
+
+    // Click collapse button in telemetry header
+    const collapseBtn = screen.getByRole("button", { name: "Collapse Telemetry Panel" });
+    fireEvent.click(collapseBtn);
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
+
+    // Now test nav toggle button
+    const navToggleBtn = screen.getByRole("button", { name: "Toggle Telemetry Panel (T)" });
+    fireEvent.click(navToggleBtn);
+    expect(screen.queryByLabelText("Telemetry Docked Rail")).toBeNull();
+    expect(screen.getByLabelText("Inspector navigation tabs")).toBeDefined();
+
+    fireEvent.click(navToggleBtn);
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
+  });
+
+  it("toggles telemetry panel via 'T' keyboard shortcut starting from collapsed state", () => {
+    render(
+      <NetworkEpisodeShell
+        episodeNumber={1}
+        title="IP Addresses, Ports & Sockets"
+      />
+    );
+
+    // Starts collapsed
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
+
+    // Press 't' key to expand into full panel
+    fireEvent.keyDown(window, { code: "KeyT", key: "t" });
+    expect(screen.queryByLabelText("Telemetry Docked Rail")).toBeNull();
+    expect(screen.getByLabelText("Inspector navigation tabs")).toBeDefined();
+
+    // Press 't' again to collapse back into docked rail
+    fireEvent.keyDown(window, { code: "KeyT", key: "t" });
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
   });
 });

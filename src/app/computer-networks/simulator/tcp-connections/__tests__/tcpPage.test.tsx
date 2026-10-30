@@ -45,8 +45,27 @@ describe("TcpConnectionsEpisodePage (Episode 3 Smoke Test)", () => {
     ).toBeDefined();
   });
 
-  it("renders step 1 badge, TCP topology dual-horizon machines, and telemetry tabs", () => {
+  it("is collapsed by default into docked rail and expands via docked rail button", () => {
     render(<TcpConnectionsEpisodePage />);
+
+    // Docked rail is visible by default (Pattern A)
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
+    expect(screen.queryByRole("tab", { name: /Wire Segment/i })).toBeNull();
+
+    // Click rail expand button
+    const railExpandBtn = screen.getByRole("button", { name: "Expand Telemetry Panel" });
+    act(() => {
+      fireEvent.click(railExpandBtn);
+    });
+
+    // Telemetry tabs are restored
+    expect(screen.getByRole("tab", { name: /Wire Segment/i })).toBeDefined();
+    expect(screen.getByRole("tab", { name: /Sockets Table/i })).toBeDefined();
+    expect(screen.getByRole("tab", { name: /TCP FSM/i })).toBeDefined();
+  });
+
+  it("renders step 1 badge, TCP topology dual-horizon machines, and telemetry tabs", () => {
+    render(<TcpConnectionsEpisodePage defaultTelemetryCollapsed={false} />);
 
     expect(screen.getByLabelText("Step explanation")).toBeDefined();
     expect(screen.getByText(/Step 1 of/i)).toBeDefined();
@@ -68,7 +87,7 @@ describe("TcpConnectionsEpisodePage (Episode 3 Smoke Test)", () => {
   });
 
   it("advances step via Next button, renders SYN segment with 8-bit flags register", () => {
-    render(<TcpConnectionsEpisodePage />);
+    render(<TcpConnectionsEpisodePage defaultTelemetryCollapsed={false} />);
 
     const nextBtn = screen.getByRole("button", { name: /Next Step/i });
     expect(nextBtn).toBeDefined();
@@ -94,7 +113,7 @@ describe("TcpConnectionsEpisodePage (Episode 3 Smoke Test)", () => {
   });
 
   it("switches telemetry tabs to Sockets Table and TCP FSM with proper ARIA semantics and renders Desktop SVG directed graph", () => {
-    render(<TcpConnectionsEpisodePage />);
+    render(<TcpConnectionsEpisodePage defaultTelemetryCollapsed={false} />);
 
     // Switch to Sockets Table tab
     const socketsTab = screen.getByRole("tab", { name: /Sockets Table/i });
@@ -118,7 +137,7 @@ describe("TcpConnectionsEpisodePage (Episode 3 Smoke Test)", () => {
   });
 
   it("clicking packet pill on canvas auto-switches active telemetry tab to Wire Segment", () => {
-    render(<TcpConnectionsEpisodePage />);
+    render(<TcpConnectionsEpisodePage defaultTelemetryCollapsed={false} />);
 
     // First switch to Sockets Table tab
     const socketsTab = screen.getByRole("tab", { name: /Sockets Table/i });
@@ -193,7 +212,7 @@ describe("TcpConnectionsEpisodePage (Episode 3 Smoke Test)", () => {
   });
 
   it("retains socket selection by ID across step navigation (Rule #8 item 3)", () => {
-    render(<TcpConnectionsEpisodePage />);
+    render(<TcpConnectionsEpisodePage defaultTelemetryCollapsed={false} />);
 
     // Switch to Sockets Table
     const socketsTab = screen.getByRole("tab", { name: /Sockets Table/i });
@@ -227,7 +246,7 @@ describe("TcpConnectionsEpisodePage (Episode 3 Smoke Test)", () => {
   });
 
   it("supports keyboard navigation on SVG FSM nodes to update the explainer drawer", () => {
-    render(<TcpConnectionsEpisodePage />);
+    render(<TcpConnectionsEpisodePage defaultTelemetryCollapsed={false} />);
 
     // Switch to TCP FSM tab
     const fsmTab = screen.getByRole("tab", { name: /TCP FSM/i });

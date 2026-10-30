@@ -199,4 +199,21 @@ Following design confirmation, Episode 4 implements:
    - Progressively dimmed/ghosted future Waterfall Gantt bars.
    - Transformed wire progress line to GPU-composited `transform: scaleX(...)`.
 
+---
+
+## 7. Universal Telemetry Collapse & Canvas Full-Width Maximization Standard
+
+Across all Computer Networks episodes (Episodes 1, 2, 3, and 4):
+- **Panel Collapse / Expand & Pattern A (Docked Micro-Rail)**:
+  - Managed centrally in [`NetworkEpisodeShell.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/NetworkEpisodeShell.tsx) via `isTelemetryCollapsed` and exposed through `telemetryControls: { isCollapsed, toggleCollapse, expandTelemetry, collapseTelemetry }`.
+  - Default state: `defaultTelemetryCollapsed = true` by default across all episodes, prioritizing canvas, code, and topology horizons on initial load.
+  - When collapsed, the topology canvas section seamlessly expands to ~96% viewport width (`flex: 1 1 0%`) via `transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]`, while the telemetry panel collapses into a sleek 56px (`w-14 shrink-0`) vertical micro-rail.
+  - The docked rail features miniature icons, an expand trigger `<PanelRightOpen />`, and live compact status badges (`[200]`, `98ms`, `4gt`, socket counts).
+  - Tapping any badge directly expands the panel and immediately switches to that active tab.
+  - Zero canvas overlap: Floating in-canvas pill is completely eliminated, ensuring 0% collision with canvas cards or horizon headers.
+  - Top navigation bar provides a quick toggle button: `Toggle Telemetry Panel (T)` beside `ScenarioDropdown`.
+  - Global shortcut <kbd>T</kbd> (via [`useNetworkKeyboardShortcuts.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/hooks/useNetworkKeyboardShortcuts.ts)) allows instant keyboard toggling.
+  - Clicking any packet, socket, or wire segment on the canvas triggers `expandTelemetry()` to reveal inspectable details without manual friction.
+  - All telemetry headers ([`DnsTelemetryPanel.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/DnsTelemetryPanel.tsx), [`TcpTelemetryPanel.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/TcpTelemetryPanel.tsx), [`HttpTelemetryPanel.tsx`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/components/network-simulator/HttpTelemetryPanel.tsx), and Episode 1 default shell) provide a `<PanelRightClose />` minimize button outside of `role="tablist"` to maintain strict W3C WAI-ARIA APG compliance.
+
 

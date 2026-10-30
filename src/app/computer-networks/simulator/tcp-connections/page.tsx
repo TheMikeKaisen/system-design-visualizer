@@ -16,7 +16,11 @@ import {
   type TcpSegment,
 } from "@/lib/network-simulator/tcp-engine";
 
-export default function TcpConnectionsEpisodePage() {
+export default function TcpConnectionsEpisodePage({
+  defaultTelemetryCollapsed = true,
+}: {
+  defaultTelemetryCollapsed?: boolean;
+} = {}) {
   const { currentStepIndex, scenario, setScenario } = useNetworkSimulationStore();
   const currentStepKey = `${scenario.id}-${currentStepIndex}`;
   const [selectedSegmentState, setSelectedSegmentState] = useState<{
@@ -43,30 +47,34 @@ export default function TcpConnectionsEpisodePage() {
       title="TCP Connection Establishment & Lifecycle — 3-Way Handshake, Backlog & Teardown"
       scenarios={ALL_TCP_SCENARIOS}
       accentColor="teal"
+      defaultTelemetryCollapsed={defaultTelemetryCollapsed}
       customGlossary={TCP_GLOSSARY}
       customTermPatterns={TCP_TERM_PATTERNS}
-      canvasSlot={(step) => {
+      canvasSlot={(step, _idx, telemetryControls) => {
         const tcpStep = step as TcpScenarioStep | null;
         if (!tcpStep?.tcpData) return null;
         return (
           <TcpTopologyCanvas
             tcpData={tcpStep.tcpData}
-            onSelectSegment={(seg) =>
+            onSelectSegment={(seg) => {
               setSelectedSegmentState({
                 stepKey: currentStepKey,
                 segment: seg,
-              })
-            }
+              });
+              telemetryControls?.expandTelemetry();
+            }}
           />
         );
       }}
-      telemetrySlot={(step) => {
+      telemetrySlot={(step, _idx, telemetryControls) => {
         const tcpStep = step as TcpScenarioStep | null;
         if (!tcpStep?.tcpData) return null;
         return (
           <TcpTelemetryPanel
             tcpData={tcpStep.tcpData}
             activeSegmentOverride={selectedSegmentOverride}
+            onToggleCollapse={telemetryControls?.toggleCollapse}
+            isCollapsed={telemetryControls?.isCollapsed}
           />
         );
       }}

@@ -10,7 +10,6 @@ import {
 import {
   Globe,
   Lock,
-  Unlock,
   Server,
   Database,
   ArrowRight,
@@ -45,13 +44,13 @@ function highlightCodeLine(line: string) {
   // Tokens:
   // 1: trailing comment (//...)
   // 2: strings ('...' | "..." | `...`)
-  // 3: keywords (const, await, import, return, function, etc.)
+  // 3: keywords (const, await, import, return, function, useState, useEffect, etc.)
   // 4: function & method invocations (fetch, res.json, setUser, setPosts, etc.)
   // 5: numbers
   // 6: identifiers
   // 7: punctuation & whitespace
   const tokenRegex =
-    /(\/\/.*$)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)|(\b(?:const|let|var|await|async|import|from|export|return|function|try|catch|if|else|new|typeof|default)\b)|(\b(?:fetch|res\.json|setUser|setError|setPost|setPosts|headers|json|then|catch|finally)\b|\b[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\())|(\b\d+\b)|([a-zA-Z_$][a-zA-Z0-9_$]*)|([^\s\w'"`]+|\s+|['"`])/g;
+    /(\/\/.*$)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)|(\b(?:const|let|var|await|async|import|from|export|return|function|try|catch|finally|if|else|new|typeof|default|useState|useEffect)\b)|(\b(?:fetch|res\.json|setUser|setError|setPost|setPosts|headers|json|then|catch|finally)\b|\b[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\())|(\b\d+\b)|([a-zA-Z_$][a-zA-Z0-9_$]*)|([^\s\w'"`]+|\s+|['"`])/g;
 
   const elements: React.ReactNode[] = [];
   let match: RegExpExecArray | null;
@@ -107,6 +106,64 @@ function highlightCodeLine(line: string) {
   }
 
   return elements.length > 0 ? elements : line;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Authentic Idiomatic React Component Builder
+// Formats procedural fetch snippets into a complete React component
+// with useState, useEffect, and JSX render paths
+// ─────────────────────────────────────────────────────────────
+function buildReactComponentCode(
+  componentName: string,
+  snippet: string,
+  highlightedLine?: number,
+  componentState?: "idle" | "loading" | "success" | "error",
+  fetchPhase?: string
+): { lines: string[]; activeLineIdx: number } {
+  // If the snippet is already a complete component, split and return
+  if (snippet.includes("export default") || snippet.includes("function ")) {
+    const lines = snippet.split("\n");
+    return {
+      lines,
+      activeLineIdx: highlightedLine ? highlightedLine - 1 : 0,
+    };
+  }
+
+  const rawLines = snippet.split("\n");
+  const isSuccess = componentState === "success" || fetchPhase === "body_parsed";
+  const isError = componentState === "error" || fetchPhase === "error";
+
+  // Build authentic React component structure
+  const lines: string[] = [
+    `export default function ${componentName}() {`,
+    `  const [user, setUser] = useState(null);`,
+    `  const [loading, setLoading] = useState(true);`,
+    `  const [error, setError] = useState(null);`,
+    ``,
+    `  useEffect(() => {`,
+    `    async function executeRequest() {`,
+    ...rawLines.map((l) => `      ${l}`),
+    `    }`,
+    `    executeRequest();`,
+    `  }, []);`,
+    ``,
+    `  if (loading) return <SkeletonLoader status="Streaming..." />;`,
+    `  if (error) return <ErrorAlert error={error} />;`,
+    `  return <UserProfileCard user={user} />;`,
+    `}`,
+  ];
+
+  // Map highlighted line from raw snippet to full component
+  let activeLineIdx = 7; // default to first line inside executeRequest
+  if (isSuccess) {
+    activeLineIdx = 14; // return <UserProfileCard ... />
+  } else if (isError && fetchPhase === "error") {
+    activeLineIdx = 13; // if (error) return <ErrorAlert ... />
+  } else if (highlightedLine !== undefined && highlightedLine > 0) {
+    activeLineIdx = 6 + highlightedLine;
+  }
+
+  return { lines, activeLineIdx };
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -192,6 +249,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
   const [activeModal, setActiveModal] = useState<"react-preview" | "wire-substrate" | null>(
     null
   );
+  const [studioView, setStudioView] = useState<"code" | "split" | "preview">("split");
 
   // Auto-dismiss modal on step transition (Rule #7)
   const [prevHttpData, setPrevHttpData] = useState(httpData);
@@ -215,19 +273,19 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeModal, maximizedHorizon]);
 
-  // Dynamic proportional flex weighting (Option A with balanced minimums)
+  // Dynamic proportional flex weighting (Adaptive Horizon Focus)
   const getHorizonWeights = () => {
     switch (activeRegion) {
       case "client":
-        return { client: 46, wire: 22, backend: 32 };
+        return { client: 64, wire: 16, backend: 20 };
       case "wire":
-        return { client: 28, wire: 44, backend: 28 };
+        return { client: 22, wire: 56, backend: 22 };
       case "backend":
       case "proxy":
-        return { client: 26, wire: 22, backend: 52 };
+        return { client: 20, wire: 16, backend: 64 };
       case "all":
       default:
-        return { client: 38, wire: 24, backend: 38 };
+        return { client: 40, wire: 22, backend: 38 };
     }
   };
 
@@ -283,6 +341,16 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
       : 0;
   const activeHeaderBytes = Math.max(0, activeWireStreamBytes - activePayloadBytes);
 
+  // Build authentic React component structure for the React Studio
+  const { lines: componentLines, activeLineIdx: activeComponentLineIdx } =
+    buildReactComponentCode(
+      client.reactState.componentName,
+      client.reactState.codeSnippet,
+      client.reactState.highlightedLine,
+      client.reactState.componentState,
+      client.fetchPhase
+    );
+
   return (
     <div className="h-full w-full rounded-xl bg-[#06080d] border border-border/60 p-3 sm:p-4 flex flex-col justify-between overflow-y-auto overflow-x-hidden select-none relative font-sans shadow-sm gap-3">
       {/* ── Top Bar: 4-Tuple and Region Context ── */}
@@ -324,7 +392,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                 ? "1 1 100%"
                 : `${weights.client} 1 0%`,
           }}
-          className={`w-full min-w-0 rounded-lg bg-[#0b0d14] border border-zinc-800/80 p-3 sm:p-3.5 flex flex-col justify-between gap-2.5 transition-all duration-300 ease-out ${
+          className={`w-full min-w-0 rounded-lg bg-[#0b0d14] border border-zinc-800/80 p-3 sm:p-3.5 flex flex-col justify-between gap-2.5 transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             maximizedHorizon !== null && maximizedHorizon !== "client"
               ? "hidden"
               : ""
@@ -375,181 +443,205 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
             </div>
           </div>
 
-          {/* Mock Browser URL Bar */}
-          <div className="rounded-md bg-zinc-950 p-2 border border-zinc-800/90 flex items-center gap-2 text-xs font-mono">
-            {client.activeSocket.tlsVersion.includes("TLS") ? (
-              <Lock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            ) : (
-              <Unlock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-            )}
-            <span
-              className={`text-[11px] uppercase font-bold px-1.5 py-0.5 rounded border shrink-0 ${getMethodBadgeColor(
-                request.method
-              )}`}
-            >
-              {request.method}
-            </span>
-            <span className="text-zinc-300 truncate text-[11px]">{client.url}</span>
-          </div>
+          {/* ── Unified React Studio Card (Option A: Xcode / Playgrounds-Style) ── */}
+          <div className="flex-1 min-h-0 flex flex-col rounded-lg bg-black/60 border border-zinc-800/90 overflow-hidden">
+            {/* Studio Toolbar Header */}
+            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-zinc-800/80 bg-zinc-950/90 text-xs font-mono shrink-0">
+              {/* File Tab */}
+              <div className="flex items-center gap-1.5 text-teal-300 font-semibold text-[11px]">
+                <Code2 className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                <span>{client.reactState.componentName}.tsx</span>
+              </div>
 
-          {/* 2-Phase Fetch Status Badge */}
-          <div className="rounded-md bg-[#0e121b] p-2 border border-zinc-800 flex flex-col gap-1">
-            <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-zinc-400 uppercase tracking-wider font-semibold">
-                Fetch API Lifecycle
-              </span>
-              <span
-                className={`px-1.5 py-0.5 rounded font-bold uppercase text-[11px] ${
-                  client.fetchPhase === "error"
-                    ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                    : client.fetchPhase === "body_parsed"
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                    : "bg-teal-500/20 text-teal-300 border border-teal-500/30"
-                }`}
-              >
-                {client.fetchPhase.replace("_", " ")}
-              </span>
-            </div>
-            <p className="text-[11px] text-zinc-300 font-sans leading-tight">
-              {client.phaseDescription ?? "Awaiting network dispatch..."}
-            </p>
-          </div>
-
-          {/* Code Spotlight: Client fetch() with token-based syntax highlighting */}
-          <div className="rounded-md bg-black/60 p-2.5 border border-zinc-800/90 font-mono text-[11px] overflow-hidden">
-            <div className="flex items-center justify-between text-zinc-400 pb-1 mb-1 border-b border-zinc-800/50 text-[11px]">
-              <span className="flex items-center gap-1.5 font-semibold text-teal-300">
-                <Code2 className="w-3.5 h-3.5 text-teal-400" />
-                {client.reactState.componentName}.tsx
-              </span>
-              <span className="text-zinc-400">JavaScript Runtime</span>
-            </div>
-            <div className="text-zinc-300 leading-relaxed font-mono text-[11px] overflow-x-auto">
-              {client.reactState.codeSnippet.split("\n").map((line, idx) => {
-                const lineNum = idx + 1;
-                const isHighlighted = client.reactState.highlightedLine === lineNum;
-                return (
-                  <div
-                    key={lineNum}
-                    className={`flex items-center gap-2 px-1.5 py-0.5 rounded transition-colors whitespace-pre font-mono ${
-                      isHighlighted
-                        ? "bg-teal-500/20 text-teal-200 border-l-2 border-teal-400 font-semibold"
-                        : "hover:bg-zinc-900/40"
-                    }`}
-                  >
-                    <span className="text-zinc-500 select-none text-[11px] w-4 text-right font-mono shrink-0">
-                      {lineNum}
-                    </span>
-                    <span className="whitespace-pre font-mono text-[11px]">{highlightCodeLine(line)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* React Component Live Preview with Centered Modal Trigger */}
-          <div className="rounded-md bg-zinc-950/80 p-2.5 border border-zinc-800/90 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
-              <span className="font-semibold text-zinc-300">React Live Preview</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-mono text-teal-400">
-                  &lt;{client.reactState.componentName} /&gt;
-                </span>
+              {/* View Mode Segmented Control: [ Code | Split | Preview ] */}
+              <div className="flex items-center bg-zinc-900/90 p-0.5 rounded border border-zinc-800 text-[10px]">
                 <button
                   type="button"
-                  onClick={() => setActiveModal("react-preview")}
-                  aria-label="Expand React Live Preview & JSON Response"
-                  title="Open Centered Modal with Full JSON Response & DOM Preview"
-                  aria-haspopup="dialog"
-                  aria-expanded={activeModal === "react-preview"}
-                  className="p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+                  onClick={() => setStudioView("code")}
+                  className={`px-2 py-0.5 rounded transition-all ${
+                    studioView === "code"
+                      ? "bg-teal-500/20 text-teal-300 font-semibold shadow-xs"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
                 >
-                  <Maximize2 className="w-3 h-3" />
+                  Code
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudioView("split")}
+                  className={`px-2 py-0.5 rounded transition-all ${
+                    studioView === "split"
+                      ? "bg-teal-500/20 text-teal-300 font-semibold shadow-xs"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Split
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudioView("preview")}
+                  className={`px-2 py-0.5 rounded transition-all ${
+                    studioView === "preview"
+                      ? "bg-teal-500/20 text-teal-300 font-semibold shadow-xs"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Preview
                 </button>
               </div>
+
+              {/* Expand Centered Modal Trigger */}
+              <button
+                type="button"
+                onClick={() => setActiveModal("react-preview")}
+                aria-label="Expand React Live Preview & JSON Response"
+                title="Open Centered Modal with Full JSON Response & DOM Preview"
+                aria-haspopup="dialog"
+                aria-expanded={activeModal === "react-preview"}
+                className="p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+              >
+                <Maximize2 className="w-3 h-3" />
+              </button>
             </div>
 
-            {/* Reactive State Badge */}
-            <div className="flex items-center justify-between text-[10px] font-mono px-2 py-1 rounded bg-black/50 border border-zinc-800/70">
-              <span className="text-zinc-500">React State</span>
-              <span className="text-teal-300 font-medium">
-                &#123; loading: {client.reactState.componentState === "loading" ? "true" : "false"}, user:{" "}
-                {client.reactState.componentState === "success" ? "Object" : "null"} &#125;
-              </span>
+            {/* Studio Main Content Area (Scrollable React Component Code & Live DOM) */}
+            <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              {/* Authentic React Component Code (Visible in 'code' and 'split' modes) */}
+              {(studioView === "code" || studioView === "split") && (
+                <div
+                  className={`flex-1 min-h-0 overflow-y-auto overflow-x-auto p-2 font-mono text-[11px] leading-relaxed custom-scrollbar ${
+                    studioView === "split" ? "border-b border-zinc-800/70 max-h-[55%]" : ""
+                  }`}
+                >
+                  {componentLines.map((line, idx) => {
+                    const lineNum = idx + 1;
+                    const isHighlighted = idx === activeComponentLineIdx;
+                    return (
+                      <div
+                        key={lineNum}
+                        className={`flex items-center gap-2 px-1.5 py-0.5 rounded transition-colors whitespace-pre font-mono ${
+                          isHighlighted
+                            ? "bg-teal-500/20 text-teal-200 border-l-2 border-teal-400 font-semibold"
+                            : "hover:bg-zinc-900/40 text-zinc-300"
+                        }`}
+                      >
+                        <span className="text-zinc-600 select-none text-[10px] w-4 text-right font-mono shrink-0">
+                          {lineNum}
+                        </span>
+                        <span className="whitespace-pre font-mono text-[11px]">
+                          {highlightCodeLine(line)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Live DOM Presentation (Visible in 'preview' and 'split' modes) */}
+              {(studioView === "preview" || studioView === "split") && (
+                <div
+                  className={`p-2.5 bg-zinc-950/90 flex flex-col justify-center gap-2 overflow-y-auto ${
+                    studioView === "preview" ? "flex-1 min-h-0" : "shrink-0"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                    <span className="font-semibold text-zinc-300 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+                      React Live Preview: &lt;{client.reactState.componentName} /&gt;
+                    </span>
+                    <span className="text-teal-300 font-medium bg-black/50 px-1.5 py-0.5 rounded border border-zinc-800">
+                      useState: &#123; loading: {client.reactState.componentState === "loading" ? "true" : "false"}, user:{" "}
+                      {client.reactState.componentState === "success" ? "Object" : "null"} &#125;
+                    </span>
+                  </div>
+
+                  {client.reactState.componentState === "loading" && (
+                    <div className="flex items-center gap-2.5 p-2 rounded bg-zinc-900/60 border border-zinc-800/80">
+                      <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700/60 animate-pulse shrink-0 flex items-center justify-center">
+                        <User className="w-4 h-4 text-zinc-600" />
+                      </div>
+                      <div className="flex-1 space-y-1.5 min-w-0">
+                        <div className="h-2.5 w-24 bg-zinc-800 rounded animate-pulse" />
+                        <div className="h-2 w-36 bg-zinc-800/60 rounded animate-pulse" />
+                      </div>
+                      <span className="text-[10px] font-mono text-teal-400 flex items-center gap-1 shrink-0">
+                        <Radio className="w-2.5 h-2.5 animate-spin" />
+                        <span>Streaming response...</span>
+                      </span>
+                    </div>
+                  )}
+
+                  {client.reactState.componentState === "success" && (
+                    <div className="flex items-center gap-2.5 p-2 rounded bg-emerald-950/20 border border-emerald-500/30">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center justify-center shrink-0">
+                        AC
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-emerald-200 text-xs truncate">
+                            Alice Cooper
+                          </span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+                            200 OK
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-zinc-300 truncate font-mono">
+                          Component Rendered: {client.reactState.dataPreview ?? "Payload rendered into DOM"}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {client.reactState.componentState === "error" && (
+                    <div className="flex items-center gap-2.5 p-2 rounded bg-rose-950/20 border border-rose-500/30">
+                      <div className="w-8 h-8 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-xs flex items-center justify-center shrink-0">
+                        <XCircle className="w-4 h-4 text-rose-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold text-rose-200 text-xs block">
+                          Component Error State:
+                        </span>
+                        <span className="text-[10px] text-zinc-300 truncate font-mono">
+                          {client.reactState.errorPreview ?? "Fetch rejected or failed"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {client.reactState.componentState === "loading" && (
-              <div className="space-y-2 py-0.5">
-                {/* Realistic DOM Skeleton Card */}
-                <div className="flex items-center gap-2.5 p-2 rounded bg-zinc-900/60 border border-zinc-800/80">
-                  <div className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700/60 animate-pulse shrink-0 flex items-center justify-center">
-                    <User className="w-3.5 h-3.5 text-zinc-600" />
-                  </div>
-                  <div className="flex-1 space-y-1.5 min-w-0">
-                    <div className="h-2.5 w-24 bg-zinc-800 rounded animate-pulse" />
-                    <div className="h-2 w-32 bg-zinc-800/60 rounded animate-pulse" />
-                  </div>
-                </div>
-                {/* Executed Code Feedback */}
-                <div className="p-1.5 rounded bg-black/60 border border-zinc-800/90 font-mono text-[10px] text-zinc-400 overflow-x-auto whitespace-pre">
-                  <span className="text-purple-400 font-semibold">if</span> (loading) <span className="text-purple-400 font-semibold">return</span> &lt;<span className="text-sky-300">SkeletonLoader</span> <span className="text-teal-300">status</span>=<span className="text-emerald-400">&quot;Streaming...&quot;</span> /&gt;;
-                </div>
-                <span className="text-[10px] text-zinc-400 font-mono flex items-center gap-1.5">
-                  <Radio className="w-2.5 h-2.5 text-teal-400 animate-spin" />
-                  <span>Streaming response...</span>
+            {/* Studio Footer: Fetch Lifecycle Status Ticker */}
+            <div className="flex items-center justify-between px-2.5 py-1.5 border-t border-zinc-800/80 bg-zinc-950/90 text-[10px] font-mono text-zinc-400 shrink-0">
+              <div className="flex items-center gap-1.5 truncate">
+                <Zap className="w-3 h-3 text-teal-400 shrink-0" />
+                <span className="text-zinc-500 uppercase tracking-wider font-semibold shrink-0">Fetch Phase:</span>
+                <span className={`px-1.5 py-0.2 rounded font-bold uppercase ${
+                  client.fetchPhase === "error"
+                    ? "bg-rose-500/20 text-rose-300"
+                    : client.fetchPhase === "body_parsed"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : "bg-teal-500/20 text-teal-300"
+                }`}>
+                  {client.fetchPhase.replace("_", " ")}
+                </span>
+                <span className="text-zinc-400 truncate hidden sm:inline">
+                  {client.phaseDescription ?? "Awaiting network dispatch..."}
                 </span>
               </div>
-            )}
-
-            {client.reactState.componentState === "success" && (
-              <div className="space-y-2 py-0.5">
-                {/* Rendered DOM Profile Card */}
-                <div className="flex items-center gap-2.5 p-2 rounded bg-emerald-950/20 border border-emerald-500/30">
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center justify-center shrink-0">
-                    AC
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-emerald-200 text-xs truncate">
-                        Alice Cooper
-                      </span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
-                        200 OK
-                      </span>
-                    </div>
-                    <div className="text-[10px] text-zinc-300 truncate font-mono">
-                      Component Rendered: {client.reactState.dataPreview ?? "Payload rendered into DOM"}
-                    </div>
-                  </div>
-                </div>
-                {/* Executed Code Feedback */}
-                <div className="p-1.5 rounded bg-black/60 border border-zinc-800/90 font-mono text-[10px] text-zinc-400 overflow-x-auto whitespace-pre">
-                  <span className="text-purple-400 font-semibold">return</span> &lt;<span className="text-sky-300">UserProfileCard</span> <span className="text-teal-300">user</span>=&#123;user&#125; /&gt;;
-                </div>
-              </div>
-            )}
-
-            {client.reactState.componentState === "error" && (
-              <div className="space-y-2 py-0.5">
-                <div className="flex items-center gap-2.5 p-2 rounded bg-rose-950/20 border border-rose-500/30">
-                  <div className="w-7 h-7 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-xs flex items-center justify-center shrink-0">
-                    <XCircle className="w-4 h-4 text-rose-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="font-semibold text-rose-200 text-xs block">
-                      Component Error State:
-                    </span>
-                    <span className="text-[10px] text-zinc-300 truncate font-mono">
-                      {client.reactState.errorPreview ?? "Fetch rejected or failed"}
-                    </span>
-                  </div>
-                </div>
-                {/* Executed Code Feedback */}
-                <div className="p-1.5 rounded bg-black/60 border border-zinc-800/90 font-mono text-[10px] text-zinc-400 overflow-x-auto whitespace-pre">
-                  <span className="text-purple-400 font-semibold">return</span> &lt;<span className="text-rose-300">ErrorAlert</span> <span className="text-teal-300">msg</span>=&#123;err&#125; /&gt;;
-                </div>
-              </div>
-            )}
+              <span className="flex items-center gap-1 shrink-0 text-[10px] font-mono">
+                <span
+                  className={`px-1 py-0.2 rounded font-bold uppercase text-[9px] border ${getMethodBadgeColor(
+                    request.method
+                  )}`}
+                >
+                  {request.method}
+                </span>
+                <span className="text-zinc-500 text-[10px] truncate max-w-[140px]">
+                  {client.url.replace("https://api.example.com", "")}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
 
@@ -561,7 +653,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                 ? "1 1 100%"
                 : `${weights.wire} 1 0%`,
           }}
-          className={`w-full min-w-0 rounded-lg bg-[#080b12] border border-zinc-800/80 p-2.5 flex flex-col justify-between gap-2 transition-all duration-300 ease-out ${
+          className={`w-full min-w-0 rounded-lg bg-[#080b12] border border-zinc-800/80 p-2.5 flex flex-col justify-between gap-2 transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             maximizedHorizon !== null && maximizedHorizon !== "wire"
               ? "hidden"
               : ""
@@ -715,7 +807,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                 ? "1 1 100%"
                 : `${weights.backend} 1 0%`,
           }}
-          className={`w-full min-w-0 rounded-lg bg-[#0b0d14] border border-zinc-800/80 p-3 sm:p-3.5 flex flex-col justify-between gap-2.5 transition-all duration-300 ease-out ${
+          className={`w-full min-w-0 rounded-lg bg-[#0b0d14] border border-zinc-800/80 p-3 sm:p-3.5 flex flex-col justify-between gap-2.5 transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             maximizedHorizon !== null && maximizedHorizon !== "backend"
               ? "hidden"
               : ""
@@ -984,6 +1076,27 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Complete Component Source Code Section */}
+                <div className="rounded-lg bg-zinc-950 p-3.5 border border-zinc-800 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 pb-1 border-b border-zinc-800/60">
+                    <span className="font-semibold text-teal-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Code2 className="w-3.5 h-3.5 text-teal-400" />
+                      <span>Component Source Code ({client.reactState.componentName}.tsx)</span>
+                    </span>
+                    <span className="text-[10px] text-zinc-500 font-mono">React 18 / Next.js Client Component</span>
+                  </div>
+                  <div className="p-3 rounded bg-black/80 border border-zinc-800 text-[11px] font-mono overflow-x-auto whitespace-pre leading-relaxed max-h-56 custom-scrollbar">
+                    {componentLines.map((line, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <span className="text-zinc-600 select-none text-[10px] w-4 text-right font-mono shrink-0">
+                          {idx + 1}
+                        </span>
+                        <span className="whitespace-pre">{highlightCodeLine(line)}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Complete Un-Truncated Formatted JSON Payload */}

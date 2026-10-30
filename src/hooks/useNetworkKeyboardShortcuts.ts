@@ -7,6 +7,7 @@ export interface UseNetworkKeyboardShortcutsOptions {
   onNext?: () => void;
   onPrev?: () => void;
   onReset?: () => void;
+  onToggleTelemetry?: () => void;
   canNext?: boolean;
   canPrev?: boolean;
   isEnabled?: boolean;
@@ -19,6 +20,7 @@ export interface UseNetworkKeyboardShortcutsOptions {
  * - ArrowRight: Step Forward (if canNext is true)
  * - ArrowLeft: Step Backward (if canPrev is true)
  * - KeyR / 'r' / 'R': Reset Simulation
+ * - KeyT / 't' / 'T': Toggle Telemetry Panel (Collapse/Expand)
  *
  * Automatically suppresses shortcuts when user focuses an editable element.
  */
@@ -27,6 +29,7 @@ export function useNetworkKeyboardShortcuts({
   onNext,
   onPrev,
   onReset,
+  onToggleTelemetry,
   canNext = true,
   canPrev = true,
   isEnabled = true,
@@ -63,9 +66,12 @@ export function useNetworkKeyboardShortcuts({
       } else if (e.code === "KeyR" || e.key === "r" || e.key === "R") {
         e.preventDefault();
         onReset?.();
+      } else if (e.code === "KeyT" || e.key === "t" || e.key === "T") {
+        e.preventDefault();
+        onToggleTelemetry?.();
       }
     },
-    [canNext, canPrev, isEnabled, onNext, onPlayPause, onPrev, onReset]
+    [canNext, canPrev, isEnabled, onNext, onPlayPause, onPrev, onReset, onToggleTelemetry]
   );
 
   useEffect(() => {

@@ -6,6 +6,8 @@ import {
   ChevronLeft,
   Network,
   FileCode,
+  PanelRightClose,
+  PanelRightOpen,
 } from "lucide-react";
 import { useNetworkSimulationStore } from "@/store/useNetworkSimulationStore";
 import { useNetworkKeyboardShortcuts } from "@/hooks/useNetworkKeyboardShortcuts";
@@ -18,16 +20,32 @@ import { ScenarioDropdown } from "@/components/ui/ScenarioDropdown";
 import { NetworkPlaybackBar } from "./NetworkPlaybackBar";
 import type { NetworkSimulationScenario, NetworkScenarioStep } from "@/lib/network-simulator/engine";
 
+export interface TelemetryControls {
+  isCollapsed: boolean;
+  toggleCollapse: () => void;
+  expandTelemetry: () => void;
+  collapseTelemetry: () => void;
+}
+
 export interface NetworkEpisodeShellProps {
   episodeNumber: number | string;
   title: string;
   scenarios?: NetworkSimulationScenario[];
   accentColor?: "teal" | "amber" | "sky" | "emerald" | "violet" | "blue";
   canvasSpan?: "7" | "8";
+  defaultTelemetryCollapsed?: boolean;
   customGlossary?: Record<string, ConceptDefinition>;
   customTermPatterns?: string[];
-  canvasSlot?: (step: NetworkScenarioStep | null, safeIndex: number) => ReactNode;
-  telemetrySlot?: (step: NetworkScenarioStep | null, safeIndex: number) => ReactNode;
+  canvasSlot?: (
+    step: NetworkScenarioStep | null,
+    safeIndex: number,
+    telemetryControls: TelemetryControls
+  ) => ReactNode;
+  telemetrySlot?: (
+    step: NetworkScenarioStep | null,
+    safeIndex: number,
+    telemetryControls: TelemetryControls
+  ) => ReactNode;
 }
 
 export function NetworkEpisodeShell({
@@ -36,6 +54,7 @@ export function NetworkEpisodeShell({
   scenarios = ALL_NETWORK_SCENARIOS,
   accentColor = "teal",
   canvasSpan = "7",
+  defaultTelemetryCollapsed = true,
   customGlossary,
   customTermPatterns,
   canvasSlot,
@@ -59,6 +78,14 @@ export function NetworkEpisodeShell({
   } = useNetworkSimulationStore();
 
   const [activeInspectorTab, setActiveInspectorTab] = useState<"sockets" | "packet">("sockets");
+  const [isTelemetryCollapsed, setIsTelemetryCollapsed] = useState(defaultTelemetryCollapsed);
+
+  const telemetryControls: TelemetryControls = {
+    isCollapsed: isTelemetryCollapsed,
+    toggleCollapse: () => setIsTelemetryCollapsed((prev) => !prev),
+    expandTelemetry: () => setIsTelemetryCollapsed(false),
+    collapseTelemetry: () => setIsTelemetryCollapsed(true),
+  };
 
   const steps = scenario.steps ?? [];
   const safeIndex = Math.max(0, Math.min(currentStepIndex, steps.length - 1));
@@ -97,6 +124,7 @@ export function NetworkEpisodeShell({
     onNext: nextStep,
     onPrev: prevStep,
     onReset: reset,
+    onToggleTelemetry: telemetryControls.toggleCollapse,
     canNext: currentStepIndex < totalSteps - 1,
     canPrev: currentStepIndex > 0,
     isEnabled: true,
@@ -130,13 +158,37 @@ export function NetworkEpisodeShell({
           </div>
         </div>
 
-        {/* Reusable Scenario Dropdown Component */}
-        <ScenarioDropdown
-          scenarios={scenarios}
-          activeScenarioId={scenario.id}
-          onSelect={setScenario}
-          accentColor={accentColor}
-        />
+        {/* Right side of Nav: Reusable Scenario Dropdown Component + Quick Telemetry Toggle */}
+        <div className="flex items-center gap-2">
+          <ScenarioDropdown
+            scenarios={scenarios}
+            activeScenarioId={scenario.id}
+            onSelect={setScenario}
+            accentColor={accentColor}
+          />
+
+          <button
+            type="button"
+            onClick={telemetryControls.toggleCollapse}
+            aria-label="Toggle Telemetry Panel (T)"
+            aria-pressed={!isTelemetryCollapsed}
+            title={isTelemetryCollapsed ? "Expand Telemetry Panel (T)" : "Collapse Telemetry Panel (T)"}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all active:scale-95 touch-manipulation focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 shrink-0 ${
+              isTelemetryCollapsed
+                ? "bg-teal-500/10 text-teal-300 border-teal-500/40 hover:bg-teal-500/20"
+                : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border-border/70 hover:bg-zinc-800"
+            }`}
+          >
+            {isTelemetryCollapsed ? (
+              <PanelRightOpen className="w-4 h-4 text-teal-400 shrink-0" />
+            ) : (
+              <PanelRightClose className="w-4 h-4 shrink-0" />
+            )}
+            <span className="hidden sm:inline font-sans font-medium text-xs">
+              {isTelemetryCollapsed ? "Expand Telemetry" : "Telemetry"}
+            </span>
+          </button>
+        </div>
       </nav>
 
       {/* ── 2. Interactive Docked Explanation Bar with In-Situ Concept Highlighting ── */}
@@ -155,16 +207,21 @@ export function NetworkEpisodeShell({
       )}
 
       {/* ── 3. Main Stage: Topology Canvas & Tabbed Inspectors ── */}
-      <main className="flex-1 min-h-0 p-3 sm:p-4 pb-20 sm:pb-4 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 overflow-visible lg:overflow-hidden">
+      <main className="flex-1 min-h-0 p-3 sm:p-4 pb-20 sm:pb-4 flex flex-col lg:flex-row gap-3 sm:gap-4 overflow-visible lg:overflow-hidden">
         {/* Left/Center: Network Topology Canvas */}
         <section
-          className={`${
-            canvasSpan === "8" ? "lg:col-span-8" : "lg:col-span-7"
-          } h-auto lg:h-full min-h-[380px] sm:min-h-[420px]`}
+          style={{
+            flex: isTelemetryCollapsed
+              ? "1 1 0%"
+              : canvasSpan === "8"
+              ? "8 1 0%"
+              : "7 1 0%",
+          }}
+          className="w-full min-w-0 h-auto lg:h-full min-h-[380px] sm:min-h-[420px] transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)] flex flex-col"
           aria-label="Network Topology View"
         >
           {canvasSlot ? (
-            canvasSlot(currentStep, safeIndex)
+            canvasSlot(currentStep, safeIndex, telemetryControls)
           ) : (
             <NetworkTopologyCanvas
               hosts={currentStep?.hosts ?? []}
@@ -173,100 +230,180 @@ export function NetworkEpisodeShell({
               onSelectPacket={(pkt) => {
                 setSelectedPacket(pkt);
                 setActiveInspectorTab("packet");
+                setIsTelemetryCollapsed(false);
               }}
             />
           )}
         </section>
 
-        {/* Right: Contextual Telemetry (Sockets vs Packet Inspector) */}
+        {/* Right: Contextual Telemetry (Expanded Panel vs Docked Micro-Rail) */}
         <section
+          style={{
+            flex: isTelemetryCollapsed
+              ? "0 0 auto"
+              : canvasSpan === "8"
+              ? "4 1 0%"
+              : "5 1 0%",
+          }}
           className={`${
-            canvasSpan === "8" ? "lg:col-span-4" : "lg:col-span-5"
-          } h-auto lg:h-full flex flex-col min-h-[400px] lg:min-h-0 mt-3 lg:mt-0`}
+            isTelemetryCollapsed
+              ? "w-full lg:w-14 shrink-0 min-h-0"
+              : "w-full min-w-0 min-h-[400px] lg:min-h-0"
+          } h-auto lg:h-full flex flex-col mt-3 lg:mt-0 transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]`}
           aria-label="Network Context Panels"
         >
           {telemetrySlot ? (
-            telemetrySlot(currentStep, safeIndex)
-          ) : (
-            <>
-              {/* Header Controls: Clean WAI-ARIA Tablist */}
-              <div
-                role="tablist"
-                aria-label="Inspector navigation tabs"
-                className="flex items-center gap-1 mb-2 bg-zinc-900/60 p-1 rounded-lg border border-border/60 shrink-0 font-mono text-xs"
+            telemetrySlot(currentStep, safeIndex, telemetryControls)
+          ) : isTelemetryCollapsed ? (
+            /* Pattern A: Default Docked Rail for Episode 1 */
+            <aside
+              aria-label="Telemetry Docked Rail"
+              className="h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex flex-row lg:flex-col items-center justify-between lg:justify-start p-1.5 sm:p-2 gap-2 select-none font-mono shadow-sm transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]"
+            >
+              <button
+                type="button"
+                onClick={() => setIsTelemetryCollapsed(false)}
+                aria-label="Expand Telemetry Panel"
+                title="Expand Telemetry Panel (T)"
+                className="p-2 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 active:scale-95 text-teal-400 border border-teal-500/30 hover:border-teal-500/60 transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation shrink-0"
               >
-                <button
-                  type="button"
-                  role="tab"
-                  id="tab-sockets"
-                  aria-selected={activeInspectorTab === "sockets"}
-                  aria-controls="panel-sockets"
-                  onClick={() => setActiveInspectorTab("sockets")}
-                  className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
-                    activeInspectorTab === "sockets"
-                      ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
-                  }`}
-                >
-                  <Network className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                  <span className="truncate">Sockets ({currentStep?.activeSockets.length ?? 0})</span>
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  id="tab-packet"
-                  aria-selected={activeInspectorTab === "packet"}
-                  aria-controls="panel-packet"
-                  onClick={() => setActiveInspectorTab("packet")}
-                  className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
-                    activeInspectorTab === "packet"
-                      ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
-                  }`}
-                >
-                  <FileCode className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                  <span className="truncate">Packet {currentStep?.activePacket ? "•" : ""}</span>
-                </button>
-              </div>
+                <PanelRightOpen className="w-4 h-4" />
+              </button>
 
-              {/* Panels Area */}
-              <div className="flex-1 min-h-0">
-                {activeInspectorTab === "sockets" ? (
+              <div className="w-px h-6 lg:w-8 lg:h-px bg-zinc-800 shrink-0" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveInspectorTab("sockets");
+                  setIsTelemetryCollapsed(false);
+                }}
+                aria-label="Expand Sockets Table"
+                title={`Sockets Table (${currentStep?.activeSockets.length ?? 0}) — Click to expand`}
+                className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation group ${
+                  activeInspectorTab === "sockets"
+                    ? "bg-zinc-800/90 text-teal-300 border border-teal-500/40 shadow-xs"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                }`}
+              >
+                <Network className="w-4 h-4 text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-bold mt-1 text-teal-300 leading-none">
+                  {currentStep?.activeSockets.length ?? 0}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveInspectorTab("packet");
+                  setIsTelemetryCollapsed(false);
+                }}
+                aria-label="Expand Packet Inspector"
+                title={`Wire Packet Inspector ${currentStep?.activePacket ? "(Active)" : "(Idle)"} — Click to expand`}
+                className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation group ${
+                  activeInspectorTab === "packet"
+                    ? "bg-zinc-800/90 text-teal-300 border border-teal-500/40 shadow-xs"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                }`}
+              >
+                <FileCode className="w-4 h-4 text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-mono mt-1 text-teal-300 leading-none">
+                  {currentStep?.activePacket ? "pkt" : "idle"}
+                </span>
+              </button>
+            </aside>
+          ) : (
+              <>
+                {/* Header Controls: Clean WAI-ARIA Tablist + Minimize Toggle */}
+                <div className="flex items-center justify-between gap-1 mb-2 shrink-0">
                   <div
-                    id="panel-sockets"
-                    role="tabpanel"
-                    aria-labelledby="tab-sockets"
-                    tabIndex={0}
-                    className="h-full focus:outline-none"
+                    role="tablist"
+                    aria-label="Inspector navigation tabs"
+                    className="flex items-center gap-1 bg-zinc-900/60 p-1 rounded-lg border border-border/60 flex-1 font-mono text-xs"
                   >
-                    <SocketTablePanel
-                      sockets={currentStep?.activeSockets ?? []}
-                      selectedSocket={selectedSocket}
-                      onSelectSocket={setSelectedSocket}
-                    />
+                    <button
+                      type="button"
+                      role="tab"
+                      id="tab-sockets"
+                      aria-selected={activeInspectorTab === "sockets"}
+                      aria-controls="panel-sockets"
+                      onClick={() => setActiveInspectorTab("sockets")}
+                      className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
+                        activeInspectorTab === "sockets"
+                          ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                          : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                      }`}
+                    >
+                      <Network className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                      <span className="truncate">Sockets ({currentStep?.activeSockets.length ?? 0})</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      id="tab-packet"
+                      aria-selected={activeInspectorTab === "packet"}
+                      aria-controls="panel-packet"
+                      onClick={() => setActiveInspectorTab("packet")}
+                      className={`flex-1 py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 ${
+                        activeInspectorTab === "packet"
+                          ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                          : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                      }`}
+                    >
+                      <FileCode className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                      <span className="truncate">Packet {currentStep?.activePacket ? "•" : ""}</span>
+                    </button>
                   </div>
-                ) : (
-                  <div
-                    id="panel-packet"
-                    role="tabpanel"
-                    aria-labelledby="tab-packet"
-                    tabIndex={0}
-                    className="h-full focus:outline-none"
+
+                  <button
+                    type="button"
+                    onClick={() => setIsTelemetryCollapsed(true)}
+                    aria-label="Collapse Telemetry Panel"
+                    title="Collapse Telemetry Panel (T)"
+                    className="p-1.5 rounded-lg bg-zinc-900/60 hover:bg-zinc-800 active:scale-95 text-zinc-400 hover:text-teal-300 border border-border/60 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation shrink-0"
                   >
-                    <PacketInspectorPanel
-                      packet={selectedPacket ?? currentStep?.activePacket ?? null}
-                      scenarioId={scenario.id}
-                      stepBadge={currentStep?.badge}
-                      stepIndex={safeIndex}
-                      selectedSocket={selectedSocket}
-                      highlightedElement={currentStep?.highlightedElement}
-                    />
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </section>
+                    <PanelRightClose className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Panels Area */}
+                <div className="flex-1 min-h-0">
+                  {activeInspectorTab === "sockets" ? (
+                    <div
+                      id="panel-sockets"
+                      role="tabpanel"
+                      aria-labelledby="tab-sockets"
+                      tabIndex={0}
+                      className="h-full focus:outline-none"
+                    >
+                      <SocketTablePanel
+                        sockets={currentStep?.activeSockets ?? []}
+                        selectedSocket={selectedSocket}
+                        onSelectSocket={setSelectedSocket}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      id="panel-packet"
+                      role="tabpanel"
+                      aria-labelledby="tab-packet"
+                      tabIndex={0}
+                      className="h-full focus:outline-none"
+                    >
+                      <PacketInspectorPanel
+                        packet={selectedPacket ?? currentStep?.activePacket ?? null}
+                        scenarioId={scenario.id}
+                        stepBadge={currentStep?.badge}
+                        stepIndex={safeIndex}
+                        selectedSocket={selectedSocket}
+                        highlightedElement={currentStep?.highlightedElement}
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </section>
       </main>
 
       {/* ── 4. Reusable Common Playback Bar (Attached at bottom on mobile) ── */}

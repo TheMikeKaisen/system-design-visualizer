@@ -28,7 +28,7 @@ describe("DnsResolutionEpisodePage", () => {
   });
 
   it("renders step 1 badge, DNS topology zones, and multi-tier cache panel", () => {
-    render(<DnsResolutionEpisodePage />);
+    render(<DnsResolutionEpisodePage defaultTelemetryCollapsed={false} />);
 
     expect(screen.getByLabelText("Step explanation")).toBeDefined();
     expect(screen.getByText(/Step 1 of/i)).toBeDefined();
@@ -47,8 +47,26 @@ describe("DnsResolutionEpisodePage", () => {
     expect(screen.getByRole("tab", { name: /Wire Packet/i })).toBeDefined();
   });
 
-  it("advances steps via playback controls and displays referral packets with Glue records", () => {
+  it("is collapsed by default into docked rail and expands via docked rail button", () => {
     render(<DnsResolutionEpisodePage />);
+
+    // Docked rail is visible by default (Pattern A)
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
+    expect(screen.queryByRole("tab", { name: /DNS Caches/i })).toBeNull();
+
+    // Click rail expand button
+    const railExpandBtn = screen.getByRole("button", { name: "Expand Telemetry Panel" });
+    act(() => {
+      fireEvent.click(railExpandBtn);
+    });
+
+    // Telemetry tabs are restored
+    expect(screen.getByRole("tab", { name: /DNS Caches/i })).toBeDefined();
+    expect(screen.getByRole("tab", { name: /Wire Packet/i })).toBeDefined();
+  });
+
+  it("advances steps via playback controls and displays referral packets with Glue records", () => {
+    render(<DnsResolutionEpisodePage defaultTelemetryCollapsed={false} />);
 
     // Find and click Next button
     const nextBtn = screen.getByRole("button", { name: /Next Step/i });

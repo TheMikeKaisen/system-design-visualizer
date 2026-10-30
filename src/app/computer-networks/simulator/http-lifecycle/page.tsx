@@ -15,7 +15,11 @@ import {
   HTTP_TERM_PATTERNS,
 } from "@/lib/network-simulator/http-engine";
 
-export default function HttpLifecycleEpisodePage() {
+export default function HttpLifecycleEpisodePage({
+  defaultTelemetryCollapsed = true,
+}: {
+  defaultTelemetryCollapsed?: boolean;
+} = {}) {
   const { setScenario } = useNetworkSimulationStore();
   const [activeTelemetryTab, setActiveTelemetryTab] = useState<
     "devtools" | "waterfall" | "backend"
@@ -35,19 +39,23 @@ export default function HttpLifecycleEpisodePage() {
       scenarios={ALL_HTTP_SCENARIOS}
       accentColor="teal"
       canvasSpan="8"
+      defaultTelemetryCollapsed={defaultTelemetryCollapsed}
       customGlossary={HTTP_GLOSSARY}
       customTermPatterns={HTTP_TERM_PATTERNS}
-      canvasSlot={(step) => {
+      canvasSlot={(step, _idx, telemetryControls) => {
         const httpStep = step as HttpScenarioStep | null;
         if (!httpStep?.httpData) return null;
         return (
           <HttpTopologyCanvas
             httpData={httpStep.httpData}
-            onSelectPacket={() => setActiveTelemetryTab("devtools")}
+            onSelectPacket={() => {
+              setActiveTelemetryTab("devtools");
+              telemetryControls?.expandTelemetry();
+            }}
           />
         );
       }}
-      telemetrySlot={(step) => {
+      telemetrySlot={(step, _idx, telemetryControls) => {
         const httpStep = step as HttpScenarioStep | null;
         if (!httpStep?.httpData) return null;
         return (
@@ -55,6 +63,8 @@ export default function HttpLifecycleEpisodePage() {
             httpData={httpStep.httpData}
             activeTabOverride={activeTelemetryTab}
             onTabChange={setActiveTelemetryTab}
+            onToggleCollapse={telemetryControls?.toggleCollapse}
+            isCollapsed={telemetryControls?.isCollapsed}
           />
         );
       }}

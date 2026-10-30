@@ -58,7 +58,7 @@ describe("HttpLifecycleEpisodePage (Episode 4 Integration)", () => {
   });
 
   it("renders step 1 badge, tripartite glass-box horizons, and telemetry tabs", () => {
-    render(<HttpLifecycleEpisodePage />);
+    render(<HttpLifecycleEpisodePage defaultTelemetryCollapsed={false} />);
 
     expect(screen.getByLabelText("Step explanation")).toBeDefined();
     expect(screen.getByText(/Step 1 of/i)).toBeDefined();
@@ -101,7 +101,7 @@ describe("HttpLifecycleEpisodePage (Episode 4 Integration)", () => {
   });
 
   it("switches telemetry tabs with proper WAI-ARIA semantics", () => {
-    render(<HttpLifecycleEpisodePage />);
+    render(<HttpLifecycleEpisodePage defaultTelemetryCollapsed={false} />);
 
     const waterfallTab = screen.getByRole("tab", { name: /Waterfall Gantt/i });
     const backendTab = screen.getByRole("tab", { name: /Backend Trace/i });
@@ -122,7 +122,7 @@ describe("HttpLifecycleEpisodePage (Episode 4 Integration)", () => {
   });
 
   it("toggles Raw CRLF wire view in DevTools Inspector", () => {
-    render(<HttpLifecycleEpisodePage />);
+    render(<HttpLifecycleEpisodePage defaultTelemetryCollapsed={false} />);
 
     const toggleRawBtn = screen.getByRole("button", { name: /Show Raw CRLF/i });
     expect(toggleRawBtn).toBeDefined();
@@ -133,7 +133,7 @@ describe("HttpLifecycleEpisodePage (Episode 4 Integration)", () => {
   });
 
   it("supports keyboard navigation on telemetry tabs (Home/End) without capturing Arrow keys", () => {
-    render(<HttpLifecycleEpisodePage />);
+    render(<HttpLifecycleEpisodePage defaultTelemetryCollapsed={false} />);
 
     const devtoolsTab = screen.getByRole("tab", { name: /DevTools Inspector/i });
     devtoolsTab.focus();
@@ -153,7 +153,7 @@ describe("HttpLifecycleEpisodePage (Episode 4 Integration)", () => {
   });
 
   it("clicking in-flight packet on canvas auto-switches active telemetry tab to DevTools Inspector", () => {
-    render(<HttpLifecycleEpisodePage />);
+    render(<HttpLifecycleEpisodePage defaultTelemetryCollapsed={false} />);
 
     // Step forward to Step 1 (Transport handshake packet in flight)
     const nextBtn = screen.getByRole("button", { name: /Next Step/i });
@@ -177,7 +177,7 @@ describe("HttpLifecycleEpisodePage (Episode 4 Integration)", () => {
   });
 
   it("renders complete HTTP request headers and authentic CRLF badges in raw mode", () => {
-    render(<HttpLifecycleEpisodePage />);
+    render(<HttpLifecycleEpisodePage defaultTelemetryCollapsed={false} />);
 
     const toggleRawBtn = screen.getByRole("button", { name: /Show Raw CRLF/i });
     fireEvent.click(toggleRawBtn);
@@ -297,7 +297,7 @@ describe("HttpLifecycleEpisodePage (Episode 4 Integration)", () => {
   });
 
   it("progressively ghosts future Waterfall Gantt bars in early steps", () => {
-    render(<HttpLifecycleEpisodePage />);
+    render(<HttpLifecycleEpisodePage defaultTelemetryCollapsed={false} />);
 
     // Switch to Waterfall tab
     const waterfallTab = screen.getByRole("tab", { name: /Waterfall Gantt/i });
@@ -306,6 +306,31 @@ describe("HttpLifecycleEpisodePage (Episode 4 Integration)", () => {
     // On Step 0 (Client Initiation), DNS is active, whereas future bars (TTFB, Download) have "Pending" badges
     const pendingBadges = screen.getAllByText("Pending");
     expect(pendingBadges.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("collapses and restores HTTP telemetry panel giving full width to canvas", () => {
+    render(<HttpLifecycleEpisodePage />);
+
+    // Docked rail is visible by default with status badges (Pattern A)
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
+    expect(screen.getByRole("button", { name: /Expand DevTools Inspector/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Expand Waterfall Gantt/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Expand Backend Trace/i })).toBeDefined();
+
+    // Click rail expand button
+    const railExpandBtn = screen.getByRole("button", { name: "Expand Telemetry Panel" });
+    fireEvent.click(railExpandBtn);
+
+    // Full telemetry panel is restored with tablist
+    expect(screen.queryByLabelText("Telemetry Docked Rail")).toBeNull();
+    expect(screen.getByRole("tablist", { name: /HTTP Telemetry Views/i })).toBeDefined();
+
+    // Click collapse button in HttpTelemetryPanel header
+    const collapseBtn = screen.getByRole("button", { name: "Collapse Telemetry Panel" });
+    fireEvent.click(collapseBtn);
+
+    // Docked rail is visible again
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
   });
 });
 
