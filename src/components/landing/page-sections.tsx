@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import { DisciplineCard, DISCIPLINES } from "@/components/ui/DisciplineCard";
+import { EpisodeCard } from "@/components/ui/EpisodeCard";
+import { getLatestEpisodes } from "@/lib/latest-episodes";
 import { HeroRuntimeSandbox } from "./HeroRuntimeSandbox";
 import { MiniDistributedCanvas } from "./MiniDistributedCanvas";
 import { HeroComputationalGraph } from "./HeroComputationalGraph";
@@ -77,6 +79,7 @@ export function LandingPage() {
         <HeroSection />
         <InteractiveSandboxSection />
         <DisciplinesSection />
+        <LatestEpisodesSection />
         <SimulationEngineSection />
         <CanvasStudioSection />
         <FinalCTASection />
@@ -341,6 +344,67 @@ function DisciplinesSection() {
             </div>
             <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
           </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3b. Latest Episodes (See what we have been up to recently)
+   ═══════════════════════════════════════════════════════════════ */
+function LatestEpisodesSection() {
+  const latestEpisodes = getLatestEpisodes(6);
+
+  if (latestEpisodes.length === 0) return null;
+
+  return (
+    <section
+      id="latest-episodes"
+      className="scroll-mt-16 py-20 sm:py-28 border-t border-border/50 bg-[#FAFAF9] dark:bg-[#090a0f]"
+      aria-labelledby="latest-episodes-heading"
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        {/* Section Header */}
+        <div className="landing-reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-semibold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                Latest Additions
+              </span>
+            </div>
+            <h2
+              id="latest-episodes-heading"
+              className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50"
+            >
+              See what we&apos;ve been up to recently.
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
+              Freshly shipped interactive simulations and computational models across all disciplines. Step through the latest additions as they go live.
+            </p>
+          </div>
+
+          <Link
+            href="/learning-paths"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors shrink-0 group self-start md:self-end"
+          >
+            <span>Explore all modules</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
+
+        {/* Episode Cards Grid */}
+        <div className="landing-reveal-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {latestEpisodes.map((ep) => (
+            <EpisodeCard
+              key={`${ep.discipline.id}-${ep.id}`}
+              episode={ep}
+              badge={ep.discipline.title}
+              accent={ep.resolvedAccent}
+              className="landing-reveal"
+            />
+          ))}
         </div>
       </div>
     </section>

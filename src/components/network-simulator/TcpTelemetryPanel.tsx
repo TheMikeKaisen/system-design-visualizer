@@ -11,16 +11,22 @@ import {
   Terminal,
   ChevronDown,
   ChevronUp,
+  PanelRightClose,
+  PanelRightOpen,
 } from "lucide-react";
 
 interface TcpTelemetryPanelProps {
   tcpData: TcpStepData;
   activeSegmentOverride?: TcpSegment | null;
+  onToggleCollapse?: () => void;
+  isCollapsed?: boolean;
 }
 
 export function TcpTelemetryPanel({
   tcpData,
   activeSegmentOverride,
+  onToggleCollapse,
+  isCollapsed = false,
 }: TcpTelemetryPanelProps) {
   const [activeTab, setActiveTab] = useState<"wire" | "sockets" | "fsm">("wire");
   const [selectedSocketId, setSelectedSocketId] = useState<string | null>(null);
@@ -39,20 +45,10 @@ export function TcpTelemetryPanel({
   const segment = activeSegmentOverride ?? tcpData.wire.activeSegment;
   const { client, server, fsmTransition } = tcpData;
 
-  const handleTabKeyDown = (e: React.KeyboardEvent, currentTab: "wire" | "sockets" | "fsm") => {
-    const tabs: Array<"wire" | "sockets" | "fsm"> = ["wire", "sockets", "fsm"];
-    const currentIndex = tabs.indexOf(currentTab);
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      const nextTab = tabs[(currentIndex + 1) % tabs.length];
-      setActiveTab(nextTab);
-      document.getElementById(`tab-tcp-${nextTab}`)?.focus();
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      const prevTab = tabs[(currentIndex - 1 + tabs.length) % tabs.length];
-      setActiveTab(prevTab);
-      document.getElementById(`tab-tcp-${prevTab}`)?.focus();
-    } else if (e.key === "Home") {
+  // ArrowLeft and ArrowRight are NOT captured here, reserving them globally
+  // for useNetworkKeyboardShortcuts simulation navigation. Only Home and End are handled.
+  const handleTabKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Home") {
       e.preventDefault();
       setActiveTab("wire");
       document.getElementById("tab-tcp-wire")?.focus();
@@ -204,70 +200,177 @@ export function TcpTelemetryPanel({
     }
   };
 
+  /* ──────────────── PATTERN A: Sleek Docked Micro-Rail with Status Badges ──────────────── */
+  if (isCollapsed) {
+    const activeFlagList = segment
+      ? (["syn", "ack", "fin", "rst", "psh", "urg", "ece", "cwr"] as const)
+          .filter((k) => !!segment.flags[k])
+          .map((k) => k.toUpperCase())
+      : [];
+
+    return (
+      <aside
+        aria-label="Telemetry Docked Rail"
+        className="h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex flex-row lg:flex-col items-center justify-between lg:justify-start p-1.5 sm:p-2 gap-2 select-none font-mono shadow-sm transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]"
+      >
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            aria-label="Expand Telemetry Panel"
+            title="Expand Telemetry Panel (T)"
+            className="p-2 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 active:scale-95 text-teal-400 border border-teal-500/30 hover:border-teal-500/60 transition-all focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation shrink-0"
+          >
+            <PanelRightOpen className="w-4 h-4" />
+          </button>
+        )}
+
+        <div className="w-px h-6 lg:w-8 lg:h-px bg-zinc-800 shrink-0" />
+
+        {/* Tab 1: Wire Segment */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab("wire");
+            onToggleCollapse?.();
+          }}
+          aria-label="Expand Wire Segment"
+          title={`Wire Segment ${segment ? `(${activeFlagList.join("+") || "DATA"})` : "(Idle)"} — Click to expand`}
+          className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation group ${
+            activeTab === "wire"
+              ? "bg-zinc-800/90 text-teal-300 border border-teal-500/40 shadow-xs"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+          }`}
+        >
+          <FileCode className="w-4 h-4 text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="text-[9px] font-mono mt-1 text-teal-300 leading-none">
+            {segment ? (activeFlagList.length > 0 ? activeFlagList[0] : "DATA") : "idle"}
+          </span>
+        </button>
+
+        {/* Tab 2: Sockets Table */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab("sockets");
+            onToggleCollapse?.();
+          }}
+          aria-label="Expand Sockets Table"
+          title={`Sockets Table (${socketRows.length} sockets) — Click to expand`}
+          className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation group ${
+            activeTab === "sockets"
+              ? "bg-zinc-800/90 text-teal-300 border border-teal-500/40 shadow-xs"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+          }`}
+        >
+          <TableProperties className="w-4 h-4 text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="text-[9px] font-bold mt-1 text-teal-300 leading-none">
+            {socketRows.length}
+          </span>
+        </button>
+
+        {/* Tab 3: TCP FSM */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab("fsm");
+            onToggleCollapse?.();
+          }}
+          aria-label="Expand TCP FSM"
+          title={`TCP State Machine (${client.state} / ${server.listenState}) — Click to expand`}
+          className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation group ${
+            activeTab === "fsm"
+              ? "bg-zinc-800/90 text-teal-300 border border-teal-500/40 shadow-xs"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+          }`}
+        >
+          <Network className="w-4 h-4 text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="text-[9px] font-mono mt-1 text-teal-300 leading-none">
+            FSM
+          </span>
+        </button>
+      </aside>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col min-h-0 select-none font-sans">
-      {/* ── Top WAI-ARIA Tablist with Roving Arrow Navigation ── */}
-      <div
-        role="tablist"
-        aria-label="TCP Telemetry Navigation"
-        className="flex items-center gap-1 mb-2 bg-zinc-900/60 p-1 rounded-lg border border-border/60 shrink-0 font-mono text-xs"
-      >
-        <button
-          type="button"
-          role="tab"
-          id="tab-tcp-wire"
-          aria-selected={activeTab === "wire"}
-          aria-controls="panel-tcp-wire"
-          tabIndex={activeTab === "wire" ? 0 : -1}
-          onClick={() => setActiveTab("wire")}
-          onKeyDown={(e) => handleTabKeyDown(e, "wire")}
-          className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
-            activeTab === "wire"
-              ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
-          }`}
+      {/* ── Top WAI-ARIA Tablist + Minimize Toggle ── */}
+      <div className="flex items-center justify-between gap-1 mb-2 shrink-0">
+        <div
+          role="tablist"
+          aria-label="TCP Telemetry Navigation"
+          className="flex items-center gap-1 bg-zinc-900/60 p-1 rounded-lg border border-border/60 flex-1 font-mono text-xs"
         >
-          <FileCode className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-          <span className="truncate">Wire Segment {segment ? "•" : ""}</span>
-        </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-tcp-wire"
+            aria-selected={activeTab === "wire"}
+            aria-controls="panel-tcp-wire"
+            tabIndex={activeTab === "wire" ? 0 : -1}
+            onClick={() => setActiveTab("wire")}
+            onKeyDown={handleTabKeyDown}
+            className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
+              activeTab === "wire"
+                ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+            }`}
+          >
+            <FileCode className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span className="truncate">Wire Segment {segment ? "•" : ""}</span>
+          </button>
 
-        <button
-          type="button"
-          role="tab"
-          id="tab-tcp-sockets"
-          aria-selected={activeTab === "sockets"}
-          aria-controls="panel-tcp-sockets"
-          tabIndex={activeTab === "sockets" ? 0 : -1}
-          onClick={() => setActiveTab("sockets")}
-          onKeyDown={(e) => handleTabKeyDown(e, "sockets")}
-          className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
-            activeTab === "sockets"
-              ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
-          }`}
-        >
-          <TableProperties className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-          <span className="truncate">Sockets Table ({socketRows.length})</span>
-        </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-tcp-sockets"
+            aria-selected={activeTab === "sockets"}
+            aria-controls="panel-tcp-sockets"
+            tabIndex={activeTab === "sockets" ? 0 : -1}
+            onClick={() => setActiveTab("sockets")}
+            onKeyDown={handleTabKeyDown}
+            className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
+              activeTab === "sockets"
+                ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+            }`}
+          >
+            <TableProperties className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span className="truncate">Sockets Table ({socketRows.length})</span>
+          </button>
 
-        <button
-          type="button"
-          role="tab"
-          id="tab-tcp-fsm"
-          aria-selected={activeTab === "fsm"}
-          aria-controls="panel-tcp-fsm"
-          tabIndex={activeTab === "fsm" ? 0 : -1}
-          onClick={() => setActiveTab("fsm")}
-          onKeyDown={(e) => handleTabKeyDown(e, "fsm")}
-          className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
-            activeTab === "fsm"
-              ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
-          }`}
-        >
-          <Network className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-          <span className="truncate">TCP FSM</span>
-        </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-tcp-fsm"
+            aria-selected={activeTab === "fsm"}
+            aria-controls="panel-tcp-fsm"
+            tabIndex={activeTab === "fsm" ? 0 : -1}
+            onClick={() => setActiveTab("fsm")}
+            onKeyDown={handleTabKeyDown}
+            className={`flex-1 min-h-[44px] py-1.5 px-3 rounded-md font-medium text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 touch-manipulation ${
+              activeTab === "fsm"
+                ? "bg-zinc-800 text-teal-300 shadow-sm border border-zinc-700/60"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+            }`}
+          >
+            <Network className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span className="truncate">TCP FSM</span>
+          </button>
+        </div>
+
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            aria-label="Collapse Telemetry Panel"
+            title="Collapse Telemetry Panel (T)"
+            className="p-1.5 rounded-lg bg-zinc-900/60 hover:bg-zinc-800 active:scale-95 text-zinc-400 hover:text-teal-300 border border-border/60 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation shrink-0"
+          >
+            <PanelRightClose className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* ── Tab Content Container ── */}

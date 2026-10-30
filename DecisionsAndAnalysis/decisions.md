@@ -1450,6 +1450,72 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - All 13 scenario integrity tests in `src/lib/network-simulator/__tests__/httpScenarioIntegrity.test.ts` pass.
 - **Blast Radius**: Zero regressions; Rule #1 strictly honored (all changes unstaged).
 
+---
 
+## Decision Record 064: Universal Telemetry Collapse & Maximize System Across Computer Networks Episodes 1–4
+- **Status**: Implemented & Verified
+- **Category**: Computer Networks Simulator, UI/UX Space Optimization & Responsive Ergonomics
+- **Problem & Rationale**:
+  - When learning core networking concepts, learners primarily interact with the code, protocol horizons, and visual topology canvas. The right telemetry panel (DevTools, Socket tables, DNS caches, Gantt charts) is informative for deep dives, but consumes 33%–42% of the viewport width continuously.
+  - On both desktop viewports and smaller screens (< sm), learners needed the option to collapse the right telemetry panel so the main visual canvas expands to 100% full width (`lg:col-span-12`), while retaining effortless single-click or keyboard restoration when telemetry is needed.
+- **Architectural Implementation**:
+  1. **Canonical State in `NetworkEpisodeShell` & Pattern A (Docked Micro-Rail)**:
+     - Maintained `isTelemetryCollapsed` in `NetworkEpisodeShell.tsx`.
+     - Parameterized `defaultTelemetryCollapsed?: boolean = true` in `NetworkEpisodeShellProps` and configured across all 4 episode routes (`ip-port-sockets`, `dns-resolution`, `tcp-connections`, `http-lifecycle`).
+     - By user specification, episodes boot by default in the collapsed micro-rail state (`defaultTelemetryCollapsed = true`), maximizing canvas, code, and protocol horizon visibility while keeping telemetry immediately accessible.
+     - Replaced Pattern B (0px collapse + floating canvas pill that overlapped with cards) with **Pattern A: The Sleek Docked Micro-Rail with Compact Status Badges**.
+     - When collapsed:
+       - On desktop (`lg:`): Canvas dynamically expands to take ~96% of viewport (`flex: 1 1 0%`) while the right panel gracefully collapses into a sleek 56px (`w-14 shrink-0`) vertical micro-rail.
+       - The docked rail features miniature icons, expand trigger `<PanelRightOpen />`, and live compact status badges (`[200]`, `98ms`, `4gt`, socket counts).
+       - Clicking any status badge directly expands the panel and immediately switches to that active tab.
+       - Completely eliminated the floating canvas pill to guarantee 0% overlap with canvas cards or horizon headers.
+  2. **Interaction Modality**:
+     - **Nav Bar Toggle**: Placed `Toggle Telemetry Panel (T)` directly beside `ScenarioDropdown` in the top navigation bar, featuring dynamic visual state (teal glow when collapsed, subtle zinc when open).
+     - **In-Panel Minimize Buttons**: Added `<PanelRightClose />` button to the right of tab bars in:
+       - Default Shell inspector tablist (Episode 1).
+       - `DnsTelemetryPanel.tsx` (Episode 2).
+       - `TcpTelemetryPanel.tsx` (Episode 3).
+       - `HttpTelemetryPanel.tsx` toolbar action group (Episode 4).
+     - **Docked Rail Controls**: Expand button at the top of the rail plus direct-action tab triggers.
+  3. **Global Keyboard Shortcut (<kbd>T</kbd>)**:
+     - Extended `useNetworkKeyboardShortcuts.ts` with `onToggleTelemetry` bound to `KeyT` / `t` / `T` (suppressed when typing in form inputs).
+  4. **Auto-Expansion on Canvas Inspection**:
+     - Selecting any packet or socket on the canvas automatically calls `telemetryControls.expandTelemetry()`, ensuring that inspectable wire elements seamlessly reveal their detailed telemetry.
+  5. **Keyboard Shortcuts Integrity**:
+     - Removed `ArrowLeft` / `ArrowRight` capture from `TcpTelemetryPanel.tsx` tab key handler, ensuring left/right arrow keys exclusively control discrete simulation timeline steps across all episodes.
+- **Verification**:
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx eslint <touched_files>`: 0 errors / 0 warnings.
+  - All 69 Vitest test suites (618 tests) pass with 100% green status.
+  - Rule #1 honored: 0 git commits or staging commands run.
+- **Blast Radius**: Zero regressions; universally available across Episodes 1, 2, 3, and 4.
 
+---
+
+## Decision Record 065: Auto-Populated "Latest Episodes" Landing Section & Cross-Discipline Registry Utility
+- **Status**: Implemented & Verified
+- **Category**: Landing Page Architecture, Auto-Populating Catalog & Component Reusability
+- **Context & Problem**:
+  - The System Simulator catalog continuously expands as new simulator episodes and interactive models are authored across all 6 core disciplines (`javascript`, `operating-systems`, `java`, `frontend`, `backend`, `computer-networks`).
+  - Previously, the landing page had no designated area showcasing recently added episodes, and maintaining a hardcoded list would require manual editing every time a new episode was published.
+  - The user requested a new section placed directly beneath "Go beyond the abstractions" (Disciplines) that automatically displays newly added episodes without manual maintenance.
+- **Architectural Solution & Implementation**:
+  1. **Single Source of Truth Utility (`src/lib/latest-episodes.ts`)**:
+     - Aggregates episode metadata arrays from the 6 canonical discipline registries (`JAVASCRIPT_EPISODES`, `OPERATING_SYSTEMS_EPISODES`, `JAVA_EPISODES`, `FRONTEND_EPISODES`, `BACKEND_EPISODES`, `COMPUTER_NETWORKS_EPISODES`).
+     - Tags each episode with its parent `discipline: DisciplineItem` and `resolvedAccent: EpisodeAccent`.
+     - Implements canonical UTC date parsing `parseEpisodeDate()` to parse human-formatted dates ("29 October 2026") while cleanly ignoring unreleased placeholder episodes ("Coming Soon").
+     - Sorts chronologically descending (`compareEpisodesLatest`), using episode number descending and discipline title as deterministic tie-breakers.
+     - Exposes `getLatestEpisodes(count = 6)` and `getAllEpisodes()`.
+  2. **Canonical UI Assembly (`src/components/landing/page-sections.tsx`)**:
+     - Authored `<LatestEpisodesSection />` placed directly underneath `<DisciplinesSection />`.
+     - Reused canonical `EpisodeCard` primitive (strictly adhering to Rule #6: Zero-Duplication & Component Reuse).
+     - Configured each card with its parent discipline badge, tokenized accent color (`ep.resolvedAccent`), launch button, and `.landing-reveal` scroll-reveal animation integration.
+     - Rendered responsive 3-column desktop grid (`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`) with smooth mobile touch ergonomics adhering to Rule #7.
+  3. **Verification & Quality Guard**:
+     - Unit test suite `src/lib/__tests__/latest-episodes.test.ts` (7 tests).
+     - Component integration test in `src/components/landing/__tests__/LandingPage.test.tsx`.
+     - TypeScript `npx tsc --noEmit`: 0 errors.
+     - ESLint `npx eslint <touched_files>`: 0 errors / 0 warnings.
+     - Rule #1 honored: 0 git commits or staging operations.
+- **Blast Radius**: Zero regressions; entirely self-contained and purely derived from existing episode registries.
 

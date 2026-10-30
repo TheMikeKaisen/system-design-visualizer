@@ -145,4 +145,21 @@ describe("LandingPage", () => {
     const canvasContainer = container.querySelector("#canvas-studio .hidden.md\\:block");
     expect(canvasContainer).not.toBeNull();
   });
+
+  it("renders the auto-populated latest episodes section directly below disciplines", () => {
+    render(<LandingPage />);
+
+    expect(
+      screen.getByRole("heading", {
+        name: /See what we've been up to recently\./i,
+      })
+    ).toBeDefined();
+
+    expect(screen.getByText("Latest Additions")).toBeDefined();
+    expect(screen.getByRole("link", { name: /Explore all modules/i })).toBeDefined();
+
+    // Verify recent episodes are displayed dynamically
+    expect(screen.getByText("HTTP Request & Response Lifecycle")).toBeDefined();
+    expect(screen.getByText("TCP Connection Establishment & Lifecycle")).toBeDefined();
+  });
 });
