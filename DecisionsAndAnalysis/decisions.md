@@ -1519,3 +1519,32 @@ This document serves as the single source of truth for architectural, UI/UX, rel
      - Rule #1 honored: 0 git commits or staging operations.
 - **Blast Radius**: Zero regressions; entirely self-contained and purely derived from existing episode registries.
 
+---
+
+## Decision Record 066: Mobile Telemetry Drawer (Slide-Up Bottom Sheet) & Responsive Dock Hiding (< lg)
+- **Status**: Implemented & Verified
+- **Category**: Computer Networks Simulator, Mobile Responsiveness & Touch Ergonomics (Rule #7)
+- **Problem & Forensic Critique**:
+  - On desktop (`lg:`), the 56px vertical micro-rail (**Pattern A**) sits along the right viewport boundary, offering live status badges with zero canvas obstruction.
+  - On mobile screens (`< lg`), the layout stacks vertically (`flex flex-col`). In this vertical flow, rendering the collapsed micro-rail after the canvas dumped it at the very bottom of the page, ~1,500px down beneath all 3 horizons.
+  - As a result, the collapsed dock was invisible on initial load (2 viewports below the fold), created an orphaned horizontal bar floating above the fixed playback bar, and if expanded, inflated total document height beyond 2,300px, severing the connection between simulation animation and telemetry inspection.
+- **Decision & Architectural Implementation**:
+  1. **Strict Dock Hiding on Mobile (`hidden lg:flex`)**:
+     - Configured the collapsed micro-rail `<aside aria-label="Telemetry Docked Rail">` with `hidden lg:flex` across `NetworkEpisodeShell.tsx`, `HttpTelemetryPanel.tsx`, `DnsTelemetryPanel.tsx`, and `TcpTelemetryPanel.tsx`.
+     - When collapsed, the telemetry panel consumes 0px on mobile viewports, granting 100% width and clean scrollability to the topology canvas.
+  2. **Slide-Up Bottom Sheet Drawer Architecture**:
+     - When telemetry is expanded on `< lg` (via top navigation toggle button `(T)` or clicking in-flight packets/sockets):
+       - Renders a semi-transparent dark backdrop (`fixed inset-0 z-30 bg-black/60 backdrop-blur-xs lg:hidden`) with click-to-dismiss.
+       - Anchors the telemetry drawer as a slide-up bottom sheet: `fixed inset-x-0 bottom-16 sm:bottom-0 z-40 max-h-[82vh] h-[75vh] rounded-t-2xl bg-zinc-950/98 backdrop-blur-xl border-t border-border/80 shadow-2xl overflow-hidden lg:static lg:h-full lg:max-h-none lg:rounded-xl lg:border-t-0 lg:shadow-none`.
+       - Renders a mobile grab header with grab bar, status indicator, and tap target `X` close button (`Close Telemetry Drawer`).
+       - Because the sheet is anchored at `bottom-16 sm:bottom-0`, the fixed bottom playback bar (`NetworkPlaybackBar`) remains completely accessible, allowing learners to step through the simulation while viewing live DevTools headers and Waterfall Gantt bars updating in real time!
+  3. **Touch Target Polish & Content Clearance**:
+     - Increased mobile bottom clearance on `<main>` from `pb-20` to `pb-24` (96px) to guarantee zero occlusion on devices with 34px iOS home indicators.
+     - Elevated horizon header maximize and modal expand buttons in `HttpTopologyCanvas.tsx` with responsive touch target envelopes (`p-1.5 sm:p-1`).
+- **Verification**:
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx eslint <touched_files>`: 0 errors / 0 warnings.
+  - All 70 Vitest test suites (629 tests) pass with 100% green status.
+  - Rule #1 honored: 0 git commits or staging commands run.
+- **Blast Radius**: Zero regressions; canonical architecture in `NetworkEpisodeShell` uniformly elevates Episodes 1–4 on mobile while preserving the desktop frozen layout.
+

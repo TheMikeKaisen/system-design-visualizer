@@ -184,4 +184,24 @@ describe("NetworkEpisodeShell", () => {
     fireEvent.keyDown(window, { code: "KeyT", key: "t" });
     expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
   });
+
+  it("renders mobile bottom sheet drawer and dismisses via mobile close button", () => {
+    render(
+      <NetworkEpisodeShell
+        episodeNumber={1}
+        title="IP Addresses, Ports & Sockets"
+        defaultTelemetryCollapsed={false}
+      />
+    );
+
+    // When expanded, the mobile bottom sheet grab header with close button is present
+    const mobileCloseBtn = screen.getByRole("button", { name: "Close Telemetry Drawer" });
+    expect(mobileCloseBtn).toBeDefined();
+    expect(screen.getByText("Telemetry Inspector")).toBeDefined();
+
+    // Click mobile close button -> collapses telemetry back into docked rail
+    fireEvent.click(mobileCloseBtn);
+    expect(screen.queryByRole("button", { name: "Close Telemetry Drawer" })).toBeNull();
+    expect(screen.getByLabelText("Telemetry Docked Rail")).toBeDefined();
+  });
 });

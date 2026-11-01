@@ -8,6 +8,7 @@ import {
   FileCode,
   PanelRightClose,
   PanelRightOpen,
+  X,
 } from "lucide-react";
 import { useNetworkSimulationStore } from "@/store/useNetworkSimulationStore";
 import { useNetworkKeyboardShortcuts } from "@/hooks/useNetworkKeyboardShortcuts";
@@ -207,7 +208,7 @@ export function NetworkEpisodeShell({
       )}
 
       {/* ── 3. Main Stage: Topology Canvas & Tabbed Inspectors ── */}
-      <main className="flex-1 min-h-0 p-3 sm:p-4 pb-20 sm:pb-4 flex flex-col lg:flex-row gap-3 sm:gap-4 overflow-visible lg:overflow-hidden">
+      <main className="flex-1 min-h-0 p-3 sm:p-4 pb-24 sm:pb-4 flex flex-col lg:flex-row gap-3 sm:gap-4 overflow-visible lg:overflow-hidden relative">
         {/* Left/Center: Network Topology Canvas */}
         <section
           style={{
@@ -236,7 +237,16 @@ export function NetworkEpisodeShell({
           )}
         </section>
 
-        {/* Right: Contextual Telemetry (Expanded Panel vs Docked Micro-Rail) */}
+        {/* Mobile Backdrop for Slide-Up Bottom Sheet Drawer (< lg) */}
+        {!isTelemetryCollapsed && (
+          <div
+            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-xs lg:hidden transition-opacity"
+            onClick={() => setIsTelemetryCollapsed(true)}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Right: Contextual Telemetry (Desktop Side Column vs Mobile Slide-Up Bottom Sheet Drawer) */}
         <section
           style={{
             flex: isTelemetryCollapsed
@@ -247,18 +257,37 @@ export function NetworkEpisodeShell({
           }}
           className={`${
             isTelemetryCollapsed
-              ? "w-full lg:w-14 shrink-0 min-h-0"
-              : "w-full min-w-0 min-h-[400px] lg:min-h-0"
-          } h-auto lg:h-full flex flex-col mt-3 lg:mt-0 transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]`}
+              ? "hidden lg:flex lg:w-14 shrink-0 min-h-0"
+              : "fixed inset-x-0 bottom-16 sm:bottom-0 z-40 max-h-[82vh] h-[75vh] lg:h-full lg:max-h-none lg:static lg:bottom-auto lg:z-auto flex flex-col rounded-t-2xl lg:rounded-xl bg-zinc-950/98 backdrop-blur-xl border-t border-border/80 lg:border-t-0 shadow-2xl lg:shadow-none overflow-hidden"
+          } h-auto lg:h-full flex-col mt-0 transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]`}
           aria-label="Network Context Panels"
         >
+          {/* Mobile Bottom Sheet Grab Handle & Header Bar (< lg) */}
+          {!isTelemetryCollapsed && (
+            <div className="lg:hidden flex items-center justify-between px-3.5 py-2.5 bg-[#0c0f17] border-b border-border/50 shrink-0">
+              <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                <span className="w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
+                <span className="font-semibold text-xs tracking-wide">Telemetry Inspector</span>
+              </div>
+              <div className="w-10 h-1 rounded-full bg-zinc-700/80 -ml-16" />
+              <button
+                type="button"
+                onClick={() => setIsTelemetryCollapsed(true)}
+                aria-label="Close Telemetry Drawer"
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/80 active:scale-95 touch-manipulation focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {telemetrySlot ? (
             telemetrySlot(currentStep, safeIndex, telemetryControls)
           ) : isTelemetryCollapsed ? (
             /* Pattern A: Default Docked Rail for Episode 1 */
             <aside
               aria-label="Telemetry Docked Rail"
-              className="h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex flex-row lg:flex-col items-center justify-between lg:justify-start p-1.5 sm:p-2 gap-2 select-none font-mono shadow-sm transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]"
+              className="hidden lg:flex h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex-col items-center justify-start p-1.5 sm:p-2 gap-2 select-none font-mono shadow-sm transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]"
             >
               <button
                 type="button"

@@ -211,7 +211,7 @@ export function TcpTelemetryPanel({
     return (
       <aside
         aria-label="Telemetry Docked Rail"
-        className="h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex flex-row lg:flex-col items-center justify-between lg:justify-start p-1.5 sm:p-2 gap-2 select-none font-mono shadow-sm transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]"
+        className="hidden lg:flex h-full w-full rounded-xl bg-[#080a0f] border border-border/60 flex-col items-center justify-start p-1.5 sm:p-2 gap-2 select-none font-mono shadow-sm transition-all duration-350 ease-[cubic-bezier(0.23,1,0.32,1)]"
       >
         {onToggleCollapse && (
           <button

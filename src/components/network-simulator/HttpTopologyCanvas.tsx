@@ -425,7 +425,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                       ? "Restore 3-horizon layout (Esc)"
                       : "Maximize Client Horizon"
                   }
-                  className="p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+                  className="p-1.5 sm:p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
                 >
                   {maximizedHorizon === "client" ? (
                     <Minimize2 className="w-3.5 h-3.5" />
@@ -498,7 +498,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                 title="Open Centered Modal with Full JSON Response & DOM Preview"
                 aria-haspopup="dialog"
                 aria-expanded={activeModal === "react-preview"}
-                className="p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+                className="p-1.5 sm:p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
               >
                 <Maximize2 className="w-3 h-3" />
               </button>
@@ -676,7 +676,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                   title="Inspect Wire Substrate & TCP/IP Framing"
                   aria-haspopup="dialog"
                   aria-expanded={activeModal === "wire-substrate"}
-                  className="p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+                  className="p-1.5 sm:p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
                 >
                   <Layers className="w-3 h-3" />
                 </button>
@@ -695,7 +695,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                       ? "Restore 3-horizon layout (Esc)"
                       : "Maximize Wire Horizon"
                   }
-                  className="p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+                  className="p-1.5 sm:p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
                 >
                   {maximizedHorizon === "wire" ? (
                     <Minimize2 className="w-3.5 h-3.5" />
@@ -840,7 +840,7 @@ export function HttpTopologyCanvas({ httpData, onSelectPacket }: HttpTopologyCan
                       ? "Restore 3-horizon layout (Esc)"
                       : "Maximize Backend Horizon"
                   }
-                  className="p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+                  className="p-1.5 sm:p-1 rounded text-zinc-400 hover:text-teal-300 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
                 >
                   {maximizedHorizon === "backend" ? (
                     <Minimize2 className="w-3.5 h-3.5" />
