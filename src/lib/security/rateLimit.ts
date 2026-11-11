@@ -79,15 +79,25 @@ function buildMemoryLimiter(requests: number, windowMs: number): RateLimiter {
 // Factory — picks the right backend
 // ─────────────────────────────────────────────
 
-export type LimiterPreset = "api" | "auth" | "diagram-save" | "diagram-list";
+export type LimiterPreset =
+  | "api"
+  | "auth"
+  | "diagram-save"
+  | "diagram-list"
+  | "notification-subscribe"
+  | "notification-verify"
+  | "notification-unsubscribe";
 
 interface PresetConfig { requests: number; windowSeconds: number }
 
 const PRESETS: Record<LimiterPreset, PresetConfig> = {
-  "api":           { requests: 100, windowSeconds: 60 },   // General API
-  "auth":          { requests: 10,  windowSeconds: 60 },   // Sign-in attempts
-  "diagram-save":  { requests: 30,  windowSeconds: 60 },   // Saves per minute
-  "diagram-list":  { requests: 60,  windowSeconds: 60 },   // List requests
+  "api":                      { requests: 100, windowSeconds: 60 },   // General API
+  "auth":                     { requests: 10,  windowSeconds: 60 },   // Sign-in attempts
+  "diagram-save":             { requests: 30,  windowSeconds: 60 },   // Saves per minute
+  "diagram-list":             { requests: 60,  windowSeconds: 60 },   // List requests
+  "notification-subscribe":   { requests: 5,   windowSeconds: 60 },   // Subscriptions per minute
+  "notification-verify":      { requests: 10,  windowSeconds: 60 },   // Verification attempts per minute
+  "notification-unsubscribe": { requests: 20,  windowSeconds: 60 },   // Unsubscribes per minute
 };
 
 const limiterCache = new Map<LimiterPreset, RateLimiter>();
