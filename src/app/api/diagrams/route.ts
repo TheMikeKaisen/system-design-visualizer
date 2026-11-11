@@ -74,6 +74,20 @@ export async function POST(request: Request) {
   }
 
   try {
+    // SECURITY (SEC-05 IDOR): If diagram already exists, verify current user is the owner
+    const existing = await prisma.diagram.findUnique({
+      where:  { id: diagram.meta.id },
+      select: { ownerId: true },
+    });
+
+    if (existing && existing.ownerId !== auth.userId) {
+      // Return 404 instead of 403 to avoid revealing diagram existence
+      return NextResponse.json(
+        { error: "Diagram not found or unauthorized." },
+        { status: 404 }
+      );
+    }
+
     const saved = await prisma.diagram.upsert({
       where:  { id: diagram.meta.id },
       update: {
