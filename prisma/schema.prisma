@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -17,9 +18,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts  Account[]
-  sessions  Session[]
-  diagrams  Diagram[]
+  accounts   Account[]
+  sessions   Session[]
+  diagrams   Diagram[]
+  subscriber Subscriber?
 
   @@index([email])
 }
@@ -79,4 +81,69 @@ model Diagram {
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId, updatedAt(sort: Desc)])
+}
+
+// ─── Notification & Subscription Models (Phase 1) ───────────────────────────
+
+enum SubjectChannel {
+  ALL
+  JAVASCRIPT
+  OPERATING_SYSTEMS
+  JAVA
+  COMPUTER_NETWORKS
+  BACKEND
+  FRONTEND
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  UNSUBSCRIBED
+  BOUNCED
+}
+
+model Subscriber {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  userId            String?            @unique
+  isVerified        Boolean            @default(false)
+  verificationToken String?            @unique
+  tokenExpiresAt    DateTime?
+  unsubscribeToken  String             @unique @default(cuid())
+  status            SubscriptionStatus @default(ACTIVE)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+
+  @@index([status, isVerified])
+}
+
+model Subscription {
+  id           String         @id @default(cuid())
+  subscriberId String
+  subject      SubjectChannel @default(ALL)
+  createdAt    DateTime       @default(now())
+
+  subscriber Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriberId, subject])
+  @@index([subject])
+}
+
+model PublishedEpisode {
+  id               String         @id @default(cuid())
+  subject          SubjectChannel
+  episodeId        String
+  episodeNumber    Int
+  title            String
+  releaseCommitSha String
+  totalRecipients  Int            @default(0)
+  publishedAt      DateTime       @default(now())
+  dispatchedAt     DateTime?
+
+  @@unique([subject, episodeId])
+  @@index([subject, episodeId])
+  @@index([releaseCommitSha])
+  @@index([publishedAt(sort: Desc)])
 }
