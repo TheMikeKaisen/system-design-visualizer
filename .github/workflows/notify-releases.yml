@@ -1,0 +1,126 @@
+name: Notify Episode Releases
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/app/**/episodes.tsx'
+      - 'src/app/**/episodes/**'
+      - 'scripts/detect-new-episodes.ts'
+      - '.github/workflows/notify-releases.yml'
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: 'Base Git reference or commit SHA to diff against (e.g. HEAD~1 or specific SHA)'
+        required: false
+        default: ''
+        type: string
+      commit_sha:
+        description: 'Explicit commit SHA to associate with detected releases (defaults to HEAD)'
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: 'Perform dry-run (log payloads and signatures without sending HTTP requests)'
+        required: false
+        default: false
+        type: boolean
+      force:
+        description: 'Force re-dispatch even if episode was previously marked dispatched'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: notify-releases-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  notify-releases:
+    name: Detect & Dispatch Episode Releases
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # fetch-depth: 0 ensures complete git history is available so git diff
+          # against github.event.before, HEAD~1, or arbitrary base_ref never fails.
+          fetch-depth: 0
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Episode Release Detection & Dispatch
+        id: dispatch
+        env:
+          INTERNAL_RELEASE_SECRET: ${{ secrets.INTERNAL_RELEASE_SECRET }}
+          APP_URL: ${{ secrets.APP_URL }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_BASE_REF: ${{ inputs.base_ref }}
+          INPUT_COMMIT_SHA: ${{ inputs.commit_sha }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_FORCE: ${{ inputs.force }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          EVENT_SHA: ${{ github.sha }}
+        run: |
+          echo "=========================================================="
+          echo " Starting System Simulator Release Detection Engine"
+          echo " Triggered by: $EVENT_NAME"
+          echo " Target App URL: $APP_URL"
+          echo "=========================================================="
+
+          # Construct CLI execution arguments using secure bash arrays (SEC-03)
+          CLI_ARGS=()
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ -n "$INPUT_BASE_REF" ]; then
+              CLI_ARGS+=(--base "$INPUT_BASE_REF")
+            fi
+            if [ -n "$INPUT_COMMIT_SHA" ]; then
+              CLI_ARGS+=(--commit "$INPUT_COMMIT_SHA")
+            fi
+            if [ "$INPUT_DRY_RUN" = "true" ]; then
+              CLI_ARGS+=(--dry-run)
+            fi
+            if [ "$INPUT_FORCE" = "true" ]; then
+              CLI_ARGS+=(--force)
+            fi
+          else
+            # Push trigger: diff against parent commit or previous commit in push batch
+            BEFORE_SHA="$EVENT_BEFORE"
+            if [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+              CLI_ARGS+=(--base "$BEFORE_SHA" --commit "$EVENT_SHA")
+            else
+              CLI_ARGS+=(--base "HEAD~1" --commit "$EVENT_SHA")
+            fi
+          fi
+
+          echo "Executing: npx tsx scripts/detect-new-episodes.ts ${CLI_ARGS[*]}"
+          npx tsx scripts/detect-new-episodes.ts "${CLI_ARGS[@]}"
+
+      - name: Publish Step Summary
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SHA: ${{ github.sha }}
+        run: |
+          if [ -f release-summary.md ]; then
+            cat release-summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Release Detection Summary" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Status**: Completed with exit code $JOB_STATUS" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Trigger**: \`$EVENT_NAME\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Commit**: \`$EVENT_SHA\`" >> "$GITHUB_STEP_SUMMARY"
+          fi
