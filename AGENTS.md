@@ -79,6 +79,35 @@ Every simulator, episode, and learning path MUST look and feel world-class on **
 
 ---
 
+## 📬 RULE #9: NOTIFICATION SYSTEM & GITOPS RELEASE INTEGRITY (MANDATORY)
+To ensure the transactional email pipeline, AWS serverless workers, and GitOps release automation remain 100% resilient and isolated against regressions:
+1. **Never Import From `@/workers/*` in Next.js App Router**:
+   - `src/workers/dispatch.ts` and `src/workers/fanout.ts` are standalone AWS Lambda worker scripts containing Node.js/Lambda dependencies (`react-dom/server`, AWS SDK handlers) that violate Next.js Turbopack compiler boundaries.
+   - Any shared utility (e.g. Resend client, Prisma database client, environment parsing) MUST live in `src/lib/` (e.g. `src/lib/resend.ts`, `src/lib/db.ts`, `src/lib/env.ts`).
+   - App Router routes (`src/app/**`) and UI components must NEVER import from `src/workers/dispatch` or `src/workers/fanout`.
+2. **Episode Metadata Structure & AST Parser Preservation**:
+   - When authoring or editing episodes in `src/app/<subject>/episodes.tsx`, metadata array export names MUST remain exact (`JAVASCRIPT_EPISODES`, `OPERATING_SYSTEMS_EPISODES`, `JAVA_EPISODES`, `COMPUTER_NETWORKS_EPISODES`, `BACKEND_EPISODES`, `FRONTEND_EPISODES`).
+   - The TypeScript AST parser in `scripts/detect-new-episodes.ts` scans these exact export names.
+   - The `date` property MUST be either `"Coming Soon"` or a standard ISO/release date `"YYYY-MM-DD"`. Transitioning an episode from `"Coming Soon"` to a release date triggers automated notification fanout.
+   - Any new discipline track must be registered in `SUBJECT_FILE_MAP` in `scripts/detect-new-episodes.ts` and in Prisma's `SubjectChannel` enum.
+3. **SQS-First Safe Ordering Architecture**:
+   - In `src/app/api/internal/episodes/publish/route.ts`, enqueueing to the AWS SQS Fanout Queue MUST ALWAYS occur before writing to PostgreSQL.
+   - If SQS enqueue fails, the endpoint returns HTTP 500 and NEVER touches the database (preventing phantom releases).
+   - If SQS succeeds but the database write fails, the endpoint returns HTTP 202 Accepted because the Lambda worker will idempotently backfill the `PublishedEpisode` record.
+   - Never reverse this order.
+4. **Resend API Mocking in Test Suites**:
+   - Any test suite that exercises notification routes (`/api/notifications/subscribe`, `/api/notifications/verify`, `/api/internal/episodes/publish`) MUST mock `@/lib/resend` and `@/workers/dispatch`.
+   - Never let test suites make live outbound network requests to Resend.
+5. **RFC 8058 Compliance & Unsubscribe Headers**:
+   - Email templates generated in `src/emails/` must always inject RFC 8058 `List-Unsubscribe` and `List-Unsubscribe-Post` headers.
+   - The unsubscribe endpoints must support both JSON API payloads and standard `application/x-www-form-urlencoded` form submissions for 1-click unsubscriptions.
+6. **Database Schema Safeguards**:
+   - Models `Subscriber`, `Subscription`, and `PublishedEpisode` in `prisma/schema.prisma` are strictly locked.
+   - Never modify, drop, or rename columns without explicit user consent and running migrations (`npx prisma migrate dev` / `npx prisma migrate deploy`).
+   - Retain composite indexes (`[status, isVerified]`, `[subject, episodeId]`) for query performance.
+
+---
+
 ## 🧪 RULE #5: RIGOROUS VERIFICATION
 Before declaring completion:
 - `npx tsc --noEmit` must pass with 0 errors.

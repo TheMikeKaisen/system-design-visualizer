@@ -1548,3 +1548,221 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - Rule #1 honored: 0 git commits or staging commands run.
 - **Blast Radius**: Zero regressions; canonical architecture in `NetworkEpisodeShell` uniformly elevates Episodes 1–4 on mobile while preserving the desktop frozen layout.
 
+---
+
+## Decision Record 067: GitOps CI/CD Workflow, Cryptographic Episode Release Ingest & Production Operations Runbook (Milestone 7)
+- **Status**: Implemented & Verified
+- **Category**: CI/CD Automation, GitOps Architecture, Cryptographic Security & Production Infrastructure
+- **Context & Problem**:
+  - The System Simulator transactional notification pipeline (Phases 1–6) enables guest and authenticated users to subscribe to disciplines and receive transactional release emails via SQS and Lambda.
+  - To close the operational loop without manual developer intervention, new simulator releases in `src/app/**/episodes.tsx` must automatically trigger notification fanout post-deployment.
+  - Naive line-based git diffs fail catastrophically due to Prettier formatting, description edits, placeholder renumbering, or deleted episodes.
+  - Furthermore, production deployment to AWS requires a complete, reproducible runbook covering SQS queues, IAM roles, Lambda workers with Resend free-tier rate limit defense (`ReservedConcurrentExecutions: 1`), Resend DNS/webhooks, and operational playbooks.
+- **Architectural Solution & Implementation**:
+  1. **Semantic AST State Differ (`scripts/detect-new-episodes.ts`)**:
+     - Utilizes the TypeScript Compiler API (`typescript.createSourceFile`) to parse episode arrays in-memory across the 6 canonical files: `src/app/{javascript,operating-systems,java,computer-networks,backend,frontend}/episodes.tsx`.
+     - Extracts `id`, `episodeNumber`, `title`, `description`, `date`, `href`, `accent`, and `badge` regardless of whitespace, JSX icons, or key ordering.
+     - Compares `git show <base>:<file>` against `git show <head>:<file>`. Triggers release notifications exclusively when an episode is brand-new or transitions from `"Coming Soon"` to a valid release date string.
+     - Ignores deleted episodes, description typos, and renumbering churn.
+     - Maps to canonical `SubjectChannel` enums (`JAVASCRIPT`, `OPERATING_SYSTEMS`, `JAVA`, `COMPUTER_NETWORKS`, `BACKEND`, `FRONTEND`).
+  2. **Cryptographic Signature & Anti-Replay Defense Pipeline**:
+     - Reuses `computeReleaseSignature` from `src/lib/security/releaseSignature.ts` to generate `x-release-timestamp` (integer Unix epoch seconds) and `x-release-signature: sha256=<hex>` bound to `${timestamp}.${rawBody}`.
+     - Implements HTTP dispatch to `POST ${APP_URL}/api/internal/episodes/publish` with exponential backoff on transient errors (500, 502, 503, 504, 429, network failures).
+     - **Critical Anti-Replay Defense**: Refreshes timestamp and recalculates signature on every retry attempt to ensure requests never expire against the server's 5-minute anti-replay window.
+     - Fails fast without retry on permanent client errors (400, 401, 403, 404, 422).
+     - Full CLI support (`--dry-run`, `--commit <sha>`, `--base <ref>`, `--url <url>`, `--secret <secret>`, `--force`, `--verbose`).
+  3. **Automated CI/CD Workflow (`.github/workflows/notify-releases.yml`)**:
+     - Configured push trigger on `main` with path filters (`src/app/**/episodes.tsx`, `scripts/detect-new-episodes.ts`, `.github/workflows/notify-releases.yml`).
+     - Configured `workflow_dispatch` trigger with manual parameters (`base_ref`, `commit_sha`, `dry_run`, `force`).
+     - Concurrency group `notify-releases-${{ github.ref }}` with `cancel-in-progress: false` to prevent race conditions during in-flight dispatches.
+     - `actions/checkout@v4` with `fetch-depth: 0` to ensure complete commit history is available for git diff.
+     - Node 20 setup with npm cache and `npm ci`.
+     - Injects `INTERNAL_RELEASE_SECRET` and `APP_URL` from GitHub Secrets and publishes summary table to `$GITHUB_STEP_SUMMARY`.
+  4. **Production Operations Runbook (`DEPLOYMENT_RUNBOOK.md`)**:
+     - Comprehensive, copy-paste ready operational guide in workspace root.
+     - AWS CLI provisioning commands for DLQ (`system-simulator-notifications-dlq`, 14-day retention, 180s visibility), Fanout Queue (`system-simulator-fanout-queue`, 180s visibility, maxReceiveCount: 3), and Dispatch Queue (`system-simulator-dispatch-queue`, 180s visibility, maxReceiveCount: 5).
+     - IAM trust policy and least-privilege execution roles (`SystemSimulatorFanoutRole`, `SystemSimulatorDispatchRole`).
+     - Lambda packaging via `esbuild` and function creation with `ReservedConcurrentExecutions: 1` on `EmailDispatchHandler` (strictly guarding Resend's 2 req/s limit).
+     - SQS Event Source Mappings with `ReportBatchItemFailures` and batch size 10.
+     - Resend DNS configuration (SPF, DKIM, DMARC, MX) and Resend webhook configuration (`/api/webhooks/resend`) with Svix signing secret.
+     - Complete GitHub Secrets checklist and 6 day-2 operational playbooks (smoke test, signed curl test, log streaming, DLQ redrive, emergency circuit breaker, zero-downtime secret rotation).
+  5. **Verification & Quality Guard**:
+     - Comprehensive unit and integration test suite `src/__tests__/notifications/detect-new-episodes.test.ts` (31 tests) passing 100%.
+     - `npx tsc --noEmit`: 0 errors repository-wide.
+     - `npx eslint scripts/detect-new-episodes.ts src/__tests__/notifications/detect-new-episodes.test.ts`: 0 errors / 0 warnings.
+     - Full Vitest suite: 96 test files, 1,183 tests passing with 0 failures repository-wide.
+     - Rule #1 honored: 0 git commits or staging operations run.
+- **Blast Radius**: Zero regressions; self-contained CI/CD workflow, operations runbook, and release detector.
+
+---
+
+## Decision Record 068: Comprehensive Security Audit Remediation & Defense-in-Depth Hardening (SEC-01 through SEC-06)
+- **Status**: Implemented & Verified
+- **Category**: Application Security, Cryptographic Verification, CI/CD Hardening & Infrastructure Hygiene
+- **Context & Problem**:
+  - Following the end-to-end implementation of the transactional notification pipeline, a formal security audit identified 6 vulnerability findings spanning API authorization, guest email delivery, CI/CD shell injection, HMAC anti-replay bypass, cross-tenant diagram tampering, and AWS Lambda runtime packaging:
+    1. **SEC-01 (High)**: Authenticated users could subscribe arbitrary third-party emails with automatic verification (`isVerified: true`), bypassing Double Opt-In consent and binding external emails to attacker accounts.
+    2. **SEC-02 (Medium)**: Guest subscriber verification emails were never dispatched via Resend, leaving guest subscribers in a permanent unverified state and unable to receive episode notifications.
+    3. **SEC-03 (High)**: Inline GitHub Actions `${{ inputs.* }}` expressions in `.github/workflows/notify-releases.yml` were subject to shell command injection.
+    4. **SEC-04 (Medium)**: Signature verification in `src/lib/security/releaseSignature.ts` permitted fallback to `expectedRawHex` without timestamp binding, enabling replay of captured payload signatures.
+    5. **SEC-05 (High)**: Diagram upsert in `src/app/api/diagrams/route.ts` lacked pre-upsert ownership checks, permitting authenticated users to overwrite diagrams owned by other users via IDOR.
+    6. **SEC-06 (Medium)**: Lambda bundling in `DEPLOYMENT_RUNBOOK.md` marked `@prisma/client` as external without packaging Prisma query engine binaries (`libquery_engine-rhel-openssl-3.0.x.so.node`), leading to cold-start crashes in AWS Lambda.
+    7. **URL Hardening**: Notification schemas permitted arbitrary URL schemes (e.g. `javascript:`, `data:`).
+- **Architectural Solution & Implementation**:
+  1. **SEC-01 Remediation (`src/app/api/notifications/subscribe/route.ts`)**:
+     - Verified that `session.user.email` strictly equals `normalizedEmail` before granting automatic verification or linking `userId`.
+     - When an authenticated user submits an email different from their session email, `isOwnEmail` evaluates to `false`, `shouldBeVerified` falls back to existing subscriber verification state, `targetUserId` is set to `null`, and Double Opt-In is strictly enforced.
+  2. **SEC-02 Remediation (`src/app/api/notifications/subscribe/route.ts`)**:
+     - When `result.requiresVerification && result.verificationToken` is true, renders `DoubleOptInEmail` via `renderToStaticMarkup` and dispatches via Resend (`resend.emails.send`) with verified sender address.
+  3. **SEC-03 Remediation (`.github/workflows/notify-releases.yml`)**:
+     - Eliminated all direct `${{ ... }}` expression interpolation inside `run:` blocks.
+     - Mapped all workflow inputs and GitHub context variables to environment variables (`EVENT_NAME`, `INPUT_BASE_REF`, `INPUT_COMMIT_SHA`, `INPUT_DRY_RUN`, `INPUT_FORCE`, `EVENT_BEFORE`, `EVENT_SHA`, `JOB_STATUS`).
+     - Constructed CLI arguments using POSIX bash array expansion `CLI_ARGS=()` and invoked `npx tsx scripts/detect-new-episodes.ts "${CLI_ARGS[@]}"`.
+  4. **SEC-04 Remediation (`src/lib/security/releaseSignature.ts`)**:
+     - Removed fallback verification against unbound `expectedRawHex`.
+     - Enforces that all candidate release signatures must strictly match `expectedBoundHex` derived from `${trimmedTimestamp}.${payload}`, preventing HMAC replay attacks.
+  5. **SEC-05 Remediation (`src/app/api/diagrams/route.ts`)**:
+     - Added pre-upsert lookup: if `diagram.meta.id` exists in the database and `existing.ownerId !== session.user.id`, returns HTTP 404 (preventing IDOR, enumeration, and diagram defacement).
+  6. **SEC-06 Remediation (`DEPLOYMENT_RUNBOOK.md` & `prisma/schema.prisma`)**:
+     - Added `binaryTargets = ["native", "rhel-openssl-3.0.x"]` to `prisma/schema.prisma` generator block to build the Amazon Linux 2023 query engine binary required by AWS Lambda Node 20 runtime.
+     - Updated Section 5.1 in `DEPLOYMENT_RUNBOOK.md` to run `npx prisma generate`, copy `node_modules/@prisma` and `node_modules/.prisma` into `dist/{fanout,dispatch}/node_modules/`, and include them in the deployment zip archives.
+  7. **URL Hardening (`src/workers/types.ts` & `src/app/api/internal/episodes/publish/route.ts`)**:
+     - Added `.refine(url => /^https?:\/\//i.test(url))` to `ctaUrl` across schemas to reject `javascript:`, `data:`, and other non-HTTP protocols.
+  8. **CUID Token Predictability Hardening (`src/app/api/notifications/subscribe/route.ts`)**:
+     - Explicitly generated 256-bit CSPRNG hex tokens (`randomBytes(32).toString('hex')`) for `unsubscribeToken` on subscriber creation, maximizing pre-image and guessing resistance.
+  9. **SQS In-Flight CI/CD Retry Deduplication Guard (`src/app/api/internal/episodes/publish/route.ts`)**:
+     - Added in-flight deduplication in step 6 fast-path idempotency check: if `publishedEpisode` was created/enqueued within the last 10 minutes (`ageMs < 10m`) and `dispatchedAt` is still null (actively in-flight in Lambda/SQS), skips redundant SQS enqueue and returns HTTP 200 with `alreadyQueued: true`, eliminating duplicate fanouts during transient GitHub Actions network timeouts.
+  10. **Test Mock Isolation Hardening (`src/__tests__/notifications/challenger-m8-1.test.ts` & `e2e-notification-lifecycle.test.ts`)**:
+     - Mocked `@/workers/dispatch` and `Resend` email dispatchers in test suites to prevent unmocked outbound HTTPS requests to Resend API in DOM environments, reducing suite execution time from 12.6s to 156ms.
+- **Verification & Quality Guard**:
+  - Dedicated regression test suites passing 100%:
+    - `src/__tests__/notifications/services.test.ts` (36 tests)
+    - `src/__tests__/diagrams.test.ts` (3 tests)
+    - `src/__tests__/notifications/ingest-release.test.ts` (32 tests)
+    - `src/__tests__/notifications/challenger-m8-1.test.ts` (36 tests)
+    - `src/__tests__/notifications/e2e-notification-lifecycle.test.ts` (93 tests)
+  - `npx tsc --noEmit`: 0 errors repository-wide.
+  - `npx eslint`: 0 errors / 0 warnings on all touched files.
+  - `git status`: All changes remain 100% unstaged in the working tree in compliance with Rule #1.
+- **Blast Radius**: Zero regressions; establishes defense-in-depth across API security, cryptographic authentication, CI/CD pipelines, and cloud workers.
+
+---
+
+## Decision Record 019: Cloud Infrastructure Provisioning & Lambda Worker Hardening for Transactional Notifications
+- **Status**: Implemented & Verified
+- **Category**: Cloud Infrastructure, Serverless Deployment & Runtime Reliability
+- **Context & Problem**:
+  - Live deployment of the transactional notification pipeline required provisioning AWS serverless resources (SQS queues, IAM roles, Lambda workers, and event source mappings) in `ap-south-1` (Mumbai) to co-locate with the existing Supabase PostgreSQL database (`aws-1-ap-south-1.pooler.supabase.com`).
+  - During bundle analysis and dry-run execution, four critical runtime and security bugs were identified:
+    1. **Missing `pg` module**: The initial runbook marked `pg` as `--external:pg`, causing `Cannot find module 'pg'` crashes upon cold start in Lambda.
+    2. **Static Web Env Schema Coupling**: Worker types and email modules statically imported `@/lib/env` (`@t3-oss/env-nextjs`), which executes schema validation on module evaluation. In AWS Lambda, the absence of web session secrets (`AUTH_SECRET`) caused immediate initialization crashes (`Invalid input: expected string, received undefined`).
+    3. **IAM Log Group and Visibility Bugs**: SQS event source mapping with `ReportBatchItemFailures` requires `sqs:ChangeMessageVisibility` to reset failed message visibility, and CloudWatch log group creation requires the exact log group ARN without trailing `:*`.
+    4. **Root Key Security Anti-Pattern**: Creating access keys under the AWS root account poses catastrophic security risks.
+- **Architectural Solution & Implementation**:
+  1. **Co-Located SQS Infrastructure (`ap-south-1`)**:
+     - Provisioned Dead-Letter Queue (`system-simulator-notifications-dlq`) with 14-day retention.
+     - Provisioned Fanout Queue (`system-simulator-fanout-queue`) with 3-retry redrive policy to DLQ.
+     - Provisioned Dispatch Queue (`system-simulator-dispatch-queue`) with 5-retry redrive policy to DLQ.
+  2. **Bundling Pure-JS Driver & Decoupling Worker Env**:
+     - Removed `--external:pg` from `esbuild` configuration. Pure-JS `pg` is bundled directly into `dist/fanout/index.js` and `dist/dispatch/index.js`.
+     - Replaced static `@/lib/env` import in `src/workers/types.ts`, `src/emails/headers.ts`, and `src/emails/EpisodeReleaseEmail.tsx` with direct `process.env` access, decoupling background workers from Next.js web application session schemas.
+     - Pruned non-runtime development packages from `@prisma` in deployment archives, producing compact ~32MB zip files (`fanout.zip`, `dispatch.zip`) for direct console upload.
+  3. **IAM Hardening & Event Source Mappings**:
+     - Configured `SystemSimulatorFanoutRole` and `SystemSimulatorDispatchRole` with exact log group ARNs and `sqs:ChangeMessageVisibility`.
+     - Wired SQS triggers: Fanout mapped to `EpisodeFanoutHandler` (batch size 1); Dispatch mapped to `EmailDispatchHandler` (batch size 10, batch window 2s, `ReportBatchItemFailures` enabled, maximum concurrency 2).
+  4. **Dedicated IAM User for External Ingest**:
+     - Created restricted service user `system-simulator-vercel` with single-action policy (`sqs:SendMessage` on `system-simulator-fanout-queue`), providing secure access keys for Vercel without root account exposure.
+- **Verification**:
+  - Both Lambda worker bundles verified in local Node.js runtime (`handler: function` loaded with zero errors).
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx eslint`: 0 errors / 0 warnings on touched files.
+  - `npm test`: 102 test files passed, 1,401 tests passed.
+  - Zero git changes staged or committed (Rule #1 compliance).
+- **Blast Radius**: Zero regressions; establishes low-latency, rate-limited, fault-tolerant transactional email delivery.
+
+---
+
+## Decision Record 069: Next.js App Router & Worker Client Decoupling (Resolving `react-dom/server` Compiler Restriction)
+- **Status**: Implemented & Verified
+- **Category**: Architecture, Bundler Integrity, Security & Framework Compatibility
+- **Context & Problem**:
+  - Submitting an email subscription via the Release Notification dialog triggered a fatal Next.js 16 App Router compiler error:
+    ```
+    You're importing a component that imports react-dom/server. To fix it, render or return the content directly as a Server Component instead for perf and security.
+    ./src/workers/dispatch.ts (2:1)
+    Import trace:
+      App Route:
+        ./src/workers/dispatch.ts
+        ./src/app/api/notifications/subscribe/route.ts
+    ```
+  - **Root Cause**:
+    - `src/app/api/notifications/subscribe/route.ts` imported `getResendClient` from `@/workers/dispatch`.
+    - `src/workers/dispatch.ts` is an AWS Lambda background worker that uses `import { renderToStaticMarkup } from "react-dom/server"` at the top level to render HTML emails.
+    - Importing `getResendClient` from `dispatch.ts` pulled the standalone Lambda worker into Next.js App Router's Turbopack module graph. Next.js App Router strictly prohibits static imports of `react-dom/server` inside any route handler or component tree.
+- **Architectural Solution & Implementation**:
+  1. **Decoupled Neutral Resend Client Module**:
+     - Authored [`src/lib/resend.ts`](file:///C:/Users/computer/Downloads/system-design-visualizer/system-design-visualizer/src/lib/resend.ts) containing `getResendClient()` and `resetDefaultResendClient()`.
+     - Re-exported `getResendClient` and `resetDefaultResendClient` from `src/workers/dispatch.ts` so AWS Lambda worker scripts, bundles, and existing worker tests retain full backward compatibility without breaking API signatures.
+  2. **Isolated Next.js App Router from Background Worker Scripts**:
+     - Updated `src/app/api/notifications/subscribe/route.ts` to import `getResendClient` directly from `@/lib/resend`.
+     - Completely removed the import from `@/workers/dispatch`, ensuring Next.js Turbopack never parses or bundles AWS Lambda worker code into the web application.
+  3. **Repository-Wide Static Audit**:
+     - Audited all occurrences of `react-dom/server` across `src/`: confirmed that only `src/workers/dispatch.ts` (standalone Lambda worker) and testing suites under `src/__tests__/notifications/` reference it.
+     - Confirmed that zero App Router routes or web components contain static `react-dom/server` imports.
+  4. **Test & Ingest Resilience**:
+     - Updated `services.test.ts` and `challenger-m8-1.test.ts` to mock `@/lib/resend` in addition to `@/workers/dispatch`, preventing unmocked outbound HTTP calls.
+     - Updated `src/app/api/internal/episodes/publish/route.ts` queue fallback resolution to check `env.SQS_FANOUT_QUEUE_URL` alongside `process.env`.
+     - Updated `e2e-notification-lifecycle.test.ts` and `challenger-m8-2.test.ts` test harnesses to cleanly hydrate `process.env` during `beforeEach`.
+- **Verification**:
+  - `npm run build`: Turbopack build succeeded with 0 errors across all 61 static and dynamic routes.
+  - `esbuild`: Bundled both workers cleanly into `dist/fanout/index.js` and `dist/dispatch/index.js`, and refreshed `dist/dispatch.zip`.
+  - `npx tsc --noEmit`: 0 errors repository-wide.
+  - `npx eslint`: 0 errors / 0 warnings on all touched files.
+  - `npm test`: 102/102 test files passed (1,401/1,401 tests passed).
+  - `git status`: All changes remain 100% unstaged in strict compliance with Rule #1.
+- **Blast Radius**: Zero regressions; cleanly separates client/server web code from background Lambda workers.
+
+---
+
+## Decision Record 070: Foundational Transactional Notification Architecture & Engineering Blueprint (Milestones 1–6)
+- **Status**: Implemented & Verified
+- **Category**: Architecture, Distributed Systems, Asynchronous Queues & Email Deliverability
+- **Context & Problem**:
+  - Educational simulation releases in System Simulator require notifying interested users as soon as new episodes drop across disciplines (JavaScript, Operating Systems, Computer Networks, Java, Backend, Frontend).
+  - Naive notification architectures (e.g. sending emails synchronously in HTTP handlers or querying all users in a single monolithic worker) suffer from fatal pitfalls:
+    1. HTTP gateway timeouts when subscriber counts grow.
+    2. Resend API rate limit throttling (10 req/s Pro, 2 req/s Free).
+    3. Spam classification due to missing RFC 8058 headers or lack of double opt-in verification.
+    4. Cascading duplicate deliveries if a batch fails partially.
+- **Architectural Solution & Implementation Across Milestones 1–6**:
+  1. **Milestone 1 — Data Model & Schema Isolation (`prisma/schema.prisma`)**:
+     - `Subscriber`: Stores email, status (`ACTIVE`, `UNSUBSCRIBED`, `BOUNCED`), `isVerified`, 32-byte CSPRNG `verificationToken`, 24h expiration, and persistent `unsubscribeToken`.
+     - `Subscription`: Junction table mapping subscribers to `SubjectChannel` enums (`ALL`, `JAVASCRIPT`, `OPERATING_SYSTEMS`, `JAVA`, `COMPUTER_NETWORKS`, `BACKEND`, `FRONTEND`).
+     - `PublishedEpisode`: Unique tracking per `(subject, episodeId)` recording `releaseCommitSha`, `totalRecipients`, and timestamp `dispatchedAt`.
+     - Composite index `@@index([status, isVerified])` optimizes query execution to $O(\log N)$ during high-volume fanouts.
+  2. **Milestone 2 — Subscription & Double Opt-In API Services (`src/app/api/notifications/`)**:
+     - `POST /api/notifications/subscribe`: Implements sliding-window rate limiting (5 req/min per IP), guest verification token generation (`crypto.randomBytes(32).toString('hex')`), and immediate verification for authenticated session users.
+     - `GET /api/notifications/verify`: Validates token, checks expiration, sets `isVerified: true`, clears token, and idempotently redirects to `/verify?status=success`.
+     - `POST /api/notifications/unsubscribe`: Handles both RFC 8058 1-click unsubscriptions (`List-Unsubscribe=One-Click` POST) and preference center channel toggles.
+  3. **Milestone 3 — Transactional Email Templates & RFC 8058 Headers (`src/emails/`)**:
+     - High-contrast, brand-aligned HTML email templates: `EpisodeReleaseEmail.tsx` (with discipline color palettes and CTA button) and `DoubleOptInEmail.tsx`.
+     - `src/emails/headers.ts`: Strictly constructs RFC 8058 compliant headers (`List-Unsubscribe: <url>`, `List-Unsubscribe-Post: List-Unsubscribe=One-Click`) required by Gmail and Yahoo to prevent spam marking.
+  4. **Milestone 4 — Asynchronous Two-Stage Serverless Worker Pipeline (`src/workers/`)**:
+     - **Stage 1 (Fanout)**: `EpisodeFanoutHandler` in `src/workers/fanout.ts` consumes 1 release record from SQS Fanout Queue, queries verified active subscribers subscribed to the subject or `ALL`, deduplicates emails, slices recipients into chunks of 10, enqueues to SQS Dispatch Queue, and updates `PublishedEpisode.totalRecipients`.
+     - **Stage 2 (Dispatch)**: `EmailDispatchHandler` in `src/workers/dispatch.ts` consumes chunks from SQS Dispatch Queue, renders templates, sends batches via Resend API with `RatePacer` (50ms interval) and exponential backoff.
+     - **Selective Failure Reporting (`ReportBatchItemFailures`)**: Uses `itemIdentifier` to acknowledge successful records and return only failed message IDs to SQS, eliminating duplicate emails for healthy recipients.
+  5. **Milestone 5 — SQS-First Safe Ingest Endpoint (`src/app/api/internal/episodes/publish/route.ts`)**:
+     - Enqueues to AWS SQS fanout queue *before* writing to PostgreSQL. If database write fails post-SQS, returns HTTP `202 Accepted` because the Lambda worker will idempotently backfill the record.
+     - 10-minute in-flight deduplication guard prevents duplicate SQS enqueuing during transient CI/CD network retries.
+  6. **Milestone 6 — Accessible UI Components (`src/components/notifications/`)**:
+     - `SubscribeModal.tsx`: Accessible WAI-ARIA modal dialog (`role="dialog"`, focus trap, tab looping, Esc dismiss, auto-focus return).
+     - `SubscribeButton.tsx`: Canonical subscription CTA button placed across subject landing pages.
+     - `TopicChip.tsx`: Interactive multi-discipline selection chip with automatic `ALL` topic synchronization.
+- **Verification**:
+  - 102 test files passed, 1,401 tests passed across all 6 milestones and adversarial challenger suites.
+  - Full TypeScript typecheck and ESLint pass cleanly with 0 errors.
+- **Blast Radius**: Isolated transactional notification layer with zero risk of regression to existing episode simulators or runtime shells.
+
+
+
+
