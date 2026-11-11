@@ -2,6 +2,8 @@ import Link from "next/link";
 import { AppNavbar } from "@/components/ui/AppNavbar";
 import { ArrowLeft, ArrowRight, Cpu, Terminal, Database, Layers, Server, Network } from "lucide-react";
 import { EditorialDisciplineCard } from "@/components/learning-paths/EditorialDisciplineCard";
+import { SubscribeButton } from "@/components/notifications/SubscribeButton";
+import { SubjectChannel } from "@/components/notifications/TopicChip";
 
 // Verified Single Sources of Truth for episode counts
 import { OPERATING_SYSTEMS_EPISODES } from "@/app/operating-systems/episodes";
@@ -52,16 +54,22 @@ export default function LearningPathsPage() {
             Interactive simulations of the internals you usually can’t see — from OS schedulers and language runtimes to network protocols.          </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
+            <SubscribeButton
+              subject={SubjectChannel.ALL}
+              label="Subscribe to Releases"
+              variant="outline"
+            />
+
             <Link
               href="/canvas"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700/80 text-zinc-800 dark:text-zinc-200 border border-zinc-200/80 dark:border-zinc-700/60 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700/80 text-zinc-800 dark:text-zinc-200 border border-zinc-200/80 dark:border-zinc-700/60 transition-colors min-h-[44px] sm:min-h-0 items-center"
             >
               <Network className="w-3.5 h-3.5 text-primary" />
               <span>Open Canvas Studio</span>
               <ArrowRight className="w-3 h-3 text-muted-foreground" />
             </Link>
 
-            <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-lg border border-border/40 bg-muted/20">
+            <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-lg border border-border/40 bg-muted/20 min-h-[44px] sm:min-h-0 flex items-center">
               {totalEpisodes} Curated Episodes
             </span>
           </div>

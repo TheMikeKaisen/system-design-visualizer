@@ -4,6 +4,8 @@ import { AppNavbar } from "@/components/ui/AppNavbar";
 import { EpisodeCard } from "@/components/ui/EpisodeCard";
 import { ArrowLeft } from "lucide-react";
 import { JAVA_EPISODES } from "./episodes";
+import { SubscribeButton } from "@/components/notifications/SubscribeButton";
+import { SubjectChannel } from "@/components/notifications/TopicChip";
 
 export default function JavaPathPage() {
   return (
@@ -41,6 +43,16 @@ export default function JavaPathPage() {
           <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed font-normal">
             Deep dive into the Java ecosystem. Explore how the JVM works, how code is compiled, and visualize the execution flow under the hood.
           </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <SubscribeButton
+              subject={SubjectChannel.JAVA}
+              subjectTitle="Java & JVM"
+            />
+            <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-lg border border-border/40 bg-muted/20">
+              {JAVA_EPISODES.length} Curated Episodes
+            </span>
+          </div>
         </div>
 
         {/* Modules Grid */}

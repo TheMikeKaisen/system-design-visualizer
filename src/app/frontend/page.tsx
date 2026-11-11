@@ -3,6 +3,8 @@ import { AppNavbar } from "@/components/ui/AppNavbar";
 import { EpisodeCard } from "@/components/ui/EpisodeCard";
 import { Monitor, ArrowLeft } from "lucide-react";
 import { FRONTEND_EPISODES } from "./episodes";
+import { SubscribeButton } from "@/components/notifications/SubscribeButton";
+import { SubjectChannel } from "@/components/notifications/TopicChip";
 
 export default function FrontendPathPage() {
   return (
@@ -34,6 +36,16 @@ export default function FrontendPathPage() {
           <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed font-normal">
             Understand how modern frontend frameworks really work. We strip away the magic and visualize the exact steps from JSX compilation down to the browser&apos;s DOM.
           </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <SubscribeButton
+              subject={SubjectChannel.FRONTEND}
+              subjectTitle="Frontend Architecture"
+            />
+            <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-lg border border-border/40 bg-muted/20">
+              {FRONTEND_EPISODES.length} Curated Episodes
+            </span>
+          </div>
         </div>
 
         {/* Modules Grid */}

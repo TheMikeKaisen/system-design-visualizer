@@ -3,6 +3,8 @@ import { AppNavbar } from "@/components/ui/AppNavbar";
 import { EpisodeCard } from "@/components/ui/EpisodeCard";
 import { ArrowLeft, Network } from "lucide-react";
 import { COMPUTER_NETWORKS_EPISODES } from "./episodes";
+import { SubscribeButton } from "@/components/notifications/SubscribeButton";
+import { SubjectChannel } from "@/components/notifications/TopicChip";
 
 export default function ComputerNetworksPathPage() {
   return (
@@ -36,6 +38,16 @@ export default function ComputerNetworksPathPage() {
           <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed font-normal">
             Look under the hood of network communication. Explore how IP addressing directs packets to host interfaces, transport ports multiplex applications, and OS kernel sockets manage stateful TCP connections.
           </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <SubscribeButton
+              subject={SubjectChannel.COMPUTER_NETWORKS}
+              subjectTitle="Computer Networks"
+            />
+            <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-lg border border-border/40 bg-muted/20">
+              {COMPUTER_NETWORKS_EPISODES.length} Curated Episodes
+            </span>
+          </div>
         </div>
 
         {/* Modules Grid */}

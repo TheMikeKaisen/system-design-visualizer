@@ -3,6 +3,8 @@ import { AppNavbar } from "@/components/ui/AppNavbar";
 import { EpisodeCard } from "@/components/ui/EpisodeCard";
 import { Server, ArrowLeft } from "lucide-react";
 import { BACKEND_EPISODES } from "./episodes";
+import { SubscribeButton } from "@/components/notifications/SubscribeButton";
+import { SubjectChannel } from "@/components/notifications/TopicChip";
 
 export default function BackendPathPage() {
   return (
@@ -34,6 +36,16 @@ export default function BackendPathPage() {
           <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed font-normal">
             Go inside the runtime. Understand why Node can handle 10,000 connections with a single thread — and exactly when it can&apos;t.
           </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <SubscribeButton
+              subject={SubjectChannel.BACKEND}
+              subjectTitle="Backend Internals"
+            />
+            <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-lg border border-border/40 bg-muted/20">
+              {BACKEND_EPISODES.length} Curated Episodes
+            </span>
+          </div>
         </div>
 
         {/* Modules Grid */}
