@@ -44,16 +44,19 @@ interface MockPublishedEpisode {
   dispatchedAt: Date | null;
 }
 
-const { mockAuth, mockEnv, memoryStore, mockPrisma, mockResendSend } = vi.hoisted(() => {
+const { mockAuth, mockEnv, memoryStore, mockPrisma, mockResendSend, TEST_WEBHOOK_SECRET } = vi.hoisted(() => {
   const mockAuth = vi.fn();
   const mockResendSend = vi.fn().mockResolvedValue({ data: { id: "mock_resend_email_id" }, error: null });
+
+  const TEST_WEBHOOK_SECRET =
+    "whsec_" + Buffer.from("mock_resend_webhook_secret_key!").toString("base64");
 
   const mockEnv = {
     DATABASE_URL: "postgresql://mock:5432/test_db",
     NEXT_PUBLIC_APP_URL: "https://systemsimulator.io",
     NODE_ENV: "test" as const,
     RESEND_API_KEY: "re_mock_api_key_test_12345",
-    RESEND_WEBHOOK_SECRET: "whsec_mfYJuJTruqd1GLmUsICDugwOTBmGtJn2",
+    RESEND_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
     RESEND_FROM_EMAIL: "notifications@systemsimulator.io",
   };
 
@@ -430,7 +433,7 @@ const { mockAuth, mockEnv, memoryStore, mockPrisma, mockResendSend } = vi.hoiste
     }),
   };
 
-  return { mockAuth, mockEnv, memoryStore, mockPrisma, mockResendSend };
+  return { mockAuth, mockEnv, memoryStore, mockPrisma, mockResendSend, TEST_WEBHOOK_SECRET };
 });
 
 export { mockAuth, mockEnv, memoryStore, mockPrisma, mockResendSend };
@@ -529,7 +532,7 @@ describe("Challenger M8-1: Tier 5 White-Box Adversarial Hardening Suite", () => 
     mockAuth.mockResolvedValue(null);
     mockEnv.DATABASE_URL = "postgresql://mock:5432/test_db";
     mockEnv.NEXT_PUBLIC_APP_URL = "https://systemsimulator.io";
-    mockEnv.RESEND_WEBHOOK_SECRET = "whsec_mfYJuJTruqd1GLmUsICDugwOTBmGtJn2";
+    mockEnv.RESEND_WEBHOOK_SECRET = TEST_WEBHOOK_SECRET;
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1386,7 +1389,7 @@ describe("Challenger M8-1: Tier 5 White-Box Adversarial Hardening Suite", () => 
   // SUITE 5: Resend Webhooks & Cryptographic Svix Verification
   // ═══════════════════════════════════════════════════════════════════════════
   describe("Suite 5: Resend Webhook & Cryptographic Svix Verification", () => {
-    const testSecret = "whsec_mfYJuJTruqd1GLmUsICDugwOTBmGtJn2";
+    const testSecret = TEST_WEBHOOK_SECRET;
 
     it("5.1 rejects Svix webhooks with timestamps outside the ±300s anti-replay window", async () => {
       const payload = JSON.stringify({ type: "email.bounced", data: { to: ["bounced@example.com"] } });

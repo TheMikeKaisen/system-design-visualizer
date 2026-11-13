@@ -5,13 +5,16 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { SubscriptionStatus } from "@prisma/client";
 
 // ─── Hoisted Mocks ──────────────────────────────────────────────────────────
-const { mockEnv, mockPrisma } = vi.hoisted(() => {
+const { mockEnv, mockPrisma, TEST_WEBHOOK_SECRET } = vi.hoisted(() => {
+  const TEST_WEBHOOK_SECRET =
+    "whsec_" + Buffer.from("mock_resend_webhook_secret_key!").toString("base64");
+
   const mockEnv = {
     DATABASE_URL: "postgresql://mock:5432/test",
     NEXT_PUBLIC_APP_URL: "https://systemvisualizer.com",
     NODE_ENV: "test" as const,
     RESEND_API_KEY: "re_test_dummy_key",
-    RESEND_WEBHOOK_SECRET: "whsec_mfYJuJTruqd1GLmUsICDugwOTBmGtJn2",
+    RESEND_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
     RESEND_FROM_EMAIL: "notifications@systemsimulator.io",
   };
 
@@ -22,7 +25,7 @@ const { mockEnv, mockPrisma } = vi.hoisted(() => {
     },
   };
 
-  return { mockEnv, mockPrisma };
+  return { mockEnv, mockPrisma, TEST_WEBHOOK_SECRET };
 });
 
 vi.mock("@/lib/db", () => ({ prisma: mockPrisma }));
@@ -65,7 +68,7 @@ function createTestSvixHeaders({
 }
 
 describe("Milestone 3: Email Templates & Resend Webhook", () => {
-  const testSecret = "whsec_mfYJuJTruqd1GLmUsICDugwOTBmGtJn2";
+  const testSecret = TEST_WEBHOOK_SECRET;
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -61,7 +61,8 @@ const {
     NEXT_PUBLIC_APP_URL: "https://systemvisualizer.com",
     AUTH_SECRET: "mock_auth_secret_minimum_32_characters_long_123456",
     RESEND_API_KEY: "re_mock_api_key_1234567890",
-    RESEND_WEBHOOK_SECRET: "whsec_mfYJuJTruqd1GLmUsICDugwOTBmGtJn2",
+    RESEND_WEBHOOK_SECRET:
+      "whsec_" + Buffer.from("mock_resend_webhook_secret_key!").toString("base64"),
     RESEND_FROM_EMAIL: "notifications@systemsimulator.io",
     AWS_REGION: "us-east-1",
     AWS_ACCESS_KEY_ID: "mock_aws_access_key_id",

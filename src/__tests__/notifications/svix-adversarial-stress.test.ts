@@ -3,13 +3,16 @@ import crypto from "node:crypto";
 import { SubscriptionStatus } from "@prisma/client";
 
 // ─── Hoisted Mocks ──────────────────────────────────────────────────────────
-const { mockEnv, mockPrisma } = vi.hoisted(() => {
+const { mockEnv, mockPrisma, TEST_WEBHOOK_SECRET } = vi.hoisted(() => {
+  const TEST_WEBHOOK_SECRET =
+    "whsec_" + Buffer.from("mock_resend_webhook_secret_key!").toString("base64");
+
   const mockEnv = {
     DATABASE_URL: "postgresql://mock:5432/test",
     NEXT_PUBLIC_APP_URL: "https://systemvisualizer.com",
     NODE_ENV: "test" as const,
     RESEND_API_KEY: "re_test_dummy_key",
-    RESEND_WEBHOOK_SECRET: "whsec_mfYJuJTruqd1GLmUsICDugwOTBmGtJn2",
+    RESEND_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
     RESEND_FROM_EMAIL: "notifications@systemsimulator.io",
   };
 
@@ -20,7 +23,7 @@ const { mockEnv, mockPrisma } = vi.hoisted(() => {
     },
   };
 
-  return { mockEnv, mockPrisma };
+  return { mockEnv, mockPrisma, TEST_WEBHOOK_SECRET };
 });
 
 vi.mock("@/lib/db", () => ({ prisma: mockPrisma }));
@@ -73,7 +76,7 @@ function makeSvixHeaders({
 }
 
 describe("Empirical Challenger M3-2: Svix Crypto & Webhook Stress Suite", () => {
-  const validSecret = "whsec_mfYJuJTruqd1GLmUsICDugwOTBmGtJn2";
+  const validSecret = TEST_WEBHOOK_SECRET;
   const alternateSecret = "whsec_anotherValidSecretForRotation1234=";
   const defaultPayload = JSON.stringify({
     type: "email.bounced",
