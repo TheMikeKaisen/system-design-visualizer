@@ -158,4 +158,29 @@ describe("InteractiveExplanationBar Tokenization & Highlight Boundaries", () => 
     // Popover dialogue must be auto-dismissed on step navigation
     expect(screen.queryByRole("dialog")).toBeNull();
   });
+
+  it("applies orange accent styles when accentColor='orange'", () => {
+    render(
+      <InteractiveExplanationBar
+        safeIndex={0}
+        totalSteps={3}
+        title="Orange Accent Test"
+        badge="Cloud IAM"
+        explanation="Testing AWS IAM explanation bar styling with Principal and Action."
+        customTermPatterns={["Principal", "Action"]}
+        customGlossary={{
+          Principal: {
+            term: "Principal",
+            category: "IAM",
+            title: "IAM Principal",
+            explanation: "An entity in AWS that can make a request.",
+          },
+        }}
+        accentColor="orange"
+      />
+    );
+
+    const termBtn = screen.getByRole("button", { name: /Inspect definition for Principal/i });
+    expect(termBtn.className).toContain("text-orange-300");
+  });
 });

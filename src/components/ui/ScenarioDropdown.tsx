@@ -20,7 +20,7 @@ export interface ScenarioDropdownProps<T extends ScenarioOption = ScenarioOption
   className?: string;
   triggerClassName?: string;
   menuClassName?: string;
-  accentColor?: "teal" | "amber" | "sky" | "emerald" | "violet" | "blue";
+  accentColor?: "teal" | "amber" | "sky" | "emerald" | "violet" | "blue" | "orange";
   ariaLabel?: string;
 }
 
@@ -66,6 +66,13 @@ const ACCENT_STYLES = {
     textActive: "text-blue-300",
     bgActive: "bg-blue-500/10",
     indicator: "bg-blue-400",
+  },
+  orange: {
+    ring: "focus-visible:ring-orange-400 focus:ring-orange-400",
+    borderActive: "border-orange-500/50",
+    textActive: "text-orange-300",
+    bgActive: "bg-orange-500/10",
+    indicator: "bg-orange-400",
   },
 };
 

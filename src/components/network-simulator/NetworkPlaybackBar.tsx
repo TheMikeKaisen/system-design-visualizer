@@ -23,7 +23,29 @@ export interface NetworkPlaybackBarProps {
   canNext?: boolean;
   canPrev?: boolean;
   className?: string;
+  accentColor?: "teal" | "amber" | "orange";
 }
+
+const PLAYBACK_ACCENTS = {
+  teal: {
+    stepHighlight: "text-teal-400",
+    ring: "focus-visible:ring-teal-400",
+    playBg: "bg-teal-600/20 text-teal-300 border border-teal-500/40 hover:bg-teal-600/30",
+    speedActive: "bg-teal-500/20 text-teal-300 border border-teal-500/40",
+  },
+  amber: {
+    stepHighlight: "text-amber-400",
+    ring: "focus-visible:ring-amber-400",
+    playBg: "bg-amber-600/20 text-amber-300 border border-amber-500/40 hover:bg-amber-600/30",
+    speedActive: "bg-amber-500/20 text-amber-300 border border-amber-500/40",
+  },
+  orange: {
+    stepHighlight: "text-orange-400",
+    ring: "focus-visible:ring-orange-400",
+    playBg: "bg-orange-600/20 text-orange-300 border border-orange-500/40 hover:bg-orange-600/30",
+    speedActive: "bg-orange-500/20 text-orange-300 border border-orange-500/40",
+  },
+};
 
 export function NetworkPlaybackBar({
   currentStepIndex,
@@ -38,7 +60,9 @@ export function NetworkPlaybackBar({
   canNext,
   canPrev,
   className,
+  accentColor = "teal",
 }: NetworkPlaybackBarProps) {
+  const accent = PLAYBACK_ACCENTS[accentColor] ?? PLAYBACK_ACCENTS.teal;
   const safeIndex = Math.max(0, Math.min(currentStepIndex, totalSteps - 1));
   const isNextDisabled = canNext !== undefined ? !canNext : safeIndex === totalSteps - 1;
   const isPrevDisabled = canPrev !== undefined ? !canPrev : safeIndex === 0;
@@ -65,7 +89,7 @@ export function NetworkPlaybackBar({
           Timeline
         </span>
         <span className="text-zinc-300 font-bold text-xs whitespace-nowrap">
-          Step <span className="text-teal-400">{safeIndex + 1}</span> of {totalSteps}
+          Step <span className={accent.stepHighlight}>{safeIndex + 1}</span> of {totalSteps}
         </span>
       </div>
 
@@ -75,7 +99,10 @@ export function NetworkPlaybackBar({
         <button
           type="button"
           onClick={onReset}
-          className="hidden sm:inline-flex p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-zinc-800 transition-all active:scale-95 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+          className={cn(
+            "hidden sm:inline-flex p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-zinc-800 transition-all active:scale-95 touch-manipulation focus:outline-none focus-visible:ring-2",
+            accent.ring
+          )}
           title="Reset Simulation (R)"
           aria-label="Reset simulation"
         >
@@ -87,7 +114,10 @@ export function NetworkPlaybackBar({
           type="button"
           onClick={onPrev}
           disabled={isPrevDisabled}
-          className="flex items-center gap-1 px-3 sm:px-3 py-2 sm:py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 sm:text-zinc-300 border border-zinc-800 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 touch-manipulation font-medium text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+          className={cn(
+            "flex items-center gap-1 px-3 sm:px-3 py-2 sm:py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 sm:text-zinc-300 border border-zinc-800 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 touch-manipulation font-medium text-xs focus:outline-none focus-visible:ring-2",
+            accent.ring
+          )}
           title="Previous Step (ArrowLeft)"
           aria-label="Previous step"
         >
@@ -100,10 +130,11 @@ export function NetworkPlaybackBar({
           type="button"
           onClick={onPlayPause}
           className={cn(
-            "flex items-center gap-1.5 px-4 sm:px-4 py-2 sm:py-2 rounded-lg font-bold text-xs shadow-sm transition-all active:scale-95 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400",
+            "flex items-center gap-1.5 px-4 sm:px-4 py-2 sm:py-2 rounded-lg font-bold text-xs shadow-sm transition-all active:scale-95 touch-manipulation focus:outline-none focus-visible:ring-2",
+            accent.ring,
             isPlaying
               ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30"
-              : "bg-teal-600/20 text-teal-300 border border-teal-500/40 hover:bg-teal-600/30"
+              : accent.playBg
           )}
           title="Play / Pause (Space)"
           aria-label={isPlaying ? "Pause simulation" : "Play simulation"}
@@ -126,7 +157,10 @@ export function NetworkPlaybackBar({
           type="button"
           onClick={onNext}
           disabled={isNextDisabled}
-          className="flex items-center gap-1 px-3 sm:px-3 py-2 sm:py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 sm:text-zinc-300 border border-zinc-800 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 touch-manipulation font-medium text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+          className={cn(
+            "flex items-center gap-1 px-3 sm:px-3 py-2 sm:py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 sm:text-zinc-300 border border-zinc-800 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 touch-manipulation font-medium text-xs focus:outline-none focus-visible:ring-2",
+            accent.ring
+          )}
           title="Next Step (ArrowRight)"
           aria-label="Next step"
         >
@@ -147,9 +181,10 @@ export function NetworkPlaybackBar({
               aria-label={`Playback speed ${spd}x`}
               aria-pressed={playbackSpeed === spd}
               className={cn(
-                "px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400",
+                "px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors touch-manipulation focus:outline-none focus-visible:ring-2",
+                accent.ring,
                 playbackSpeed === spd
-                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
+                  ? accent.speedActive
                   : "text-zinc-500 hover:text-zinc-300"
               )}
             >

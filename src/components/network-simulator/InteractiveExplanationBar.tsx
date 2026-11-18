@@ -257,7 +257,44 @@ export interface InteractiveExplanationBarProps {
   detailedNotes?: NetworkStepNote[];
   customGlossary?: Record<string, ConceptDefinition>;
   customTermPatterns?: string[];
+  accentColor?: "teal" | "amber" | "orange";
 }
+
+const BAR_ACCENTS = {
+  teal: {
+    highlightText: "text-teal-300",
+    highlightDeco: "decoration-teal-500/60 hover:decoration-teal-400 hover:text-teal-200",
+    ring: "focus-visible:ring-teal-400",
+    pulsePing: "bg-teal-400",
+    pulseCore: "bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.6)]",
+    chipIcon: "text-teal-400",
+    chipHover: "hover:bg-teal-500/20 hover:text-teal-300 hover:border-teal-500/40",
+    popoverBorder: "border-teal-500/40",
+    popoverTitle: "text-teal-300",
+  },
+  amber: {
+    highlightText: "text-amber-300",
+    highlightDeco: "decoration-amber-500/60 hover:decoration-amber-400 hover:text-amber-200",
+    ring: "focus-visible:ring-amber-400",
+    pulsePing: "bg-amber-400",
+    pulseCore: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]",
+    chipIcon: "text-amber-400",
+    chipHover: "hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-500/40",
+    popoverBorder: "border-amber-500/40",
+    popoverTitle: "text-amber-300",
+  },
+  orange: {
+    highlightText: "text-orange-300",
+    highlightDeco: "decoration-orange-500/60 hover:decoration-orange-400 hover:text-orange-200",
+    ring: "focus-visible:ring-orange-400",
+    pulsePing: "bg-orange-400",
+    pulseCore: "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]",
+    chipIcon: "text-orange-400",
+    chipHover: "hover:bg-orange-500/20 hover:text-orange-300 hover:border-orange-500/40",
+    popoverBorder: "border-orange-500/40",
+    popoverTitle: "text-orange-300",
+  },
+};
 
 export function InteractiveExplanationBar({
   safeIndex,
@@ -268,7 +305,9 @@ export function InteractiveExplanationBar({
   detailedNotes,
   customGlossary,
   customTermPatterns,
+  accentColor = "teal",
 }: InteractiveExplanationBarProps) {
+  const theme = BAR_ACCENTS[accentColor] ?? BAR_ACCENTS.teal;
   const [activeConcept, setActiveConcept] = useState<ConceptDefinition | null>(null);
   const [isPinned, setIsPinned] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -545,7 +584,7 @@ export function InteractiveExplanationBar({
             aria-haspopup="dialog"
             aria-expanded={activeConcept?.title === concept.title}
             aria-label={`Inspect definition for ${part}`}
-            className="inline text-teal-300 font-semibold underline decoration-teal-500/60 decoration-dashed underline-offset-[3px] hover:text-teal-200 hover:decoration-teal-400 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 rounded-sm cursor-help transition-colors touch-manipulation"
+            className={`inline ${theme.highlightText} font-semibold underline ${theme.highlightDeco} decoration-dashed underline-offset-[3px] focus:outline-none focus-visible:ring-1 ${theme.ring} rounded-sm cursor-help transition-colors touch-manipulation`}
           >
             {part}
           </button>
@@ -583,8 +622,8 @@ export function InteractiveExplanationBar({
           {/* Top row: Pulse indicator dot, step count, badge, and title */}
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="flex h-2.5 w-2.5 relative shrink-0" aria-hidden="true">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75 motion-reduce:hidden" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${theme.pulsePing} opacity-75 motion-reduce:hidden`} />
+              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${theme.pulseCore}`} />
             </span>
             <span className="text-[11px] uppercase tracking-wider font-mono font-semibold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700/80 shrink-0 select-none">
               Step {safeIndex + 1} of {totalSteps}
@@ -611,7 +650,7 @@ export function InteractiveExplanationBar({
           {stepConceptNotes.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] font-sans">
               <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-mono font-semibold mr-1 flex items-center gap-1 select-none">
-                <Info className="w-3 h-3 text-teal-400" />
+                <Info className={`w-3 h-3 ${theme.chipIcon}`} />
                 Inspect Concepts:
               </span>
               {stepConceptNotes.map((concept) => (
@@ -623,11 +662,11 @@ export function InteractiveExplanationBar({
                   onClick={() => toggleConcept(concept)}
                   aria-haspopup="dialog"
                   aria-expanded={activeConcept?.title === concept.title}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-zinc-800/80 hover:bg-teal-500/20 text-zinc-300 hover:text-teal-300 border border-zinc-700/60 hover:border-teal-500/40 transition-colors cursor-help focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-zinc-800/80 ${theme.chipHover} border border-zinc-700/60 transition-colors cursor-help focus:outline-none focus-visible:ring-1 ${theme.ring} touch-manipulation`}
                 >
-                  <BookOpen className="w-3 h-3 text-teal-400" />
+                  <BookOpen className={`w-3 h-3 ${theme.chipIcon}`} />
                   <span>{concept.title}</span>
-                  <span className="text-[9px] text-teal-400 opacity-70">▾</span>
+                  <span className={`text-[9px] ${theme.chipIcon} opacity-70`}>▾</span>
                 </button>
               ))}
             </div>
@@ -656,14 +695,14 @@ export function InteractiveExplanationBar({
           aria-label={activeConcept.title}
           onMouseEnter={handlePopoverEnter}
           onMouseLeave={handlePopoverLeave}
-          className="fixed sm:absolute left-3 right-3 sm:left-6 sm:right-auto top-20 sm:top-full mt-0 sm:mt-1.5 z-50 max-w-lg sm:w-auto max-h-[80vh] overflow-y-auto p-4 rounded-xl bg-[#090b10] border border-teal-500/40 text-zinc-200 shadow-[0_16px_40px_rgba(0,0,0,0.7)] backdrop-blur-xl animate-in fade-in-0 zoom-in-95 duration-150 font-sans custom-scrollbar"
+          className={`fixed sm:absolute left-3 right-3 sm:left-6 sm:right-auto top-20 sm:top-full mt-0 sm:mt-1.5 z-50 max-w-lg sm:w-auto max-h-[80vh] overflow-y-auto p-4 rounded-xl bg-[#090b10] border ${theme.popoverBorder} text-zinc-200 shadow-[0_16px_40px_rgba(0,0,0,0.7)] backdrop-blur-xl animate-in fade-in-0 zoom-in-95 duration-150 font-sans custom-scrollbar`}
         >
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3 pb-2 mb-2 border-b border-zinc-800/80">
             <div>
               <div className="flex items-center gap-2 mb-0.5">
-                <h4 className="font-bold text-teal-300 text-xs sm:text-sm font-mono flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                <h4 className={`font-bold ${theme.popoverTitle} text-xs sm:text-sm font-mono flex items-center gap-1.5`}>
+                  <Terminal className={`w-3.5 h-3.5 ${theme.chipIcon} shrink-0`} />
                   {activeConcept.title}
                 </h4>
               </div>
@@ -678,7 +717,7 @@ export function InteractiveExplanationBar({
                 setActiveConcept(null);
                 setIsPinned(false);
               }}
-              className="p-1 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-400 touch-manipulation"
+              className={`p-1 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-1 ${theme.ring} touch-manipulation`}
               aria-label="Close dialogue"
             >
               <X className="w-3.5 h-3.5" />

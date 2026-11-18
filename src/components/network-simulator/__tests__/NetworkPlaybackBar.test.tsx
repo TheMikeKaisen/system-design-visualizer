@@ -87,4 +87,25 @@ describe("NetworkPlaybackBar", () => {
     const nextBtn = screen.getByRole("button", { name: /Next step/i });
     expect(nextBtn).toBeDisabled();
   });
+
+  it("applies orange accent styles when accentColor='orange'", () => {
+    render(
+      <NetworkPlaybackBar
+        currentStepIndex={0}
+        totalSteps={3}
+        isPlaying={false}
+        playbackSpeed={1.0}
+        onPlayPause={vi.fn()}
+        onNext={vi.fn()}
+        onPrev={vi.fn()}
+        onReset={vi.fn()}
+        onSpeedChange={vi.fn()}
+        accentColor="orange"
+      />
+    );
+
+    const playBtn = screen.getByRole("button", { name: /Play simulation/i });
+    expect(playBtn.className).toContain("text-orange-300");
+    expect(playBtn.className).toContain("border-orange-500/40");
+  });
 });
