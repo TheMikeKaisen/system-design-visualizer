@@ -13,7 +13,7 @@ const { mockEnv, mockPrisma, TEST_WEBHOOK_SECRET } = vi.hoisted(() => {
     NODE_ENV: "test" as const,
     RESEND_API_KEY: "re_test_dummy_key",
     RESEND_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
-    RESEND_FROM_EMAIL: "notifications@systemsimulator.io",
+    RESEND_FROM_EMAIL: "notifications@systemsimulator.vercel.app",
   };
 
   const mockPrisma = {

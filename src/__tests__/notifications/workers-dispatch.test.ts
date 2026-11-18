@@ -151,7 +151,7 @@ describe("Worker Dispatch Handler (workers-dispatch.test.ts)", () => {
       };
 
       const emailItems = buildBatchEmailItems(payload, {
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
 
       expect(emailItems).toHaveLength(2);

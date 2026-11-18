@@ -922,7 +922,7 @@ describe("Empirical Challenger M4-2: Dispatcher & Resend Concurrency Suite", () 
       };
 
       const emailItems = buildBatchEmailItems(payload, {
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
 
       expect(emailItems).toHaveLength(2);
@@ -993,13 +993,13 @@ describe("Empirical Challenger M4-2: Dispatcher & Resend Concurrency Suite", () 
       });
 
       const emailItems = buildBatchEmailItems(payload, {
-        fromEmail: "custom-sender@systemsimulator.io", // plain email without angle brackets
+        fromEmail: "custom-sender@systemsimulator.vercel.app", // plain email without angle brackets
       });
 
       expect(emailItems).toHaveLength(1);
       const item = emailItems[0];
       // Should wrap plain email in "System Simulator <email>"
-      expect(item.from).toBe("System Simulator <custom-sender@systemsimulator.io>");
+      expect(item.from).toBe("System Simulator <custom-sender@systemsimulator.vercel.app>");
       // HTML must contain the custom ctaUrl
       expect(item.html).toContain("https://custom-domain.io/override-episode-url");
       // HTML must contain fallback summary

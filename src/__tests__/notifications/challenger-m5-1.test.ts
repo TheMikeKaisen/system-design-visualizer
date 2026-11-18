@@ -60,7 +60,7 @@ const SAMPLE_PAYLOAD: PublishEpisodePayload = {
   releaseCommitSha: "deadbeefcafe1234567890abcdef1234567890ab",
   summary: "Comprehensive study of cache-aside, write-through, and CDN caching.",
   keyConcepts: ["Cache-Aside", "Write-Through", "Thundering Herd"],
-  ctaUrl: "https://systemsimulator.io/backend/distributed-caching",
+  ctaUrl: "https://systemsimulator.vercel.app/backend/distributed-caching",
   force: false,
 };
 

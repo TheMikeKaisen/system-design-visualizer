@@ -74,7 +74,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
             subject: channel,
             title: `Release for ${channel}`,
             summary: `Summary for ${channel}`,
-            ctaUrl: `https://systemsimulator.io/episodes/${channel.toLowerCase()}`,
+            ctaUrl: `https://systemsimulator.vercel.app/episodes/${channel.toLowerCase()}`,
           })
         );
 
@@ -142,7 +142,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
         React.createElement(EpisodeReleaseEmail, {
           title: "Title",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
           keyConcepts: [],
         })
       );
@@ -153,7 +153,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
         React.createElement(EpisodeReleaseEmail, {
           title: "Title",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
         })
       );
       expect(htmlOmitted).not.toContain("Key Concepts In This Simulation");
@@ -169,7 +169,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
           title: hugeTitle,
           summary: hugeSummary,
           keyConcepts: manyConcepts,
-          ctaUrl: "https://systemsimulator.io/episodes/extreme",
+          ctaUrl: "https://systemsimulator.vercel.app/episodes/extreme",
         })
       );
 
@@ -188,7 +188,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
           title: unicodeTitle,
           summary: unicodeSummary,
           keyConcepts: unicodeConcepts,
-          ctaUrl: "https://systemsimulator.io/episodes/unicode",
+          ctaUrl: "https://systemsimulator.vercel.app/episodes/unicode",
         })
       );
 
@@ -210,7 +210,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
           title: xssTitle,
           summary: xssSummary,
           keyConcepts: xssConcepts,
-          ctaUrl: "https://systemsimulator.io/episodes/xss",
+          ctaUrl: "https://systemsimulator.vercel.app/episodes/xss",
         })
       );
 
@@ -232,7 +232,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
           episodeNumber: 1,
           title: "Title",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
         })
       );
       expect(htmlSingle).toContain("JAVASCRIPT • EPISODE 01");
@@ -244,7 +244,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
           episodeNumber: 14,
           title: "Title",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
         })
       );
       expect(htmlDouble).toContain("OPERATING SYSTEMS • EPISODE 14");
@@ -255,7 +255,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
           subject: "JAVA",
           title: "Title",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
         })
       );
       expect(htmlNone).toContain("JAVA &amp; JVM ARCHITECTURE");
@@ -272,7 +272,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
         React.createElement(EpisodeReleaseEmail, {
           title: "Touch Target Test",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io/interactive",
+          ctaUrl: "https://systemsimulator.vercel.app/interactive",
         })
       );
 
@@ -334,14 +334,14 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
       const html = renderToStaticMarkup(
         React.createElement(DoubleOptInEmail, {
           verificationToken: tokenWithSpecials,
-          appUrl: "https://systemsimulator.io",
+          appUrl: "https://systemsimulator.vercel.app",
         })
       );
 
       const encoded = encodeURIComponent(tokenWithSpecials);
       expect(html).toContain(`token=${encoded}`);
       // Fallback box should contain the encoded URL
-      expect(html).toContain(`https://systemsimulator.io/api/notifications/verify?token=${encoded}`);
+      expect(html).toContain(`https://systemsimulator.vercel.app/api/notifications/verify?token=${encoded}`);
     });
 
     it("uses custom verifyUrl prop when explicitly provided", () => {
@@ -409,9 +409,9 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
   describe("Dimension 5: RFC 8058 Header Generation Variations (getEmailHeaders)", () => {
     it("handles trailing slashes on appUrl robustly", () => {
       const variations = [
-        "https://systemsimulator.io/",
-        "https://systemsimulator.io///",
-        "https://systemsimulator.io/path/",
+        "https://systemsimulator.vercel.app/",
+        "https://systemsimulator.vercel.app///",
+        "https://systemsimulator.vercel.app/path/",
       ];
 
       for (const url of variations) {
@@ -437,7 +437,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
       for (const tok of adversarialTokens) {
         const headers = getEmailHeaders({
           unsubscribeToken: tok,
-          appUrl: "https://systemsimulator.io",
+          appUrl: "https://systemsimulator.vercel.app",
         });
 
         // The outer header MUST start with '<' and end with '>' exactly
@@ -455,7 +455,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
       const headersAll = getEmailHeaders({
         unsubscribeToken: "tok",
         subject: "ALL",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
       expect(headersAll["List-Unsubscribe"]).toContain("&topic=ALL");
 
@@ -463,7 +463,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
       const headersComplex = getEmailHeaders({
         unsubscribeToken: "tok",
         subject: "OS & Kernel / Low-Level",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
       expect(headersComplex["List-Unsubscribe"]).toContain(
         `&topic=${encodeURIComponent("OS & Kernel / Low-Level")}`
@@ -473,7 +473,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
       const headersEmptySub = getEmailHeaders({
         unsubscribeToken: "tok",
         subject: "",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
       expect(headersEmptySub["List-Unsubscribe"]).not.toContain("&topic=");
     });
@@ -481,7 +481,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
     it("verifies exact RFC 8058 List-Unsubscribe-Post header constant", () => {
       const headers = getEmailHeaders({
         unsubscribeToken: "token_abc",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
       expect(headers["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click");
     });
@@ -493,7 +493,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
       const headers = getEmailHeaders({
         unsubscribeToken: crlfToken,
         subject: crlfSubject,
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
 
       // Headers must never contain raw \r or \n
@@ -513,7 +513,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
         React.createElement(EpisodeReleaseEmail, {
           title: "Title",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
           // unsubscribeToken is omitted
         })
       );
@@ -521,7 +521,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
       // Topic & ALL unsubscribe links should fall back to "#"
       expect(html).toContain('href="#"');
       // Preferences link should not append undefined token query
-      expect(html).toContain('href="https://systemsimulator.io/unsubscribe"');
+      expect(html).toContain('href="https://systemsimulator.vercel.app/unsubscribe"');
       expect(html).not.toContain("token=undefined");
       expect(html).not.toContain("token=null");
     });
@@ -535,7 +535,7 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
           recipientEmail: maliciousEmail,
           title: "Title",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
         })
       );
       expect(htmlRelease).not.toContain("<script>alert(");
@@ -553,20 +553,20 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
     });
 
     it("sanitizes trailing slashes on appUrl inside templates", () => {
-      const dirtyUrl = "https://systemsimulator.io///";
+      const dirtyUrl = "https://systemsimulator.vercel.app///";
 
       // EpisodeReleaseEmail
       const htmlRelease = renderToStaticMarkup(
         React.createElement(EpisodeReleaseEmail, {
           title: "Title",
           summary: "Summary",
-          ctaUrl: "https://systemsimulator.io/c",
+          ctaUrl: "https://systemsimulator.vercel.app/c",
           unsubscribeToken: "tok",
           appUrl: dirtyUrl,
         })
       );
-      expect(htmlRelease).not.toContain("systemsimulator.io///api");
-      expect(htmlRelease).toContain("https://systemsimulator.io/api/notifications/unsubscribe");
+      expect(htmlRelease).not.toContain("systemsimulator.vercel.app///api");
+      expect(htmlRelease).toContain("https://systemsimulator.vercel.app/api/notifications/unsubscribe");
 
       // DoubleOptInEmail
       const htmlOptIn = renderToStaticMarkup(
@@ -575,8 +575,8 @@ describe("Challenger M3-1: Empirical Stress Harness for Email Templates & Accent
           appUrl: dirtyUrl,
         })
       );
-      expect(htmlOptIn).not.toContain("systemsimulator.io///api");
-      expect(htmlOptIn).toContain("https://systemsimulator.io/api/notifications/verify");
+      expect(htmlOptIn).not.toContain("systemsimulator.vercel.app///api");
+      expect(htmlOptIn).toContain("https://systemsimulator.vercel.app/api/notifications/verify");
     });
   });
 });

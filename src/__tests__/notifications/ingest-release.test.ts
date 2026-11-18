@@ -89,7 +89,7 @@ function buildSignedRequest(options: {
             releaseCommitSha: "a1b2c3d4e5f6789012345678901234567890abcd",
             summary: "Comprehensive guide to microtasks and rendering",
             keyConcepts: ["Event Loop", "Microtasks"],
-            ctaUrl: "https://systemsimulator.io/javascript/event-loop",
+            ctaUrl: "https://systemsimulator.vercel.app/javascript/event-loop",
           }
         );
 
@@ -455,7 +455,7 @@ describe("Cryptographic Release Ingest Pipeline — Functional Suite", () => {
         releaseCommitSha: "b2c3d4e5f6a1789012345678901234567890bcde",
         summary: "In-depth look at TLBs, page faults, and page table walks.",
         keyConcepts: ["Paging", "TLB", "Page Fault"],
-        ctaUrl: "https://systemsimulator.io/os/paging",
+        ctaUrl: "https://systemsimulator.vercel.app/os/paging",
       };
 
       const req = buildSignedRequest({ payload });
@@ -469,7 +469,7 @@ describe("Cryptographic Release Ingest Pipeline — Functional Suite", () => {
       const [sqsPayload] = enqueueMock.mock.calls[0];
       expect(sqsPayload.summary).toBe("In-depth look at TLBs, page faults, and page table walks.");
       expect(sqsPayload.keyConcepts).toEqual(["Paging", "TLB", "Page Fault"]);
-      expect(sqsPayload.ctaUrl).toBe("https://systemsimulator.io/os/paging");
+      expect(sqsPayload.ctaUrl).toBe("https://systemsimulator.vercel.app/os/paging");
     });
 
     it("HP-03: coerces empty ctaUrl: '' to undefined", async () => {

@@ -91,7 +91,7 @@ function buildSignedPublishRequest(options: {
             releaseCommitSha: "a1b2c3d4e5f6789012345678901234567890abcd",
             summary: "Comprehensive guide to microtasks and rendering",
             keyConcepts: ["Event Loop", "Microtasks"],
-            ctaUrl: "https://systemsimulator.io/javascript/event-loop",
+            ctaUrl: "https://systemsimulator.vercel.app/javascript/event-loop",
           }
         );
 

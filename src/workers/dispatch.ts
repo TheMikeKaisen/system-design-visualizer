@@ -58,13 +58,13 @@ export function buildBatchEmailItems(
   const baseAppUrl = (
     options.appUrl ||
     getWorkerEnv("NEXT_PUBLIC_APP_URL") ||
-    "https://systemsimulator.io"
+    "https://systemsimulator.vercel.app"
   ).replace(/\/+$/, "");
 
   const rawFrom =
     options.fromEmail ||
     getWorkerEnv("RESEND_FROM_EMAIL") ||
-    "System Simulator <notifications@systemsimulator.io>";
+    "System Simulator <notifications@systemsimulator.vercel.app>";
 
   const from = rawFrom.includes("<") ? rawFrom : `System Simulator <${rawFrom}>`;
   const palette = getSubjectPalette(payload.episode.subject);

@@ -204,7 +204,7 @@ export function EpisodeReleaseEmail({
   const base = (
     appUrl ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    "https://systemsimulator.io"
+    "https://systemsimulator.vercel.app"
   ).replace(/\/+$/, "");
 
   const safeToken = unsubscribeToken ? encodeURIComponent(unsubscribeToken) : "";

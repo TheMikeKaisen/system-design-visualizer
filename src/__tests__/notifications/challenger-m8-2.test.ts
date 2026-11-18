@@ -63,7 +63,7 @@ const {
     RESEND_API_KEY: "re_mock_api_key_1234567890",
     RESEND_WEBHOOK_SECRET:
       "whsec_" + Buffer.from("mock_resend_webhook_secret_key!").toString("base64"),
-    RESEND_FROM_EMAIL: "notifications@systemsimulator.io",
+    RESEND_FROM_EMAIL: "notifications@systemsimulator.vercel.app",
     AWS_REGION: "us-east-1",
     AWS_ACCESS_KEY_ID: "mock_aws_access_key_id",
     AWS_SECRET_ACCESS_KEY: "mock_aws_secret_access_key",
@@ -1160,7 +1160,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
       const res = await sendResendBatch(
         [
           {
-            from: "System Simulator <notifications@systemsimulator.io>",
+            from: "System Simulator <notifications@systemsimulator.vercel.app>",
             to: "user@domain.com",
             subject: "Test",
             html: "<p>Hello</p>",
@@ -1204,7 +1204,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
       const res = await sendResendBatch(
         [
           {
-            from: "System Simulator <notifications@systemsimulator.io>",
+            from: "System Simulator <notifications@systemsimulator.vercel.app>",
             to: "user@domain.com",
             subject: "Test",
             html: "<p>Hello</p>",
@@ -1302,7 +1302,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
 
       const items = [
         {
-          from: "System Simulator <notifications@systemsimulator.io>",
+          from: "System Simulator <notifications@systemsimulator.vercel.app>",
           to: "user@domain.com",
           subject: "Test",
           html: "<p>Hello</p>",
@@ -1416,7 +1416,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
             { email: "user@domain.com", unsubscribeToken: "sec-token-12345" },
           ],
         },
-        { appUrl: "https://systemsimulator.io" }
+        { appUrl: "https://systemsimulator.vercel.app" }
       );
 
       expect(items.length).toBe(1);
@@ -1656,7 +1656,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
         bound: true,
       });
 
-      const request = new Request("https://systemsimulator.io/api/internal/episodes/publish", {
+      const request = new Request("https://systemsimulator.vercel.app/api/internal/episodes/publish", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1710,7 +1710,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
         bound: true,
       });
 
-      const request = new Request("https://systemsimulator.io/api/internal/episodes/publish", {
+      const request = new Request("https://systemsimulator.vercel.app/api/internal/episodes/publish", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1770,7 +1770,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
         bound: true,
       });
 
-      const request = new Request("https://systemsimulator.io/api/internal/episodes/publish", {
+      const request = new Request("https://systemsimulator.vercel.app/api/internal/episodes/publish", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1879,7 +1879,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
         { "src/app/backend/episodes.tsx": beforeCode },
         { "src/app/backend/episodes.tsx": afterCode },
         "head-commit-sha",
-        { baseUrl: "https://systemsimulator.io" }
+        { baseUrl: "https://systemsimulator.vercel.app" }
       );
 
       // Expected detections:
@@ -1893,7 +1893,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
 
       expect(ep1).toBeDefined();
       expect(ep1?.subject).toBe(SubjectChannel.BACKEND);
-      expect(ep1?.ctaUrl).toBe("https://systemsimulator.io/backend/lsm");
+      expect(ep1?.ctaUrl).toBe("https://systemsimulator.vercel.app/backend/lsm");
 
       expect(ep4).toBeDefined();
       expect(ep4?.episodeId).toBe("ep-4");
@@ -1927,7 +1927,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
       delete process.env.INTERNAL_RELEASE_SECRET;
       try {
         expect(() =>
-          resolveDispatchConfig({ appUrl: "https://systemsimulator.io" })
+          resolveDispatchConfig({ appUrl: "https://systemsimulator.vercel.app" })
         ).toThrow("Missing required environment variable: INTERNAL_RELEASE_SECRET");
       } finally {
         if (prevSecret) process.env.INTERNAL_RELEASE_SECRET = prevSecret;
@@ -1936,7 +1936,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
       // 3. Invalid URL protocol throws
       expect(() =>
         resolveDispatchConfig({
-          appUrl: "ftp://systemsimulator.io",
+          appUrl: "ftp://systemsimulator.vercel.app",
           secret: "valid-secret",
         })
       ).toThrow("Invalid APP_URL format");
@@ -1975,7 +1975,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
       const mockSleep = vi.fn().mockResolvedValue(undefined);
 
       const config = {
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
         releaseSecret: TEST_SECRET,
         maxRetries: 2,
         initialDelayMs: 10,
@@ -2063,7 +2063,7 @@ describe("Challenger M8-2: Tier 5 Adversarial Coverage Hardening", () => {
       // Valid URL
       const resValid = publishEpisodePayloadSchema.safeParse({
         ...base,
-        ctaUrl: "https://systemsimulator.io/episodes/1",
+        ctaUrl: "https://systemsimulator.vercel.app/episodes/1",
       });
       expect(resValid.success).toBe(true);
 

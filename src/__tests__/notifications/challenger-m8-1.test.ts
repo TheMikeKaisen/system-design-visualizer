@@ -53,11 +53,11 @@ const { mockAuth, mockEnv, memoryStore, mockPrisma, mockResendSend, TEST_WEBHOOK
 
   const mockEnv = {
     DATABASE_URL: "postgresql://mock:5432/test_db",
-    NEXT_PUBLIC_APP_URL: "https://systemsimulator.io",
+    NEXT_PUBLIC_APP_URL: "https://systemsimulator.vercel.app",
     NODE_ENV: "test" as const,
     RESEND_API_KEY: "re_mock_api_key_test_12345",
     RESEND_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
-    RESEND_FROM_EMAIL: "notifications@systemsimulator.io",
+    RESEND_FROM_EMAIL: "notifications@systemsimulator.vercel.app",
   };
 
   const memoryStore = {
@@ -531,7 +531,7 @@ describe("Challenger M8-1: Tier 5 White-Box Adversarial Hardening Suite", () => 
     memoryStore.reset();
     mockAuth.mockResolvedValue(null);
     mockEnv.DATABASE_URL = "postgresql://mock:5432/test_db";
-    mockEnv.NEXT_PUBLIC_APP_URL = "https://systemsimulator.io";
+    mockEnv.NEXT_PUBLIC_APP_URL = "https://systemsimulator.vercel.app";
     mockEnv.RESEND_WEBHOOK_SECRET = TEST_WEBHOOK_SECRET;
   });
 
@@ -768,7 +768,7 @@ describe("Challenger M8-1: Tier 5 White-Box Adversarial Hardening Suite", () => 
     });
 
     it("2.3 safely preserves RFC 5322 plus-addressed emails (e.g. user+tag@domain.com)", async () => {
-      const taggedEmail = "tester+release-alerts@systemsimulator.io";
+      const taggedEmail = "tester+release-alerts@systemsimulator.vercel.app";
 
       const req = new Request("http://localhost/api/notifications/subscribe", {
         method: "POST",
@@ -1578,7 +1578,7 @@ describe("Challenger M8-1: Tier 5 White-Box Adversarial Hardening Suite", () => 
         title: "<script>alert('XSS Title')</script>",
         summary: '<img src=x onerror="alert(\'XSS Summary\')">',
         keyConcepts: ["<svg onload=alert('XSS Concept')>", "Virtual Memory"],
-        ctaUrl: "https://systemsimulator.io/operating-systems/virtual-memory",
+        ctaUrl: "https://systemsimulator.vercel.app/operating-systems/virtual-memory",
         recipientEmail: "victim@example.com",
         unsubscribeToken: "token_xss_test",
       };
@@ -1603,7 +1603,7 @@ describe("Challenger M8-1: Tier 5 White-Box Adversarial Hardening Suite", () => 
           title: "Network Sockets",
           summary: "Deep dive into TCP socket state machine.",
           subject: "COMPUTER_NETWORKS",
-          ctaUrl: "https://systemsimulator.io/computer-networks/sockets",
+          ctaUrl: "https://systemsimulator.vercel.app/computer-networks/sockets",
           unsubscribeToken: specialToken,
         })
       );
@@ -1656,7 +1656,7 @@ describe("Challenger M8-1: Tier 5 White-Box Adversarial Hardening Suite", () => 
           title: "JVM Garbage Collection",
           summary: "G1 vs ZGC generational collectors.",
           subject: "JAVA",
-          ctaUrl: "https://systemsimulator.io/java/gc",
+          ctaUrl: "https://systemsimulator.vercel.app/java/gc",
           unsubscribeToken: "tok_touch_target",
         })
       );

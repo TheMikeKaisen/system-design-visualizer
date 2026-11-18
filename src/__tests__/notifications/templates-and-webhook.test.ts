@@ -15,7 +15,7 @@ const { mockEnv, mockPrisma, TEST_WEBHOOK_SECRET } = vi.hoisted(() => {
     NODE_ENV: "test" as const,
     RESEND_API_KEY: "re_test_dummy_key",
     RESEND_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
-    RESEND_FROM_EMAIL: "notifications@systemsimulator.io",
+    RESEND_FROM_EMAIL: "notifications@systemsimulator.vercel.app",
   };
 
   const mockPrisma = {
@@ -86,7 +86,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
       const headers = getEmailHeaders({
         unsubscribeToken: "token-abc-123",
         subject: "OPERATING_SYSTEMS",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
 
       expect(headers).toHaveProperty("List-Unsubscribe");
@@ -97,7 +97,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
     it("wraps List-Unsubscribe URI in angle brackets per RFC 2369/8058", () => {
       const headers = getEmailHeaders({
         unsubscribeToken: "token-abc-123",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
 
       expect(headers["List-Unsubscribe"]).toMatch(/^<https:\/\/.*>$/);
@@ -107,7 +107,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
       const headers = getEmailHeaders({
         unsubscribeToken: "tok-456",
         subject: "JAVASCRIPT",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
 
       expect(headers["List-Unsubscribe"]).toContain("topic=JAVASCRIPT");
@@ -116,7 +116,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
     it("omits topic query param when subject is omitted", () => {
       const headers = getEmailHeaders({
         unsubscribeToken: "tok-789",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
 
       expect(headers["List-Unsubscribe"]).not.toContain("topic=");
@@ -125,11 +125,11 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
     it("sanitizes trailing slash from base appUrl", () => {
       const headers = getEmailHeaders({
         unsubscribeToken: "tok-slash",
-        appUrl: "https://systemsimulator.io///",
+        appUrl: "https://systemsimulator.vercel.app///",
       });
 
       expect(headers["List-Unsubscribe"]).toContain(
-        "https://systemsimulator.io/api/notifications/unsubscribe"
+        "https://systemsimulator.vercel.app/api/notifications/unsubscribe"
       );
       expect(headers["List-Unsubscribe"]).not.toContain("io///");
       expect(headers["List-Unsubscribe"]).not.toContain("io//api");
@@ -139,7 +139,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
       const headers = getEmailHeaders({
         unsubscribeToken: "tok+special/val==",
         subject: "COMPUTER_NETWORKS",
-        appUrl: "https://systemsimulator.io",
+        appUrl: "https://systemsimulator.vercel.app",
       });
 
       expect(headers["List-Unsubscribe"]).toContain(
@@ -162,7 +162,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           episodeNumber: 4,
           title: "Microtasks & Macro-task Queues",
           summary: "An in-depth visual trace through Promise reaction jobs.",
-          ctaUrl: "https://systemsimulator.io/javascript/episodes/04",
+          ctaUrl: "https://systemsimulator.vercel.app/javascript/episodes/04",
         })
       );
 
@@ -180,7 +180,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           subject: "JAVASCRIPT",
           title: "Event Loop",
           summary: "Runtime execution",
-          ctaUrl: "https://systemsimulator.io/js",
+          ctaUrl: "https://systemsimulator.vercel.app/js",
         })
       );
 
@@ -196,7 +196,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           subject: "OPERATING_SYSTEMS",
           title: "Scheduler",
           summary: "CFS and Multitasking",
-          ctaUrl: "https://systemsimulator.io/os",
+          ctaUrl: "https://systemsimulator.vercel.app/os",
         })
       );
 
@@ -212,7 +212,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           subject: "JAVA",
           title: "JVM Memory",
           summary: "Young &amp; Old Generation",
-          ctaUrl: "https://systemsimulator.io/java",
+          ctaUrl: "https://systemsimulator.vercel.app/java",
         })
       );
 
@@ -228,7 +228,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           subject: "FRONTEND",
           title: "Virtual DOM",
           summary: "Fiber architecture",
-          ctaUrl: "https://systemsimulator.io/frontend",
+          ctaUrl: "https://systemsimulator.vercel.app/frontend",
         })
       );
 
@@ -244,7 +244,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           subject: "BACKEND",
           title: "Connection Pool",
           summary: "PostgreSQL connection pooling",
-          ctaUrl: "https://systemsimulator.io/backend",
+          ctaUrl: "https://systemsimulator.vercel.app/backend",
         })
       );
 
@@ -260,7 +260,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           subject: "COMPUTER_NETWORKS",
           title: "TCP 3-Way Handshake",
           summary: "SYN, SYN-ACK, ACK",
-          ctaUrl: "https://systemsimulator.io/networks",
+          ctaUrl: "https://systemsimulator.vercel.app/networks",
         })
       );
 
@@ -269,7 +269,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
     });
 
     it("renders deep-link CTA button with matching href and min-height 44px", () => {
-      const cta = "https://systemsimulator.io/javascript/episodes/04?utm_source=email";
+      const cta = "https://systemsimulator.vercel.app/javascript/episodes/04?utm_source=email";
       const html = renderToStaticMarkup(
         React.createElement(EpisodeReleaseEmail, {
           recipientEmail: "dev@example.com",
@@ -295,7 +295,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           title: "Test Episode",
           summary: "Summary",
           keyConcepts: ["Call Stack", "Microtask Queue", "Event Loop"],
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
         })
       );
 
@@ -313,18 +313,18 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           subject: "COMPUTER_NETWORKS",
           title: "Network Simulator",
           summary: "Packet routing",
-          ctaUrl: "https://systemsimulator.io",
-          appUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
+          appUrl: "https://systemsimulator.vercel.app",
         })
       );
 
       expect(html).toContain(
-        "https://systemsimulator.io/api/notifications/unsubscribe?token=unsub-999&amp;topic=COMPUTER_NETWORKS"
+        "https://systemsimulator.vercel.app/api/notifications/unsubscribe?token=unsub-999&amp;topic=COMPUTER_NETWORKS"
       );
       expect(html).toContain(
-        "https://systemsimulator.io/api/notifications/unsubscribe?token=unsub-999&amp;topic=ALL"
+        "https://systemsimulator.vercel.app/api/notifications/unsubscribe?token=unsub-999&amp;topic=ALL"
       );
-      expect(html).toContain("https://systemsimulator.io/unsubscribe?token=unsub-999");
+      expect(html).toContain("https://systemsimulator.vercel.app/unsubscribe?token=unsub-999");
       expect(html).toContain("1-Click Unsubscribe from Computer Networks");
     });
 
@@ -336,7 +336,7 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
           subject: "ALL",
           title: "Test",
           summary: "Test",
-          ctaUrl: "https://systemsimulator.io",
+          ctaUrl: "https://systemsimulator.vercel.app",
         })
       );
 
@@ -354,13 +354,13 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
         React.createElement(DoubleOptInEmail, {
           recipientEmail: "dev@example.com",
           verificationToken: "verify-token-xyz",
-          appUrl: "https://systemsimulator.io",
+          appUrl: "https://systemsimulator.vercel.app",
         })
       );
 
       expect(html).toContain("Verify Subscription →");
       expect(html).toContain(
-        "https://systemsimulator.io/api/notifications/verify?token=verify-token-xyz"
+        "https://systemsimulator.vercel.app/api/notifications/verify?token=verify-token-xyz"
       );
       expect(html).toContain("min-height:44px");
     });
@@ -400,13 +400,13 @@ describe("Milestone 3: Email Templates & Resend Webhook", () => {
       const html = renderToStaticMarkup(
         React.createElement(DoubleOptInEmail, {
           verificationToken: "tok-plain",
-          appUrl: "https://systemsimulator.io",
+          appUrl: "https://systemsimulator.vercel.app",
         })
       );
 
       expect(html).toContain("Or copy and paste this link into your browser:");
       expect(html).toContain(
-        "https://systemsimulator.io/api/notifications/verify?token=tok-plain"
+        "https://systemsimulator.vercel.app/api/notifications/verify?token=tok-plain"
       );
     });
 

@@ -24,7 +24,7 @@ export function getEmailHeaders({
   const base = (
     appUrl ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    "https://systemsimulator.io"
+    "https://systemsimulator.vercel.app"
   ).replace(/\/+$/, "");
 
   const topicQuery = subject ? `&topic=${encodeURIComponent(subject)}` : "";
