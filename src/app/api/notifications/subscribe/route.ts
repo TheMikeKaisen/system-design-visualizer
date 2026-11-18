@@ -6,7 +6,7 @@ import { SubjectChannel, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth/auth";
 import { env } from "@/lib/env";
-import { getClientIp } from "@/lib/security/sanitize";
+import { getClientIp } from "@/lib/security/clientIp";
 import { checkRateLimit } from "@/lib/security/rateLimit";
 import { getResendClient } from "@/lib/resend";
 import { DoubleOptInEmail } from "@/emails/DoubleOptInEmail";

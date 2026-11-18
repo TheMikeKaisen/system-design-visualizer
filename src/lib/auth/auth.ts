@@ -57,8 +57,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      * Only allow redirects to our own origin — prevents open redirect attacks.
      */
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("/"))           return `${baseUrl}${url}`;
-      if (new URL(url).origin === baseUrl) return url;
+      if (!url) return baseUrl;
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch {
+        return baseUrl;
+      }
       return baseUrl;
     },
   },

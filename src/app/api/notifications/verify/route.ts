@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { SubscriptionStatus } from "@prisma/client";
-import { getClientIp } from "@/lib/security/sanitize";
+import { getClientIp } from "@/lib/security/clientIp";
 import { checkRateLimit } from "@/lib/security/rateLimit";
 
 export async function GET(request: Request) {

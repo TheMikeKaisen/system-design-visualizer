@@ -4,7 +4,7 @@ import { requireAuth }          from "@/lib/security/apiAuth";
 import { checkRateLimit }       from "@/lib/security/rateLimit";
 import { deserializeDiagram }   from "@/lib/persistence/diagramSerializer";
 import { sanitizeDiagramName }  from "@/lib/security/sanitize";
-import { getClientIp }          from "@/lib/security/sanitize";
+import { getClientIp }          from "@/lib/security/clientIp";
 import { env }                  from "@/lib/env";
 
 // GET /api/diagrams

@@ -1,9 +1,7 @@
 import { NextResponse }   from "next/server";
-import { nanoid }         from "nanoid";
-import { prisma }         from "@/lib/db";
 import { requireAuth }    from "@/lib/security/apiAuth";
 import { checkRateLimit } from "@/lib/security/rateLimit";
-import { getClientIp }    from "@/lib/security/sanitize";
+import { getClientIp }    from "@/lib/security/clientIp";
 import { env }            from "@/lib/env";
 
 /**

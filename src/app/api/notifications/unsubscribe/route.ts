@@ -3,7 +3,7 @@ import { SubjectChannel, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { checkRateLimit } from "@/lib/security/rateLimit";
-import { getClientIp } from "@/lib/security/sanitize";
+import { getClientIp } from "@/lib/security/clientIp";
 
 const CANONICAL_DISCIPLINES: SubjectChannel[] = [
   SubjectChannel.JAVASCRIPT,

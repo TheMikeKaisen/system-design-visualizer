@@ -2,7 +2,7 @@ import { NextResponse }             from "next/server";
 import { prisma }                   from "@/lib/db";
 import { requireAuth, requireDiagramOwnership } from "@/lib/security/apiAuth";
 import { checkRateLimit }           from "@/lib/security/rateLimit";
-import { getClientIp }              from "@/lib/security/sanitize";
+import { getClientIp }              from "@/lib/security/clientIp";
 import { env }                      from "@/lib/env";
 
 type Params = { params: Promise<{ id: string }> };
