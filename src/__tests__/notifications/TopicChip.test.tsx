@@ -170,4 +170,20 @@ describe("TopicChip Component", () => {
 
     expect(screen.getByTestId("chip-check-icon")).toBeInTheDocument();
   });
+
+  it("TC-CHIP-09: renders Cloud Engineering channel with orange palette styling", () => {
+    const onToggle = vi.fn();
+    render(
+      <TopicChip
+        subject={SubjectChannel.CLOUD}
+        selected={true}
+        onToggle={onToggle}
+      />
+    );
+
+    const button = screen.getByRole("checkbox");
+    expect(screen.getByText("Cloud Engineering")).toBeInTheDocument();
+    expect(screen.getByText("AWS & Distributed Systems")).toBeInTheDocument();
+    expect(button.className).toContain("border-orange-500");
+  });
 });

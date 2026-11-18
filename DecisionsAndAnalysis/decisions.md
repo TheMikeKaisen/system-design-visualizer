@@ -1763,6 +1763,77 @@ This document serves as the single source of truth for architectural, UI/UX, rel
   - Full TypeScript typecheck and ESLint pass cleanly with 0 errors.
 - **Blast Radius**: Isolated transactional notification layer with zero risk of regression to existing episode simulators or runtime shells.
 
+---
 
+## Decision Record 008: Cloud Engineering Discipline & AWS IAM Simulation Architecture (Episode 1)
+- **Status**: Implemented & Verified
+- **Category**: Subject Architecture, Cloud Infrastructure Simulation & UI Engineering
+- **Subject**: Cloud Engineering (`/cloud`), Episode 1: *AWS IAM: Who Gets Access to What?*
+- **Problem**:
+  - AWS IAM is a mission-critical yet notoriously abstract system concept. Misconfigured policies, misunderstanding default implicit deny, and overlooking the priority cascade of explicit deny statements cause severe production outages and security vulnerabilities across the software industry.
+  - Prior learning tracks had not introduced cloud infrastructure as a first-class subject discipline.
+  - Need to adhere strictly to the platform's 7 simulation rules, zero duplication guidelines, responsive viewport fidelity (larger `lg:` and shorter `< sm` screens), and zero-database GitOps release safeguards (Phase 1).
+- **Architectural Decision & Implementation**:
+  1. **Discipline Taxonomy & Stratum 4 Architecture (`/learning-paths`)**:
+     - Formally established **Cloud Engineering** (`/cloud`) with authentic AWS Console Orange accent (`#f97316` / `#ff9900`).
+     - Reconfigured **Stratum 4: Cloud & Distributed Systems** on `/learning-paths` into a balanced 2-column grid featuring the Cloud Engineering `EditorialDisciplineCard` alongside the Canvas Studio card.
+     - Registered `CLOUD_EPISODES` typed metadata in `src/app/cloud/episodes.tsx`, initializing Episode 1 with release date `"2026-11-15"` and forward roadmap modules (`vpc-transit-gateway`, `serverless-event-driven`, `dynamodb-distributed-scaling`).
+  2. **Pure Evaluation Engine & Types (`src/lib/cloud-simulator/`)**:
+     - Authored strict TypeScript domain types in `types.ts` (`IAMPolicy`, `IAMStatement`, `IAMPrincipal`, `AWSResource`, `CloudSimulationStep`, `EvaluationVerdict`).
+     - Implemented pure AST pattern matching (`matchesAction`, `matchesResourceArn` supporting wildcard globbing `s3:*`, `dynamodb:Get*`, `arn:aws:s3:::bucket/*`).
+     - Modeled the canonical 5-step AWS IAM authorization evaluation pipeline in `engine.ts` (1. Implicit Deny Baseline -> 2. Explicit Deny Precedence Scan -> 3. Allow Statement Scan -> 4. Cross-Account Dual-Allow Handshake -> 5. Fallback Default Deny).
+  3. **Curated Scenarios & AWS Glossary (`src/lib/cloud-simulator/scenarios.ts`)**:
+     - Authored 5 discrete scenarios:
+       1. *Least Privilege & Default Deny Baseline* (Alice: Deny -> Policy Attach -> Allow).
+       2. *The Golden Rule: Explicit Deny Overrides Allow* (Bob with `AdministratorAccess` blocked by compliance guardrail).
+       3. *Group Inheritance & Multi-Policy Merge* (Charlie: intern user policy + Developers group DynamoDB policy union).
+       4. *Resource-Based Policies vs. Identity Policies* (Alice: cross-account boundary requiring dual-account trust).
+       5. *Workload Identity: EC2 Role & Temporary STS Credentials* (EC2 assuming role via IMDSv2, receiving short-lived `ASIA...` session tokens).
+     - Built rich 25+ entry AWS CLI concept glossary with real terminal commands (`aws iam simulate-principal-policy`, `aws sts get-caller-identity`, `aws sts assume-role`, `curl IMDSv2`, etc.).
+  4. **Zustand Discrete Simulation Store with Defensive Retention (`src/store/useCloudSimulationStore.ts`)**:
+     - Implemented deterministic discrete step playback with bounds clamping.
+     - Added defensive state retention (`resolveSelectedPrincipal`) across step transitions (Rule #8.3).
+     - Integrated Mode 2 statement override toggling with automatic step navigation reset to preserve narrative alignment with `InteractiveExplanationBar`.
+     - Integrated clean route teardown on unmount via `resetEpisode()` (Decision Record 002 & Rule #8.4).
+  5. **Stage Visuals: 3-Zone Architecture & PDP Circuit Breaker (`CloudTopologyCanvas.tsx`)**:
+     - Zone 1: Principals (Alice, Bob, Charlie, EC2) with IAM badges and active request dispatch payload.
+     - Zone 2: Policy Decision Point (PDP) Gateway featuring in-transit API request token, animated evaluation pipeline, and the signature **Ruby Crimson Circuit Breaker** (`border-red-500/80 bg-red-950/40 shadow-[0_0_24px_rgba(239,68,68,0.4)]`) tripping when Explicit Deny is encountered.
+     - Zone 3: Target AWS Resources (S3 Bucket, DynamoDB Table, IMDSv2 endpoint).
+  6. **Inspector Panels & Mode 2 Live Sandbox (`PolicyInspectorPanel.tsx`, `PermissionMatrixPanel.tsx`, `TokenVaultPanel.tsx`)**:
+     - WAI-ARIA compliant 4-tab inspector:
+       - Tab 1: Syntax-highlighted Policy JSON AST with interactive statement toggles.
+       - Tab 2: 5-Stage Evaluation Decision Trace.
+       - Tab 3: Effective Permissions Matrix (Principals × Common AWS Actions).
+       - Tab 4: Token Vault (Static `AKIA...` vs Short-Lived `ASIA...` STS Temporary Session Tokens).
+  7. **Canonical Primitive Parameterization & Shell Integration**:
+     - Parameterized `ScenarioDropdown.tsx` with `"orange"` in `ACCENT_STYLES`.
+     - Parameterized `InteractiveExplanationBar.tsx` and `NetworkPlaybackBar.tsx` with backward-compatible `accentColor?: "teal" | "amber" | "orange"` (defaulting to `"teal"`).
+     - Authored `CloudEpisodeShell.tsx` and route `/cloud/simulator/aws-iam/page.tsx` with full responsive fidelity (min-h-screen mobile scrollability, bottom clearance `pb-24`, 44px touch targets).
+     - Connected `SubscribeButton` on `/cloud` to `SubjectChannel.ALL` preserving 100% database schema freeze (Rule #9.6).
+- **Verification**:
+  - `npx tsc --noEmit`: 0 errors repository-wide.
+  - `npx eslint`: 0 errors / 0 warnings on all touched files.
+  - `npm test`: 111 test files passed (1,459/1,459 tests passed).
+  - All git modifications remain unstaged in strict compliance with Rule #1.
+- **Blast Radius**: Zero regressions; canonical primitives remain 100% backward-compatible across existing subjects (Computer Networks, Operating Systems, JavaScript, Java, Frontend, Backend).
 
+---
+
+## Decision Record 009: Removal of "Coming Soon" Unreleased Episode Placeholders
+- **Status**: Implemented & Verified
+- **Category**: Content Cleanliness & Catalog Hygiene
+- **Subject**: `src/app/cloud/episodes.tsx`, `src/app/computer-networks/episodes.tsx`
+- **Problem**:
+  - Unreleased placeholder modules labeled `"Coming Soon"` in `CLOUD_EPISODES` (`vpc-transit-gateway`, `serverless-event-driven`, `dynamodb-distributed-scaling`) and `COMPUTER_NETWORKS_EPISODES` (`tls-handshake`, `tcp-flow-control`) cluttered catalog listings and created dead routes for learners.
+- **Architectural Decision & Implementation**:
+  - Removed all unreleased placeholder items with `date: "Coming Soon"` from `src/app/cloud/episodes.tsx` and `src/app/computer-networks/episodes.tsx`.
+  - Cleaned up unused icon imports (`Network`, `Zap`, `Database` in `cloud/episodes.tsx`; `ShieldCheck` in `computer-networks/episodes.tsx`).
+  - Catalog listings now display exclusively playable, verified episodes:
+    - **Cloud Engineering**: 1 active episode (*AWS IAM: Who Gets Access to What?*).
+    - **Computer Networks**: 4 active episodes (*IP Addresses, Ports & Sockets*, *DNS Resolution*, *TCP Connections*, *HTTP Lifecycle*).
+- **Verification**:
+  - `npx tsc --noEmit`: 0 errors.
+  - `npx eslint`: 0 errors / 0 warnings.
+  - `npm test`: All relevant test suites pass cleanly.
+- **Blast Radius**: Zero regressions; `getLatestEpisodes()` and `/learning-paths` reflect verified active modules.
 

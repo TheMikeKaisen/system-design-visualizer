@@ -25,6 +25,7 @@ const ALL_INDIVIDUAL_SUBJECTS: SubjectChannel[] = [
   "FRONTEND",
   "BACKEND",
   "COMPUTER_NETWORKS",
+  "CLOUD",
 ];
 
 export interface SubscribeModalProps {
@@ -178,13 +179,16 @@ function SubscribeModalDialog({
       ? ["ALL"]
       : selectedSubjects;
 
+    // Map CLOUD to ALL for server compatibility until PostgreSQL enum migration is applied
+    const apiSubjects = payloadSubjects.map((s) => (s === "CLOUD" ? "ALL" : s));
+
     try {
       const res = await fetch("/api/notifications/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
-          subjects: payloadSubjects,
+          subjects: apiSubjects,
         }),
       });
 
@@ -225,7 +229,7 @@ function SubscribeModalDialog({
         onClick={(e) => e.stopPropagation()}
         className={cn(
           "w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/80 bg-background shadow-2xl flex flex-col",
-          "scale-100 transition-all duration-200 custom-scrollbar"
+          "scale-100 transition-all duration-200 [scrollbar-width:thin] [scrollbar-color:rgba(156,163,175,0.3)_transparent]"
         )}
       >
         {/* Header */}
@@ -405,7 +409,7 @@ function SubscribeModalDialog({
 
                 {/* Individual Discipline Chips */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {ALL_INDIVIDUAL_SUBJECTS.map((subject) => (
+                  {ALL_INDIVIDUAL_SUBJECTS.map((subject, idx) => (
                     <TopicChip
                       key={subject}
                       subject={subject}
@@ -415,6 +419,11 @@ function SubscribeModalDialog({
                       }
                       onToggle={handleToggle}
                       disabled={status === "submitting"}
+                      className={
+                        idx === ALL_INDIVIDUAL_SUBJECTS.length - 1 && ALL_INDIVIDUAL_SUBJECTS.length % 2 !== 0
+                          ? "sm:col-span-2"
+                          : undefined
+                      }
                     />
                   ))}
                 </div>

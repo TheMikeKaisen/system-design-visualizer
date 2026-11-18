@@ -9,6 +9,7 @@ import {
   Server,
   Network,
   Sparkles,
+  Cloud,
   Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,8 @@ export type SubjectChannel =
   | "JAVA"
   | "COMPUTER_NETWORKS"
   | "BACKEND"
-  | "FRONTEND";
+  | "FRONTEND"
+  | "CLOUD";
 
 export const SubjectChannel = {
   ALL: "ALL",
@@ -30,6 +32,7 @@ export const SubjectChannel = {
   COMPUTER_NETWORKS: "COMPUTER_NETWORKS",
   BACKEND: "BACKEND",
   FRONTEND: "FRONTEND",
+  CLOUD: "CLOUD",
 } as const;
 
 export interface SubjectMetadata {
@@ -121,6 +124,17 @@ export const SUBJECT_METADATA_MAP: Record<SubjectChannel, SubjectMetadata> = {
     activeBg: "bg-teal-500/10 dark:bg-teal-500/20",
     activeText: "text-teal-600 dark:text-teal-400 font-semibold",
     checkBg: "bg-teal-500 text-zinc-950",
+  },
+  CLOUD: {
+    channel: "CLOUD",
+    title: "Cloud Engineering",
+    subtitle: "AWS & Distributed Systems",
+    icon: Cloud,
+    accentColor: "#f97316",
+    activeBorder: "border-orange-500/70 dark:border-orange-500/80 shadow-orange-500/10",
+    activeBg: "bg-orange-500/10 dark:bg-orange-500/20",
+    activeText: "text-orange-600 dark:text-orange-400 font-semibold",
+    checkBg: "bg-orange-500 text-zinc-950",
   },
 };
 

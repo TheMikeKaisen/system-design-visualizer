@@ -19,6 +19,7 @@ const ALL_INDIVIDUAL_SUBJECTS: SubjectChannel[] = [
   "FRONTEND",
   "BACKEND",
   "COMPUTER_NETWORKS",
+  "CLOUD",
 ];
 
 describe("Milestone 6 Adversarial Challenger Suite (challenger-m6-1)", () => {
@@ -316,7 +317,7 @@ describe("Milestone 6 Adversarial Challenger Suite (challenger-m6-1)", () => {
   // SECTION 3: MASTER ALL SWITCH STATE INVARIANTS & CONSOLIDATION
   // =========================================================================
   describe("3. Master ALL Switch State Invariants & Topic Consolidation", () => {
-    it("CHA-INV-01: deselecting 1 individual topic disables ALL chip while keeping remaining 5 topics active", async () => {
+    it("CHA-INV-01: deselecting 1 individual topic disables ALL chip while keeping remaining 6 topics active", async () => {
       const user = userEvent.setup();
       render(<SubscribeModal isOpen={true} onClose={vi.fn()} />);
 
@@ -327,6 +328,7 @@ describe("Milestone 6 Adversarial Challenger Suite (challenger-m6-1)", () => {
       const feChip = screen.getByRole("checkbox", { name: /Frontend Systems/i });
       const beChip = screen.getByRole("checkbox", { name: /Backend Internals/i });
       const netChip = screen.getByRole("checkbox", { name: /Computer Networks/i });
+      const cloudChip = screen.getByRole("checkbox", { name: /Cloud Engineering/i });
 
       // Initially all are checked
       expect(allChip).toHaveAttribute("aria-checked", "true");
@@ -343,23 +345,24 @@ describe("Milestone 6 Adversarial Challenger Suite (challenger-m6-1)", () => {
       expect(feChip).toHaveAttribute("aria-checked", "true");
       expect(beChip).toHaveAttribute("aria-checked", "true");
       expect(netChip).toHaveAttribute("aria-checked", "true");
-      expect(screen.getByText("5 selected")).toBeInTheDocument();
+      expect(cloudChip).toHaveAttribute("aria-checked", "true");
+      expect(screen.getByText("6 selected")).toBeInTheDocument();
     });
 
-    it("CHA-INV-02: re-selecting the 6th individual topic automatically collapses state back to ALL", async () => {
+    it("CHA-INV-02: re-selecting the 7th individual topic automatically collapses state back to ALL", async () => {
       const user = userEvent.setup();
       render(<SubscribeModal isOpen={true} onClose={vi.fn()} />);
 
       const allChip = screen.getByRole("checkbox", { name: /All Disciplines/i });
       const jsChip = screen.getByRole("checkbox", { name: /JavaScript/i });
 
-      // Unselect JavaScript -> drops to 5 individual topics
+      // Unselect JavaScript -> drops to 6 individual topics
       await user.click(jsChip);
       expect(allChip).toHaveAttribute("aria-checked", "false");
       expect(jsChip).toHaveAttribute("aria-checked", "false");
-      expect(screen.getByText("5 selected")).toBeInTheDocument();
+      expect(screen.getByText("6 selected")).toBeInTheDocument();
 
-      // Re-select JavaScript -> all 6 individual topics now selected -> collapses to ALL
+      // Re-select JavaScript -> all 7 individual topics now selected -> collapses to ALL
       await user.click(jsChip);
       expect(allChip).toHaveAttribute("aria-checked", "true");
       expect(jsChip).toHaveAttribute("aria-checked", "true");
