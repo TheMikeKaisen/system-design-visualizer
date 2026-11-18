@@ -13,5 +13,6 @@ describe("CloudPathPage (/cloud)", () => {
     expect(screen.getByText(`${CLOUD_EPISODES.length} Curated Episodes`)).toBeInTheDocument();
     expect(screen.getByText("Subscribe to Cloud Engineering")).toBeInTheDocument();
     expect(screen.getByText(/AWS IAM: Who Gets Access to What\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/Amazon EC2: The Invisible Handshake/i)).toBeInTheDocument();
   });
 });
