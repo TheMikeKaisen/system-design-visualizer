@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppNavbar } from "@/components/ui/AppNavbar";
-import { ArrowLeft, ArrowRight, Cpu, Terminal, Database, Layers, Server, Network } from "lucide-react";
+import { ArrowLeft, ArrowRight, Cpu, Terminal, Database, Layers, Server, Network, Cloud } from "lucide-react";
 import { EditorialDisciplineCard } from "@/components/learning-paths/EditorialDisciplineCard";
 import { SubscribeButton } from "@/components/notifications/SubscribeButton";
 import { SubjectChannel } from "@/components/notifications/TopicChip";
@@ -12,6 +12,7 @@ import { JAVASCRIPT_EPISODES } from "@/app/javascript/episodes";
 import { JAVA_EPISODES } from "@/app/java/episodes";
 import { FRONTEND_EPISODES } from "@/app/frontend/episodes";
 import { BACKEND_EPISODES } from "@/app/backend/episodes";
+import { CLOUD_EPISODES } from "@/app/cloud/episodes";
 
 export default function LearningPathsPage() {
   const osCount = OPERATING_SYSTEMS_EPISODES.length;
@@ -20,7 +21,8 @@ export default function LearningPathsPage() {
   const javaCount = JAVA_EPISODES.length;
   const frontendCount = FRONTEND_EPISODES.length;
   const backendCount = BACKEND_EPISODES.length;
-  const totalEpisodes = osCount + networkCount + jsCount + javaCount + frontendCount + backendCount;
+  const cloudCount = CLOUD_EPISODES.length;
+  const totalEpisodes = osCount + networkCount + jsCount + javaCount + frontendCount + backendCount + cloudCount;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-amber-500/25 selection:text-amber-950 dark:selection:text-amber-200">
@@ -231,79 +233,98 @@ export default function LearningPathsPage() {
           </div>
         </section>
 
-        {/* ── Stratum 4: Distributed Systems Studio (Canvas Studio) ── */}
-        <section aria-labelledby="stratum-studio-heading">
+        {/* ── Stratum 4: Cloud & Distributed Systems Studio ── */}
+        <section aria-labelledby="stratum-cloud-heading">
           <div className="flex items-baseline justify-between border-b border-border/60 pb-3 mb-6">
             <h2
-              id="stratum-studio-heading"
+              id="stratum-cloud-heading"
               className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2"
             >
-              <span>Distributed Systems Studio</span>
+              <span>Cloud & Distributed Systems Studio</span>
               <span className="text-xs font-mono font-normal text-zinc-500 dark:text-zinc-400">
-                (Multi-Node Sandbox)
+                (AWS Infrastructure & Multi-Node Architecture)
               </span>
             </h2>
             <span className="text-xs font-mono text-zinc-500">
-              Interactive Canvas
+              {cloudCount} Module{cloudCount === 1 ? "" : "s"} • Studio
             </span>
           </div>
 
-          <Link
-            href="/canvas"
-            className="group relative flex flex-col md:flex-row items-start md:items-center justify-between p-6 sm:p-8 rounded-2xl border border-border/60 hover:border-primary/70 bg-white dark:bg-zinc-900/70 backdrop-blur-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10 dark:hover:shadow-black/40 overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.03)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-          >
-            {/* Top hairline highlight on hover */}
-            <div
-              className="absolute top-0 left-6 right-6 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-primary to-transparent pointer-events-none"
-              aria-hidden="true"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Cloud Engineering Discipline Card */}
+            <EditorialDisciplineCard
+              id="cloud"
+              title="Cloud Engineering"
+              badge={`${cloudCount}`}
+              description="Investigate AWS IAM authorization ASTs, explicit deny circuit breakers, cross-account boundaries, and temporary STS workload credentials."
+              topics={["AWS IAM Evaluation", "Explicit Deny Precedence", "Cross-Account Trust", "STS & IMDSv2"]}
+              icon={Cloud}
+              accentColor="#f97316"
+              accentBg="bg-orange-500/10"
+              accentBorder="border-border/60 hover:border-orange-500/70 dark:hover:border-orange-500/60"
+              accentText="text-orange-500 dark:text-orange-400"
+              ctaText="Explore Cloud Engineering"
+              href="/cloud"
             />
 
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-105 duration-300 border border-primary/20 shadow-sm shrink-0">
-                  <Network className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block font-semibold">
+            {/* Canvas Studio Card */}
+            <Link
+              href="/canvas"
+              className="group relative flex flex-col justify-between p-6 sm:p-7 rounded-2xl border border-border/60 hover:border-primary/70 bg-white dark:bg-zinc-900/70 backdrop-blur-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/10 dark:hover:shadow-black/40 overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.03)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+            >
+              {/* Top hairline highlight on hover */}
+              <div
+                className="absolute top-0 left-6 right-6 h-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-primary to-transparent pointer-events-none"
+                aria-hidden="true"
+              />
+
+              <div>
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-105 duration-300 border border-primary/20 shadow-sm shrink-0">
+                      <Network className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors tracking-tight">
+                      Canvas Studio
+                    </h3>
+                  </div>
+
+                  <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-muted/60 text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-border/40 shrink-0">
                     Interactive Workshop
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground group-hover:text-primary transition-colors tracking-tight">
-                    Canvas Studio
-                  </h3>
+                </div>
+
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-6 font-normal">
+                  Assemble multi-node distributed architectures. Simulate live packet flows, test circuit breakers, and observe rate-limiting dynamics across client, gateway, service, and database tiers.
+                </p>
+              </div>
+
+              <div>
+                <div className="flex flex-wrap gap-1.5 mb-5">
+                  {[
+                    "API Gateway",
+                    "Event Streams",
+                    "Rate Limiting",
+                    "Circuit Breakers",
+                    "Distributed Caching",
+                    "Live Packet Flow",
+                  ].map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-100/90 dark:bg-muted/50 border border-zinc-200/80 dark:border-border/40 text-zinc-600 dark:text-zinc-300 group-hover:border-zinc-300 dark:group-hover:border-border/80 transition-colors"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold pt-3 border-t border-border/40 text-primary">
+                  <span>Launch Canvas Studio</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
-
-              <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed mb-5 font-normal max-w-xl">
-                Assemble multi-node distributed architectures. Simulate live packet flows, test circuit breakers, and observe rate-limiting dynamics across client, gateway, service, and database tiers.
-              </p>
-
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  "API Gateway",
-                  "Event Streams",
-                  "Rate Limiting",
-                  "Circuit Breakers",
-                  "Distributed Caching",
-                  "Live Packet Flow",
-                ].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-100/90 dark:bg-muted/50 border border-zinc-200/80 dark:border-border/40 text-zinc-600 dark:text-zinc-300 group-hover:border-zinc-300 dark:group-hover:border-border/80 transition-colors"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 md:mt-0 flex items-center gap-2 text-sm font-semibold text-primary shrink-0 self-end md:self-center">
-              <span className="hidden sm:inline">Launch Canvas Studio</span>
-              <span className="sm:hidden">Launch Studio</span>
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
         </section>
       </main>
     </div>

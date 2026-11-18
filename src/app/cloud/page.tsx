@@ -1,0 +1,63 @@
+import Link from "next/link";
+import { AppNavbar } from "@/components/ui/AppNavbar";
+import { EpisodeCard } from "@/components/ui/EpisodeCard";
+import { ArrowLeft, Cloud } from "lucide-react";
+import { CLOUD_EPISODES } from "./episodes";
+import { SubscribeButton } from "@/components/notifications/SubscribeButton";
+import { SubjectChannel } from "@/components/notifications/TopicChip";
+
+export default function CloudPathPage() {
+  return (
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-orange-500/25 selection:text-orange-950 dark:selection:text-orange-200">
+      {/* Standardized Navigation */}
+      <AppNavbar />
+
+      {/* Main Content */}
+      <main className="pt-28 sm:pt-32 pb-20 mx-auto max-w-6xl px-4 sm:px-6">
+        {/* Header */}
+        <div className="mb-14">
+          <Link
+            href="/learning-paths"
+            className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-foreground mb-8 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+            <span>Back to Learning Paths</span>
+          </Link>
+
+          <div className="flex items-center gap-5 mb-6">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center p-2 bg-orange-500/10 overflow-hidden shadow-sm border border-orange-500/20 text-orange-500 dark:text-orange-400">
+              <Cloud className="w-9 h-9" />
+            </div>
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#0A0A0A] dark:text-zinc-50">
+                Cloud Engineering
+              </h1>
+            </div>
+          </div>
+
+          <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed font-normal">
+            Look under the hood of cloud infrastructure. Explore how AWS IAM evaluates authorization ASTs, VPC networks route packets across subnets, and distributed cloud services enforce security perimeters.
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <SubscribeButton
+              subject={SubjectChannel.CLOUD}
+              subjectTitle="Cloud Engineering"
+              label="Subscribe to Cloud Engineering"
+            />
+            <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-lg border border-border/40 bg-muted/20">
+              {CLOUD_EPISODES.length} Curated Episodes
+            </span>
+          </div>
+        </div>
+
+        {/* Modules Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {CLOUD_EPISODES.map((episode) => (
+            <EpisodeCard key={episode.id} episode={episode} />
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}

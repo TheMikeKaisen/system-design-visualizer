@@ -30,13 +30,14 @@ describe("LearningPathsPage", () => {
   it("renders all six core disciplines with verified links and distilled metadata", () => {
     render(<LearningPathsPage />);
 
-    // 6 Core Disciplines
+    // 6 Core Disciplines + Cloud Engineering
     expect(screen.getByText("Operating Systems")).toBeDefined();
     expect(screen.getByText("Computer Networks")).toBeDefined();
     expect(screen.getByText("JavaScript")).toBeDefined();
     expect(screen.getByText("Java & JVM Architecture")).toBeDefined();
     expect(screen.getByText("Frontend Architecture")).toBeDefined();
     expect(screen.getByText("Backend Internals")).toBeDefined();
+    expect(screen.getByText("Cloud Engineering")).toBeDefined();
 
     // Verify verified episode badges are displayed
     expect(screen.getAllByText(/Episode/i).length).toBeGreaterThanOrEqual(6);
@@ -48,6 +49,7 @@ describe("LearningPathsPage", () => {
     expect(screen.getByText("Explore Java & JVM")).toBeDefined();
     expect(screen.getByText("Explore Frontend Architecture")).toBeDefined();
     expect(screen.getByText("Explore Backend Internals")).toBeDefined();
+    expect(screen.getByText("Explore Cloud Engineering")).toBeDefined();
 
     // Studio action
     expect(screen.getAllByText("Canvas Studio").length).toBeGreaterThanOrEqual(1);

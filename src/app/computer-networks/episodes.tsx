@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { EpisodeAccent } from "@/components/ui/EpisodeCard";
-import { Network, Globe, ShieldCheck, Cpu } from "lucide-react";
+import { Network, Globe, Cpu } from "lucide-react";
 
 export interface EpisodeMetadata {
   id: string;
@@ -57,28 +57,6 @@ export const COMPUTER_NETWORKS_EPISODES: EpisodeMetadata[] = [
       "Trace the full round-trip journey: DNS, TCP, TLS 1.3, Nginx reverse proxying, Express middleware, 2-phase fetch(), Keep-Alive, ETag caching, and CORS boundaries.",
     date: "29 October 2026",
     href: "/computer-networks/simulator/http-lifecycle",
-    accent: "teal",
-    icon: <Network className="w-5 h-5" />,
-  },
-  {
-    id: "tls-handshake",
-    episodeNumber: 5,
-    title: "TLS 1.3 Encryption & Handshake",
-    description:
-      "Inspect Diffie-Hellman ephemeral key exchanges, certificate validation, and cipher negotiation securing HTTPS packets.",
-    date: "Coming Soon",
-    href: "/computer-networks/simulator/ip-port-sockets",
-    accent: "teal",
-    icon: <ShieldCheck className="w-5 h-5" />,
-  },
-  {
-    id: "tcp-flow-control",
-    episodeNumber: 6,
-    title: "TCP Flow Control & Sliding Window",
-    description:
-      "Observe receive window advertisements, ACK pacing, and congestion control (Slow Start & Congestion Avoidance).",
-    date: "Coming Soon",
-    href: "/computer-networks/simulator/ip-port-sockets",
     accent: "teal",
     icon: <Network className="w-5 h-5" />,
   },

@@ -6,6 +6,7 @@ import BackendPathPage from "../backend/page";
 import JavaPathPage from "../java/page";
 import JavascriptPathPage from "../javascript/page";
 import ComputerNetworksPathPage from "../computer-networks/page";
+import CloudPathPage from "../cloud/page";
 
 describe("Subject Path Pages (Design System Consistency)", () => {
   describe("Operating Systems Path Page", () => {
@@ -133,8 +134,7 @@ describe("Subject Path Pages (Design System Consistency)", () => {
       expect(screen.getByText("IP Addresses, Ports & Sockets")).toBeDefined();
       expect(screen.getByText("DNS Resolution & Caching")).toBeDefined();
       expect(screen.getByText("TCP Connection Establishment & Lifecycle")).toBeDefined();
-      expect(screen.getByText("TLS 1.3 Encryption & Handshake")).toBeDefined();
-      expect(screen.getByText("TCP Flow Control & Sliding Window")).toBeDefined();
+      expect(screen.getByText("HTTP Request & Response Lifecycle")).toBeDefined();
 
       expect(screen.getByRole("link", { name: /IP Addresses, Ports & Sockets/i })).toHaveAttribute(
         "href",
@@ -143,6 +143,24 @@ describe("Subject Path Pages (Design System Consistency)", () => {
       expect(screen.getByRole("link", { name: /TCP Connection Establishment & Lifecycle/i })).toHaveAttribute(
         "href",
         "/computer-networks/simulator/tcp-connections"
+      );
+      expect(screen.getByRole("link", { name: /HTTP Request & Response Lifecycle/i })).toHaveAttribute(
+        "href",
+        "/computer-networks/simulator/http-lifecycle"
+      );
+    });
+  });
+
+  describe("Cloud Engineering Path Page", () => {
+    it("renders Cloud Engineering episodes with standardized AppNavbar and EpisodeCard", () => {
+      render(<CloudPathPage />);
+
+      expect(screen.getByRole("heading", { level: 1, name: /Cloud Engineering/i })).toBeDefined();
+      expect(screen.getByText("AWS IAM: Who Gets Access to What?")).toBeDefined();
+
+      expect(screen.getByRole("link", { name: /AWS IAM: Who Gets Access to What\?/i })).toHaveAttribute(
+        "href",
+        "/cloud/simulator/aws-iam"
       );
     });
   });
